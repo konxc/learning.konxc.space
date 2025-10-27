@@ -28,3 +28,22 @@ src/lib/paraglide
 
 # SQLite
 *.db
+
+# IDE
+# .cursor/
+# .vscode/
+# .idea/
+
+# Build artifacts
+pnpm-lock.yaml
+pnpm-workspace.yaml
+.project.inlang/cache/
+
+# Prototype files
+prototype/
+
+# Deployment scripts (keep main deploy-safe.sh)
+# scripts/deploy.sh
+
+# Temporary files
+# TODO.md
