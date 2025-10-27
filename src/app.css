@@ -1,3 +1,138 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+/* Design System - Naik Kelas Color Palette (OKLCH) */
+@theme {
+	/* Primary Colors - OKLCH format for perceptual uniformity */
+	--color-primary-soft-blue: oklch(56% 0.08 210); /* #5a7d9a equivalent */
+	--color-primary-dark: oklch(30% 0.05 220); /* #2c3e50 equivalent */
+	--color-primary-medium: oklch(50% 0.07 220); /* #6b7c93 equivalent */
+	--color-text-secondary: oklch(48% 0.05 220); /* #5a6c7d equivalent */
+	--color-text-tertiary: oklch(70% 0.02 220); /* #a0aec0 equivalent */
+
+	/* Background Colors - OKLCH for better gradients */
+	--color-bg-light: oklch(98% 0.002 220); /* #fafbfc equivalent */
+	--color-bg-lighter: oklch(98% 0.003 220); /* #f8f9fc equivalent */
+	--color-bg-hero: oklch(96% 0.003 220); /* #f5f7fa equivalent */
+	--color-bg-hero-end: oklch(92% 0.005 220); /* #e8eef5 equivalent */
+
+	/* Gradient Colors - OKLCH for smooth gradients */
+	--color-gradient-purple-start: oklch(60% 0.2 280); /* #667eea equivalent */
+	--color-gradient-purple-mid: oklch(50% 0.2 300); /* #764ba2 equivalent */
+	--color-gradient-purple-end: oklch(75% 0.18 310); /* #f093fb equivalent */
+
+	/* Legacy HEX fallback for older browsers */
+	--color-primary-soft-blue-hex: #5a7d9a;
+	--color-primary-dark-hex: #2c3e50;
+	--color-primary-medium-hex: #6b7c93;
+	--color-text-secondary-hex: #5a6c7d;
+	--color-text-tertiary-hex: #a0aec0;
+	--color-bg-light-hex: #fafbfc;
+	--color-bg-lighter-hex: #f8f9fc;
+	--color-bg-hero-hex: #f5f7fa;
+	--color-bg-hero-end-hex: #e8eef5;
+	--color-gradient-purple-start-hex: #667eea;
+	--color-gradient-purple-mid-hex: #764ba2;
+	--color-gradient-purple-end-hex: #f093fb;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	line-height: 1.6;
+	color: #333;
+	overflow-x: hidden;
+}
+
+/* Skip to main content link for accessibility */
+.skip-to-content {
+	position: absolute;
+	top: -40px;
+	left: 0;
+	background: var(--color-gradient-purple-start);
+	color: white;
+	padding: 8px 16px;
+	text-decoration: none;
+	z-index: 100;
+	border-radius: 0 0 4px 0;
+}
+
+.skip-to-content:focus {
+	top: 0;
+}
+
+/* Focus visible styles for keyboard navigation */
+*:focus-visible {
+	outline: 3px solid oklch(60% 0.2 280);
+	outline-offset: 2px;
+}
+
+/* @supports for OKLCH - fallback to HEX if not supported */
+@supports not (color: oklch(0 0 0)) {
+	:root {
+		--color-primary-soft-blue: var(--color-primary-soft-blue-hex);
+		--color-primary-dark: var(--color-primary-dark-hex);
+		--color-primary-medium: var(--color-primary-medium-hex);
+		--color-text-secondary: var(--color-text-secondary-hex);
+		--color-text-tertiary: var(--color-text-tertiary-hex);
+		--color-bg-light: var(--color-bg-light-hex);
+		--color-bg-lighter: var(--color-bg-lighter-hex);
+		--color-bg-hero: var(--color-bg-hero-hex);
+		--color-bg-hero-end: var(--color-bg-hero-end-hex);
+		--color-gradient-purple-start: var(--color-gradient-purple-start-hex);
+		--color-gradient-purple-mid: var(--color-gradient-purple-mid-hex);
+		--color-gradient-purple-end: var(--color-gradient-purple-end-hex);
+	}
+}
+
+/* Global styles only - component-specific styles are in individual components */
+
+/* Animations */
+@keyframes bounce {
+	0%,
+	20%,
+	50%,
+	80%,
+	100% {
+		transform: translateY(0);
+	}
+	40% {
+		transform: translateY(-10px);
+	}
+	60% {
+		transform: translateY(-5px);
+	}
+}
+
+@keyframes slideUp {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
+}
+
+.animate-slide-up {
+	animation: slideUp 0.5s ease;
+}
+
+/* Responsive adjustments are handled in individual components */
