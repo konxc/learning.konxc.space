@@ -1,7 +1,0 @@
-# Temporary files
-*.tmp
-*.temp
-*.log
-
-# Local notes (jika ada)
-notes/local/*
