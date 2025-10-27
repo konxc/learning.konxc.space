@@ -1,0 +1,79 @@
+# Cursor Rules for Naik Kelas Platform
+
+## Project Context
+
+Building a SvelteKit-based learning platform for "Naik Kelas by Koneksi" educational program.
+
+## Tech Stack
+
+- Frontend: SvelteKit 5, Svelte 5 Runes
+- Styling: Tailwind CSS 4
+- Database: Turso (LibSQL) via Drizzle ORM
+- Auth: Lucia v3
+- i18n: Paraglide (inlang)
+
+## Code Style & Patterns
+
+### Component Structure
+
+- Use TypeScript with proper interfaces for props
+- Prefer `$props()` for component props in Svelte 5
+- Place reusable components in `src/lib/components/`
+- Place section components in `src/lib/sections/`
+
+### Naming Conventions
+
+- Components: PascalCase (e.g., `FeatureCard.svelte`)
+- Files: kebab-case for routes, PascalCase for components
+- Variables: camelCase
+- Constants: UPPER_SNAKE_CASE
+
+### Design System
+
+- Follow colors from `docs/DESIGN_REFERENCE.md`
+- Use Tailwind CSS utilities
+- Maintain responsive breakpoint at 768px
+- Use gradient backgrounds for CTA sections
+
+### File Organization
+
+```
+src/
+├── lib/
+│   ├── components/     # Reusable UI components
+│   ├── sections/       # Page sections
+│   ├── server/         # Server-side code
+│   └── assets/         # Static assets
+├── routes/             # SvelteKit routes
+└── app.css             # Global styles
+```
+
+## Best Practices
+
+### When Adding Features
+
+1. Create modular components
+2. Add TypeScript interfaces for props
+3. Follow design system from DESIGN_REFERENCE.md
+4. Write accessible HTML (ARIA labels, semantic tags)
+5. Add responsive styles for mobile
+
+### When Refactoring
+
+1. Maintain existing functionality
+2. Keep visual design consistent
+3. Test responsive layout
+4. Update documentation if needed
+
+### Database
+
+- Use Drizzle ORM for database operations
+- Run `pnpm run db:push` after schema changes
+- Never commit sensitive data
+
+## Important Notes
+
+- User prefers responses in Indonesian (memory ID: 3042113)
+- Maintain accessibility (a11y) standards
+- Follow Svelte 5 Runes pattern
+- Use Tailwind CSS for styling
