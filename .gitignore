@@ -29,7 +29,7 @@ src/lib/paraglide
 # SQLite
 *.db
 
-# IDE
+# IDE - Keep for team consistency
 # .cursor/
 # .vscode/
 # .idea/
@@ -37,12 +37,15 @@ src/lib/paraglide
 # Build artifacts
 pnpm-lock.yaml
 pnpm-workspace.yaml
-.project.inlang/cache/
+
+# i18n cache only
+project.inlang/cache/
+project.inlang/project_id
 
 # Prototype files
 prototype/
 
-# Deployment scripts (keep main deploy-safe.sh)
+# Temporary single-use deploy script
 # scripts/deploy.sh
 
 # Temporary files
