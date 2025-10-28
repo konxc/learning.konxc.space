@@ -180,20 +180,22 @@
 
 	.header-container {
 		max-width: 1200px;
-		margin: 0 auto;
-		padding: 12px 24px;
+		/* margin: 0 auto; */
+		/* padding: 10px 20px; */
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		gap: 20px;
 	}
 
 	.logo a {
-		font-size: 1.4em;
+		font-size: 1.3em;
 		font-weight: 700;
 		color: var(--color-primary-dark);
 		text-decoration: none;
 		transition: all 0.3s ease;
 		letter-spacing: -0.5px;
+		white-space: nowrap;
 		background: linear-gradient(
 			135deg,
 			var(--color-primary-dark) 0%,
@@ -224,7 +226,7 @@
 
 	.desktop-nav ul {
 		display: flex;
-		gap: 30px;
+		gap: 8px;
 		list-style: none;
 		margin: 0;
 		padding: 0;
@@ -236,9 +238,10 @@
 		font-weight: 500;
 		transition: all 0.3s ease;
 		position: relative;
-		padding: 8px 12px;
+		padding: 8px 14px;
 		border-radius: 10px;
-		font-size: 0.95em;
+		font-size: 0.9em;
+		white-space: nowrap;
 	}
 
 	.desktop-nav a:hover {
