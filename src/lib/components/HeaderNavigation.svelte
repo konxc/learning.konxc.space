@@ -160,10 +160,20 @@
 
 	.header.hidden {
 		transform: translateY(calc(-100% - 20px));
+		opacity: 0;
+		visibility: hidden;
+		transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+		            opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		            visibility 0s 0.4s;
 	}
 
 	.header.visible {
 		transform: translateY(0);
+		opacity: 1;
+		visibility: visible;
+		transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+		            opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+		            visibility 0s;
 	}
 
 	.header.scrolled {
@@ -179,9 +189,8 @@
 	}
 
 	.header-container {
-		max-width: 1200px;
-		/* margin: 0 auto; */
-		/* padding: 10px 20px; */
+		margin: 0 auto;
+		padding: 10px 20px;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
