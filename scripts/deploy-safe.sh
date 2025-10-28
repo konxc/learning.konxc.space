@@ -51,10 +51,16 @@ fi
 echo "Creating new worktree..."
 git worktree add .build gh-pages
 
-# Copy build files
+# Copy build files - CLEAN INSTALL (only build files)
 echo "📋 Copying build files..."
 cd .build
-git rm -rf . --quiet 2>/dev/null || true
+
+# Remove ALL files except .git
+echo "Cleaning existing files..."
+find . -mindepth 1 -name '.git' -prune -o -print | xargs rm -rf || true
+
+# Copy ONLY build directory contents
+echo "Copying from build/..."
 cp -r ../build/* .
 cp ../static/CNAME .
 
