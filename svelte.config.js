@@ -8,11 +8,13 @@ const config = {
 	kit: {
 		adapter: adapter({
 			pages: 'build',
-			assets: 'build',
-			fallback: 'index.html', // Needed for pre-rendering
-			precompress: false,
-			strict: true
+			assets: 'build'
 		}),
+		paths: {
+			relative: false,
+			base: '/',
+			assets: '/'
+		},
 		prerender: {
 			handleHttpError: 'warn',
 			handleMissingId: 'warn',
