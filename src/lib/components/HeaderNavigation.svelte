@@ -37,9 +37,9 @@
 			const heroRect = heroSection.getBoundingClientRect();
 			const heroBottom = heroRect.bottom;
 			const heroHeight = heroRect.height;
-			// Show header when hero section is ~80% scrolled (20% remaining)
-			// Calculate threshold: 20% of hero height from bottom
-			const threshold = heroHeight * 0.2;
+			// Show header when hero section is ~90% scrolled (10% remaining)
+			// Calculate threshold: 10% of hero height from bottom
+			const threshold = heroHeight * 1;
 			isInHero = heroBottom > threshold;
 		}
 		scrolled = window.scrollY > 50;
@@ -347,8 +347,9 @@
 		border-top: 1px solid rgba(102, 126, 234, 0.2);
 		border-radius: 32px 32px 0 0;
 		padding: 80px 24px 40px;
-		box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15),
-		            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+		box-shadow:
+			0 -10px 40px rgba(0, 0, 0, 0.15),
+			inset 0 1px 0 rgba(255, 255, 255, 0.95);
 		animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 		overflow-y: auto;
 	}
@@ -360,17 +361,17 @@
 	}
 
 	.mobile-nav li {
-		margin-bottom: 10px;
+		margin-bottom: 12px;
 	}
 
 	.mobile-nav a {
 		display: block;
-		padding: 16px 24px;
+		padding: 20px 24px;
 		color: var(--color-primary-dark);
 		text-decoration: none;
 		font-weight: 600;
-		font-size: 1.1em;
-		border-radius: 14px;
+		font-size: 1.15em;
+		border-radius: 16px;
 		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		position: relative;
 		overflow: hidden;
