@@ -39,7 +39,8 @@
 			const heroHeight = heroRect.height;
 			// Show header when hero section is ~90% scrolled (10% remaining)
 			// Calculate threshold: 10% of hero height from bottom
-			const threshold = heroHeight * 1;
+			const threshold = heroHeight * 0.1;
+			// isInHero = true means user is still in hero section
 			isInHero = heroBottom > threshold;
 		}
 		scrolled = window.scrollY > 50;
