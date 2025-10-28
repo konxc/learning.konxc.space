@@ -32,7 +32,7 @@
 		background: linear-gradient(135deg, var(--color-bg-hero) 0%, var(--color-bg-hero-end) 100%);
 		padding: 80px 20px;
 		text-align: center;
-		min-height: 90vh;
+		min-height: 100vh;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -102,7 +102,7 @@
 	@media (max-width: 768px) {
 		.hero {
 			padding: 60px 20px;
-			min-height: 80vh;
+			min-height: 100vh;
 		}
 
 		.logo {
@@ -131,7 +131,7 @@
 	@media (max-width: 480px) {
 		.hero {
 			padding: 50px 20px;
-			min-height: 75vh;
+			min-height: 100vh;
 		}
 
 		.logo {
