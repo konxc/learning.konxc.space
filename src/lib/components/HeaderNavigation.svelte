@@ -419,6 +419,20 @@
 		}
 	}
 
+	@keyframes slideInUp {
+		from {
+			transform: translateY(100%);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
+
+	/* Mobile - Improve overlay backdrop */
+	.menu-overlay {
+		backdrop-filter: blur(10px);
+	}
+
 	/* Responsive: Desktop */
 	@media (min-width: 768px) {
 		.header-container {
@@ -435,6 +449,24 @@
 
 		.menu-overlay {
 			display: none;
+		}
+
+		/* Desktop: Keep side menu */
+		.mobile-nav {
+			position: fixed;
+			top: 10px;
+			right: 10px;
+			left: auto;
+			bottom: auto;
+			width: 320px;
+			max-width: 85vw;
+			height: calc(100vh - 20px);
+			border: 1px solid rgba(255, 255, 255, 0.3);
+			border-radius: 24px;
+			padding: 100px 24px 24px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+			animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 		}
 	}
 
