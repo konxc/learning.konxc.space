@@ -8,12 +8,11 @@ const config = {
 	kit: {
 		adapter: adapter({
 			pages: 'build',
-			assets: 'build'
+			assets: 'build',
+			strict: false // Allow mix of static and dynamic routes
 		}),
 		paths: {
-			relative: false,
-			base: '/',
-			assets: '/'
+			relative: false
 		},
 		prerender: {
 			handleHttpError: 'warn',
