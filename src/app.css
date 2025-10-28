@@ -8,6 +8,7 @@
 	--color-primary-soft-blue: oklch(56% 0.08 210); /* #5a7d9a equivalent */
 	--color-primary-dark: oklch(30% 0.05 220); /* #2c3e50 equivalent */
 	--color-primary-medium: oklch(50% 0.07 220); /* #6b7c93 equivalent */
+	--color-text-primary: oklch(20% 0.05 220); /* #1a252e equivalent - dark text for input */
 	--color-text-secondary: oklch(48% 0.05 220); /* #5a6c7d equivalent */
 	--color-text-tertiary: oklch(70% 0.02 220); /* #a0aec0 equivalent */
 
@@ -26,6 +27,7 @@
 	--color-primary-soft-blue-hex: #5a7d9a;
 	--color-primary-dark-hex: #2c3e50;
 	--color-primary-medium-hex: #6b7c93;
+	--color-text-primary-hex: #1a252e;
 	--color-text-secondary-hex: #5a6c7d;
 	--color-text-tertiary-hex: #a0aec0;
 	--color-bg-light-hex: #fafbfc;
@@ -79,6 +81,7 @@ body {
 		--color-primary-soft-blue: var(--color-primary-soft-blue-hex);
 		--color-primary-dark: var(--color-primary-dark-hex);
 		--color-primary-medium: var(--color-primary-medium-hex);
+		--color-text-primary: var(--color-text-primary-hex);
 		--color-text-secondary: var(--color-text-secondary-hex);
 		--color-text-tertiary: var(--color-text-tertiary-hex);
 		--color-bg-light: var(--color-bg-light-hex);

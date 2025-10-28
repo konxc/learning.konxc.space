@@ -68,4 +68,29 @@
 	.social-links a:hover {
 		color: white;
 	}
+
+	/* Responsive: Mobile */
+	@media (max-width: 768px) {
+		.footer {
+			padding: 40px 20px;
+		}
+
+		.footer h3 {
+			font-size: 1.3em;
+		}
+
+		.footer p {
+			font-size: 0.95em;
+		}
+
+		.social-links {
+			margin-top: 25px;
+		}
+
+		.social-links a {
+			display: block;
+			margin: 10px 0;
+			padding: 8px 0;
+		}
+	}
 </style>

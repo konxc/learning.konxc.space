@@ -82,6 +82,15 @@
 
 	/* Responsive timeline */
 	@media (max-width: 768px) {
+		.program {
+			padding: 60px 20px;
+		}
+
+		.program h2 {
+			font-size: 1.8em;
+			margin-bottom: 40px;
+		}
+
 		.timeline::before {
 			left: 30px;
 		}

@@ -128,8 +128,21 @@
 	}
 
 	@media (max-width: 768px) {
+		.cta-section {
+			padding: 80px 20px;
+		}
+
 		.cta-section h2 {
 			font-size: 2em;
+		}
+
+		.cta-section p {
+			font-size: 1.1em;
+		}
+
+		.code-snippet {
+			padding: 20px;
+			font-size: 0.85em;
 		}
 	}
 </style>

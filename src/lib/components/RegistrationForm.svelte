@@ -207,11 +207,20 @@
 	.form-group textarea {
 		width: 100%;
 		padding: 15px;
-		border: 2px solid var(--color-bg-hero-end);
+		border: 2px solid rgba(0, 0, 0, 0.1);
 		border-radius: 10px;
 		font-size: 1em;
 		transition: all 0.3s ease;
 		font-family: inherit;
+		color: var(--color-primary-dark);
+		background: var(--color-bg-light);
+	}
+
+	/* Placeholder styling */
+	.form-group input::placeholder,
+	.form-group textarea::placeholder {
+		color: var(--color-text-secondary);
+		opacity: 0.7;
 	}
 
 	.form-group input:focus,
@@ -219,7 +228,18 @@
 	.form-group textarea:focus {
 		outline: none;
 		border-color: var(--color-gradient-purple-start);
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+		background: white;
+	}
+
+	/* Select dropdown styling */
+	.form-group select {
+		cursor: pointer;
+	}
+
+	.form-group select option {
+		color: var(--color-primary-dark);
+		background: white;
 	}
 
 	.btn-submit {
@@ -262,15 +282,23 @@
 	}
 
 	.error-message {
-		background: rgba(239, 68, 68, 0.1);
-		border: 2px solid rgba(239, 68, 68, 0.3);
+		background: #fef2f2;
+		border: 2px solid #fecaca;
 		color: #dc2626;
 	}
 
+	.error-message strong {
+		color: #991b1b;
+	}
+
 	.success-message {
-		background: rgba(34, 197, 94, 0.1);
-		border: 2px solid rgba(34, 197, 94, 0.3);
+		background: #f0fdf4;
+		border: 2px solid #bbf7d0;
 		color: #16a34a;
+	}
+
+	.success-message strong {
+		color: #15803d;
 	}
 
 	/* Loading State */
@@ -297,9 +325,64 @@
 		}
 	}
 
+	/* Responsive: Tablet */
+	@media (max-width: 1024px) {
+		.registration-form {
+			padding: 40px 35px;
+			max-width: 550px;
+		}
+	}
+
+	/* Responsive: Mobile */
 	@media (max-width: 768px) {
 		.registration-form {
 			padding: 30px 25px;
+			max-width: 100%;
+		}
+
+		.form-group label {
+			font-size: 0.95em;
+		}
+
+		.form-group input,
+		.form-group select,
+		.form-group textarea {
+			padding: 12px;
+			font-size: 16px; /* Prevents zoom on iOS */
+		}
+
+		.btn-submit {
+			padding: 16px;
+			font-size: 1.1em;
+		}
+
+		.error-message,
+		.success-message {
+			font-size: 0.9em;
+			padding: 12px;
+		}
+	}
+
+	/* Responsive: Small mobile */
+	@media (max-width: 480px) {
+		.registration-form {
+			padding: 20px 15px;
+		}
+
+		.form-group label {
+			font-size: 0.9em;
+		}
+
+		.form-group input,
+		.form-group select,
+		.form-group textarea {
+			padding: 10px;
+			font-size: 14px;
+		}
+
+		.btn-submit {
+			padding: 14px;
+			font-size: 1em;
 		}
 	}
 </style>
