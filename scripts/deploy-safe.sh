@@ -57,7 +57,7 @@ cd .build
 
 # Remove ALL files except .git
 echo "Cleaning existing files..."
-find . -mindepth 1 -name '.git' -prune -o -print | xargs rm -rf || true
+find . -mindepth 1 -not -path '*/.git*' -delete || true
 
 # Copy ONLY build directory contents
 echo "Copying from build/..."
