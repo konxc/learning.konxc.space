@@ -40,11 +40,13 @@
 			const heroRect = heroSection.getBoundingClientRect();
 			const heroBottom = heroRect.bottom;
 			const heroHeight = heroRect.height;
-			// Show header when hero section is ~90% scrolled (10% remaining)
-			// Calculate threshold: 10% of hero height from bottom
-			const threshold = heroHeight * 0.1;
-			// isInHero = true means user is still in hero section
-			isInHero = heroBottom > threshold;
+			
+			// Show header when 10% of hero remains (90% scrolled)
+			// Threshold: bottom of hero should be at 10% of viewport height
+			const threshold = heroHeight * 0.9;
+			
+			// isInHero = true if we haven't scrolled past 90% of hero
+			isInHero = heroBottom > (heroHeight * 0.9);
 		}
 		scrolled = window.scrollY > 50;
 	}
@@ -63,48 +65,14 @@
 		in:fly={{ y: -100, duration: 500, easing: cubicOut }}
 		out:fly={{ y: -100, duration: 400, easing: cubicOut }}
 	>
-	<div class="header-container">
-		<!-- Logo -->
-		<div class="logo">
-			<a href="/" aria-label="Home">Naik Kelas</a>
-		</div>
+		<div class="header-container">
+			<!-- Logo -->
+			<div class="logo">
+				<a href="/" aria-label="Home">Naik Kelas</a>
+			</div>
 
-		<!-- Desktop Navigation -->
-		<nav class="desktop-nav" aria-label="Main navigation">
-			<ul>
-				{#each navItems as item}
-					<li>
-						<a
-							href={item.href}
-							aria-label={item.ariaLabel}
-							onclick={() => closeMenu()}
-							data-scroll="smooth"
-						>
-							{item.label}
-						</a>
-					</li>
-				{/each}
-			</ul>
-		</nav>
-
-		<!-- Mobile Hamburger Button -->
-		<button
-			class="hamburger"
-			aria-label="Toggle menu"
-			aria-expanded={menuOpen}
-			onclick={toggleMenu}
-			type="button"
-		>
-			<span class="hamburger-line"></span>
-			<span class="hamburger-line"></span>
-			<span class="hamburger-line"></span>
-		</button>
-	</div>
-
-	<!-- Mobile Menu Overlay -->
-	{#if menuOpen}
-		<div class="menu-overlay" onclick={closeMenu} role="button" aria-label="Close menu">
-			<nav class="mobile-nav" aria-label="Main navigation">
+			<!-- Desktop Navigation -->
+			<nav class="desktop-nav" aria-label="Main navigation">
 				<ul>
 					{#each navItems as item}
 						<li>
@@ -120,8 +88,42 @@
 					{/each}
 				</ul>
 			</nav>
+
+			<!-- Mobile Hamburger Button -->
+			<button
+				class="hamburger"
+				aria-label="Toggle menu"
+				aria-expanded={menuOpen}
+				onclick={toggleMenu}
+				type="button"
+			>
+				<span class="hamburger-line"></span>
+				<span class="hamburger-line"></span>
+				<span class="hamburger-line"></span>
+			</button>
 		</div>
-	{/if}
+
+		<!-- Mobile Menu Overlay -->
+		{#if menuOpen}
+			<div class="menu-overlay" onclick={closeMenu} role="button" aria-label="Close menu">
+				<nav class="mobile-nav" aria-label="Main navigation">
+					<ul>
+						{#each navItems as item}
+							<li>
+								<a
+									href={item.href}
+									aria-label={item.ariaLabel}
+									onclick={() => closeMenu()}
+									data-scroll="smooth"
+								>
+									{item.label}
+								</a>
+							</li>
+						{/each}
+					</ul>
+				</nav>
+			</div>
+		{/if}
 	</header>
 {/if}
 
@@ -171,7 +173,6 @@
 			border-color: rgba(102, 126, 234, 0.25);
 		}
 	}
-
 
 	.header.scrolled {
 		background: rgba(255, 255, 255, 0.85);
@@ -392,7 +393,6 @@
 			opacity: 1;
 		}
 	}
-
 
 	/* Mobile - Improve overlay backdrop */
 	.menu-overlay {
