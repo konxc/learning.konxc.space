@@ -1,6 +1,7 @@
 <script lang="ts">
 	let menuOpen = $state(false);
 	let scrolled = $state(false);
+	let isInHero = $state(true);
 
 	// Navigation items
 	const navItems = [
@@ -29,8 +30,14 @@
 		}
 	}
 
-	// Handle scroll for sticky header
+	// Handle scroll for sticky header and detect hero section
 	function handleScroll() {
+		const heroSection = document.querySelector('#hero');
+		if (heroSection) {
+			const heroBottom = heroSection.getBoundingClientRect().bottom;
+			// Show header when scrolled past hero section
+			isInHero = heroBottom > 150; // Show when hero is mostly visible
+		}
 		scrolled = window.scrollY > 50;
 	}
 
@@ -41,7 +48,7 @@
 	});
 </script>
 
-<header class="header" class:scrolled>
+<header class="header" class:scrolled class:visible={!isInHero || scrolled} class:hidden={isInHero && !scrolled}>
 	<div class="header-container">
 		<!-- Logo -->
 		<div class="logo">
@@ -105,13 +112,24 @@
 
 <style>
 	.header {
-		position: sticky;
+		position: fixed;
 		top: 0;
+		left: 0;
+		right: 0;
 		background: rgba(255, 255, 255, 0.95);
 		backdrop-filter: blur(10px);
 		border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 		z-index: 1000;
-		transition: all 0.3s ease;
+		transition: transform 0.3s ease, box-shadow 0.3s ease;
+		transform: translateY(0);
+	}
+
+	.header.hidden {
+		transform: translateY(-100%);
+	}
+
+	.header.visible {
+		transform: translateY(0);
 	}
 
 	.header.scrolled {
