@@ -35,8 +35,8 @@
 		const heroSection = document.querySelector('#hero');
 		if (heroSection) {
 			const heroBottom = heroSection.getBoundingClientRect().bottom;
-			// Show header when scrolled past hero section
-			isInHero = heroBottom > 150; // Show when hero is mostly visible
+			// Show header when scrolled past hero section (when hero is out of view)
+			isInHero = heroBottom > 0;
 		}
 		scrolled = window.scrollY > 50;
 	}
@@ -164,16 +164,21 @@
 		visibility: hidden;
 		transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
 		            opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-		            visibility 0s 0.4s;
+		            visibility 0s 0.4s,
+		            box-shadow 0s,
+		            background 0s,
+		            border-color 0s;
 	}
 
 	.header.visible {
 		transform: translateY(0);
 		opacity: 1;
 		visibility: visible;
-		transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-		            opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-		            visibility 0s;
+		transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+		            opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+		            visibility 0s,
+		            box-shadow 0.4s ease,
+		            background 0.4s ease;
 	}
 
 	.header.scrolled {
