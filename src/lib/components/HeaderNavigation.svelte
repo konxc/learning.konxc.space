@@ -48,7 +48,12 @@
 	});
 </script>
 
-<header class="header" class:scrolled class:visible={!isInHero || scrolled} class:hidden={isInHero && !scrolled}>
+<header
+	class="header"
+	class:scrolled
+	class:visible={!isInHero || scrolled}
+	class:hidden={isInHero && !scrolled}
+>
 	<div class="header-container">
 		<!-- Logo -->
 		<div class="logo">
@@ -113,19 +118,25 @@
 <style>
 	.header {
 		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		background: rgba(255, 255, 255, 0.95);
-		backdrop-filter: blur(10px);
-		border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+		top: 10px;
+		left: 10px;
+		right: 10px;
+		background: rgba(255, 255, 255, 0.98);
+		backdrop-filter: blur(20px) saturate(180%);
+		border: 1px solid rgba(255, 255, 255, 0.8);
+		border-radius: 20px;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 
+		            0 1px 0 rgba(255, 255, 255, 0.6) inset;
 		z-index: 1000;
-		transition: transform 0.3s ease, box-shadow 0.3s ease;
+		transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+		            box-shadow 0.3s ease,
+		            border-color 0.3s ease,
+		            background 0.3s ease;
 		transform: translateY(0);
 	}
 
 	.header.hidden {
-		transform: translateY(-100%);
+		transform: translateY(calc(-100% - 20px));
 	}
 
 	.header.visible {
@@ -133,28 +144,50 @@
 	}
 
 	.header.scrolled {
-		box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+		background: rgba(255, 255, 255, 0.99);
+		box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08),
+		            0 1px 0 rgba(255, 255, 255, 0.7) inset,
+		            0 0 0 1px rgba(0, 0, 0, 0.02);
+		border-color: rgba(255, 255, 255, 0.95);
 	}
 
 	.header-container {
 		max-width: 1200px;
 		margin: 0 auto;
-		padding: 15px 20px;
+		padding: 12px 24px;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 	}
 
 	.logo a {
-		font-size: 1.5em;
+		font-size: 1.4em;
 		font-weight: 700;
 		color: var(--color-primary-dark);
 		text-decoration: none;
-		transition: color 0.3s ease;
+		transition: all 0.3s ease;
+		letter-spacing: -0.5px;
+		background: linear-gradient(
+			135deg,
+			var(--color-primary-dark) 0%,
+			var(--color-primary-soft-blue) 100%
+		);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
 	}
 
 	.logo a:hover {
-		color: var(--color-primary-soft-blue);
+		background: linear-gradient(
+			135deg,
+			var(--color-gradient-purple-start) 0%,
+			var(--color-gradient-purple-mid) 100%
+		);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
 	}
 
 	/* Desktop Navigation */
@@ -174,42 +207,47 @@
 		color: var(--color-primary-medium);
 		text-decoration: none;
 		font-weight: 500;
-		transition: color 0.3s ease;
+		transition: all 0.3s ease;
 		position: relative;
-	}
-
-	.desktop-nav a::after {
-		content: '';
-		position: absolute;
-		bottom: -5px;
-		left: 0;
-		width: 0;
-		height: 2px;
-		background: var(--color-gradient-purple-start);
-		transition: width 0.3s ease;
+		padding: 8px 12px;
+		border-radius: 10px;
+		font-size: 0.95em;
 	}
 
 	.desktop-nav a:hover {
 		color: var(--color-primary-dark);
+		background: rgba(102, 126, 234, 0.08);
 	}
 
-	.desktop-nav a:hover::after {
-		width: 100%;
+	.desktop-nav a:active {
+		transform: scale(0.96);
 	}
 
 	/* Hamburger Button */
 	.hamburger {
 		display: flex;
 		flex-direction: column;
-		gap: 5px;
-		background: none;
-		border: none;
+		gap: 6px;
+		background: rgba(102, 126, 234, 0.08);
+		border: 1px solid rgba(102, 126, 234, 0.15);
+		border-radius: 12px;
 		cursor: pointer;
 		padding: 8px;
 		width: 44px;
 		height: 44px;
 		justify-content: center;
 		align-items: center;
+		transition: all 0.3s ease;
+	}
+
+	.hamburger:hover {
+		background: rgba(102, 126, 234, 0.12);
+		border-color: rgba(102, 126, 234, 0.25);
+		transform: scale(1.05);
+	}
+
+	.hamburger:active {
+		transform: scale(0.95);
 	}
 
 	.hamburger:focus {
@@ -218,15 +256,15 @@
 	}
 
 	.hamburger-line {
-		width: 25px;
-		height: 3px;
+		width: 22px;
+		height: 2.5px;
 		background: var(--color-primary-dark);
-		border-radius: 3px;
+		border-radius: 2px;
 		transition: all 0.3s ease;
 	}
 
 	.hamburger:hover .hamburger-line {
-		background: var(--color-primary-soft-blue);
+		background: var(--color-gradient-purple-start);
 	}
 
 	/* Mobile Menu Overlay */
