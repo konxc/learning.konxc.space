@@ -125,13 +125,15 @@
 		backdrop-filter: blur(20px) saturate(180%);
 		border: 1px solid rgba(255, 255, 255, 0.8);
 		border-radius: 20px;
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 
-		            0 1px 0 rgba(255, 255, 255, 0.6) inset;
+		box-shadow:
+			0 8px 32px rgba(0, 0, 0, 0.06),
+			0 1px 0 rgba(255, 255, 255, 0.6) inset;
 		z-index: 1000;
-		transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-		            box-shadow 0.3s ease,
-		            border-color 0.3s ease,
-		            background 0.3s ease;
+		transition:
+			transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+			box-shadow 0.3s ease,
+			border-color 0.3s ease,
+			background 0.3s ease;
 		transform: translateY(0);
 	}
 
@@ -145,9 +147,10 @@
 
 	.header.scrolled {
 		background: rgba(255, 255, 255, 0.99);
-		box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08),
-		            0 1px 0 rgba(255, 255, 255, 0.7) inset,
-		            0 0 0 1px rgba(0, 0, 0, 0.02);
+		box-shadow:
+			0 12px 40px rgba(0, 0, 0, 0.08),
+			0 1px 0 rgba(255, 255, 255, 0.7) inset,
+			0 0 0 1px rgba(0, 0, 0, 0.02);
 		border-color: rgba(255, 255, 255, 0.95);
 	}
 
