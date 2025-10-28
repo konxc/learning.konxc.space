@@ -15,7 +15,7 @@
 	}: Props = $props();
 </script>
 
-<section class="hero" aria-labelledby="hero-heading">
+<section id="hero" class="hero" aria-labelledby="hero-heading">
 	<div class="logo" aria-label="Naik Kelas Program">{logo}</div>
 	<p class="tagline">{tagline}</p>
 
@@ -76,5 +76,84 @@
 		animation: bounce 2s infinite;
 	}
 
-	/* Animation keyframes are defined in app.css */
+	/* Responsive: Desktop large */
+	@media (max-width: 1920px) {
+		.hero h1 {
+			font-size: 3.2em;
+		}
+	}
+
+	/* Responsive: Tablet */
+	@media (max-width: 1024px) {
+		.hero {
+			padding: 70px 20px;
+		}
+
+		.hero h1 {
+			font-size: 2.3em;
+		}
+
+		.hero p {
+			font-size: 1.1em;
+		}
+	}
+
+	/* Responsive: Mobile */
+	@media (max-width: 768px) {
+		.hero {
+			padding: 60px 20px;
+			min-height: 80vh;
+		}
+
+		.logo {
+			font-size: 2em;
+		}
+
+		.tagline {
+			font-size: 1em;
+		}
+
+		.hero h1 {
+			font-size: 1.8em;
+		}
+
+		.hero p {
+			font-size: 1em;
+		}
+
+		.scroll-hint {
+			margin-top: 30px;
+			font-size: 0.85em;
+		}
+	}
+
+	/* Responsive: Small mobile */
+	@media (max-width: 480px) {
+		.hero {
+			padding: 50px 20px;
+			min-height: 75vh;
+		}
+
+		.logo {
+			font-size: 1.7em;
+		}
+
+		.tagline {
+			font-size: 0.95em;
+		}
+
+		.hero h1 {
+			font-size: 1.5em;
+			line-height: 1.2;
+		}
+
+		.hero p {
+			font-size: 0.95em;
+		}
+
+		.scroll-hint {
+			margin-top: 20px;
+			font-size: 0.8em;
+		}
+	}
 </style>

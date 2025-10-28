@@ -19,7 +19,7 @@
 	}
 </script>
 
-<section class="cta-section">
+<section id="register" class="cta-section">
 	<div class="cta-container">
 		<div class="cta-badge">🚀 Batch Pertama - Segera Dibuka!</div>
 
@@ -127,6 +127,22 @@
 		color: #60a5fa;
 	}
 
+	/* Responsive: Tablet */
+	@media (max-width: 1024px) {
+		.cta-section {
+			padding: 100px 20px;
+		}
+
+		.cta-section h2 {
+			font-size: 2.5em;
+		}
+
+		.cta-section p {
+			font-size: 1.2em;
+		}
+	}
+
+	/* Responsive: Mobile */
 	@media (max-width: 768px) {
 		.cta-section {
 			padding: 80px 20px;
@@ -143,6 +159,31 @@
 		.code-snippet {
 			padding: 20px;
 			font-size: 0.85em;
+		}
+	}
+
+	/* Responsive: Small mobile */
+	@media (max-width: 480px) {
+		.cta-section {
+			padding: 60px 15px;
+		}
+
+		.cta-badge {
+			padding: 8px 20px;
+			font-size: 0.9em;
+		}
+
+		.cta-section h2 {
+			font-size: 1.7em;
+		}
+
+		.cta-section p {
+			font-size: 1em;
+		}
+
+		.code-snippet {
+			padding: 15px;
+			font-size: 0.8em;
 		}
 	}
 </style>

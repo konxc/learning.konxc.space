@@ -29,7 +29,7 @@
 	];
 </script>
 
-<section class="about">
+<section id="about" class="about">
 	<div class="about-container">
 		<h2>Kenapa Naik Kelas?</h2>
 		<p class="about-subtitle">
@@ -78,5 +78,59 @@
 		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 		gap: 40px;
 		margin-top: 50px;
+	}
+
+	/* Responsive: Tablet */
+	@media (max-width: 1024px) {
+		.about {
+			padding: 80px 20px;
+		}
+
+		.features {
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 30px;
+		}
+	}
+
+	/* Responsive: Mobile */
+	@media (max-width: 768px) {
+		.about {
+			padding: 60px 20px;
+		}
+
+		.about h2 {
+			font-size: 1.8em;
+		}
+
+		.about-subtitle {
+			font-size: 1em;
+			margin-bottom: 40px;
+		}
+
+		.features {
+			grid-template-columns: 1fr;
+			gap: 25px;
+			margin-top: 40px;
+		}
+	}
+
+	/* Responsive: Small mobile */
+	@media (max-width: 480px) {
+		.about {
+			padding: 50px 15px;
+		}
+
+		.about h2 {
+			font-size: 1.5em;
+		}
+
+		.about-subtitle {
+			font-size: 0.95em;
+			margin-bottom: 30px;
+		}
+
+		.features {
+			gap: 20px;
+		}
 	}
 </style>

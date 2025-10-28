@@ -8,13 +8,24 @@
 	import { onMount } from 'svelte';
 
 	onMount(() => {
-		// Smooth scroll for anchor links
+		// Smooth scroll for anchor links with header offset
+		const headerHeight = 70; // Approximate header height in pixels
+
 		document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
 			anchor.addEventListener('click', function (e) {
 				e.preventDefault();
-				const target = document.querySelector(anchor.getAttribute('href') || '');
+				const href = anchor.getAttribute('href');
+				if (!href) return;
+
+				const target = document.querySelector(href);
 				if (target) {
-					target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+					const targetPosition = target.getBoundingClientRect().top + window.pageYOffset;
+					const finalPosition = targetPosition - headerHeight;
+
+					window.scrollTo({
+						top: finalPosition,
+						behavior: 'smooth'
+					});
 				}
 			});
 		});

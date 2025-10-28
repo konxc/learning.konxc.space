@@ -29,7 +29,7 @@
 	];
 </script>
 
-<section class="program">
+<section id="program" class="program">
 	<div class="program-container">
 		<h2>Apa yang Akan Kamu Pelajari?</h2>
 
@@ -80,7 +80,18 @@
 		);
 	}
 
-	/* Responsive timeline */
+	/* Responsive: Tablet */
+	@media (max-width: 1024px) {
+		.program {
+			padding: 80px 20px;
+		}
+
+		.program h2 {
+			font-size: 2.2em;
+		}
+	}
+
+	/* Responsive: Mobile */
 	@media (max-width: 768px) {
 		.program {
 			padding: 60px 20px;
@@ -93,6 +104,22 @@
 
 		.timeline::before {
 			left: 30px;
+		}
+	}
+
+	/* Responsive: Small mobile */
+	@media (max-width: 480px) {
+		.program {
+			padding: 50px 15px;
+		}
+
+		.program h2 {
+			font-size: 1.6em;
+			margin-bottom: 30px;
+		}
+
+		.timeline::before {
+			left: 20px;
 		}
 	}
 </style>

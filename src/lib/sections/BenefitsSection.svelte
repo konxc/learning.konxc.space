@@ -36,7 +36,7 @@
 	];
 </script>
 
-<section class="benefits">
+<section id="benefits" class="benefits">
 	<div class="benefits-container">
 		<h2>Yang Kamu Dapatkan</h2>
 
@@ -76,5 +76,46 @@
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 		gap: 30px;
+	}
+
+	/* Responsive: Tablet */
+	@media (max-width: 1024px) {
+		.benefits-grid {
+			grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+			gap: 25px;
+		}
+	}
+
+	/* Responsive: Mobile */
+	@media (max-width: 768px) {
+		.benefits {
+			padding: 60px 20px;
+		}
+
+		.benefits h2 {
+			font-size: 1.8em;
+			margin-bottom: 40px;
+		}
+
+		.benefits-grid {
+			grid-template-columns: 1fr;
+			gap: 20px;
+		}
+	}
+
+	/* Responsive: Small mobile */
+	@media (max-width: 480px) {
+		.benefits {
+			padding: 50px 15px;
+		}
+
+		.benefits h2 {
+			font-size: 1.5em;
+			margin-bottom: 30px;
+		}
+
+		.benefits-grid {
+			gap: 15px;
+		}
 	}
 </style>
