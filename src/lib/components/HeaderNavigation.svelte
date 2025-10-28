@@ -336,20 +336,20 @@
 
 	.mobile-nav {
 		position: fixed;
-		top: 10px;
-		right: 10px;
-		width: 320px;
-		max-width: 85vw;
-		height: calc(100vh - 20px);
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(40px) saturate(200%);
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		border-radius: 24px;
-		padding: 100px 24px 24px;
-		box-shadow:
-			0 20px 60px rgba(0, 0, 0, 0.3),
-			inset 0 1px 0 rgba(255, 255, 255, 0.9);
-		animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+		bottom: 0;
+		left: 0;
+		right: 0;
+		width: 100%;
+		max-width: 100%;
+		max-height: calc(100vh - 20px);
+		background: rgba(255, 255, 255, 0.95);
+		backdrop-filter: blur(50px) saturate(200%);
+		border-top: 1px solid rgba(102, 126, 234, 0.2);
+		border-radius: 32px 32px 0 0;
+		padding: 80px 24px 40px;
+		box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15),
+		            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+		animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 		overflow-y: auto;
 	}
 
@@ -464,8 +464,9 @@
 			border: 1px solid rgba(255, 255, 255, 0.3);
 			border-radius: 24px;
 			padding: 100px 24px 24px;
-			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
-			            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+			box-shadow:
+				0 20px 60px rgba(0, 0, 0, 0.3),
+				inset 0 1px 0 rgba(255, 255, 255, 0.9);
 			animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 		}
 	}
