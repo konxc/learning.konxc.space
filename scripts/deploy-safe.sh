@@ -62,7 +62,7 @@ cp ../static/CNAME .
 echo "💾 Committing changes..."
 git add .
 git commit -m "Deploy: $(date '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
-git push origin gh-pages
+git push origin gh-pages --force
 
 # Cleanup
 echo "🧹 Cleaning up..."
