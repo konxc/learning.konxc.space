@@ -34,9 +34,13 @@
 	function handleScroll() {
 		const heroSection = document.querySelector('#hero');
 		if (heroSection) {
-			const heroBottom = heroSection.getBoundingClientRect().bottom;
-			// Show header when scrolled past hero section (when hero is out of view)
-			isInHero = heroBottom > 0;
+			const heroRect = heroSection.getBoundingClientRect();
+			const heroBottom = heroRect.bottom;
+			const heroHeight = heroRect.height;
+			// Show header when hero section is ~80% scrolled (20% remaining)
+			// Calculate threshold: 20% of hero height from bottom
+			const threshold = heroHeight * 0.2;
+			isInHero = heroBottom > threshold;
 		}
 		scrolled = window.scrollY > 50;
 	}
