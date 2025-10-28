@@ -132,11 +132,15 @@
 			inset 0 -1px 1px rgba(255, 255, 255, 0.6);
 		z-index: 1000;
 		transition:
-			transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+			transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
 			box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
 			border-color 0.3s ease,
-			background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+			background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+			opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+			visibility 0s linear;
 		transform: translateY(0);
+		opacity: 1;
+		visibility: visible;
 		animation: subtle-glow 3s ease-in-out infinite alternate;
 	}
 
@@ -162,23 +166,25 @@
 		transform: translateY(calc(-100% - 20px));
 		opacity: 0;
 		visibility: hidden;
-		transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-		            opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-		            visibility 0s 0.4s,
-		            box-shadow 0s,
-		            background 0s,
-		            border-color 0s;
+		transition:
+			transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+			opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+			visibility 0s 0.4s,
+			box-shadow 0s,
+			background 0s,
+			border-color 0s;
 	}
 
 	.header.visible {
 		transform: translateY(0);
 		opacity: 1;
 		visibility: visible;
-		transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-		            opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-		            visibility 0s,
-		            box-shadow 0.4s ease,
-		            background 0.4s ease;
+		transition:
+			transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+			opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+			visibility 0s,
+			box-shadow 0.4s ease,
+			background 0.4s ease;
 	}
 
 	.header.scrolled {
