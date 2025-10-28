@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { fly, slide } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
+
 	let menuOpen = $state(false);
 	let scrolled = $state(false);
 	let isInHero = $state(true);
@@ -53,12 +56,13 @@
 	});
 </script>
 
-<header
-	class="header"
-	class:scrolled
-	class:visible={!isInHero || scrolled}
-	class:hidden={isInHero && !scrolled}
->
+{#if !isInHero || scrolled}
+	<header
+		class="header"
+		class:scrolled
+		in:fly={{ y: -100, duration: 500, easing: cubicOut }}
+		out:fly={{ y: -100, duration: 400, easing: cubicOut }}
+	>
 	<div class="header-container">
 		<!-- Logo -->
 		<div class="logo">
@@ -118,7 +122,8 @@
 			</nav>
 		</div>
 	{/if}
-</header>
+	</header>
+{/if}
 
 <style>
 	.header {
@@ -167,30 +172,6 @@
 		}
 	}
 
-	.header.hidden {
-		transform: translateY(calc(-100% - 20px));
-		opacity: 0;
-		visibility: hidden;
-		transition:
-			transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-			opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-			visibility 0s 0.4s,
-			box-shadow 0s,
-			background 0s,
-			border-color 0s;
-	}
-
-	.header.visible {
-		transform: translateY(0);
-		opacity: 1;
-		visibility: visible;
-		transition:
-			transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-			opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-			visibility 0s,
-			box-shadow 0.4s ease,
-			background 0.4s ease;
-	}
 
 	.header.scrolled {
 		background: rgba(255, 255, 255, 0.85);
@@ -412,23 +393,6 @@
 		}
 	}
 
-	@keyframes slideIn {
-		from {
-			transform: translateX(100%);
-		}
-		to {
-			transform: translateX(0);
-		}
-	}
-
-	@keyframes slideInUp {
-		from {
-			transform: translateY(100%);
-		}
-		to {
-			transform: translateY(0);
-		}
-	}
 
 	/* Mobile - Improve overlay backdrop */
 	.menu-overlay {
