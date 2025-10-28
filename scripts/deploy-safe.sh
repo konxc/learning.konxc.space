@@ -64,6 +64,10 @@ echo "Copying from build/..."
 cp -r ../build/* .
 cp ../static/CNAME .
 
+# Create .nojekyll to disable Jekyll processing (required for _app/ folder)
+echo "Creating .nojekyll..."
+touch .nojekyll
+
 # Commit and push
 echo "💾 Committing changes..."
 git add .
