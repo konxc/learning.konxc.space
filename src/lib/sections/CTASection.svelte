@@ -1,22 +1,5 @@
 <script lang="ts">
-	import RegistrationForm, { type RegistrationData } from '$lib/components/RegistrationForm.svelte';
-
-	async function handleFormSubmit(data: RegistrationData) {
-		console.log('Form submitted:', data);
-
-		// In production: send to backend API
-		try {
-			// const response = await fetch('/api/register', {
-			// 	method: 'POST',
-			// 	headers: { 'Content-Type': 'application/json' },
-			// 	body: JSON.stringify(data)
-			// });
-			// if (!response.ok) throw new Error('Failed to submit');
-		} catch (err) {
-			console.error('Error submitting form:', err);
-			throw err; // Re-throw untuk ditangani oleh form
-		}
-	}
+	// CTA section with buttons instead of form
 </script>
 
 <section id="register" class="cta-section">
@@ -36,7 +19,14 @@
 }`}
 		</pre>
 
-		<RegistrationForm onSubmit={handleFormSubmit} />
+		<div class="cta-buttons">
+			<a href="/waiting-list" class="cta-primary"> 🎯 Join Waiting List - Gratis! </a>
+			<a href="/marketplace" class="cta-secondary"> 🔍 Lihat Semua Course </a>
+		</div>
+
+		<p class="cta-note">
+			Sudah punya akun? <a href="/auth/signin">Masuk di sini</a>
+		</p>
 	</div>
 </section>
 
@@ -127,6 +117,69 @@
 		color: #60a5fa;
 	}
 
+	.cta-buttons {
+		display: flex;
+		gap: 20px;
+		justify-content: center;
+		margin-bottom: 30px;
+		flex-wrap: wrap;
+	}
+
+	.cta-primary {
+		display: inline-block;
+		padding: 18px 40px;
+		background: white;
+		color: var(--color-gradient-purple-start);
+		font-weight: 700;
+		font-size: 1.2em;
+		border-radius: 50px;
+		text-decoration: none;
+		transition: all 0.3s ease;
+		box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+	}
+
+	.cta-primary:hover {
+		transform: translateY(-5px);
+		box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+	}
+
+	.cta-secondary {
+		display: inline-block;
+		padding: 18px 40px;
+		background: rgba(255, 255, 255, 0.2);
+		backdrop-filter: blur(10px);
+		color: white;
+		font-weight: 600;
+		font-size: 1.2em;
+		border: 2px solid white;
+		border-radius: 50px;
+		text-decoration: none;
+		transition: all 0.3s ease;
+	}
+
+	.cta-secondary:hover {
+		background: rgba(255, 255, 255, 0.3);
+		transform: translateY(-3px);
+	}
+
+	.cta-note {
+		font-size: 1.1em;
+		color: rgba(255, 255, 255, 0.9);
+		margin-top: 20px;
+	}
+
+	.cta-note a {
+		color: white;
+		text-decoration: underline;
+		font-weight: 600;
+		transition: all 0.2s ease;
+	}
+
+	.cta-note a:hover {
+		text-decoration: none;
+		opacity: 0.8;
+	}
+
 	/* Responsive: Tablet */
 	@media (max-width: 1024px) {
 		.cta-section {
@@ -159,6 +212,19 @@
 		.code-snippet {
 			padding: 20px;
 			font-size: 0.85em;
+		}
+
+		.cta-buttons {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.cta-primary,
+		.cta-secondary {
+			width: 100%;
+			text-align: center;
+			font-size: 1.1em;
+			padding: 16px 32px;
 		}
 	}
 
