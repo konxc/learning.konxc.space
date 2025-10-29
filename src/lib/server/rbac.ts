@@ -1,6 +1,6 @@
 import type { User } from './db/schema';
 
-export type UserRole = 'user' | 'mentor' | 'admin';
+export type UserRole = 'user' | 'mentor' | 'admin' | 'bd';
 
 export function hasRole(user: User | null, role: UserRole | UserRole[]): boolean {
     if (!user) return false;
@@ -37,7 +37,15 @@ export function getNavItemsForRole(role: string): NavItem[] {
             { label: 'Manage Courses', href: '/dashboard/admin/courses' },
             { label: 'Coupons', href: '/dashboard/admin/coupons' },
             { label: 'Users', href: '/dashboard/admin/users' },
-            { label: 'Mentor Applications', href: '/dashboard/admin/mentor-applications' }
+            { label: 'Mentor Applications', href: '/dashboard/admin/mentor-applications' },
+            { label: 'CRM: Waiting List', href: '/dashboard/crm/waiting-list' }
+        ];
+    }
+
+    if (role === 'bd') {
+        return [
+            ...baseNav,
+            { label: 'CRM: Waiting List', href: '/dashboard/crm/waiting-list' }
         ];
     }
 
