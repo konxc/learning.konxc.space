@@ -5,6 +5,9 @@ import * as schema from '$lib/server/db/schema';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { eq } from 'drizzle-orm';
 
+// Disable prerendering because this page has server actions
+export const prerender = false;
+
 export const load: PageServerLoad = async () => {
     return {};
 };
