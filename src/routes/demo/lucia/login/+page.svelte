@@ -25,10 +25,22 @@
 	<button class="rounded-md bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
 		>Login</button
 	>
-	<button
-		formaction="?/register"
-		class="rounded-md bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
-		>Register</button
-	>
 </form>
 <p style="color: red">{form?.message ?? ''}</p>
+<div class="register-link">
+	<p>
+		Belum punya akun?
+		<a href="/auth/register" class="text-blue-600 underline hover:text-blue-700">Daftar di sini</a>
+	</p>
+</div>
+
+<style>
+	.register-link {
+		margin-top: 16px;
+		text-align: center;
+	}
+	.register-link p {
+		color: #6b7280;
+		font-size: 0.9em;
+	}
+</style>

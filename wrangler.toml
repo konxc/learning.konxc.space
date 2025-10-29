@@ -1,0 +1,12 @@
+name = "learning-konxc-space"
+compatibility_date = "2024-01-01"
+
+[env.production]
+vars = { NODE_ENV = "production" }
+
+# Environment variables will be set in Cloudflare dashboard
+# Required vars:
+# - DATABASE_URL (Turso database URL)
+# - DATABASE_AUTH_TOKEN (Turso auth token)
+# - SESSION_SECRET (for Lucia session encryption)
+

@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import * as auth from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
+import * as schema from '$lib/server/db/schema';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
@@ -50,7 +51,22 @@ export const actions: Actions = {
 		const session = await auth.createSession(sessionToken, existingUser.id);
 		auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 
-		return redirect(302, '/demo/lucia');
+		// Check for redirect URL
+		const redirectUrl = event.url.searchParams.get('redirect');
+		if (redirectUrl) {
+			throw redirect(302, redirectUrl);
+		}
+
+		// Check if user has any enrollments, redirect to onboarding if not
+		const enrollments = await db.query.enrollment.findFirst({
+			where: eq(schema.enrollment.userId, existingUser.id)
+		});
+
+		if (!enrollments) {
+			throw redirect(302, '/onboarding');
+		}
+
+		throw redirect(302, '/dashboard');
 	},
 	register: async (event) => {
 		const formData = await event.request.formData();
@@ -79,10 +95,16 @@ export const actions: Actions = {
 			const sessionToken = auth.generateSessionToken();
 			const session = await auth.createSession(sessionToken, userId);
 			auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
+
+			// Check for redirect URL
+			const redirectUrl = event.url.searchParams.get('redirect');
+			if (redirectUrl) {
+				return redirect(302, redirectUrl);
+			}
 		} catch {
 			return fail(500, { message: 'An error has occurred' });
 		}
-		return redirect(302, '/demo/lucia');
+		return redirect(302, '/dashboard');
 	}
 };
 
