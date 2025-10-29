@@ -10,14 +10,14 @@
 	async function generateCode() {
 		const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 		let code = '';
-		
+
 		// Generate 6-12 character code
 		const length = 6 + Math.floor(Math.random() * 7);
-		
+
 		for (let i = 0; i < length; i++) {
 			code += chars.charAt(Math.floor(Math.random() * chars.length));
 		}
-		
+
 		// Check if code exists
 		try {
 			const response = await fetch('/dashboard/admin/coupons/create?action=checkCode', {
@@ -25,9 +25,9 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ code })
 			});
-			
+
 			const result = await response.json();
-			
+
 			if (result.exists) {
 				// Try again if exists
 				generateCode();
@@ -159,16 +159,18 @@
 		</div>
 
 		<div class="form-group">
-			<label>Applicable Courses (optional)</label>
-			<p class="help-text">Select specific courses or leave empty for all courses</p>
-			<div class="course-selection">
-				{#each data.courses as course}
-					<label class="course-checkbox">
-						<input type="checkbox" bind:group={selectedCourses} value={course.id} />
-						<span>{course.title}</span>
-					</label>
-				{/each}
-			</div>
+			<fieldset>
+				<legend>Applicable Courses (optional)</legend>
+				<p class="help-text">Select specific courses or leave empty for all courses</p>
+				<div class="course-selection">
+					{#each data.courses as course}
+						<label class="course-checkbox">
+							<input type="checkbox" bind:group={selectedCourses} value={course.id} />
+							<span>{course.title}</span>
+						</label>
+					{/each}
+				</div>
+			</fieldset>
 			<input type="hidden" name="applicableCourses" value={JSON.stringify(selectedCourses)} />
 		</div>
 

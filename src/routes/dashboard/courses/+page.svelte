@@ -426,21 +426,6 @@
 		font-size: 0.9em;
 	}
 
-	.status-badge {
-		display: inline-block;
-		padding: 4px 12px;
-		border-radius: 12px;
-		font-size: 0.8em;
-		text-transform: capitalize;
-		background: #f3f4f6;
-		color: #6b7280;
-	}
-
-	.status-badge.published {
-		background: #d1fae5;
-		color: #065f46;
-	}
-
 	.empty-state {
 		text-align: center;
 		padding: 60px 20px;

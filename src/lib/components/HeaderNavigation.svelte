@@ -204,7 +204,9 @@
 	<div
 		class="menu-backdrop"
 		onclick={closeMenu}
+		onkeydown={(e) => e.key === 'Escape' && closeMenu()}
 		role="button"
+		tabindex="-1"
 		aria-label="Close menu"
 		in:fade={{ duration: 200 }}
 		out:fade={{ duration: 200 }}
@@ -527,39 +529,6 @@
 	.mobile-menu.dragging .menu-content {
 		overflow-y: hidden;
 		pointer-events: none;
-	}
-
-	/* Close Button */
-	.close-menu-btn {
-		width: 36px;
-		height: 36px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: rgba(102, 126, 234, 0.08);
-		border: none;
-		border-radius: 10px;
-		cursor: pointer;
-		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	.close-menu-btn:hover {
-		background: rgba(102, 126, 234, 0.12);
-		transform: scale(1.05);
-	}
-
-	.close-menu-btn:active {
-		transform: scale(0.95);
-	}
-
-	.close-menu-btn svg {
-		color: var(--color-primary-dark);
-		opacity: 0.7;
-		transition: opacity 0.2s ease;
-	}
-
-	.close-menu-btn:hover svg {
-		opacity: 1;
 	}
 
 	/* CTA Button (Daftar) */

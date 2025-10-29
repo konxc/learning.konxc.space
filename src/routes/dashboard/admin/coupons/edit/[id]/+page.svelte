@@ -181,21 +181,23 @@
 		</div>
 
 		<div class="form-group">
-			<label>Applicable Courses (optional)</label>
-			<p class="help-text">Select specific courses or leave empty for all courses</p>
-			<div class="course-selection">
-				{#each data.courses as course}
-					<label class="course-checkbox">
-						<input
-							type="checkbox"
-							bind:group={selectedCourses}
-							value={course.id}
-							checked={selectedCourses.includes(course.id)}
-						/>
-						<span>{course.title}</span>
-					</label>
-				{/each}
-			</div>
+			<fieldset>
+				<legend>Applicable Courses (optional)</legend>
+				<p class="help-text">Select specific courses or leave empty for all courses</p>
+				<div class="course-selection">
+					{#each data.courses as course}
+						<label class="course-checkbox">
+							<input
+								type="checkbox"
+								bind:group={selectedCourses}
+								value={course.id}
+								checked={selectedCourses.includes(course.id)}
+							/>
+							<span>{course.title}</span>
+						</label>
+					{/each}
+				</div>
+			</fieldset>
 			<input type="hidden" name="applicableCourses" value={JSON.stringify(selectedCourses)} />
 		</div>
 

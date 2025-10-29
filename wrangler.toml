@@ -1,12 +1,12 @@
 name = "learning-konxc-space"
-compatibility_date = "2024-01-01"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "build"
+compatibility_flags = ["nodejs_compat"]
+
+# Environment variables for production deployment
+# NOTE: Never commit sensitive tokens to git!
+# Use Cloudflare Dashboard to set these variables securely
 
 [env.production]
 vars = { NODE_ENV = "production" }
-
-# Environment variables will be set in Cloudflare dashboard
-# Required vars:
-# - DATABASE_URL (Turso database URL)
-# - DATABASE_AUTH_TOKEN (Turso auth token)
-# - SESSION_SECRET (for Lucia session encryption)
 

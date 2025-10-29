@@ -19,10 +19,10 @@ if (dev) {
 	});
 } else {
 	// Production: use HTTP for Cloudflare Workers compatibility
+	// Note: syncUrl is not needed for remote Turso databases
 	dbClient = createClient({
-		url: env.DATABASE_URL,
-		authToken: env.DATABASE_AUTH_TOKEN,
-		syncUrl: undefined // HTTP mode for cloud
+		url: env.DATABASE_URL || '',
+		authToken: env.DATABASE_AUTH_TOKEN || undefined
 	});
 }
 

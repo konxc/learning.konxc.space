@@ -58,7 +58,6 @@
 		"vite-plugin-devtools-json": "^1.0.0"
 	},
 	"dependencies": {
-		"@node-rs/argon2": "^2.0.2",
 		"dompurify": "^3.3.0"
 	}
 }

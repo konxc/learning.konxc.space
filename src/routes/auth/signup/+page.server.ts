@@ -1,4 +1,4 @@
-import { hash } from '@node-rs/argon2';
+import { hashPassword } from '$lib/server/password';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
@@ -92,12 +92,7 @@ export const actions: Actions = {
 
         // Create user
         const userId = generateUserId();
-        const passwordHash = await hash(password, {
-            memoryCost: 19456,
-            timeCost: 2,
-            outputLen: 32,
-            parallelism: 1
-        });
+        const passwordHash = await hashPassword(password);
 
         try {
             await db.insert(table.user).values({
