@@ -15,6 +15,13 @@
       "when": 1761693941699,
       "tag": "0001_equal_skullbuster",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1761724309634,
+      "tag": "0002_wet_thor",
+      "breakpoints": true
     }
   ]
 }
