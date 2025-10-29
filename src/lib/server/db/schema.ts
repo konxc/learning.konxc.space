@@ -93,6 +93,19 @@ export const mentorApplication = sqliteTable('mentor_application', {
 	reviewedBy: text('reviewed_by').references(() => user.id)
 });
 
+export const waitingList = sqliteTable('waiting_list', {
+	id: text('id').primaryKey(),
+	fullName: text('full_name').notNull(),
+	email: text('email').notNull(),
+	phone: text('phone'),
+	interest: text('interest'), // e.g. 'python', 'web', 'career-switch'
+	source: text('source'), // e.g. 'landing-cta', 'ads', 'referral'
+	status: text('status').notNull().default('new'), // 'new' | 'contacted' | 'qualified' | 'converted' | 'archived'
+	notes: text('notes'),
+	createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date())
+});
+
 export type Session = typeof session.$inferSelect;
 export type User = typeof user.$inferSelect;
 export type Course = typeof course.$inferSelect;
@@ -100,3 +113,4 @@ export type Enrollment = typeof enrollment.$inferSelect;
 export type Coupon = typeof coupon.$inferSelect;
 export type CouponUsage = typeof couponUsage.$inferSelect;
 export type MentorApplication = typeof mentorApplication.$inferSelect;
+export type WaitingList = typeof waitingList.$inferSelect;
