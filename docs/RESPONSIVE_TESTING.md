@@ -374,10 +374,10 @@ If adding navigation in the future, consider:
       <!-- Hamburger icon -->
     </button>
     <ul>
-      <li><a href="#about">Tentang</a></li>
-      <li><a href="#program">Program</a></li>
-      <li><a href="#benefits">Benefits</a></li>
-      <li><a href="#register">Daftar</a></li>
+      <li><a href="/#about">Tentang</a></li>
+      <li><a href="/#program">Program</a></li>
+      <li><a href="/#benefits">Benefits</a></li>
+      <li><a href="/#register">Daftar</a></li>
     </ul>
   </nav>
 </header>

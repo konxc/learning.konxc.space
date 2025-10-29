@@ -1,85 +1,59 @@
-<!-- d54ffffb-dbf1-4c4a-8190-f614aa6b67e2 2391289d-6773-4ca1-b5ba-e848fe076644 -->
-# Refactor Authentication URLs to Best Practice
+<!-- d54ffffb-dbf1-4c4a-8190-f614aa6b67e2 f60e794f-6a89-4b25-821c-8dac856499ff -->
+# Redesign Auth Signin Page
 
-Implementasi URL best practice untuk authentication dengan structure yang clean dan semantic.
+Redesign halaman signin dengan layout full-height (100vh), responsif di semua breakpoint, dan desain yang konsisten dengan auth pages lainnya.
 
-## Current State
+## Requirements
 
-- ❌ `/demo/lucia/login` - Tidak best practice (mengandung library name)
-- ✅ `/auth/register` - Sudah ada dan baik
-- ❌ Semua redirect masih ke `/demo/lucia/login`
+- Layout 100vh yang responsif di semua breakpoint (mobile, tablet, desktop)
+- Tidak menampilkan header navigation (auth layout terpisah dari public layout)
+- Tombol kembali ke home di pojok kanan atas (fixed position dengan jarak dari tepi)
+- Desain konsisten dengan signup/register pages
+- Form login dengan username & password
+- Link ke signup page
+- Gradient background matching signup/register
+- Error handling display
 
-## Target State
+## Design Specifications
 
-- ✅ `/auth/signin` - Login page dengan form
-- ✅ `/auth/signup` - Register page (rename dari register)
-- ✅ Semua redirect update ke `/auth/signin`
-
-## Implementation Plan
-
-### Step 1: Move Login Route
-
-- Move `src/routes/demo/lucia/login` → `src/routes/auth/signin`
-- Update `+page.server.ts` untuk handle action login
-- Update `+page.svelte` untuk UI
-
-### Step 2: Rename Register Route (Optional)
-
-- Rename `src/routes/auth/register` → `src/routes/auth/signup`
-- Update internal references
-
-### Step 3: Update All Redirect References
-
-Update redirect dari `/demo/lucia/login` ke `/auth/signin` di:
-
-- `src/routes/onboarding/+page.server.ts`
-- `src/routes/marketplace/[id]/checkout/+page.server.ts`
-- `src/routes/marketplace/[id]/+page.svelte`
-- `src/lib/server/middleware.ts`
-- `src/routes/dashboard/+layout.server.ts`
-- `src/hooks.server.ts`
-
-### Step 4: Update Links in UI
-
-- `src/routes/auth/signup/+page.svelte` - Update login link
-- `src/routes/marketplace/[id]/+page.svelte` - Update login link
-
-## URL Structure Comparison
-
-### Before
+### Layout Structure
 
 ```
-❌ /demo/lucia/login
-✅ /auth/register
-❌ /demo/lucia?/logout
+<div class="auth-page"> (100vh container)
+  <button class="back-to-home">←</button> (fixed top-right dengan padding)
+  <div class="auth-container"> (centered card)
+    - Header with title & description
+    - Form with username & password fields
+    - Submit button
+    - Error message display
+    - Link to signup
+  </div>
+</div>
 ```
 
-### After  
+### Responsive Breakpoints
 
-```
-✅ /auth/signin
-✅ /auth/signup  
-✅ /auth/logout (future)
-```
+- Mobile (< 640px): Full width card, reduced padding
+- Tablet (640px - 1024px): Max width card
+- Desktop (> 1024px): Centered card with max-width
+
+### Styling
+
+- Background: Gradient matching signup (`var(--color-bg-hero)` to `var(--color-bg-hero-end)`)
+- Card: White background, rounded corners, shadow
+- Typography: Match signup design
+- Colors: Use design system colors
+- Buttons: Match signup button styles
 
 ## Files to Modify
 
-- Move: `src/routes/demo/lucia/login` → `src/routes/auth/signin/`
-- Update: `src/routes/auth/signup/+page.svelte` (update login link)
-- Update: All server files with redirect references
-- Update: `src/hooks.server.ts` skip list
-
-## Benefits
-
-- Clean URL structure
-- Semantic naming
-- Consistent with auth namespace
-- Remove library-specific paths
+- `src/routes/auth/signin/+page.svelte` - Complete redesign
+- Keep `+page.server.ts` unchanged (auth logic already working)
 
 ### To-dos
 
-- [ ] Move /demo/lucia/login ke /auth/signin
-- [ ] Rename /auth/register ke /auth/signup
-- [ ] Update semua redirect dari /demo/lucia/login ke /auth/signin
-- [ ] Update semua link di UI ke /auth/signin
-- [ ] Update hooks.server.ts untuk skip /auth/signin
+- [ ] Create 100vh layout dengan centered card yang responsif
+- [ ] Add tombol kembali ke home di pojok kanan atas (fixed position)
+- [ ] Style form dengan desain konsisten signup/register
+- [ ] Implement responsive design untuk semua breakpoints
+- [ ] Add error message display yang konsisten

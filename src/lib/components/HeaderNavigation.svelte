@@ -14,11 +14,11 @@
 
 	// Navigation items
 	const navItems = [
-		{ href: '#about', label: 'Tentang', ariaLabel: 'Tentang Naik Kelas' },
-		{ href: '#program', label: 'Program', ariaLabel: 'Program Pelatihan' },
-		{ href: '#benefits', label: 'Benefits', ariaLabel: 'Manfaat Program' },
+		{ href: '/#about', label: 'Tentang', ariaLabel: 'Tentang Naik Kelas' },
+		{ href: '/#program', label: 'Program', ariaLabel: 'Program Pelatihan' },
+		{ href: '/#benefits', label: 'Benefits', ariaLabel: 'Manfaat Program' },
 		{ href: '/marketplace', label: 'Marketplace', ariaLabel: 'Browse Courses' },
-		{ href: '#register', label: 'Daftar', ariaLabel: 'Daftar Sekarang' }
+		{ href: '/#register', label: 'Daftar', ariaLabel: 'Daftar Sekarang' }
 	];
 
 	// Toggle menu
