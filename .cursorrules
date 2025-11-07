@@ -65,6 +65,14 @@ src/
 3. Test responsive layout
 4. Update documentation if needed
 
+### Validation Flow After Refactor
+
+1. Jalankan `pnpm run check` untuk validasi tipe.
+2. Jalankan `pnpm run lint` untuk memastikan konsistensi.
+3. Jalankan `pnpm run test` (jika ada test suite).
+4. Review hasil refactor di panel diff Cursor sebelum commit.
+5. Jika refactor melibatkan file `.svelte`, lakukan visual QA di browser dev.
+
 ### Database
 
 - Use Drizzle ORM for database operations
@@ -77,3 +85,23 @@ src/
 - Maintain accessibility (a11y) standards
 - Follow Svelte 5 Runes pattern
 - Use Tailwind CSS for styling
+
+## AI Refactor Behavior
+
+- Prioritize **type safety** and **runtime stability** over minimal code changes.
+- Automatically create missing interfaces in `src/lib/types/` if type inference fails.
+- When uncertain, prefer explicit type annotations instead of relying on inference.
+- Convert legacy Svelte 4 syntax to Svelte 5 Runes pattern:
+  - `$props()` without generics
+  - `$bindable()` for two-way binding
+  - `$derived()` for computed values
+- Use `lang="postcss"` in `<style>` blocks when Tailwind @apply is used.
+- Ensure all Drizzle queries are type-safe using `InferModel`.
+
+## Auto-Fix Scope Rules
+
+- Allowed: refactor imports, types, props, and Tailwind class corrections.
+- Allowed: split large components into smaller reusable parts.
+- Allowed: migrate `$props<T>` to new `$props()` syntax.
+- Disallowed: introduce third-party dependencies without explicit instruction.
+- Disallowed: modify business logic or remove security-related checks.
