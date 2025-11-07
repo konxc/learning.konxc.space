@@ -66,8 +66,10 @@
 	},
 	"dependencies": {
 		"dompurify": "^3.3.0",
+		"highlight.js": "^11.11.1",
 		"html2canvas": "^1.4.1",
 		"jspdf": "^2.5.2",
+		"marked": "^17.0.0",
 		"sharp": "^0.34.4",
 		"svelte-toast": "^1.0.0"
 	}

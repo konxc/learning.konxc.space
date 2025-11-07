@@ -12,6 +12,10 @@ const config = {
 		},
 		prerender: {
 			handleUnseenRoutes: 'ignore'
+		},
+		alias: {
+			$lib: 'src/lib',
+			$docs: 'docs'
 		}
 	},
 	extensions: ['.svelte', '.svx']
