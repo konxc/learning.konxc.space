@@ -1,0 +1,8 @@
+
+> learning.konxc.space@0.0.1 check /home/dev/web/koneksi/learning.konxc.space
+> svelte-kit sync && svelte-check --tsconfig ./tsconfig.json
+
+Loading svelte-check in workspace: /home/dev/web/koneksi/learning.konxc.space
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings
