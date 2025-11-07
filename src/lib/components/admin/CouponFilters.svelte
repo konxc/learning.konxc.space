@@ -7,11 +7,7 @@
 		onFilterChange?: (value: string) => void;
 	}
 
-	let {
-		filter = $bindable('all'),
-		filterCounts,
-		onFilterChange
-	} = $props<CouponFiltersProps>();
+	let { filter = $bindable('all'), filterCounts, onFilterChange }: CouponFiltersProps = $props();
 
 	// Filter options for buttons
 	const filterOptions: Array<{
@@ -43,4 +39,3 @@
 		</button>
 	{/each}
 </div>
-

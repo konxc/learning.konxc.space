@@ -313,11 +313,11 @@
 
 <style>
 	/* Prevent flicker: CSS reads from data attribute set by inline script */
-	html[data-sidebar-collapsed='true'] .sidebar-container {
+	:global(html[data-sidebar-collapsed='true'] .sidebar-container) {
 		width: 4rem;
 	}
-	html[data-sidebar-collapsed='false'] .sidebar-container,
-	html:not([data-sidebar-collapsed]) .sidebar-container {
+	:global(html[data-sidebar-collapsed='false'] .sidebar-container),
+	:global(html:not([data-sidebar-collapsed]) .sidebar-container) {
 		width: 16rem;
 	}
 

@@ -79,6 +79,12 @@
 			aria-labelledby={title ? 'modal-title' : undefined}
 			tabindex="-1"
 			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
+				if (e.key === 'Escape') {
+					e.stopPropagation();
+					onClose();
+				}
+			}}
 		>
 			<!-- Header -->
 			{#if title || header}

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import type { ActionData } from './$types';
-	import { onMount, onDestroy } from 'svelte';
-	import Toast from 'svelte-toast';
+import { enhance } from '$app/forms';
+import type { ActionData } from './$types';
+import { onMount, onDestroy } from 'svelte';
+import Toast from 'svelte-toast';
 
-	let { form }: { form: ActionData } = $props();
+let { form }: { form?: ActionData | null } = $props();
 
 	let mouseX = $state(0);
 	let mouseY = $state(0);
@@ -72,18 +72,36 @@
 	let currentStep = $state(1);
 	const totalSteps = 3;
 
-	// Form data state - menyimpan nilai input antar langkah
-	let formData = $state({
-		fullName: form?.data?.fullName || '',
-		phone: form?.data?.phone || '',
-		interest: form?.data?.interest || '',
-		email: form?.data?.email || '',
-		school: form?.data?.school || '',
-		enrollmentYear: form?.data?.enrollmentYear || '',
-		educationStatus: form?.data?.educationStatus || '',
-		screenshot: form?.data?.screenshot || '',
-		instagramUsername: form?.data?.instagramUsername || ''
-	});
+const INITIAL_FORM_VALUES = {
+	fullName: '',
+	phone: '',
+	interest: '',
+	email: '',
+	school: '',
+	enrollmentYear: '',
+	educationStatus: '',
+	screenshot: '',
+	instagramUsername: ''
+};
+
+function getInitialFieldValue<Key extends keyof typeof INITIAL_FORM_VALUES>(key: Key): string {
+	const actionData = form as ({ data?: Partial<typeof INITIAL_FORM_VALUES> } | null | undefined);
+	const value = actionData?.data?.[key];
+	return typeof value === 'string' ? value : INITIAL_FORM_VALUES[key];
+}
+
+// Form data state - menyimpan nilai input antar langkah
+let formData = $state({
+	fullName: getInitialFieldValue('fullName'),
+	phone: getInitialFieldValue('phone'),
+	interest: getInitialFieldValue('interest'),
+	email: getInitialFieldValue('email'),
+	school: getInitialFieldValue('school'),
+	enrollmentYear: getInitialFieldValue('enrollmentYear'),
+	educationStatus: getInitialFieldValue('educationStatus'),
+	screenshot: getInitialFieldValue('screenshot'),
+	instagramUsername: getInitialFieldValue('instagramUsername')
+});
 
 	// File upload state
 	let screenshotFile = $state<File | null>(null);

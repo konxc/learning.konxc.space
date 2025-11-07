@@ -121,7 +121,6 @@
 	<nav
 		bind:this={navElement}
 		class="section-navigation"
-		role="navigation"
 		aria-label="Section navigation"
 		class:visible={isVisible}
 	>

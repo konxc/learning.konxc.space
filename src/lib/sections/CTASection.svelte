@@ -9,6 +9,7 @@
 	import type { CTAPatternType } from '$lib/types/ctaPatterns';
 	import type { TerminalTheme } from '$lib/utils/terminalTheme';
 	import { CTA_OVERLAY_CONFIG } from '$lib/config/ctaSection';
+	import type { GlowOrbConfig } from '$lib/config/overlayConfigs';
 	import { getCTAContent } from '$lib/config/contentConfig';
 	import {
 		getPatternBackgroundStyle,
@@ -52,11 +53,14 @@
 	let theme = $state<TerminalTheme>('p10k');
 
 	// Glow orbs configuration
-	const glowOrbsConfig = $derived(
-		$brandMode === 'hardcore'
-			? CTA_OVERLAY_CONFIG.glowOrbs.hardcore
-			: CTA_OVERLAY_CONFIG.glowOrbs.chill
-	);
+	const glowOrbsConfig = $derived.by<GlowOrbConfig[]>(() => {
+		const source =
+			$brandMode === 'hardcore'
+				? CTA_OVERLAY_CONFIG.glowOrbs.hardcore
+				: CTA_OVERLAY_CONFIG.glowOrbs.chill;
+
+		return source.map((orb) => ({ ...orb }));
+	});
 
 	// AboutWindow helpers
 	const getPromptForAbout = createPromptGetter();

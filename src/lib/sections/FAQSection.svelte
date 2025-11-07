@@ -36,8 +36,8 @@
 	});
 
 	// FAQ data
-	let allFAQs = $derived(getFAQ(currentDomain));
-	let filteredFAQs = $state<FAQEntry[]>(getFAQ(currentDomain));
+	const allFAQs = $derived.by(() => getFAQ(currentDomain));
+	let filteredFAQs = $state<FAQEntry[]>([]);
 	let searchQuery = $state('');
 	let selectedCategory = $state<string | null>(null);
 	let categories = $derived(getFAQCategories(currentDomain));

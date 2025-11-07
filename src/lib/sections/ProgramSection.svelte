@@ -121,6 +121,10 @@
 				}
 			);
 
+			if (!timelineContainer) {
+				return;
+			}
+
 			const items = timelineContainer.querySelectorAll('[data-timeline-index]');
 			items.forEach((item) => observerInstance?.observe(item));
 		}, TIMELINE_CONSTANTS.OBSERVER_SETUP_TIMEOUT);

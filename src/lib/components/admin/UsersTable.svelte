@@ -10,7 +10,7 @@
 		fullName?: string | null;
 		email?: string | null;
 		role: string;
-		onboardingCompleted: boolean;
+	onboardingCompleted: boolean | null;
 		createdAt: Date | string;
 	}
 

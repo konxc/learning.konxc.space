@@ -2,12 +2,12 @@
 	import { RADIUS, TEXT, COLOR, TRANSITION } from '$lib/config/design';
 	import { m } from '$lib/paraglide/messages.js';
 
-	interface User {
-		fullName?: string;
-		username?: string;
-		avatarUrl?: string;
-		role?: string;
-	}
+interface User {
+	fullName?: string | null;
+	username?: string | null;
+	avatarUrl?: string | null;
+	role?: string | null;
+}
 
 	function getRoleLabel(role: string | null | undefined): string {
 		if (!role) return '';

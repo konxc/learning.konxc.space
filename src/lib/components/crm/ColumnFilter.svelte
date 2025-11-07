@@ -115,8 +115,8 @@
 							class="h-4 w-4 shrink-0 cursor-pointer rounded border border-gray-400 bg-white text-blue-600 transition-all checked:border-blue-600 checked:bg-blue-600 hover:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-500 dark:bg-neutral-800 dark:checked:border-blue-500 dark:checked:bg-blue-500 dark:hover:border-blue-400 dark:focus:ring-blue-400"
 						/>
 						<span class={`${TEXT.body} ${COLOR.textPrimary} flex-1`}>{col.label}</span>
-						{#if col.required}
-							<span class={`${TEXT.xsmall} ${COLOR.textSecondary}`}>Required</span>
+				{#if col.required}
+					<span class={`${TEXT.small} ${COLOR.textSecondary}`}>Required</span>
 						{/if}
 					</label>
 				{/each}

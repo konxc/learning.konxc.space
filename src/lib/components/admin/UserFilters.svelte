@@ -10,8 +10,8 @@
 	let {
 		roleFilter = $bindable('all'),
 		roleCounts,
-		onRoleFilterChange
-	} = $props<UserFiltersProps>();
+	onRoleFilterChange
+}: UserFiltersProps = $props();
 
 	// Role filter options for buttons
 	const roleFilterOptions: Array<{

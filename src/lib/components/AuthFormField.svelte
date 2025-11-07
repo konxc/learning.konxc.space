@@ -1,59 +1,7 @@
 <script lang="ts">
-	type FullAutoFill =
-		| 'name'
-		| 'honorific-prefix'
-		| 'given-name'
-		| 'additional-name'
-		| 'family-name'
-		| 'honorific-suffix'
-		| 'nickname'
-		| 'email'
-		| 'username'
-		| 'new-password'
-		| 'current-password'
-		| 'one-time-code'
-		| 'organization-title'
-		| 'organization'
-		| 'street-address'
-		| 'address-line1'
-		| 'address-line2'
-		| 'address-line3'
-		| 'address-level4'
-		| 'address-level3'
-		| 'address-level2'
-		| 'address-level1'
-		| 'country'
-		| 'country-name'
-		| 'postal-code'
-		| 'cc-name'
-		| 'cc-given-name'
-		| 'cc-additional-name'
-		| 'cc-family-name'
-		| 'cc-number'
-		| 'cc-exp'
-		| 'cc-exp-month'
-		| 'cc-exp-year'
-		| 'cc-csc'
-		| 'cc-type'
-		| 'transaction-amount'
-		| 'transaction-currency'
-		| 'language'
-		| 'bday'
-		| 'bday-day'
-		| 'bday-month'
-		| 'bday-year'
-		| 'sex'
-		| 'tel'
-		| 'tel-country-code'
-		| 'tel-national'
-		| 'tel-area-code'
-		| 'tel-local'
-		| 'tel-extension'
-		| 'impp'
-		| 'url'
-		| 'photo'
-		| 'off'
-		| 'on';
+	import type { FullAutoFill } from 'svelte/elements';
+
+	type AutoCompleteValue = FullAutoFill | 'on' | 'off';
 
 	interface Props {
 		label: string;
@@ -61,7 +9,7 @@
 		name: string;
 		placeholder?: string;
 		required?: boolean;
-		autocomplete?: FullAutoFill | null;
+		autocomplete?: AutoCompleteValue | null;
 		pattern?: string;
 		minlength?: number;
 		maxlength?: number;

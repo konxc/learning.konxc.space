@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ActionResult, SubmitFunction } from '@sveltejs/kit';
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
@@ -9,28 +10,43 @@
 
 	let { data }: { data: PageData } = $props();
 
+	type QuizQuestion = PageData['quiz']['questions'][number];
+	const quizQuestions = $derived<QuizQuestion[]>(data.quiz.questions ?? []);
+
 	let answers: Record<string, string> = $state({});
 	let isSubmitting = $state(false);
 	let showResult = $state(false);
 	let result: { score: number; passingScore: number; passed: boolean } | null = $state(null);
 	let form = $state<HTMLFormElement | undefined>(undefined);
 
-	import type { SubmitFunction, ActionResult } from '@sveltejs/kit';
-	function handleSubmit({ result: actionResult }: Parameters<SubmitFunction>[0]) {
-		const resultData = actionResult as ActionResult<{
-			score: number;
-			passingScore: number;
-			passed: boolean;
-		}>;
-		if (resultData?.type === 'success' && resultData.data) {
-			result = {
-				score: resultData.data.score,
-				passingScore: resultData.data.passingScore,
-				passed: resultData.data.passed
-			};
-			showResult = true;
-		}
-	}
+	type QuizActionResult = ActionResult<{
+		score: number;
+		passingScore: number;
+		passed: boolean;
+	}>;
+
+	type EnhanceCallback = Exclude<Awaited<ReturnType<SubmitFunction>>, void>;
+	type EnhanceCallbackArgs = Parameters<EnhanceCallback>[0];
+
+	const handleEnhance: SubmitFunction = () => {
+		isSubmitting = true;
+		showResult = false;
+
+		return async ({ result: actionResult }: EnhanceCallbackArgs) => {
+			isSubmitting = false;
+			const typedResult = actionResult as QuizActionResult;
+			if (typedResult.type === 'success' && typedResult.data) {
+				result = {
+					score: typedResult.data.score,
+					passingScore: typedResult.data.passingScore,
+					passed: typedResult.data.passed
+				};
+				showResult = true;
+			} else {
+				result = null;
+			}
+		};
+	};
 
 	function getResultStatus() {
 		if (!result) return '';
@@ -112,11 +128,11 @@
 				</div>
 			</PageSection>
 		{:else}
-			<form bind:this={form} method="post" action="?/submitQuiz" use:enhance={handleSubmit}>
+			<form bind:this={form} method="post" action="?/submitQuiz" use:enhance={handleEnhance}>
 				<input type="hidden" name="answers" value={JSON.stringify(answers)} />
 
 				<div class="mb-8 space-y-5">
-					{#each data.quiz.questions || [] as question, idx}
+					{#each quizQuestions as question, idx}
 						<PageSection>
 							<div class="mb-3 flex items-center justify-between">
 								<span class={`${TEXT.button} ${COLOR.accent} font-semibold`}>

@@ -2,9 +2,13 @@ import type { Actions, PageServerLoad } from './$types';
 import { requireMentor } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, inArray } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
+
+type SubmissionRecord = typeof schema.submission.$inferSelect;
+type CourseRecord = typeof schema.course.$inferSelect;
+type SubmissionWithCourse = SubmissionRecord & { course: CourseRecord | null };
 
 export const load: PageServerLoad = async ({ params, locals, url }) => {
 	const mentor = await requireMentor({ user: locals.user });
@@ -45,25 +49,27 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		.orderBy(desc(schema.submission.createdAt));
 
 	// Get quiz details for quiz submissions
-	const quizSubmissions = submissions.filter((s) => s.submission.type === 'quiz');
-	const quizIds = quizSubmissions.map((s) => s.submission.quizId).filter(Boolean);
+const quizSubmissions = submissions.filter((s) => s.submission.type === 'quiz');
+const quizIds = quizSubmissions
+	.map((s) => s.submission.quizId)
+	.filter((id): id is string => typeof id === 'string' && id.length > 0);
 
-	const quizzes =
-		quizIds.length > 0
-			? await db.select().from(schema.quiz).where(eq(schema.quiz.id, quizIds[0]))
-			: [];
+const quizzes =
+	quizIds.length > 0
+		? await db.select().from(schema.quiz).where(inArray(schema.quiz.id, quizIds))
+		: [] as typeof schema.quiz.$inferSelect[];
 
 	const quizMap = new Map(quizzes.map((q) => [q.id, q]));
 
 	// Get grades for submissions
-	const gradedSubmissionIds = submissions.map((s) => s.submission.id);
-	const grades =
-		gradedSubmissionIds.length > 0
-			? await db
-					.select()
-					.from(schema.submissionGrade)
-					.where(eq(schema.submissionGrade.submissionId, gradedSubmissionIds[0]))
-			: [];
+const gradedSubmissionIds = submissions.map((s) => s.submission.id);
+const grades =
+	gradedSubmissionIds.length > 0
+		? await db
+				.select()
+				.from(schema.submissionGrade)
+				.where(inArray(schema.submissionGrade.submissionId, gradedSubmissionIds))
+		: [] as typeof schema.submissionGrade.$inferSelect[];
 
 	const gradeMap = new Map(grades.map((g) => [g.submissionId, g]));
 
@@ -105,23 +111,32 @@ export const actions: Actions = {
 		const mentor = await requireMentor({ user: locals.user });
 
 		const formData = await request.formData();
-		const submissionId = formData.get('submissionId') as string;
-		const score = parseInt(formData.get('score') as string);
-		const feedback = formData.get('feedback') as string;
+		const submissionIdValue = formData.get('submissionId');
+		const scoreValue = formData.get('score');
+		const feedbackValue = formData.get('feedback');
 
-		if (!submissionId || isNaN(score)) {
+		if (typeof submissionIdValue !== 'string' || submissionIdValue.trim().length === 0) {
 			return fail(400, { error: 'Submission ID and score are required' });
 		}
 
+		const parsedScore = typeof scoreValue === 'string' ? Number.parseInt(scoreValue, 10) : Number.NaN;
+		if (!Number.isFinite(parsedScore)) {
+			return fail(400, { error: 'Submission ID and score are required' });
+		}
+
+		const feedback = typeof feedbackValue === 'string' ? feedbackValue.trim() : '';
+		const submissionId = submissionIdValue.trim();
+		const score = parsedScore;
+
 		// Verify mentor owns the course
-		const submission = await db.query.submission.findFirst({
+		const submission = (await db.query.submission.findFirst({
 			where: eq(schema.submission.id, submissionId),
 			with: {
 				course: true
 			}
-		});
+		})) as SubmissionWithCourse | undefined;
 
-		if (!submission || submission.course.mentorId !== mentor.id) {
+		if (!submission?.course || submission.course.mentorId !== mentor.id) {
 			return fail(403, { error: 'Unauthorized' });
 		}
 
@@ -144,7 +159,7 @@ export const actions: Actions = {
 			submissionId,
 			gradedBy: mentor.id,
 			score,
-			feedback: feedback || null
+			feedback: feedback.length > 0 ? feedback : null
 		});
 
 		return { success: true };

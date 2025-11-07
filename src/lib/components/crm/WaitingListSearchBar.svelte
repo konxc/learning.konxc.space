@@ -7,14 +7,14 @@
 	let {
 		searchQuery = $bindable(''),
 		columns,
-		columnFilterRef,
+	columnFilterRef = $bindable<ColumnFilter | null>(null),
 		onVisibilityChange,
 		storageKey,
 		placeholder = 'Cari nama, email, atau HP...'
 	}: {
 		searchQuery?: string;
 		columns: TableColumn[];
-		columnFilterRef?: ColumnFilter;
+	columnFilterRef?: ColumnFilter | null;
 		onVisibilityChange?: (visibleColumns: Set<string>) => void;
 		storageKey: string;
 		placeholder?: string;

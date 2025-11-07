@@ -1,22 +1,19 @@
 <script lang="ts">
-	import { RADIUS, TEXT, COLOR, TRANSITION, ELEVATION } from '$lib/config/design';
-	import { m } from '$lib/paraglide/messages.js';
-	import ProfileMenuSummary from './ProfileMenuSummary.svelte';
-	import ProfileUserInfo from './ProfileUserInfo.svelte';
-	import ThemeAccordion from './ThemeAccordion.svelte';
-	import RoleSwitcherAccordion from './RoleSwitcherAccordion.svelte';
-	import type { Theme } from '$lib/stores/theme';
-	import { onMount } from 'svelte';
-	import { enhance } from '$app/forms';
-	import { toast } from '$lib/stores/toast';
+import { RADIUS, TEXT, COLOR, TRANSITION, ELEVATION } from '$lib/config/design';
+import { m } from '$lib/paraglide/messages.js';
+import ProfileMenuSummary from './ProfileMenuSummary.svelte';
+import ProfileUserInfo from './ProfileUserInfo.svelte';
+import ThemeAccordion from './ThemeAccordion.svelte';
+import RoleSwitcherAccordion from './RoleSwitcherAccordion.svelte';
+import type { Theme } from '$lib/stores/theme';
+import { onMount } from 'svelte';
+import { enhance } from '$app/forms';
+import { toast } from '$lib/stores/toast';
+import type { User as DbUser } from '$lib/server/db/schema';
 
-	interface User {
-		fullName?: string | null;
-		username?: string;
-		email?: string | null;
-		avatarUrl?: string | null;
-		role?: string;
-	}
+type ProfileMenuUser = Partial<DbUser> & {
+	avatarUrl?: string | null;
+};
 
 	let {
 		user,
@@ -27,9 +24,9 @@
 		onAccordionToggle,
 		profileDetailsRef,
 		themeAccordionRef,
-		roleAccordionRef
+	roleAccordionRef
 	}: {
-		user: User | null;
+		user: ProfileMenuUser | null;
 		theme: Theme;
 		activeRole?: string | null;
 		onThemeChange: (theme: Theme, e: MouseEvent) => void;

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { PageData, ActionData } from './$types';
-	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
-	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
-	import PageSection from '$lib/components/layouts/PageSection.svelte';
-	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
+import type { PageData, ActionData } from './$types';
+import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
+import PageHeader from '$lib/components/layouts/PageHeader.svelte';
+import PageSection from '$lib/components/layouts/PageSection.svelte';
+import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
 	let portfolioUrl = $state('');
 	let githubUrl = $state('');
@@ -60,10 +60,10 @@
 			description="Share your expertise and help others grow their programming skills"
 		/>
 
-		{#if form?.error}
+		{#if form?.message}
 			<PageSection>
 				<div class={`${RADIUS.button} ${SPACING.cardPadding} ${COLOR.error} ${ELEVATION.base}`} role="alert">
-					{form.error}
+					{form.message}
 				</div>
 			</PageSection>
 		{/if}

@@ -49,6 +49,6 @@
 			<h2 class={`${TEXT.h3} ${COLOR.textPrimary}`}>My Courses</h2>
 			<a href="/dashboard/my-courses"><Button variant="ghost">Lihat semua</Button></a>
 		</div>
-		<Table {courseColumns} rows={courseRows} />
+		<Table columns={courseColumns} rows={courseRows} />
 	</PageSection>
 </div>

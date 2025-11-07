@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { TEXT, COLOR, RADIUS } from '$lib/config/design';
 
-	interface User {
-		fullName?: string;
-		username?: string;
-		email?: string;
-		role?: string;
-	}
+interface User {
+	fullName?: string | null;
+	username?: string | null;
+	email?: string | null;
+	role?: string | null;
+}
 
 	function getRoleLabel(role: string | null | undefined): string {
 		if (!role) return '';

@@ -193,12 +193,18 @@
 				action="?/updateProfile"
 				use:enhance={() => {
 					return async ({ result, update }) => {
-						if (result.type === 'success') {
-							toast.success('Profil berhasil diperbarui!');
-							await update();
-						} else if (result.type === 'failure') {
-							toast.error(result.data?.error || 'Gagal memperbarui profil');
-						}
+					if (result.type === 'success') {
+						toast.success('Profil berhasil diperbarui!');
+						await update();
+					} else if (result.type === 'failure') {
+						const failureData = result.data;
+						const message =
+							typeof failureData === 'object' && failureData && 'error' in failureData &&
+							typeof (failureData as { error?: unknown }).error === 'string'
+								? (failureData as { error: string }).error
+								: 'Gagal memperbarui profil';
+						toast.error(message);
+					}
 					};
 				}}
 				class="space-y-6"
@@ -291,16 +297,22 @@
 				action="?/changePassword"
 				use:enhance={() => {
 					return async ({ result, update }) => {
-						if (result.type === 'success') {
-							toast.success('Password berhasil diubah!');
-							currentPassword = '';
-							newPassword = '';
-							confirmPassword = '';
-							showPasswordChange = false;
-							await update();
-						} else if (result.type === 'failure') {
-							toast.error(result.data?.error || 'Gagal mengubah password');
-						}
+					if (result.type === 'success') {
+						toast.success('Password berhasil diubah!');
+						currentPassword = '';
+						newPassword = '';
+						confirmPassword = '';
+						showPasswordChange = false;
+						await update();
+					} else if (result.type === 'failure') {
+						const failureData = result.data;
+						const message =
+							typeof failureData === 'object' && failureData && 'error' in failureData &&
+							typeof (failureData as { error?: unknown }).error === 'string'
+								? (failureData as { error: string }).error
+								: 'Gagal mengubah password';
+						toast.error(message);
+					}
 					};
 				}}
 				class="space-y-6"
@@ -527,6 +539,7 @@
 							onclick={handleBrandModeChange}
 							role="switch"
 							aria-checked={brandModeValue === 'hardcore'}
+					aria-label="Toggle brand mode"
 							class={`relative inline-flex h-6 w-11 items-center rounded-full ${TRANSITION.colors} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 ${
 								brandModeValue === 'hardcore' ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
 							}`}

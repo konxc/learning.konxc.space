@@ -10,8 +10,8 @@
 	let {
 		statusFilter = $bindable('all'),
 		statusCounts,
-		onStatusFilterChange
-	} = $props<CourseFiltersProps>();
+	onStatusFilterChange
+}: CourseFiltersProps = $props();
 
 	// Status filter options for buttons
 	const statusFilterOptions: Array<{

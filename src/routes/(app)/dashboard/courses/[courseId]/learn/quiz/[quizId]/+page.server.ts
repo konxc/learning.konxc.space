@@ -6,6 +6,19 @@ import { eq, and } from 'drizzle-orm';
 import { redirect, fail } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 
+type QuizChoicePublic = Pick<typeof schema.quizChoice.$inferSelect, 'id' | 'text'>;
+type QuizChoiceWithAnswer = typeof schema.quizChoice.$inferSelect;
+
+type QuizQuestionWithChoices<TChoice> = typeof schema.quizQuestion.$inferSelect & {
+	choices: TChoice[];
+};
+
+type QuizWithQuestions<TChoice> = typeof schema.quiz.$inferSelect & {
+	questions: QuizQuestionWithChoices<TChoice>[];
+};
+
+type QuizSubmissionAnswers = Record<string, string>;
+
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
 	const { courseId, quizId } = event.params;
@@ -28,7 +41,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	// Get quiz with questions and choices (exclude isCorrect for student)
-	const quiz = await db.query.quiz.findFirst({
+	const quiz = (await db.query.quiz.findFirst({
 		where: eq(schema.quiz.id, quizId),
 		with: {
 			questions: {
@@ -44,7 +57,7 @@ export const load: PageServerLoad = async (event) => {
 				}
 			}
 		}
-	});
+	})) as QuizWithQuestions<QuizChoicePublic> | undefined;
 
 	if (!quiz) {
 		throw redirect(303, `/dashboard/courses/${courseId}/learn`);
@@ -76,10 +89,9 @@ export const actions: Actions = {
 		const { courseId, quizId } = event.params;
 
 		const formData = await event.request.formData();
-		const answers = JSON.parse(formData.get('answers') as string); // { questionId: choiceId }
 
 		// Get quiz with correct answers
-		const quiz = await db.query.quiz.findFirst({
+		const quiz = (await db.query.quiz.findFirst({
 			where: eq(schema.quiz.id, quizId),
 			with: {
 				questions: {
@@ -88,10 +100,22 @@ export const actions: Actions = {
 					}
 				}
 			}
-		});
+		})) as QuizWithQuestions<QuizChoiceWithAnswer> | undefined;
 
 		if (!quiz) {
 			return fail(404, { error: 'Quiz not found' });
+		}
+
+		const rawAnswers = formData.get('answers');
+		if (typeof rawAnswers !== 'string') {
+			return fail(400, { error: 'Invalid answers payload' });
+		}
+
+		let answers: QuizSubmissionAnswers;
+		try {
+			answers = JSON.parse(rawAnswers) as QuizSubmissionAnswers;
+		} catch (error) {
+			return fail(400, { error: 'Invalid answers payload' });
 		}
 
 		// Check for existing submission
@@ -113,15 +137,20 @@ export const actions: Actions = {
 
 		// Grade the quiz
 		let correctCount = 0;
-		const questions = quiz.questions || [];
+		const questions: QuizQuestionWithChoices<QuizChoiceWithAnswer>[] =
+			quiz.questions ?? ([] as QuizQuestionWithChoices<QuizChoiceWithAnswer>[]);
 		const totalQuestions = questions.length;
+
+		if (totalQuestions === 0) {
+			return fail(400, { error: 'Quiz has no questions' });
+		}
 
 		for (const question of questions) {
 			const userAnswer = answers[question.id];
 			if (!userAnswer) continue;
 
-			const choices = question.choices || [];
-			const correctChoice = choices.find((c: { isCorrect?: boolean }) => c.isCorrect);
+			const choices = question.choices ?? [];
+			const correctChoice = choices.find((choice) => choice.isCorrect);
 			if (correctChoice && userAnswer === correctChoice.id) {
 				correctCount++;
 			}

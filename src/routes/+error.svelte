@@ -3,9 +3,16 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
-	import type { Error } from '@sveltejs/kit';
+	import type { HttpError } from '@sveltejs/kit';
 
-	let { error, status }: { error: Error; status: number } = $props();
+	let { error, status }: { error: HttpError | Error; status: number } = $props();
+
+	function getErrorMessage(err: HttpError | Error): string {
+		if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
+			return err.message;
+		}
+		return 'Maaf, terjadi kesalahan saat memuat halaman.';
+	}
 
 	let mouseX = $state(0);
 	let mouseY = $state(0);
@@ -174,7 +181,7 @@
 					class={`${TEXT.body} ${COLOR.textSecondary} mx-auto mb-6 max-w-lg`}
 					style="animation: fadeInUp 0.6s ease-out 0.4s both;"
 				>
-					{error?.message || 'Maaf, terjadi kesalahan saat memuat halaman.'}
+					{getErrorMessage(error)}
 				</p>
 			{/if}
 		</div>

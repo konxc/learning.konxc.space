@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { PageData, ActionData } from './$types';
-	import AuthContainer from '$lib/components/AuthContainer.svelte';
-	import AuthFormField from '$lib/components/AuthFormField.svelte';
-	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
-	import AuthMessage from '$lib/components/AuthMessage.svelte';
-	import { enhance } from '$app/forms';
+import type { PageData, ActionData } from './$types';
+import AuthContainer from '$lib/components/AuthContainer.svelte';
+import AuthFormField from '$lib/components/AuthFormField.svelte';
+import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
+import AuthMessage from '$lib/components/AuthMessage.svelte';
+import { enhance } from '$app/forms';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
 	let password = $state('');
 	let confirmPassword = $state('');
@@ -42,11 +42,8 @@
         </aside>
 
         <section class="auth-main">
-            {#if form?.error}
-                <AuthMessage type="error" message={form.error} />
-            {/if}
             {#if form?.message}
-                <AuthMessage type="success" message={form.message} />
+                <AuthMessage type="error" message={form.message} />
             {/if}
 
             <form
@@ -135,7 +132,6 @@
                             disabled={!password ||
                                 !confirmPassword ||
                                 !validatePasswordMatch(password, confirmPassword)}
-                            loading={form?.loading}
                         />
 
                         <div class="divider"><span>atau</span></div>

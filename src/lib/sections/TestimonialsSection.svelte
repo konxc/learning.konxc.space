@@ -52,7 +52,7 @@
 		</div>
 	{:else}
 		<div class="testimonials-carousel-wrapper" bind:this={gridContainer}>
-			<TestimonialsCarousel {testimonials} autoplayInterval={5000} pauseOnHover={true} />
+			<TestimonialsCarousel {testimonials} />
 		</div>
 	{/if}
 

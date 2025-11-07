@@ -320,8 +320,8 @@ export function trackDownload(fileName: string, fileType: string): void {
 // Type declarations untuk window object
 declare global {
 	interface Window {
-		gtag?: (...args: any[]) => void;
-		plausible?: (event: string, options?: { props?: Record<string, any> }) => void;
+		gtag?: (...args: unknown[]) => void;
+		plausible?: (event: string, options?: { props?: Record<string, unknown> }) => void;
 		dataLayer?: any[];
 	}
 }

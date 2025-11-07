@@ -1,16 +1,11 @@
 <script lang="ts">
-	import ProfileMenu from './ProfileMenu.svelte';
-	import { TEXT, COLOR } from '$lib/config/design';
-	import { getPageMetadata } from '$lib/stores/pageMetadata';
-	import type { Theme } from '$lib/stores/theme';
+import ProfileMenu from './ProfileMenu.svelte';
+import { TEXT, COLOR } from '$lib/config/design';
+import { getPageMetadata } from '$lib/stores/pageMetadata';
+import type { Theme } from '$lib/stores/theme';
+import type { User as DbUser } from '$lib/server/db/schema';
 
-	interface User {
-		fullName?: string | null;
-		username?: string;
-		email?: string | null;
-		avatarUrl?: string | null;
-		role?: string;
-	}
+type HeaderUser = Partial<DbUser> & { avatarUrl?: string | null };
 
 	let {
 		user,
@@ -21,10 +16,10 @@
 		onAccordionToggle,
 		profileDetailsRef,
 		themeAccordionRef,
-		roleAccordionRef,
-		sidebarCollapsed = false
-	}: {
-		user: User | null;
+	roleAccordionRef,
+	sidebarCollapsed = false
+}: {
+	user: HeaderUser | null;
 		theme: Theme;
 		activeRole?: string | null;
 		onThemeChange: (theme: Theme, e: MouseEvent) => void;

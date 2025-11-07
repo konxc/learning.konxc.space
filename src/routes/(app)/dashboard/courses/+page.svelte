@@ -51,14 +51,19 @@
 			);
 		}
 
-		// Price filter
-		if (maxPrice !== null) {
-			courses = courses.filter((course) => course.price <= maxPrice);
+	// Price filter
+	const maxPriceFilter = maxPrice;
+	if (maxPriceFilter !== null) {
+		courses = courses.filter((course) => course.price <= maxPriceFilter);
 		}
 
 		// Duration filter
-		if (minDuration !== null) {
-			courses = courses.filter((course) => course.duration && course.duration >= minDuration);
+	const minDurationFilter = minDuration;
+	if (minDurationFilter !== null) {
+		courses = courses.filter((course) => {
+			const { duration } = course;
+			return typeof duration === 'number' && duration >= minDurationFilter;
+		});
 		}
 
 		// Sort

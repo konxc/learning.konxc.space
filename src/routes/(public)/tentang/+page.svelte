@@ -11,13 +11,7 @@
 	import { get } from 'svelte/store';
 	import { browser } from '$app/environment';
 	import { communitySpotlight } from '$lib/data/communitySpotlight';
-	import type { CommunitySpotlightEntry } from '$lib/data/communitySpotlight';
-
-	declare global {
-		interface Window {
-			gtag?: (...args: any[]) => void;
-		}
-	}
+import type { CommunitySpotlightEntry } from '$lib/data/communitySpotlight';
 
 	const heroHighlights = [
 		{
