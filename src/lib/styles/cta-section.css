@@ -1,0 +1,298 @@
+/**
+ * Shared CSS untuk CTA Section
+ * 
+ * Import di:
+ * - CTASection.svelte
+ */
+
+@reference "../../app.css";
+
+/* Base Section Styles */
+.cta-section {
+	@apply section-padding-cta;
+	background:
+		linear-gradient(
+			to bottom,
+			var(--color-gradient-purple-start) 0%,
+			var(--color-gradient-purple-start) 5%,
+			var(--color-gradient-purple-mid) 50%,
+			var(--color-gradient-purple-end) 85%,
+			var(--color-gradient-purple-end) 95%,
+			rgba(255, 255, 255, 0.05) 100%
+		),
+		linear-gradient(
+			135deg,
+			var(--color-gradient-purple-start) 0%,
+			var(--color-gradient-purple-mid) 50%,
+			var(--color-gradient-purple-end) 100%
+		);
+	position: relative;
+	overflow: hidden;
+	color: white;
+}
+
+/* Pattern Overlay Base */
+.cta-pattern-overlay {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	mask-image: linear-gradient(
+		to bottom,
+		transparent 0%,
+		transparent 8%,
+		rgba(0, 0, 0, 0.3) 12%,
+		black 20%,
+		black 80%,
+		rgba(0, 0, 0, 0.3) 88%,
+		transparent 92%,
+		transparent 100%
+	);
+	-webkit-mask-image: linear-gradient(
+		to bottom,
+		transparent 0%,
+		transparent 8%,
+		rgba(0, 0, 0, 0.3) 12%,
+		black 20%,
+		black 80%,
+		rgba(0, 0, 0, 0.3) 88%,
+		transparent 92%,
+		transparent 100%
+	);
+	pointer-events: none;
+	z-index: 0;
+}
+
+/* Matrix Rain Effect - CMatrix Style */
+.cta-pattern-overlay.matrix-rain {
+	background: transparent !important;
+	background-size: auto !important;
+	overflow: hidden;
+	background-image: 
+		/* Column 1 - Fast */
+		repeating-linear-gradient(
+			to bottom,
+			transparent 0px,
+			transparent 12px,
+			rgba(255, 255, 255, 0.04) 12px,
+			rgba(255, 255, 255, 0.04) 14px,
+			transparent 14px,
+			transparent 20px
+		),
+		/* Column 2 - Medium */
+			repeating-linear-gradient(
+				to bottom,
+				transparent 0px,
+				transparent 18px,
+				rgba(255, 255, 255, 0.035) 18px,
+				rgba(255, 255, 255, 0.035) 20px,
+				transparent 20px,
+				transparent 28px
+			),
+		/* Column 3 - Slow */
+			repeating-linear-gradient(
+				to bottom,
+				transparent 0px,
+				transparent 25px,
+				rgba(255, 255, 255, 0.03) 25px,
+				rgba(255, 255, 255, 0.03) 27px,
+				transparent 27px,
+				transparent 35px
+			),
+		/* Column 4 - Fast */
+			repeating-linear-gradient(
+				to bottom,
+				transparent 0px,
+				transparent 15px,
+				rgba(255, 255, 255, 0.025) 15px,
+				rgba(255, 255, 255, 0.025) 17px,
+				transparent 17px,
+				transparent 24px
+			),
+		/* Column 5 - Medium */
+			repeating-linear-gradient(
+				to bottom,
+				transparent 0px,
+				transparent 20px,
+				rgba(255, 255, 255, 0.03) 20px,
+				rgba(255, 255, 255, 0.03) 22px,
+				transparent 22px,
+				transparent 30px
+			);
+	background-size:
+		18px 200%,
+		22px 180%,
+		20px 220%,
+		19px 190%,
+		21px 200%;
+	background-position:
+		0% 0%,
+		20% 0%,
+		40% 0%,
+		60% 0%,
+		80% 0%;
+	animation: matrixRainFall 12s linear infinite;
+}
+
+@keyframes matrixRainFall {
+	0% {
+		background-position:
+			0% -100%,
+			20% -80%,
+			40% -120%,
+			60% -90%,
+			80% -100%;
+	}
+	100% {
+		background-position:
+			0% 100%,
+			20% 100%,
+			40% 100%,
+			60% 110%,
+			80% 100%;
+	}
+}
+
+/* Container */
+.cta-container {
+	max-width: 800px;
+	margin: 0 auto;
+	text-align: center;
+	position: relative;
+	z-index: 1;
+}
+
+/* Content Styles */
+.cta-badge {
+	display: inline-block;
+	background: rgba(255, 255, 255, 0.2);
+	backdrop-filter: blur(10px);
+	padding: 10px 25px;
+	border-radius: 50px;
+	color: white;
+	font-weight: 600;
+	margin-bottom: 30px;
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	animation: pulse 2s infinite;
+}
+
+.cta-section h2 {
+	@apply mb-8 text-4xl text-white md:mb-10 md:text-5xl lg:mb-12 lg:text-6xl;
+	text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.cta-section p {
+	@apply mb-8 text-xl leading-relaxed text-white/95 md:mb-12 md:text-2xl;
+}
+
+/* Button Styles */
+.cta-buttons {
+	display: flex;
+	gap: 20px;
+	justify-content: center;
+	margin-bottom: 30px;
+	flex-wrap: wrap;
+}
+
+.cta-primary {
+	@apply relative inline-block rounded-full bg-white px-10 py-4.5 text-xl font-bold no-underline transition-all duration-300;
+	color: var(--color-gradient-purple-start);
+	box-shadow:
+		0 10px 40px rgba(0, 0, 0, 0.3),
+		0 0 0 0 rgba(255, 255, 255, 0);
+}
+
+.cta-primary:hover {
+	transform: translateY(-5px);
+	box-shadow:
+		0 15px 50px rgba(0, 0, 0, 0.4),
+		0 0 0 8px rgba(255, 255, 255, 0.08);
+}
+
+.cta-primary::after {
+	content: '';
+	position: absolute;
+	inset: -2px;
+	border-radius: 999px;
+	background: linear-gradient(90deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+	opacity: 0;
+	transition: opacity 0.25s ease;
+	pointer-events: none;
+}
+
+.cta-primary:hover::after {
+	opacity: 1;
+}
+
+.cta-note {
+	@apply mt-5 text-lg text-white/90;
+}
+
+.cta-note a {
+	color: white;
+	text-decoration: underline;
+	font-weight: 600;
+	transition: all 0.2s ease;
+}
+
+.cta-note a:hover {
+	text-decoration: none;
+	opacity: 0.8;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+	.cta-buttons {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.cta-primary {
+		@apply w-full px-8 py-4 text-center text-lg;
+	}
+
+	/* Matrix Rain - Mobile: Kurangi kolom */
+	.cta-pattern-overlay.matrix-rain {
+		background-image:
+			repeating-linear-gradient(
+				to bottom,
+				transparent 0px,
+				transparent 15px,
+				rgba(255, 255, 255, 0.035) 15px,
+				rgba(255, 255, 255, 0.035) 17px,
+				transparent 17px,
+				transparent 25px
+			),
+			repeating-linear-gradient(
+				to bottom,
+				transparent 0px,
+				transparent 22px,
+				rgba(255, 255, 255, 0.03) 22px,
+				rgba(255, 255, 255, 0.03) 24px,
+				transparent 24px,
+				transparent 32px
+			);
+		background-size:
+			25px 200%,
+			30px 180%;
+		background-position:
+			30% 0%,
+			70% 0%;
+	}
+}
+
+@media (max-width: 480px) {
+	.cta-badge {
+		@apply px-5 py-2 text-sm;
+	}
+
+	.cta-section h2 {
+		@apply text-3xl;
+	}
+
+	.cta-section p {
+		@apply text-base;
+	}
+}

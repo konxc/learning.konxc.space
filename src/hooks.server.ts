@@ -25,17 +25,24 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
-	const { session, user } = await auth.validateSessionToken(sessionToken);
+	try {
+		const { session, user } = await auth.validateSessionToken(sessionToken);
 
-	if (session) {
-		auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
-	} else {
-		auth.deleteSessionTokenCookie(event);
+		if (session) {
+			auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
+		} else {
+			auth.deleteSessionTokenCookie(event);
+		}
+
+		event.locals.user = user;
+		event.locals.session = session;
+		return resolve(event);
+	} catch (e) {
+		// Fallback bila DB belum siap/migrasi belum dijalankan
+		event.locals.user = null;
+		event.locals.session = null;
+		return resolve(event);
 	}
-
-	event.locals.user = user;
-	event.locals.session = session;
-	return resolve(event);
 };
 
 const handleOnboarding: Handle = async ({ event, resolve }) => {
@@ -60,6 +67,11 @@ const handleOnboarding: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
+	// Skip onboarding check for admin and bd roles
+	if (event.locals.user.role === 'admin' || event.locals.user.role === 'bd') {
+		return resolve(event);
+	}
+
 	// Check if user has any enrollments
 	const enrollments = await db.query.enrollment.findFirst({
 		where: eq(schema.enrollment.userId, event.locals.user.id)
@@ -73,4 +85,27 @@ const handleOnboarding: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handle: Handle = sequence(handleParaglide, handleAuth, handleOnboarding);
+const handleTheme: Handle = async ({ event, resolve }) => {
+	// Get theme from cookie (set by client) - for SSR hydration
+	const theme = event.cookies.get('nk-theme');
+
+	// If we have explicit theme from cookie, inject class directly in HTML for instant application
+	// This is faster than waiting for JavaScript to run
+	if (theme === 'dark' || theme === 'light') {
+		return resolve(event, {
+			transformPageChunk: ({ html }) => {
+				if (html.includes('class=""')) {
+					// Direct injection - no JavaScript needed, zero FOUC
+					return html.replace('class=""', theme === 'dark' ? 'class="dark"' : 'class=""');
+				}
+				return html;
+			}
+		});
+	}
+
+	// For 'system' or no theme, let inline script in app.html handle it
+	// (The inline script runs before body renders)
+	return resolve(event);
+};
+
+export const handle: Handle = sequence(handleParaglide, handleAuth, handleOnboarding, handleTheme);

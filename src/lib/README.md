@@ -158,3 +158,30 @@ Design system menggunakan:
 
 **Last Updated**: 2025-01-23
 
+## 🧭 Layouts & Routes Conventions
+
+- Gunakan grup route SvelteKit untuk pemisahan domain:
+  - `(public)`: landing/marketing, bebas autentikasi
+  - `(auth)`: alur autentikasi (signin/signup/waiting-list)
+  - `(app)`: area pengguna login (dashboard, settings, dsb.)
+  - `(prototype)`: halaman percobaan; tidak dijamin stabil
+- Ekstrak layout ke komponen di `lib/components/layouts/`:
+  - `PublicShell.svelte` untuk `(public)`
+  - `AppShell.svelte` untuk `(app)` (rencana)
+- Semua halaman publik sebaiknya memakai `HeaderNavigation` melalui `PublicShell`.
+
+## 🏗️ Struktur Modular (Refactor)
+
+Direktori penting yang baru ditambahkan:
+
+- `lib/constants/`: konstanta aplikasi (roles, routes)
+- `lib/utils/`: helper (format tanggal/angka/mata uang, fetcher API)
+- `lib/stores/`: store global (user, tema)
+- `lib/hooks/`: hook reusable antar role/layout (`useRole`)
+- `lib/types/`: definisi TypeScript (user, class, finance)
+- `lib/components/ui/`: komponen UI dasar (Button, Card, Input, Table)
+- `lib/components/layout/`: komponen layout generik (Navbar, Sidebar, Footer)
+- `lib/components/dashboard/`: komponen spesifik dashboard (RoleSwitcher, StatCard, OverviewGraph)
+
+Semua penambahan ini tidak mengubah route/logika yang ada.
+

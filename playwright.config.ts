@@ -1,9 +1,20 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-	webServer: {
-		command: 'npm run build && npm run preview',
-		port: 4173
+	testDir: './tests',
+	timeout: 30_000,
+	use: {
+		baseURL: 'http://localhost:5173',
+		headless: true,
+		viewport: { width: 1280, height: 800 },
+		trace: 'on-first-retry',
+		video: 'on',
+		screenshot: 'only-on-failure'
 	},
-	testDir: 'e2e'
+	webServer: {
+		command: 'pnpm run dev -- --port=5173',
+		url: 'http://localhost:5173',
+		reuseExistingServer: true,
+		timeout: 120_000
+	}
 });

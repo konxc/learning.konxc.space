@@ -28,6 +28,11 @@ Aplikasi telah dikonfigurasi untuk SSR-first deployment dengan Cloudflare Pages/
 DATABASE_URL=<turso-database-url>
 DATABASE_AUTH_TOKEN=<turso-auth-token>
 SESSION_SECRET=<random-secret-key>
+MIDTRANS_IS_PRODUCTION=false
+MIDTRANS_MERCHANT_ID=<your-merchant-id>
+MIDTRANS_CLIENT_KEY=<your-client-key>
+MIDTRANS_SERVER_KEY=<your-server-key>
+APP_URL=<https://your-domain>
 ```
 
 ### Local Development
@@ -88,6 +93,15 @@ pnpm run deploy:cf
 3. Set output directory: `build`
 4. Add environment variables di dashboard
 5. Deploy automatic dari main branch
+
+### Midtrans Setup (Sandbox/Production)
+
+1. Isi environment variables Midtrans seperti di atas.
+2. Di Midtrans Dashboard, set Notification URL ke:
+   - `${APP_URL}/api/payments/midtrans/webhook`
+3. Allowed origins/front-end gunakan domain aplikasi Anda: `${APP_URL}`.
+4. Untuk Sandbox, gunakan Snap JS dari `https://app.sandbox.midtrans.com/snap/snap.js`.
+5. Pastikan `APP_URL` benar agar redirect dan webhook valid.
 
 ### Option 2: Selfhosted (Node.js)
 

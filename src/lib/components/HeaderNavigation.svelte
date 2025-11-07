@@ -1,12 +1,16 @@
 <script lang="ts">
-	import { fly, slide, fade } from 'svelte/transition';
+	import { fly, fade } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
+	import AuroraOverlay from '$lib/components/decor/AuroraOverlay.svelte';
+	import GlowOrbs from '$lib/components/decor/GlowOrbs.svelte';
+	import { brandMode } from '$lib/stores/brandMode';
 
+	// State menggunakan Svelte 5 Runes
 	let menuOpen = $state(false);
 	let scrolled = $state(false);
 	let isInHero = $state(true);
-
-	// Drag state for swipe to close
+	let isInProgram = $state(false);
+	let showHeader = $state(true);
 	let isDragging = $state(false);
 	let dragStartY = 0;
 	let currentDragY = 0;
@@ -18,29 +22,33 @@
 		{ href: '/#program', label: 'Program', ariaLabel: 'Program Pelatihan' },
 		{ href: '/#benefits', label: 'Benefits', ariaLabel: 'Manfaat Program' },
 		{ href: '/marketplace', label: 'Marketplace', ariaLabel: 'Browse Courses' },
-		{ href: '/#register', label: 'Daftar', ariaLabel: 'Daftar Sekarang' }
+		{ href: '/waiting-list', label: 'Daftar', ariaLabel: 'Daftar Sekarang' }
 	];
 
-	// Toggle menu
+	// Computed values untuk brand mode
+	const navHoverBg = $derived(
+		$brandMode === 'hardcore' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.95)'
+	);
+	const navHoverTint = $derived(
+		$brandMode === 'hardcore' ? 'rgba(251, 146, 60, 0.08)' : 'rgba(20, 184, 166, 0.06)'
+	);
+	const navHoverGlow = $derived(
+		$brandMode === 'hardcore'
+			? '0 0 20px rgba(251, 146, 60, 0.3)'
+			: '0 0 20px rgba(20, 184, 166, 0.25)'
+	);
+
+	// Functions
 	function toggleMenu() {
 		menuOpen = !menuOpen;
-		// Prevent body scroll when menu is open
-		if (menuOpen) {
-			document.body.style.overflow = 'hidden';
-		} else {
-			document.body.style.overflow = '';
-		}
+		document.body.style.overflow = menuOpen ? 'hidden' : '';
 	}
 
-	// Close menu when clicking on link
 	function closeMenu() {
-		if (menuOpen) {
-			menuOpen = false;
-			document.body.style.overflow = '';
-		}
+		menuOpen = false;
+		document.body.style.overflow = '';
 	}
 
-	// Handle drag start
 	function handleDragStart(e: TouchEvent | MouseEvent) {
 		if (!menuOpen) return;
 		isDragging = true;
@@ -49,14 +57,10 @@
 		document.body.style.overflow = 'hidden';
 	}
 
-	// Handle drag move
 	function handleDragMove(e: TouchEvent | MouseEvent) {
 		if (!isDragging || !menuOpen) return;
-
 		const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
 		const deltaY = clientY - dragStartY;
-
-		// Only allow downward dragging
 		if (deltaY > 0) {
 			currentDragY = deltaY;
 			if (menuElement) {
@@ -65,53 +69,51 @@
 		}
 	}
 
-	// Handle drag end
 	function handleDragEnd() {
 		if (!isDragging) return;
-
-		// If dragged down more than 100px, close menu
 		if (currentDragY > 100) {
 			closeMenu();
-		} else {
-			// Reset transform
-			if (menuElement) {
-				menuElement.style.transform = '';
-			}
+		} else if (menuElement) {
+			menuElement.style.transform = '';
 		}
-
 		isDragging = false;
 		dragStartY = 0;
 		currentDragY = 0;
 	}
 
-	// Handle scroll for sticky header and detect hero section
 	function handleScroll() {
+		// Hero section detection
 		const heroSection = document.querySelector('#hero');
 		if (heroSection) {
-			const heroRect = heroSection.getBoundingClientRect();
-			const heroBottom = heroRect.bottom;
-			const heroHeight = heroRect.height;
-
-			// Show header when 10% of hero remains (90% scrolled)
-			// Threshold: bottom of hero should be at 10% of viewport height
-			const threshold = heroHeight * 0.7;
-
-			// isInHero = true if we haven't scrolled past 90% of hero
-			isInHero = heroBottom > heroHeight * 0.9;
+			const { bottom: heroBottom, height: heroHeight } = heroSection.getBoundingClientRect();
+			isInHero = heroBottom > heroHeight * 0.4;
+		} else {
+			isInHero = false;
 		}
+
+		// Program section detection - hide header 100px sebelum masuk, show 100px sebelum keluar
+		const programSection = document.querySelector('#program');
+		if (programSection) {
+			const { top: programTop, bottom: programBottom } = programSection.getBoundingClientRect();
+			const threshold = 100;
+			// Header tersembunyi jika sudah masuk (top <= 100px) dan belum keluar (bottom > 100px)
+			isInProgram = programTop <= threshold && programBottom > threshold;
+		} else {
+			isInProgram = false;
+		}
+
+		showHeader = !isInProgram;
 		scrolled = window.scrollY > 50;
 	}
 
-	// Listen to scroll events
+	// Effects menggunakan Svelte 5 Runes
 	$effect(() => {
 		window.addEventListener('scroll', handleScroll);
 		return () => window.removeEventListener('scroll', handleScroll);
 	});
 
-	// Listen to global drag events when menu is open
 	$effect(() => {
 		if (!menuOpen || !isDragging) return;
-
 		const handleGlobalMouseMove = (e: MouseEvent) => handleDragMove(e);
 		const handleGlobalMouseUp = () => handleDragEnd();
 		const handleGlobalTouchMove = (e: TouchEvent) => handleDragMove(e);
@@ -129,31 +131,82 @@
 			window.removeEventListener('touchend', handleGlobalTouchEnd);
 		};
 	});
+
+	// Smooth scroll handler untuk data-scroll="smooth"
+	function handleSmoothScroll(e: Event) {
+		const target = e.target as HTMLAnchorElement;
+		if (!target || target.getAttribute('data-scroll') !== 'smooth') return;
+
+		const href = target.getAttribute('href');
+		if (!href || !href.startsWith('#')) return;
+
+		e.preventDefault();
+		const targetElement = document.querySelector(href);
+		if (targetElement) {
+			const headerHeight = 70; // Approximate header height
+			const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+			const finalPosition = targetPosition - headerHeight;
+
+			window.scrollTo({
+				top: finalPosition,
+				behavior: 'smooth'
+			});
+		}
+	}
+
+	// Attach smooth scroll handler
+	$effect(() => {
+		document.addEventListener('click', handleSmoothScroll);
+		return () => {
+			document.removeEventListener('click', handleSmoothScroll);
+		};
+	});
 </script>
 
-{#if !isInHero || scrolled}
+{#if !isInHero && showHeader}
 	<header
-		class="header"
-		class:scrolled
-		in:fly={{ y: -100, duration: 500, easing: cubicOut }}
-		out:fly={{ y: -100, duration: 400, easing: cubicOut }}
+		class="fixed top-[10px] right-[10px] left-[10px] z-[1100] overflow-hidden rounded-3xl border border-white/25 bg-gradient-to-br from-white/50 to-white/40 backdrop-blur-[60px] transition-all duration-600 ease-out {scrolled
+			? 'scrolled'
+			: ''}"
+		style="
+			--nav-hover-bg: {navHoverBg};
+			--nav-hover-tint: {navHoverTint};
+			--nav-hover-glow: {navHoverGlow};
+			backdrop-filter: blur(60px) saturate(180%);
+			-webkit-backdrop-filter: blur(60px) saturate(180%);
+			box-shadow: 
+				0 8px 32px rgba(31, 38, 135, 0.12),
+				0 2px 8px rgba(0, 0, 0, 0.06),
+				inset 0 1px 1px rgba(255, 255, 255, 0.6),
+				inset 0 -1px 1px rgba(255, 255, 255, 0.4);
+		"
+		in:fly={{ y: -100, duration: 400, easing: cubicOut }}
+		out:fly={{ y: -100, duration: 300, easing: cubicOut }}
 	>
-		<div class="header-container">
+		<div
+			class="header-container relative z-[2] mx-auto flex items-center justify-between gap-5 px-5 py-2 md:px-10"
+		>
 			<!-- Logo -->
 			<div class="logo">
-				<a href="/" aria-label="Home">Naik Kelas</a>
+				<a
+					href="/"
+					aria-label="Home"
+					class="logo-link text-xl leading-none font-bold tracking-tight transition-all duration-300 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--color-gradient-purple-start) md:text-2xl"
+				>
+					Naik Kelas
+				</a>
 			</div>
 
 			<!-- Desktop Navigation -->
-			<nav class="desktop-nav" aria-label="Main navigation">
-				<ul>
+			<nav class="desktop-nav hidden md:block" aria-label="Main navigation">
+				<ul class="desktop-nav-list relative z-10 m-0 flex list-none gap-0.5 p-0">
 					{#each navItems as item}
-						<li>
+						<li class="desktop-nav-item relative isolate z-10 overflow-hidden rounded-xl">
 							<a
 								href={item.href}
 								aria-label={item.ariaLabel}
-								onclick={() => closeMenu()}
 								data-scroll="smooth"
+								class="desktop-nav-link relative z-11 block rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap text-primary-medium no-underline transition-[background,color,box-shadow,outline] duration-200 ease-out focus-visible:z-12 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-gradient-purple-start)"
 							>
 								{item.label}
 							</a>
@@ -165,25 +218,37 @@
 			<!-- Mobile Hamburger Button / Close Button -->
 			{#if !menuOpen}
 				<button
-					class="hamburger"
+					class="hamburger flex h-11 w-11 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border border-[rgba(102,126,234,0.15)] bg-[rgba(102,126,234,0.08)] p-2 transition-all duration-300 hover:scale-105 hover:border-[rgba(102,126,234,0.25)] hover:bg-[rgba(102,126,234,0.12)] focus:outline-2 focus:outline-offset-2 focus:outline-(--color-gradient-purple-start) active:scale-95 md:hidden"
 					aria-label="Toggle menu"
 					aria-expanded={menuOpen}
 					onclick={toggleMenu}
 					type="button"
 				>
-					<span class="hamburger-line"></span>
-					<span class="hamburger-line"></span>
-					<span class="hamburger-line"></span>
+					<span
+						class="hamburger-line h-0.5 w-[22px] rounded-sm bg-(--color-primary-dark) transition-all duration-300 group-hover:bg-(--color-gradient-purple-start)"
+					></span>
+					<span
+						class="hamburger-line h-0.5 w-[22px] rounded-sm bg-(--color-primary-dark) transition-all duration-300 group-hover:bg-(--color-gradient-purple-start)"
+					></span>
+					<span
+						class="hamburger-line h-0.5 w-[22px] rounded-sm bg-(--color-primary-dark) transition-all duration-300 group-hover:bg-(--color-gradient-purple-start)"
+					></span>
 				</button>
 			{:else}
 				<button
-					class="hamburger hamburger--close"
+					class="hamburger hamburger--close flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-[rgba(102,126,234,0.15)] bg-[rgba(102,126,234,0.08)] p-2 transition-all duration-300 hover:scale-105 hover:border-[rgba(102,126,234,0.25)] hover:bg-[rgba(102,126,234,0.12)] focus:outline-2 focus:outline-offset-2 focus:outline-(--color-gradient-purple-start) active:scale-95 md:hidden"
 					aria-label="Close menu"
 					aria-expanded={menuOpen}
 					onclick={closeMenu}
 					type="button"
 				>
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+					<svg
+						class="text-(--color-primary-dark) transition-all duration-300 hover:rotate-90 hover:text-(--color-gradient-purple-start)"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+					>
 						<path
 							d="M18 6L6 18M6 6l12 12"
 							stroke="currentColor"
@@ -195,14 +260,61 @@
 				</button>
 			{/if}
 		</div>
+
+		<!-- Decorative overlays -->
+		<AuroraOverlay
+			intensity={0.02}
+			blurPx={30}
+			speedSec={30}
+			insetPercent={10}
+			zIndex={0}
+			mode={$brandMode}
+		/>
+		<GlowOrbs
+			zIndex={0}
+			orbs={[
+				$brandMode === 'hardcore'
+					? {
+							size: 120,
+							x: '-30px',
+							y: '60%',
+							color: 'rgba(251, 146, 60, 0.16)',
+							hideOnMobile: true
+						}
+					: {
+							size: 120,
+							x: '-30px',
+							y: '60%',
+							color: 'rgba(20, 184, 166, 0.16)',
+							hideOnMobile: true
+						},
+				$brandMode === 'hardcore'
+					? {
+							size: 90,
+							x: 'calc(100% - 20px)',
+							y: '-20px',
+							color: 'rgba(59, 130, 246, 0.16)',
+							delaySec: 2,
+							hideOnMobile: true
+						}
+					: {
+							size: 90,
+							x: 'calc(100% - 20px)',
+							y: '-20px',
+							color: 'rgba(45, 212, 191, 0.16)',
+							delaySec: 2,
+							hideOnMobile: true
+						}
+			]}
+		/>
 	</header>
 {/if}
 
-<!-- Mobile Menu Overlay (Outside header, fixed to viewport) -->
+<!-- Mobile Menu Overlay -->
 {#if menuOpen}
 	<!-- Backdrop -->
 	<div
-		class="menu-backdrop"
+		class="menu-backdrop fixed inset-0 z-[1099] bg-black/50 backdrop-blur-sm"
 		onclick={closeMenu}
 		onkeydown={(e) => e.key === 'Escape' && closeMenu()}
 		role="button"
@@ -214,15 +326,21 @@
 
 	<!-- Bottom Sheet Menu -->
 	<div
-		class="mobile-menu"
-		class:dragging={isDragging}
+		class="mobile-menu fixed bottom-0 z-[1100] flex max-h-[80vh] w-full flex-col rounded-t-[28px] border border-white/30 bg-gradient-to-br from-(--color-bg-hero) to-(--color-bg-hero-end) opacity-95 backdrop-blur-[40px] [backdrop-filter:saturate(180%)] transition-transform duration-200 ease-out {isDragging
+			? 'dragging'
+			: ''}"
+		style="
+			box-shadow: 
+				0 8px 32px rgba(0, 0, 0, 0.12),
+				inset 0 1px 0 rgba(255, 255, 255, 0.8);
+		"
 		bind:this={menuElement}
 		in:fly={{ y: 100, duration: 300, easing: cubicOut }}
 		out:fly={{ y: 100, duration: 250, easing: cubicOut }}
 	>
 		<!-- Drag Handle Bar -->
 		<div
-			class="drag-handle"
+			class="drag-handle mx-auto my-4 h-1.5 w-12 cursor-grab rounded-sm bg-[rgba(102,126,234,0.3)] transition-all duration-200 select-none hover:scale-110 hover:bg-[rgba(102,126,234,0.4)] active:cursor-grabbing"
 			onmousedown={handleDragStart}
 			ontouchstart={handleDragStart}
 			role="button"
@@ -231,7 +349,11 @@
 		></div>
 
 		<!-- Scrollable Content -->
-		<div class="menu-content">
+		<div
+			class="menu-content min-h-0 flex-1 overflow-y-auto px-4 pt-6 pb-10 {isDragging
+				? 'pointer-events-none overflow-y-hidden'
+				: ''}"
+		>
 			<!-- CTA Button (Daftar) -->
 			{#each navItems.filter((item) => item.label === 'Daftar') as item}
 				<a
@@ -239,22 +361,23 @@
 					aria-label={item.ariaLabel}
 					onclick={() => closeMenu()}
 					data-scroll="smooth"
-					class="menu-cta-btn"
+					class="menu-cta-btn mb-4 flex items-center justify-center rounded-2xl bg-gradient-to-br from-(--color-gradient-purple-start) to-(--color-gradient-purple-mid) px-6 py-5 text-xl font-bold text-white no-underline transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:opacity-90 focus:-translate-y-0.5 focus:opacity-90 active:translate-y-0 active:scale-[0.98]"
 				>
 					{item.label}
 				</a>
 			{/each}
 
-			<!-- Navigation Links (Other items) -->
-			<nav class="mobile-nav" aria-label="Mobile navigation">
-				<ul>
+			<!-- Navigation Links -->
+			<nav class="mobile-nav mt-3" aria-label="Mobile navigation">
+				<ul class="m-0 flex list-none flex-col gap-2 p-0">
 					{#each navItems.filter((item) => item.label !== 'Daftar') as item}
-						<li>
+						<li class="m-0">
 							<a
 								href={item.href}
 								aria-label={item.ariaLabel}
 								onclick={() => closeMenu()}
 								data-scroll="smooth"
+								class="mobile-nav-link relative flex min-h-[60px] items-center overflow-visible rounded-2xl border border-[rgba(102,126,234,0.1)] bg-white/50 px-6 py-5 text-lg font-semibold text-(--color-primary-dark) no-underline transition-[background,color,padding-left,border-color,box-shadow] duration-300 ease-out hover:z-[1] hover:border-[rgba(102,126,234,0.3)] hover:bg-[rgba(102,126,234,0.1)] hover:pl-14 hover:text-(--color-gradient-purple-start) hover:shadow-[0_4px_12px_rgba(102,126,234,0.15)] focus:z-[1] focus:border-[rgba(102,126,234,0.3)] focus:bg-[rgba(102,126,234,0.1)] focus:pl-14 focus:text-(--color-gradient-purple-start) focus:shadow-[0_4px_12px_rgba(102,126,234,0.15)] active:scale-[0.98] active:pl-[52px]"
 							>
 								{item.label}
 							</a>
@@ -267,370 +390,225 @@
 {/if}
 
 <style>
-	@reference '../../app.css';
-	.header {
-		position: fixed;
-		top: 10px;
-		left: 10px;
-		right: 10px;
-		background: rgba(255, 255, 255, 0.7);
-		backdrop-filter: blur(40px) saturate(200%);
-		border: 1px solid rgba(255, 255, 255, 0.18);
-		border-radius: 24px;
-		box-shadow:
-			0 8px 32px rgba(31, 38, 135, 0.15),
-			0 2px 8px rgba(0, 0, 0, 0.08),
-			inset 0 1px 1px rgba(255, 255, 255, 0.9),
-			inset 0 -1px 1px rgba(255, 255, 255, 0.6);
-		z-index: 1000;
-		transition:
-			transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-			box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-			border-color 0.3s ease,
-			background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-			opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-			visibility 0s linear;
-		transform: translateY(0);
-		opacity: 1;
-		visibility: visible;
-		animation: subtle-glow 3s ease-in-out infinite alternate;
+	/* Custom CSS hanya untuk efek yang tidak bisa dicapai dengan Tailwind */
+
+	/* Logo */
+	.logo-link {
+		background: linear-gradient(
+			135deg,
+			var(--color-primary-dark, #1e293b) 0%,
+			var(--color-primary-soft-blue, #3b82f6) 100%
+		);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+		color: transparent;
+		display: inline-block;
+	}
+
+	.logo-link:hover,
+	.logo-link:focus-visible {
+		background: linear-gradient(
+			135deg,
+			var(--color-gradient-purple-start, #667eea) 0%,
+			var(--color-gradient-purple-mid, #764ba2) 100%
+		);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+		color: transparent;
 	}
 
 	@keyframes subtle-glow {
 		0% {
 			box-shadow:
-				0 8px 32px rgba(31, 38, 135, 0.15),
-				0 2px 8px rgba(0, 0, 0, 0.08),
-				inset 0 1px 1px rgba(255, 255, 255, 0.9),
-				inset 0 -1px 1px rgba(255, 255, 255, 0.6);
+				0 8px 32px rgba(31, 38, 135, 0.12),
+				0 2px 8px rgba(0, 0, 0, 0.06),
+				inset 0 1px 1px rgba(255, 255, 255, 0.6),
+				inset 0 -1px 1px rgba(255, 255, 255, 0.4);
+			border-color: rgba(255, 255, 255, 0.25);
 		}
 		100% {
 			box-shadow:
-				0 8px 32px rgba(102, 126, 234, 0.2),
+				0 8px 32px rgba(102, 126, 234, 0.18),
 				0 2px 8px rgba(0, 0, 0, 0.08),
-				inset 0 1px 1px rgba(255, 255, 255, 0.95),
-				inset 0 -1px 1px rgba(255, 255, 255, 0.7);
-			border-color: rgba(102, 126, 234, 0.25);
+				inset 0 1px 1px rgba(255, 255, 255, 0.7),
+				inset 0 -1px 1px rgba(255, 255, 255, 0.5);
+			border-color: rgba(102, 126, 234, 0.3);
 		}
 	}
 
-	.header.scrolled {
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(50px) saturate(200%);
-		box-shadow:
-			0 20px 60px rgba(31, 38, 135, 0.2),
-			0 4px 16px rgba(0, 0, 0, 0.1),
-			inset 0 2px 2px rgba(255, 255, 255, 0.95),
-			inset 0 -2px 2px rgba(255, 255, 255, 0.75);
-		border-color: rgba(102, 126, 234, 0.3);
-		animation: none; /* Stop glow animation when scrolled */
+	/* Desktop Navigation Effects - Pseudo-elements */
+	.desktop-nav-item::before {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 50px;
+		height: 50px;
+		background: radial-gradient(circle, rgba(102, 126, 234, 0.25) 0%, transparent 65%);
+		border-radius: 50%;
+		opacity: 0;
+		transition:
+			opacity 0.3s ease,
+			transform 0.3s ease;
+		z-index: 0;
+		pointer-events: none;
+		filter: blur(6px);
 	}
 
-	.header-container {
-		margin: 0 auto;
-		padding: 10px 20px;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 20px;
+	.desktop-nav-item:hover::before {
+		opacity: 1;
+		transform: translate(-50%, -50%) scale(1.2);
+		will-change: opacity, transform;
 	}
 
-	.logo a {
-		font-size: 1.3em;
-		font-weight: 700;
-		color: var(--color-primary-dark);
-		text-decoration: none;
-		transition: all 0.3s ease;
-		letter-spacing: -0.5px;
-		white-space: nowrap;
+	.desktop-nav-item::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+		border-radius: 12px;
+		transition: left 0.6s ease;
+		z-index: 1;
+		pointer-events: none;
+		opacity: 0;
+	}
+
+	.desktop-nav-item:hover::after {
+		left: 100%;
+		opacity: 1;
+		will-change: left, opacity;
+	}
+
+	.desktop-nav-link::before {
+		content: '';
+		position: absolute;
+		bottom: 4px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 0;
+		height: 2px;
+		background: linear-gradient(
+			90deg,
+			transparent,
+			var(--color-gradient-purple-start),
+			var(--color-gradient-purple-mid),
+			transparent
+		);
+		border-radius: 2px;
+		transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+		z-index: 1;
+		pointer-events: none;
+		box-shadow: 0 0 8px rgba(102, 126, 234, 0.6);
+	}
+
+	.desktop-nav-link:hover::before,
+	.desktop-nav-link:focus-visible::before {
+		width: 80%;
+	}
+
+	.desktop-nav-link::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
 		background: linear-gradient(
 			135deg,
-			var(--color-primary-dark) 0%,
-			var(--color-primary-soft-blue) 100%
+			var(--nav-hover-bg) 0%,
+			var(--nav-hover-tint) 50%,
+			var(--nav-hover-bg) 100%
 		);
-		-webkit-background-clip: text;
-		background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
+		background-size: 200% 100%;
+		background-position: -100% 0;
+		border-radius: 12px;
+		opacity: 0;
+		transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		z-index: -1;
+		pointer-events: none;
 	}
 
-	.logo a:hover {
+	.desktop-nav-link:hover::after,
+	.desktop-nav-link:focus-visible::after {
+		opacity: 1;
+		animation: gradient-shift 2s ease-in-out infinite;
+	}
+
+	@keyframes gradient-shift {
+		0%,
+		100% {
+			background-position: -100% 0;
+		}
+		50% {
+			background-position: 100% 0;
+		}
+	}
+
+	.desktop-nav-link:hover,
+	.desktop-nav-link:focus-visible {
+		color: var(--color-primary-dark);
+		box-shadow: var(--nav-hover-glow);
+		background: var(--nav-hover-bg);
+	}
+
+	.desktop-nav-link:active {
+		transform: scale(0.96);
+	}
+
+	/* Mobile Navigation Effects - Pseudo-elements */
+	.mobile-nav-link::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 0;
 		background: linear-gradient(
 			135deg,
 			var(--color-gradient-purple-start) 0%,
 			var(--color-gradient-purple-mid) 100%
 		);
-		-webkit-background-clip: text;
-		background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
+		border-radius: 16px 0 0 16px;
+		transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+		z-index: 0;
+		box-shadow: 2px 0 8px rgba(102, 126, 234, 0.3);
 	}
 
-	/* Desktop Navigation */
-	.desktop-nav {
-		display: none;
-	}
-
-	.desktop-nav ul {
-		display: flex;
-		gap: 8px;
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-
-	.desktop-nav a {
-		color: var(--color-primary-medium);
-		text-decoration: none;
-		font-weight: 500;
-		transition: all 0.3s ease;
-		position: relative;
-		padding: 8px 14px;
-		border-radius: 10px;
-		font-size: 0.9em;
-		white-space: nowrap;
-	}
-
-	.desktop-nav a:hover {
-		color: var(--color-primary-dark);
-		background: rgba(102, 126, 234, 0.08);
-	}
-
-	.desktop-nav a:active {
-		transform: scale(0.96);
-	}
-
-	/* Hamburger Button */
-	.hamburger {
-		display: flex;
-		flex-direction: column;
-		gap: 6px;
-		background: rgba(102, 126, 234, 0.08);
-		border: 1px solid rgba(102, 126, 234, 0.15);
-		border-radius: 12px;
-		cursor: pointer;
-		padding: 8px;
-		width: 44px;
-		height: 44px;
-		justify-content: center;
-		align-items: center;
-		transition: all 0.3s ease;
-	}
-
-	.hamburger:hover {
-		background: rgba(102, 126, 234, 0.12);
-		border-color: rgba(102, 126, 234, 0.25);
-		transform: scale(1.05);
-	}
-
-	.hamburger:active {
-		transform: scale(0.95);
-	}
-
-	.hamburger:focus {
-		outline: 2px solid var(--color-gradient-purple-start);
-		outline-offset: 2px;
-	}
-
-	.hamburger-line {
-		width: 22px;
-		height: 2.5px;
-		background: var(--color-primary-dark);
-		border-radius: 2px;
-		transition: all 0.3s ease;
-	}
-
-	.hamburger:hover .hamburger-line {
-		background: var(--color-gradient-purple-start);
-	}
-
-	/* Hamburger as Close Button */
-	.hamburger--close {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.hamburger--close svg {
-		color: var(--color-primary-dark);
-		transition: all 0.3s ease;
-	}
-
-	.hamburger--close:hover svg {
-		color: var(--color-gradient-purple-start);
-		transform: rotate(90deg);
-	}
-
-	/* Mobile Menu Backdrop */
-	.menu-backdrop {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: rgba(0, 0, 0, 0.5);
-		backdrop-filter: blur(8px);
-		z-index: 999;
-	}
-
-	/* Mobile Menu Bottom Sheet - Glass ala Meta dengan warna Hero */
-	.mobile-menu {
-		@apply fixed bottom-0 w-full;
-		max-height: 80vh;
-		background: linear-gradient(135deg, var(--color-bg-hero) 0%, var(--color-bg-hero-end) 100%);
-		opacity: 0.95;
-		backdrop-filter: blur(40px) saturate(180%);
-		border-radius: 28px 28px 0 0;
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		box-shadow:
-			0 8px 32px rgba(0, 0, 0, 0.12),
-			inset 0 1px 0 rgba(255, 255, 255, 0.8);
-		z-index: 1000;
-		display: flex;
-		flex-direction: column;
-		transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	.mobile-menu.dragging {
-		transition: none;
-	}
-
-	/* Drag Handle Bar */
-	.drag-handle {
-		width: 48px;
-		height: 6px;
-		background: rgba(102, 126, 234, 0.3);
-		border-radius: 3px;
-		margin: 16px auto;
-		cursor: grab;
-		user-select: none;
-		-webkit-user-select: none;
-		transition: all 0.2s ease;
-	}
-
-	.drag-handle:hover {
-		background: rgba(102, 126, 234, 0.4);
-		transform: scale(1.1);
-	}
-
-	.drag-handle:active {
-		cursor: grabbing;
-	}
-
-	/* Scrollable Content */
-	.menu-content {
-		flex: 1;
-		overflow-y: auto;
-		-webkit-overflow-scrolling: touch;
-		@apply px-4 pt-6 pb-10;
-		min-height: 0;
-	}
-
-	.mobile-menu.dragging .menu-content {
-		overflow-y: hidden;
+	.mobile-nav-link::after {
+		content: '→';
+		position: absolute;
+		left: 12px;
+		top: 50%;
+		transform: translateY(-50%);
+		opacity: 0;
+		color: white;
+		font-size: 1.2em;
+		font-weight: bold;
+		transition:
+			opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+			left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+		z-index: 1;
 		pointer-events: none;
 	}
 
-	/* CTA Button (Daftar) */
-	.menu-cta-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 20px 24px;
-		background: linear-gradient(
-			135deg,
-			var(--color-gradient-purple-start),
-			var(--color-gradient-purple-mid)
-		);
-		color: white !important;
-		text-decoration: none;
-		font-weight: 700;
-		font-size: 1.2em;
-		border-radius: 16px;
-		margin-bottom: 16px;
-		transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	.mobile-nav-link:hover::before,
+	.mobile-nav-link:focus::before {
+		width: 48px;
 	}
 
-	.menu-cta-btn:hover,
-	.menu-cta-btn:focus {
-		transform: translateY(-2px);
-		opacity: 0.9;
+	.mobile-nav-link:hover::after,
+	.mobile-nav-link:focus::after {
+		opacity: 1;
+		left: 24px;
 	}
 
-	.menu-cta-btn:active {
-		transform: translateY(0) scale(0.98);
-	}
-
-	/* Mobile Navigation */
-	.mobile-nav {
-		margin-top: 12px;
-	}
-
-	.mobile-nav ul {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-
-	.mobile-nav li {
-		margin: 0;
-	}
-
-	.mobile-nav a {
-		display: flex;
-		align-items: center;
-		padding: 20px 24px;
-		color: var(--color-primary-dark);
-		text-decoration: none;
-		font-weight: 600;
-		font-size: 1.1em;
-		border-radius: 16px;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		background: rgba(255, 255, 255, 0.5);
-		border: 1px solid rgba(102, 126, 234, 0.1);
-		min-height: 60px;
-	}
-
-	.mobile-nav a:hover,
-	.mobile-nav a:focus {
-		background: rgba(102, 126, 234, 0.1);
-		color: var(--color-gradient-purple-start);
-		transform: translateX(8px);
-		border-color: rgba(102, 126, 234, 0.3);
-		box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-	}
-
-	.mobile-nav a:active {
-		transform: translateX(8px) scale(0.98);
-	}
-
-	/* Responsive: Desktop */
-	@media (min-width: 768px) {
-		.header-container {
-			padding: 20px 40px;
-		}
-
-		.desktop-nav {
-			display: block;
-		}
-
-		.hamburger {
-			display: none;
-		}
-
-		.menu-backdrop {
-			display: none;
-		}
-
-		.mobile-menu {
-			display: none;
-		}
-	}
-
-	/* Reduced motion */
+	/* Reduced motion preference */
 	@media (prefers-reduced-motion: reduce) {
 		* {
 			animation-duration: 0.01ms !important;

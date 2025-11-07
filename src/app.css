@@ -1,8 +1,35 @@
+/* ============================================================================
+   NAIK KELAS - GLOBAL STYLES
+   ============================================================================
+   Central stylesheet untuk aplikasi Naik Kelas by Koneksi.
+   
+   Structure:
+   1. Tailwind CSS imports & configuration
+   2. Dark mode configuration
+   3. Design system tokens (@theme)
+   4. Theme CSS variables (semantic tokens)
+   5. Utility classes
+   6. Base styles (@layer base)
+   7. Accessibility helpers
+   8. Animations
+   ============================================================================ */
+
+/* ----------------------------------------------------------------------------
+   1. TAILWIND CSS IMPORTS & CONFIGURATION
+   ---------------------------------------------------------------------------- */
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
-/* Design System - Naik Kelas Color Palette (OKLCH) */
+/* Enable class-based dark mode for Tailwind CSS 4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ----------------------------------------------------------------------------
+   2. DESIGN SYSTEM TOKENS (@theme)
+   ----------------------------------------------------------------------------
+   Tailwind CSS 4 theme tokens menggunakan OKLCH untuk perceptual uniformity.
+   Tokens ini digunakan untuk custom Tailwind utilities dan color palette.
+   ---------------------------------------------------------------------------- */
 @theme {
 	/* Primary Colors - OKLCH format for perceptual uniformity */
 	--color-primary-soft-blue: oklch(56% 0.08 210); /* #5a7d9a equivalent */
@@ -23,7 +50,7 @@
 	--color-gradient-purple-mid: oklch(50% 0.2 300); /* #764ba2 equivalent */
 	--color-gradient-purple-end: oklch(75% 0.18 310); /* #f093fb equivalent */
 
-	/* Legacy HEX fallback for older browsers */
+	/* Legacy HEX fallback for older browsers (used in @supports) */
 	--color-primary-soft-blue-hex: #5a7d9a;
 	--color-primary-dark-hex: #2c3e50;
 	--color-primary-medium-hex: #6b7c93;
@@ -39,20 +66,343 @@
 	--color-gradient-purple-end-hex: #f093fb;
 }
 
-* {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
+/* ----------------------------------------------------------------------------
+   3. THEME CSS VARIABLES (Semantic Tokens)
+   ----------------------------------------------------------------------------
+   Semantic tokens untuk theme switching. Digunakan oleh body, utility classes,
+   dan komponen yang perlu akses langsung ke theme values.
+   
+   Konsisten dengan design tokens di $lib/config/design.ts:
+   - --surface: bg-white / dark:bg-neutral-900
+   - --border: border-gray-200/60 / dark:border-neutral-800
+   - --text: text-gray-900 / dark:text-gray-50
+   ---------------------------------------------------------------------------- */
+:root {
+	/* Surface colors - konsisten dengan COLOR.card dan COLOR.surface */
+	--surface: #ffffff; /* bg-white */
+	--surface-muted: #f8f9fb;
+	--surface-contrast: #0f172a;
+
+	/* Border colors - konsisten dengan COLOR.cardBorder (border-gray-200/60) */
+	--border: #e5e7eb; /* gray-200 */
+	--border-strong: #d1d5db; /* gray-300 */
+
+	/* Text colors - konsisten dengan COLOR.textPrimary dan COLOR.textSecondary */
+	--text: #0f172a; /* text-gray-900 */
+	--text-muted: #475569; /* text-gray-700 */
+
+	/* Accent colors */
+	--accent: oklch(60% 0.2 280); /* Purple gradient start */
+	--accent-foreground: #ffffff;
+
+	/* Glass morphism tokens */
+	--glass-bg: rgba(255, 255, 255, 0.6);
+	--glass-border: rgba(255, 255, 255, 0.35);
+	--glass-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
-body {
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-	line-height: 1.6;
-	color: #333;
-	overflow-x: hidden;
+/* Dark mode using class selector (Tailwind CSS 4 compatible) */
+.dark {
+	/* Surface colors - konsisten dengan dark:bg-neutral-900 */
+	--surface: #0b0f19; /* neutral-900 */
+	--surface-muted: #0e1422;
+	--surface-contrast: #e2e8f0;
+
+	/* Border colors - konsisten dengan dark:border-neutral-800 */
+	--border: #1f2937; /* neutral-800 */
+	--border-strong: #334155; /* neutral-700 */
+
+	/* Text colors - konsisten dengan dark:text-gray-50 */
+	--text: #e2e8f0; /* gray-50 */
+	--text-muted: #94a3b8; /* gray-400 */
+
+	/* Accent colors */
+	--accent: oklch(65% 0.17 280);
+	--accent-foreground: #0b0f19;
+
+	/* Glass morphism tokens */
+	--glass-bg: rgba(15, 23, 42, 0.55);
+	--glass-border: rgba(255, 255, 255, 0.12);
+	--glass-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
-/* Skip to main content link for accessibility */
+/* Fallback: System preference for initial load (before JavaScript runs) */
+@media (prefers-color-scheme: dark) {
+	:root:not(.light):not(.dark) {
+		--surface: #0b0f19;
+		--surface-muted: #0e1422;
+		--surface-contrast: #e2e8f0;
+		--border: #1f2937;
+		--border-strong: #334155;
+		--text: #e2e8f0;
+		--text-muted: #94a3b8;
+		--accent: oklch(65% 0.17 280);
+		--accent-foreground: #0b0f19;
+		--glass-bg: rgba(15, 23, 42, 0.55);
+		--glass-border: rgba(255, 255, 255, 0.12);
+		--glass-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+	}
+}
+
+/* ----------------------------------------------------------------------------
+   4. UTILITY CLASSES
+   ----------------------------------------------------------------------------
+   Utility classes yang menggunakan CSS variables. Hindari duplikasi dengan
+   design tokens - gunakan untuk kasus khusus seperti glass morphism.
+   ---------------------------------------------------------------------------- */
+.glass-surface {
+	background: var(--glass-bg);
+	-webkit-backdrop-filter: blur(12px);
+	backdrop-filter: blur(12px);
+	border: 1px solid var(--glass-border);
+	box-shadow: var(--glass-shadow);
+}
+
+.focus-ring {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+/* Custom utility classes untuk text sizes yang digunakan dengan @apply */
+@utility text-2xl {
+	font-size: 1.5rem;
+	line-height: 2rem;
+}
+
+@utility text-3xl {
+	font-size: 1.875rem;
+	line-height: 2.25rem;
+}
+
+@utility text-4xl {
+	font-size: 2.25rem;
+	line-height: 2.5rem;
+}
+
+@utility text-5xl {
+	font-size: 3rem;
+	line-height: 1;
+}
+
+@utility text-6xl {
+	font-size: 3.75rem;
+	line-height: 1;
+}
+
+@utility text-lg {
+	font-size: 1.125rem;
+	line-height: 1.75rem;
+}
+
+@utility text-xl {
+	font-size: 1.25rem;
+	line-height: 1.75rem;
+}
+
+@utility text-base {
+	font-size: 1rem;
+	line-height: 1.5rem;
+}
+
+@utility text-sm {
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+}
+
+/* ============================================================================
+   CUSTOM SPACING UTILITIES - TERPUSAT
+   ============================================================================
+   Semua utility spacing untuk landing page terpusat di sini untuk 
+   kemudahan pengelolaan dan konsistensi.
+   ============================================================================ */
+
+/* Section Padding - Konsisten untuk semua section */
+@utility section-padding {
+	padding: 2.5rem 1.25rem; /* 40px 20px - Mobile */
+
+	@media (min-width: 768px) {
+		padding: 4rem 1.25rem; /* 64px 20px - Tablet */
+	}
+
+	@media (min-width: 1024px) {
+		padding: 4.5rem 1.25rem; /* 72px 20px - Desktop (dikurangi dari 80px, -8px) */
+	}
+}
+
+/* Section Padding untuk CTA (lebih besar) */
+@utility section-padding-cta {
+	padding: 3rem 1.25rem; /* 48px 20px - Mobile */
+
+	@media (min-width: 768px) {
+		padding: 5rem 1.25rem; /* 80px 20px - Tablet */
+	}
+
+	@media (min-width: 1024px) {
+		padding: 7.5rem 1.25rem; /* 120px 20px - Desktop */
+	}
+}
+
+/* Section Padding dengan Header Offset - untuk section dengan anchor navigation */
+@utility section-padding-with-offset {
+	padding: calc(2.5rem + 80px) 1.25rem; /* 40px + 80px = 120px top, 20px sides - Mobile */
+
+	@media (min-width: 768px) {
+		padding: calc(3rem + 70px) 1.25rem; /* 64px + 80px = 144px top, 20px sides - Tablet */
+	}
+}
+
+/* Container Padding - Konsisten untuk container dalam section */
+@utility container-padding {
+	padding: 0 1.25rem; /* 20px horizontal */
+}
+
+/* Base spacing utilities (tanpa responsif) */
+@utility mb-15 {
+	margin-bottom: 3.75rem; /* 60px */
+}
+
+@utility py-25 {
+	padding-top: 6.25rem; /* 100px */
+	padding-bottom: 6.25rem; /* 100px */
+}
+
+@utility py-30 {
+	padding-top: 7.5rem; /* 120px */
+	padding-bottom: 7.5rem; /* 120px */
+}
+
+/* Responsive utilities untuk desktop (lg: 1024px+) */
+@utility lg-mb-15 {
+	@media (min-width: 1024px) {
+		margin-bottom: 3.75rem; /* 60px desktop */
+	}
+}
+
+@utility lg-py-25 {
+	@media (min-width: 1024px) {
+		padding-top: 6.25rem; /* 100px desktop */
+		padding-bottom: 6.25rem; /* 100px desktop */
+	}
+}
+
+@utility lg-py-30 {
+	@media (min-width: 1024px) {
+		padding-top: 7.5rem; /* 120px desktop */
+		padding-bottom: 7.5rem; /* 120px desktop */
+	}
+}
+
+/* Section Padding dengan Header Offset - untuk section dengan anchor navigation */
+@utility section-padding-with-offset {
+	padding: calc(2.5rem + 80px) 1.25rem; /* 40px + 80px = 120px top, 20px sides - Mobile (dikurangi dari 148px) */
+
+	@media (min-width: 768px) {
+		padding: calc(4rem + 80px) 1.25rem; /* 64px + 80px = 144px top, 20px sides - Tablet (dikurangi dari 180px) */
+	}
+
+	@media (min-width: 1024px) {
+		padding: calc(5rem + 80px) 1.25rem; /* 80px + 80px = 160px top, 20px sides - Desktop (dikurangi dari 200px) */
+	}
+}
+
+/* ----------------------------------------------------------------------------
+   5. BASE STYLES (@layer base)
+   ----------------------------------------------------------------------------
+   Base styles yang tidak bisa di-handle oleh Tailwind utilities.
+   Konsisten dengan design tokens dan tidak menimpa Tailwind classes.
+   ---------------------------------------------------------------------------- */
+@layer base {
+	/* Reset */
+	*,
+	::before,
+	::after {
+		box-sizing: border-box;
+	}
+
+	/* Default border-color untuk mencegah white flash selama theme transition
+	   Konsisten dengan COLOR.cardBorder: border-gray-200/60 dark:border-neutral-800 */
+	html *[class*='border'] {
+		/* Light mode: gray-200 dengan opacity 60% */
+		border-color: rgb(229 231 235 / 0.6); /* gray-200/60 */
+	}
+
+	.dark html *[class*='border'] {
+		/* Dark mode: neutral-800 */
+		border-color: rgb(31 41 55); /* neutral-800 */
+	}
+
+	/* Theme transition configuration
+	   Durasi konsisten dengan TRANSITION.colors (200ms) dan TRANSITION.all (300ms)
+	   Tidak menimpa transition yang sudah didefinisikan di design tokens */
+	html {
+		transition-property: color-scheme;
+		transition-duration: 300ms;
+		transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); /* ease-out */
+	}
+
+	html *,
+	html *::before,
+	html *::after {
+		transition-property:
+			color, background-color, border-color, text-decoration-color, fill, stroke, box-shadow,
+			outline-color;
+		transition-duration: 200ms; /* Konsisten dengan TRANSITION.colors */
+		transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); /* ease-out */
+	}
+
+	/* Exclude elements that shouldn't transition */
+	html img,
+	html svg,
+	html video,
+	html canvas,
+	html iframe,
+	html audio,
+	html [style*='transition'],
+	html [class*='transition-none'],
+	html [class*='no-transition'] {
+		transition-property: none !important;
+	}
+
+	/* Body styles - menggunakan CSS variables untuk theme switching */
+	body {
+		margin: 0;
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		line-height: 1.6;
+		color: var(--text, #111827); /* Fallback: gray-900 */
+		background-color: var(--surface, #ffffff); /* Fallback: white */
+		overflow-x: hidden;
+		/* Smooth transition for body background and text */
+		transition-property: color, background-color;
+		transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+		transition-duration: 300ms;
+	}
+
+	/* Media elements */
+	img,
+	svg,
+	video,
+	canvas,
+	audio,
+	iframe {
+		display: block;
+		max-width: 100%;
+	}
+
+	/* Typography reset */
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-weight: inherit;
+	}
+}
+
+/* ----------------------------------------------------------------------------
+   6. ACCESSIBILITY HELPERS
+   ---------------------------------------------------------------------------- */
+/* Skip to main content link */
 .skip-to-content {
 	position: absolute;
 	top: -40px;
@@ -69,12 +419,16 @@ body {
 	top: 0;
 }
 
-/* Focus visible styles for keyboard navigation */
+/* Focus visible styles for keyboard navigation
+   Minimal - Tailwind utilities handle most cases via focus-visible: */
 *:focus-visible {
-	outline: 3px solid oklch(60% 0.2 280);
+	outline: 2px solid oklch(60% 0.2 280); /* accent color */
 	outline-offset: 2px;
 }
 
+/* ----------------------------------------------------------------------------
+   7. BROWSER COMPATIBILITY
+   ---------------------------------------------------------------------------- */
 /* @supports for OKLCH - fallback to HEX if not supported */
 @supports not (color: oklch(0 0 0)) {
 	:root {
@@ -94,9 +448,11 @@ body {
 	}
 }
 
-/* Global styles only - component-specific styles are in individual components */
-
-/* Animations */
+/* ----------------------------------------------------------------------------
+   8. ANIMATIONS
+   ----------------------------------------------------------------------------
+   Global animations. Gunakan Tailwind animate-* utilities jika memungkinkan.
+   ---------------------------------------------------------------------------- */
 @keyframes bounce {
 	0%,
 	20%,
@@ -138,4 +494,9 @@ body {
 	animation: slideUp 0.5s ease;
 }
 
-/* Responsive adjustments are handled in individual components */
+/* ============================================================================
+   END OF GLOBAL STYLES
+   
+   Note: Component-specific styles should be in individual component files
+   using Tailwind utilities and design tokens from $lib/config/design.ts
+   ============================================================================ */

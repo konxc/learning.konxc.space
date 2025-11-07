@@ -13,5 +13,16 @@ export default defineConfig({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide'
 		})
-	]
+	],
+	build: {
+		rollupOptions: {
+			external: ['html2canvas', 'jspdf']
+		}
+	},
+	server: {
+		host: '0.0.0.0',
+		port: 5173,
+		allowedHosts: ['naikkelas-app', 'learning.konxc.space', 'localhost'],
+		cors: true // pastikan dev HMR juga jalan via reverse proxy
+	}
 });

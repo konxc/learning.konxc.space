@@ -1,111 +1,39 @@
 <script lang="ts">
-	interface Props {
-		title: string;
-		subtitle?: string;
-		description: string;
-	}
-	let { title, subtitle, description }: Props = $props();
+	import TimelineDot from './TimelineDot.svelte';
+	import TimelineCardBase from './TimelineCardBase.svelte';
+	import type { TimelineItemProps } from '$lib/types/timeline';
+	import '$lib/styles/timeline-hover.css';
+
+	let { title, subtitle, description, index = 0 }: TimelineItemProps = $props();
+
+	const isEven = index % 2 === 0;
+	const alignment = $derived(isEven ? 'left' : 'right');
 </script>
 
-<div class="timeline-item">
-	<div class="timeline-dot"></div>
-	<div class="timeline-content">
-		<h3>{title}</h3>
-		<p>
-			{#if subtitle}
-				<strong>{subtitle}</strong>
-				<br />
-			{/if}
+<div class="timeline-item relative mb-12 md:mb-[50px]">
+	<!-- Timeline Dot -->
+	<TimelineDot />
+
+	<!-- Card Wrapper -->
+	<div class="timeline-card-wrapper">
+		<!-- Timeline Content Card -->
+		<TimelineCardBase
+			{title}
+			{subtitle}
 			{description}
-		</p>
+			{alignment}
+			classPrefix="timeline-content"
+			class="timeline-content-desktop {isEven ? 'timeline-left' : 'timeline-right'}"
+		/>
 	</div>
 </div>
 
 <style>
-	.timeline-item {
-		margin-bottom: 50px;
+	/* Card Wrapper - hanya untuk positioning */
+	.timeline-card-wrapper {
 		position: relative;
 	}
 
-	.timeline-content {
-		background: white;
-		padding: 30px;
-		border-radius: 12px;
-		box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-		width: 45%;
-	}
-
-	.timeline-item:nth-child(odd) .timeline-content {
-		margin-left: 55%;
-	}
-
-	.timeline-item:nth-child(even) .timeline-content {
-		margin-right: 55%;
-		text-align: right;
-	}
-
-	.timeline-dot {
-		position: absolute;
-		left: 50%;
-		transform: translate(-50%, 20px);
-		width: 20px;
-		height: 20px;
-		background: var(--color-primary-soft-blue);
-		border: 4px solid var(--color-bg-lighter);
-		border-radius: 50%;
-		z-index: 1;
-	}
-
-	.timeline-content h3 {
-		color: var(--color-primary-dark);
-		font-size: 1.5em;
-		margin-bottom: 10px;
-	}
-
-	.timeline-content p {
-		color: var(--color-primary-medium);
-	}
-
-	/* Responsive: Mobile */
-	@media (max-width: 768px) {
-		.timeline-content {
-			width: calc(100% - 80px);
-			margin-left: 80px !important;
-			margin-right: 0 !important;
-			text-align: left !important;
-			padding: 25px;
-		}
-
-		.timeline-content h3 {
-			font-size: 1.3em;
-		}
-
-		.timeline-dot {
-			left: 30px;
-		}
-	}
-
-	/* Responsive: Small mobile */
-	@media (max-width: 480px) {
-		.timeline-content {
-			width: calc(100% - 60px);
-			margin-left: 60px !important;
-			padding: 20px;
-		}
-
-		.timeline-content h3 {
-			font-size: 1.2em;
-			margin-bottom: 8px;
-		}
-
-		.timeline-content p {
-			font-size: 0.95em;
-		}
-
-		.timeline-dot {
-			left: 20px;
-			width: 16px;
-			height: 16px;
-		}
-	}
+	/* Group hover effects di-handle oleh shared CSS (timeline-hover.css) */
+	/* Import di script tag */
 </style>

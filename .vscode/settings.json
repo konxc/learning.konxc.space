@@ -4,9 +4,7 @@
 	},
 	"svelte.plugin.svelte.diagnostics": true,
 	"svelte.plugin.typescript.diagnostics": true,
-	"tailwindCSS.experimental.classRegex": [
-		["class:\\s*?[\"'`]([^\"'`]*).*?[\"'`]", "([^\\s]*)"]
-	],
+	"tailwindCSS.experimental.classRegex": [["class:\\s*?[\"'`]([^\"'`]*).*?[\"'`]", "([^\\s]*)"]],
 	"tailwindCSS.includeLanguages": {
 		"svelte": "html"
 	},
@@ -26,6 +24,9 @@
 		"**/node_modules/**": true,
 		"**/.svelte-kit/**": true,
 		"**/build/**": true
-	}
+	},
+	"css.customData": [".vscode/tailwind.json"]
+	// "css.lint.unknownAtRules": "ignore",
+	// "scss.lint.unknownAtRules": "ignore",
+	// "less.lint.unknownAtRules": "ignore"
 }
-

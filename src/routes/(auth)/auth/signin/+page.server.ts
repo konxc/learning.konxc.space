@@ -52,6 +52,11 @@ export const actions: Actions = {
 			throw redirect(302, redirectUrl);
 		}
 
+		// Skip onboarding check for admin and bd roles
+		if (existingUser.role === 'admin' || existingUser.role === 'bd') {
+			throw redirect(302, '/dashboard');
+		}
+
 		// Check if user has any enrollments, redirect to onboarding if not
 		const enrollments = await db.query.enrollment.findFirst({
 			where: eq(schema.enrollment.userId, existingUser.id)

@@ -1,4 +1,17 @@
 <script lang="ts">
+	import type { HeadlineVariant } from '$lib/data/headlineVariants';
+	import { headlineVariants } from '$lib/data/headlineVariants';
+	import AuroraOverlay from '$lib/components/decor/AuroraOverlay.svelte';
+	import GlowOrbs from '$lib/components/decor/GlowOrbs.svelte';
+	import FlyingIcons from '$lib/components/decor/FlyingIcons.svelte';
+	import ScrollHint from '$lib/components/ScrollHint.svelte';
+	import BrandModeToggle from '$lib/components/BrandModeToggle.svelte';
+	import HeroLogo from '$lib/components/HeroLogo.svelte';
+	import HeroTagline from '$lib/components/HeroTagline.svelte';
+	import RotatingText from '$lib/components/RotatingText.svelte';
+	import { brandMode } from '$lib/stores/brandMode';
+	import { HERO_OVERLAY_CONFIG } from '$lib/config/overlayConfigs';
+
 	interface Props {
 		logo?: string;
 		tagline?: string;
@@ -6,154 +19,172 @@
 		headlinePart2?: string;
 		description?: string;
 	}
-	let {
+
+	const {
 		logo = 'Naik Kelas',
 		tagline = 'by Koneksi × Yayasan Klub Fisika',
-		headline = 'Mulai Perjalanan Coding-mu',
-		headlinePart2 = 'Dari Nol Hingga Siap Kerja',
-		description = 'Program pelatihan intensif 2 bulan untuk menjadi developer. Belajar Python, Web Development, dan skills yang dibutuhkan industri tech.'
+		headline: defaultHeadline,
+		headlinePart2: defaultHeadlinePart2,
+		description: defaultDescription
 	}: Props = $props();
+
+	// Prepare default variant jika props custom diberikan
+	const defaultVariant: HeadlineVariant | undefined =
+		defaultHeadline && defaultHeadlinePart2 && defaultDescription
+			? {
+					headline: defaultHeadline,
+					headlinePart2: defaultHeadlinePart2,
+					description: defaultDescription
+				}
+			: undefined;
+
+	// Glow orbs configuration
+	const glowOrbsConfig = $derived(
+		$brandMode === 'hardcore'
+			? HERO_OVERLAY_CONFIG.glowOrbs.hardcore
+			: HERO_OVERLAY_CONFIG.glowOrbs.chill
+	);
 </script>
 
-<section id="hero" class="hero" aria-labelledby="hero-heading">
-	<div class="logo" aria-label="Naik Kelas Program">{logo}</div>
-	<p class="tagline">{tagline}</p>
-
-	<h1 id="hero-heading">{headline}<br />{headlinePart2}</h1>
-	<p>{description}</p>
-
-	<div class="scroll-hint" role="status" aria-label="Scroll indicator">
-		↓ Scroll untuk tahu lebih lanjut
+<section
+	id="hero"
+	class="hero-bg relative flex min-h-screen flex-col justify-between overflow-hidden bg-linear-to-br from-bg-hero to-bg-hero-end"
+	aria-labelledby="hero-heading"
+	aria-label="Hero section - Program Naik Kelas"
+>
+	<div class="relative z-10 mb-4 pt-6 text-center min-[640px]:pt-8 md:pt-10 lg:pt-12">
+		<HeroLogo {logo} />
+		<HeroTagline {tagline} />
 	</div>
+	<div
+		class="hero-inner relative z-10 flex flex-1 flex-col items-center justify-center px-4 pb-12 text-center min-[640px]:px-6 md:px-8"
+	>
+		<RotatingText variants={headlineVariants} {defaultVariant} />
+	</div>
+	<!-- Desktop: Tombol terpisah seperti biasa -->
+	<div
+		class="scroll-hint-wrapper relative z-10 hidden h-32 items-end px-4 pb-6 md:flex md:items-start md:justify-center"
+	>
+		<ScrollHint />
+	</div>
+	<!-- Desktop/Tablet: BrandModeToggle di pojok kanan atas -->
+	<div
+		class="brand-mode-toggle-wrapper absolute top-0 right-0 z-10 hidden pt-6 pr-6 md:block lg:pt-8 lg:pr-8"
+	>
+		<BrandModeToggle />
+	</div>
+
+	<!-- Mobile: Wrapper untuk kedua tombol di pojok kanan bawah -->
+	<div
+		class="floating-buttons-mobile relative z-10 flex h-32 items-end justify-end pr-4 pb-4 md:hidden"
+		data-mobile-wrapper="true"
+	>
+		<div class="flex flex-col items-end gap-3">
+			<BrandModeToggle />
+			<ScrollHint />
+		</div>
+	</div>
+	<AuroraOverlay {...HERO_OVERLAY_CONFIG.aurora} mode={$brandMode} />
+	<GlowOrbs zIndex={HERO_OVERLAY_CONFIG.aurora.zIndex} orbs={glowOrbsConfig} />
+	<FlyingIcons zIndex={2} intensity={0.8} interactionMode="subtle" flyingMode="gentle" />
 </section>
 
 <style>
-	.hero {
-		background: linear-gradient(135deg, var(--color-bg-hero) 0%, var(--color-bg-hero-end) 100%);
-		padding: 80px 20px;
-		text-align: center;
-		min-height: 100vh;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
+	/* Custom CSS hanya untuk efek yang tidak tersedia di Tailwind CSS 4 */
 
-	.logo {
-		font-size: 2.5em;
-		font-weight: 700;
-		color: var(--color-primary-soft-blue);
-		margin-bottom: 10px;
-		letter-spacing: -1px;
-	}
-
-	.tagline {
-		font-size: 1.1em;
-		color: var(--color-primary-medium);
-		margin-bottom: 30px;
-		font-weight: 300;
-	}
-
-	.hero h1 {
-		font-size: 2.8em;
-		color: var(--color-primary-dark);
-		margin-bottom: 20px;
-		font-weight: 600;
-		line-height: 1.3;
-	}
-
-	.hero p {
-		font-size: 1.2em;
-		color: var(--color-text-secondary);
-		max-width: 700px;
-		margin: 0 auto 40px;
-	}
-
-	.scroll-hint {
-		margin-top: 50px;
-		color: var(--color-text-tertiary);
-		font-size: 0.9em;
-		animation: bounce 2s infinite;
-	}
-
-	/* Responsive: Desktop large */
-	@media (max-width: 1920px) {
-		.hero h1 {
-			font-size: 3.2em;
+	/* Fallback untuk browser yang tidak support dvh - fallback ke 100vh */
+	@supports not (height: 100dvh) {
+		.hero-bg {
+			height: 100vh;
 		}
 	}
 
-	/* Responsive: Tablet */
-	@media (max-width: 1024px) {
-		.hero {
-			padding: 70px 20px;
-		}
-
-		.hero h1 {
-			font-size: 2.3em;
-		}
-
-		.hero p {
-			font-size: 1.1em;
+	/* Desktop: Safe area support untuk wrapper ScrollHint */
+	@supports (padding-bottom: env(safe-area-inset-bottom)) {
+		.scroll-hint-wrapper {
+			padding-bottom: calc(1rem + env(safe-area-inset-bottom));
 		}
 	}
 
-	/* Responsive: Mobile */
+	@media (min-width: 769px) {
+		.scroll-hint-wrapper {
+			padding-bottom: 1rem;
+		}
+	}
+
+	/* Desktop/Tablet: BrandModeToggle positioning - pojok kanan atas */
+	.brand-mode-toggle-wrapper {
+		/* Safe area support untuk desktop/tablet */
+		@supports (padding-top: env(safe-area-inset-top)) {
+			padding-top: calc(1.5rem + env(safe-area-inset-top));
+			padding-right: calc(1.5rem + env(safe-area-inset-right, 0px));
+		}
+	}
+
+	@media (min-width: 769px) {
+		.brand-mode-toggle-wrapper {
+			padding-top: 1.5rem;
+			padding-right: 1.5rem;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.brand-mode-toggle-wrapper {
+			padding-top: 2rem;
+			padding-right: 2rem;
+		}
+	}
+
+	/* Mobile: Wrapper untuk kedua tombol di pojok kanan bawah */
+	/* Menggunakan struktur yang sama dengan scroll-hint-wrapper */
+	/* Safe area support untuk menghindari navbar Android/iOS */
+	@supports (padding-bottom: env(safe-area-inset-bottom)) {
+		.floating-buttons-mobile {
+			padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2rem);
+			padding-right: calc(env(safe-area-inset-right, 0px) + 1.25rem);
+		}
+	}
+
+	/* Fallback untuk browser yang tidak support safe-area-inset */
 	@media (max-width: 768px) {
-		.hero {
-			padding: 60px 20px;
-			min-height: 100vh;
-		}
-
-		.logo {
-			font-size: 2em;
-		}
-
-		.tagline {
-			font-size: 1em;
-		}
-
-		.hero h1 {
-			font-size: 1.8em;
-		}
-
-		.hero p {
-			font-size: 1em;
-		}
-
-		.scroll-hint {
-			margin-top: 30px;
-			font-size: 0.85em;
+		.floating-buttons-mobile {
+			padding-bottom: 3rem; /* Extra space untuk mobile navbar */
+			padding-right: 1.25rem;
 		}
 	}
 
-	/* Responsive: Small mobile */
 	@media (max-width: 480px) {
-		.hero {
-			padding: 50px 20px;
-			min-height: 100vh;
+		.floating-buttons-mobile {
+			padding-bottom: 3.25rem; /* Extra space untuk mobile navbar */
+			padding-right: 0.75rem; /* Lebih mepet ke tepi kanan */
 		}
+	}
 
-		.logo {
-			font-size: 1.7em;
-		}
+	/* Tombol di dalam wrapper mobile menggunakan relative positioning */
+	/* Tidak perlu override karena komponen sudah tidak memiliki positioning logic */
 
-		.tagline {
-			font-size: 0.95em;
-		}
+	/* Smooth transition ke CTA section - gradient fade di bagian bawah */
+	.hero-bg::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 200px;
+		background: linear-gradient(
+			to bottom,
+			transparent 0%,
+			rgba(102, 126, 234, 0.1) 30%,
+			rgba(102, 126, 234, 0.3) 60%,
+			var(--color-gradient-purple-start) 100%
+		);
+		pointer-events: none;
+		z-index: 1;
+	}
 
-		.hero h1 {
-			font-size: 1.5em;
-			line-height: 1.2;
-		}
-
-		.hero p {
-			font-size: 0.95em;
-		}
-
-		.scroll-hint {
-			margin-top: 20px;
-			font-size: 0.8em;
+	@media (max-width: 768px) {
+		.hero-bg::after {
+			height: 140px;
 		}
 	}
 </style>

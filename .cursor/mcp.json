@@ -3,6 +3,14 @@
 		"svelte": {
 			"command": "npx",
 			"args": ["-y", "@sveltejs/mcp"]
+		},
+		"mcp-svelte-docs": {
+			"command": "npx",
+			"args": ["-y", "mcp-svelte-docs"]
+		},
+		"tailwindcss-server": {
+			"command": "npx",
+			"args": ["-y", "tailwindcss-mcp-server"]
 		}
 	}
 }

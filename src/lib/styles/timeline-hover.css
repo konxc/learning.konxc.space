@@ -1,0 +1,109 @@
+/**
+ * Shared CSS untuk Timeline Group Hover Effects
+ * 
+ * Import di:
+ * - TimelineItem.svelte
+ * - TimelineDot.svelte
+ * - ProgramSection.svelte (untuk TimelineCard group hover)
+ * 
+ * Group hover: Hover dot → Card ikut hover
+ * Group hover: Hover card → Dot ikut hover
+ * 
+ * Menggunakan CSS :has() selector untuk group hover effects
+ */
+
+/* Group Hover: Card hover → Dot ikut hover */
+/* Untuk TimelineItem */
+.timeline-item:has(.timeline-content:hover) .timeline-dot {
+	box-shadow: 0 0 24px rgba(59, 130, 246, 0.6);
+	background: var(--color-gradient-purple-start);
+}
+
+@media (min-width: 769px) {
+	.timeline-item:has(.timeline-content:hover) .timeline-dot {
+		transform: translateX(-50%) scale(1.3);
+	}
+}
+
+@media (max-width: 768px) {
+	.timeline-item:has(.timeline-content:hover) .timeline-dot {
+		transform: translateX(0) scale(1.3);
+	}
+}
+
+/* Group Hover: Card hover → Dot ikut hover */
+/* Untuk TimelineCard (di ProgramSection) */
+.timeline-item:has(.timeline-card:hover) .timeline-dot {
+	box-shadow: 0 0 24px rgba(59, 130, 246, 0.6);
+	background: var(--color-gradient-purple-start);
+}
+
+@media (min-width: 769px) {
+	.timeline-item:has(.timeline-card:hover) .timeline-dot {
+		transform: translateX(-50%) scale(1.3);
+	}
+}
+
+@media (max-width: 768px) {
+	.timeline-item:has(.timeline-card:hover) .timeline-dot {
+		transform: translateX(0) scale(1.3);
+	}
+}
+
+/* Group Hover: Dot hover → Card ikut hover */
+/* Untuk TimelineItem (.timeline-content) */
+.timeline-item:has(.timeline-dot:hover) .timeline-content {
+	transform: translateY(-8px) scale(1.02);
+	border-color: var(--color-primary-soft-blue);
+	box-shadow: 0 12px 40px rgba(59, 130, 246, 0.12);
+}
+
+.timeline-item:has(.timeline-dot:hover) .timeline-content::before {
+	opacity: 1;
+}
+
+.timeline-item:has(.timeline-dot:hover) .timeline-title {
+	background: linear-gradient(
+		135deg,
+		var(--color-primary-soft-blue),
+		var(--color-gradient-purple-start)
+	);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	color: transparent;
+}
+
+.timeline-item:has(.timeline-dot:hover) .timeline-bullet::before {
+	transform: scale(1.3);
+	color: var(--color-gradient-purple-start);
+}
+
+/* Group Hover: Dot hover → Card ikut hover */
+/* Untuk TimelineCard (di ProgramSection dengan .timeline-item-wrapper) */
+.timeline-item-wrapper .timeline-item:has(.timeline-dot:hover) .timeline-card {
+	transform: translateY(-8px) scale(1.02);
+	border-color: var(--color-primary-soft-blue);
+	box-shadow: 0 12px 40px rgba(59, 130, 246, 0.12);
+}
+
+.timeline-item-wrapper .timeline-item:has(.timeline-dot:hover) .timeline-card::before {
+	opacity: 1;
+}
+
+.timeline-item-wrapper .timeline-item:has(.timeline-dot:hover) .timeline-card-title {
+	background: linear-gradient(
+		135deg,
+		var(--color-primary-soft-blue),
+		var(--color-gradient-purple-start)
+	);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	color: transparent;
+}
+
+.timeline-item-wrapper .timeline-item:has(.timeline-dot:hover) .timeline-card-bullet::before {
+	transform: scale(1.3);
+	color: var(--color-gradient-purple-start);
+}

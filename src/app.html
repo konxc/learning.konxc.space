@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" class="">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -43,8 +43,10 @@
 		<!-- PWA Manifest -->
 		<link rel="manifest" href="/manifest.json" />
 
+		<!-- Mobile Web App -->
+		<meta name="mobile-web-app-capable" content="yes" />
+
 		<!-- Apple Mobile Web App -->
-		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<meta name="apple-mobile-web-app-title" content="Naik Kelas" />
 
@@ -63,6 +65,63 @@
 					"category": "Programming Course"
 				}
 			}
+		</script>
+
+		<!-- Blocking theme script - prevents FOUC by running before any rendering -->
+		<script>
+			(function () {
+				// Immediately check theme before any rendering occurs
+				try {
+					// Parse cookie
+					const cookieMatch = document.cookie.match(/nk-theme=([^;]+)/);
+					const cookieTheme = cookieMatch ? cookieMatch[1] : null;
+
+					// Check localStorage (faster than cookie parsing)
+					let storedTheme = null;
+					try {
+						storedTheme = localStorage.getItem('nk-theme');
+					} catch (e) {}
+
+					// Priority: localStorage > cookie > system
+					const theme = storedTheme || cookieTheme || 'system';
+
+					// Validate theme value
+					const validTheme =
+						theme === 'light' || theme === 'dark' || theme === 'system' ? theme : 'system';
+
+					// Determine if dark mode
+					const systemDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+					const isDark = validTheme === 'dark' || (validTheme === 'system' && systemDark);
+
+					// Apply immediately - this blocks rendering until complete
+					if (isDark) {
+						document.documentElement.classList.add('dark');
+					} else {
+						document.documentElement.classList.remove('dark');
+					}
+
+					// Set sidebar collapsed state to prevent flicker
+					try {
+						const sidebarCollapsed = localStorage.getItem('sidebar-collapsed');
+						if (sidebarCollapsed === 'true') {
+							document.documentElement.setAttribute('data-sidebar-collapsed', 'true');
+						} else {
+							document.documentElement.setAttribute('data-sidebar-collapsed', 'false');
+						}
+					} catch (e) {
+						// Silent fail - default to expanded
+						document.documentElement.setAttribute('data-sidebar-collapsed', 'false');
+					}
+				} catch (e) {
+					// Silent fail - fallback to system preference
+					const systemDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+					if (systemDark) {
+						document.documentElement.classList.add('dark');
+					}
+					// Default sidebar to expanded
+					document.documentElement.setAttribute('data-sidebar-collapsed', 'false');
+				}
+			})();
 		</script>
 
 		%sveltekit.head%
