@@ -21,6 +21,12 @@
 		{ href: '/#about', label: 'Tentang', ariaLabel: 'Tentang Naik Kelas' },
 		{ href: '/#program', label: 'Program', ariaLabel: 'Program Pelatihan' },
 		{ href: '/#benefits', label: 'Benefits', ariaLabel: 'Manfaat Program' },
+		{ href: '/kemitraan', label: 'Kemitraan', ariaLabel: 'Kemitraan Sekolah dan Mitra' },
+		{
+			href: '/paket-les',
+			label: 'Paket Les',
+			ariaLabel: 'Paket les dan ekstrakurikuler Naik Kelas'
+		},
 		{ href: '/marketplace', label: 'Marketplace', ariaLabel: 'Browse Courses' },
 		{ href: '/waiting-list', label: 'Daftar', ariaLabel: 'Daftar Sekarang' }
 	];
@@ -165,7 +171,7 @@
 
 {#if !isInHero && showHeader}
 	<header
-		class="fixed top-[10px] right-[10px] left-[10px] z-[1100] overflow-hidden rounded-3xl border border-white/25 bg-gradient-to-br from-white/50 to-white/40 backdrop-blur-[60px] transition-all duration-600 ease-out {scrolled
+		class="fixed top-[10px] right-[10px] left-[10px] z-1100 overflow-hidden rounded-3xl border border-white/25 bg-linear-to-br from-white/50 to-white/40 backdrop-blur-[60px] transition-all duration-600 ease-out {scrolled
 			? 'scrolled'
 			: ''}"
 		style="
@@ -184,7 +190,7 @@
 		out:fly={{ y: -100, duration: 300, easing: cubicOut }}
 	>
 		<div
-			class="header-container relative z-[2] mx-auto flex items-center justify-between gap-5 px-5 py-2 md:px-10"
+			class="header-container relative z-2 mx-auto flex items-center justify-between gap-5 px-5 py-2 md:px-10"
 		>
 			<!-- Logo -->
 			<div class="logo">
@@ -314,7 +320,7 @@
 {#if menuOpen}
 	<!-- Backdrop -->
 	<div
-		class="menu-backdrop fixed inset-0 z-[1099] bg-black/50 backdrop-blur-sm"
+		class="menu-backdrop fixed inset-0 z-1099 bg-black/50 backdrop-blur-sm"
 		onclick={closeMenu}
 		onkeydown={(e) => e.key === 'Escape' && closeMenu()}
 		role="button"
@@ -326,7 +332,7 @@
 
 	<!-- Bottom Sheet Menu -->
 	<div
-		class="mobile-menu fixed bottom-0 z-[1100] flex max-h-[80vh] w-full flex-col rounded-t-[28px] border border-white/30 bg-gradient-to-br from-(--color-bg-hero) to-(--color-bg-hero-end) opacity-95 backdrop-blur-[40px] [backdrop-filter:saturate(180%)] transition-transform duration-200 ease-out {isDragging
+		class="mobile-menu fixed bottom-0 z-1100 flex max-h-[80vh] w-full flex-col rounded-t-[28px] border border-white/30 bg-linear-to-br from-(--color-bg-hero) to-(--color-bg-hero-end) opacity-95 backdrop-blur-[40px] [backdrop-filter:saturate(180%)] transition-transform duration-200 ease-out {isDragging
 			? 'dragging'
 			: ''}"
 		style="
@@ -361,7 +367,7 @@
 					aria-label={item.ariaLabel}
 					onclick={() => closeMenu()}
 					data-scroll="smooth"
-					class="menu-cta-btn mb-4 flex items-center justify-center rounded-2xl bg-gradient-to-br from-(--color-gradient-purple-start) to-(--color-gradient-purple-mid) px-6 py-5 text-xl font-bold text-white no-underline transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:opacity-90 focus:-translate-y-0.5 focus:opacity-90 active:translate-y-0 active:scale-[0.98]"
+					class="menu-cta-btn mb-4 flex items-center justify-center rounded-2xl bg-linear-to-br from-(--color-gradient-purple-start) to-(--color-gradient-purple-mid) px-6 py-5 text-xl font-bold text-white no-underline transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:opacity-90 focus:-translate-y-0.5 focus:opacity-90 active:translate-y-0 active:scale-[0.98]"
 				>
 					{item.label}
 				</a>
@@ -377,7 +383,7 @@
 								aria-label={item.ariaLabel}
 								onclick={() => closeMenu()}
 								data-scroll="smooth"
-								class="mobile-nav-link relative flex min-h-[60px] items-center overflow-visible rounded-2xl border border-[rgba(102,126,234,0.1)] bg-white/50 px-6 py-5 text-lg font-semibold text-(--color-primary-dark) no-underline transition-[background,color,padding-left,border-color,box-shadow] duration-300 ease-out hover:z-[1] hover:border-[rgba(102,126,234,0.3)] hover:bg-[rgba(102,126,234,0.1)] hover:pl-14 hover:text-(--color-gradient-purple-start) hover:shadow-[0_4px_12px_rgba(102,126,234,0.15)] focus:z-[1] focus:border-[rgba(102,126,234,0.3)] focus:bg-[rgba(102,126,234,0.1)] focus:pl-14 focus:text-(--color-gradient-purple-start) focus:shadow-[0_4px_12px_rgba(102,126,234,0.15)] active:scale-[0.98] active:pl-[52px]"
+								class="mobile-nav-link relative flex min-h-[60px] items-center overflow-visible rounded-2xl border border-[rgba(102,126,234,0.1)] bg-white/50 px-6 py-5 text-lg font-semibold text-(--color-primary-dark) no-underline transition-[background,color,padding-left,border-color,box-shadow] duration-300 ease-out hover:z-1 hover:border-[rgba(102,126,234,0.3)] hover:bg-[rgba(102,126,234,0.1)] hover:pl-14 hover:text-(--color-gradient-purple-start) hover:shadow-[0_4px_12px_rgba(102,126,234,0.15)] focus:z-1 focus:border-[rgba(102,126,234,0.3)] focus:bg-[rgba(102,126,234,0.1)] focus:pl-14 focus:text-(--color-gradient-purple-start) focus:shadow-[0_4px_12px_rgba(102,126,234,0.15)] active:scale-[0.98] active:pl-[52px]"
 							>
 								{item.label}
 							</a>
