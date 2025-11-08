@@ -1,7 +1,11 @@
 <script lang="ts">
-	const { messages = [] } = $props<{
-		messages?: { id: string; type: 'success' | 'error' | 'info'; text: string }[];
-	}>();
+	import type { ToasterMessage } from '$lib/stores/toaster';
+
+	interface ToasterProps {
+		messages?: ToasterMessage[];
+	}
+
+	let { messages = [] }: ToasterProps = $props();
 </script>
 
 <div aria-live="polite" class="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col gap-2 md:bottom-6 md:right-6">

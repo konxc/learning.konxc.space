@@ -6,7 +6,13 @@
   import Button from '$lib/components/ui/Button.svelte';
   import PageSection from '$lib/components/layouts/PageSection.svelte';
   import { COLOR, TEXT, SPACING } from '$lib/config/design';
-  const { data } = $props<{ data: any }>();
+  import { formatCurrency } from '$lib/utils/format';
+
+interface DashboardMentorProps {
+	data: any;
+}
+
+let { data }: DashboardMentorProps = $props();
 
   const columns = [
     { key: 'title', label: 'Course' },

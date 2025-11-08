@@ -21,7 +21,11 @@
 		{ href: '/#about', label: 'Tentang', ariaLabel: 'Tentang Naik Kelas' },
 		{ href: '/#program', label: 'Program', ariaLabel: 'Program Pelatihan' },
 		{ href: '/#benefits', label: 'Benefits', ariaLabel: 'Manfaat Program' },
-		{ href: '/kemitraan', label: 'Kemitraan', ariaLabel: 'Kemitraan Sekolah dan Mitra' },
+		{
+			href: '/school-partnership',
+			label: 'Kemitraan Sekolah',
+			ariaLabel: 'Ringkasan kemitraan sekolah Naik Kelas'
+		},
 		{
 			href: '/paket-les',
 			label: 'Paket Les',
@@ -114,6 +118,7 @@
 
 	// Effects menggunakan Svelte 5 Runes
 	$effect(() => {
+		handleScroll();
 		window.addEventListener('scroll', handleScroll);
 		return () => window.removeEventListener('scroll', handleScroll);
 	});

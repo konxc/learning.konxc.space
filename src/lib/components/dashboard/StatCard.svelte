@@ -1,9 +1,11 @@
 <script lang="ts">
-	const { label, value, hint } = $props<{
+	interface StatCardProps {
 		label: string;
 		value: string | number;
 		hint?: string;
-	}>();
+	}
+
+	let { label, value, hint }: StatCardProps = $props();
 </script>
 
 <div class="rounded-lg border bg-white p-4 shadow-sm">

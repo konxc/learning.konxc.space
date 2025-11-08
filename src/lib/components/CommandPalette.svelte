@@ -2,12 +2,23 @@
 	import { onMount } from 'svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 
-	const { items } = $props<{ items: Array<{ label: string; href: string }> }>();
+	interface CommandPaletteItem {
+		label: string;
+		href: string;
+	}
+
+	interface CommandPaletteProps {
+		items: CommandPaletteItem[];
+	}
+
+	let { items }: CommandPaletteProps = $props();
 	let open = $state(false);
 	let query = $state('');
 	let inputEl = $state<HTMLInputElement | null>(null);
 	const filtered = $derived(
-		items.filter((i: { label: string; href: string }) => i.label.toLowerCase().includes(query.toLowerCase()))
+		items.filter((i: { label: string; href: string }) =>
+			i.label.toLowerCase().includes(query.toLowerCase())
+		)
 	);
 
 	function onKey(e: KeyboardEvent) {
@@ -70,8 +81,7 @@
 					<a
 						href={i.href}
 						class={`block ${RADIUS.small} px-3 py-2 ${TEXT.body} ${COLOR.textPrimary} ${TRANSITION.colors} hover:bg-gray-100 dark:hover:bg-neutral-800`}
-						onclick={() => (open = false)}
-						>{i.label}</a
+						onclick={() => (open = false)}>{i.label}</a
 					>
 				{/each}
 				{#if filtered.length === 0}

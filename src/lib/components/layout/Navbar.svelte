@@ -2,15 +2,13 @@
 	import { MAIN_ROUTES } from '$lib/constants/routes';
 	import type { Snippet } from 'svelte';
 
-	const {
-		brand = 'Naik Kelas',
-		actions,
-		children
-	} = $props<{
+	interface NavbarProps {
 		brand?: string;
 		actions?: Snippet;
 		children?: Snippet;
-	}>();
+	}
+
+	let { brand = 'Naik Kelas', actions, children }: NavbarProps = $props();
 </script>
 
 <header class="glass-surface sticky top-0 z-40 border-b bg-white/80 backdrop-blur">

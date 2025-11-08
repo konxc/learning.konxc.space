@@ -1,17 +1,14 @@
 <script lang="ts">
 	import { RADIUS, ELEVATION, COLOR, SPACING, TEXT, TRANSITION } from '$lib/config/design';
 
-	const {
-		label,
-		value = 0,
-		hint = null,
-		accent = false
-	} = $props<{
+	interface KpiCardProps {
 		label: string;
 		value?: string | number;
 		hint?: string | null;
 		accent?: boolean;
-	}>();
+	}
+
+	let { label, value = 0, hint = null, accent = false }: KpiCardProps = $props();
 </script>
 
 <div

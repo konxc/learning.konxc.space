@@ -3,10 +3,13 @@
 	import ThemeToggle from './ThemeToggle.svelte';
 	import LocaleSwitcher from './LocaleSwitcher.svelte';
 	import { m } from '$lib/paraglide/messages.js';
-	const { data, isAdmin = false } = $props<{
+
+	interface HeaderProps {
 		data: { user: any; roles: string[]; activeRole: string | null };
 		isAdmin?: boolean;
-	}>();
+	}
+
+	let { data, isAdmin = false }: HeaderProps = $props();
 	import AuroraOverlay from '$lib/components/decor/AuroraOverlay.svelte';
 	import GlowOrbs from '$lib/components/decor/GlowOrbs.svelte';
 	import { brandMode } from '$lib/stores/brandMode';

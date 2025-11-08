@@ -7,7 +7,12 @@
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
 	import { COLOR, TEXT, SPACING } from '$lib/config/design';
 	import { formatCurrency } from '$lib/utils/format';
-	const { data } = $props<{ data: any }>();
+
+	interface DashboardBusinessProps {
+		data: any;
+	}
+
+	let { data }: DashboardBusinessProps = $props();
 
 	const columns = [
 		{ key: 'date', label: 'Date' },

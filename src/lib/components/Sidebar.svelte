@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { m } from '$lib/paraglide/messages.js';
-	const { data } = $props<{
+
+	interface SidebarProps {
 		data: { roles: string[]; activeRole: string | null };
-	}>();
+	}
+
+	let { data }: SidebarProps = $props();
 	const isAdmin = data.activeRole === 'admin';
 
 	function isActive(href: string, path: string) {

@@ -1,6 +1,19 @@
 <script lang="ts">
 	import { RADIUS, SPACING, COLOR, TRANSITION } from '$lib/config/design';
+	import type { HTMLInputAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
+
+	interface InputProps {
+		id?: string;
+		label?: string;
+		type?: string;
+		value?: string | number;
+		placeholder?: string;
+		disabled?: boolean;
+		required?: boolean;
+		autocomplete?: HTMLInputAttributes['autocomplete'];
+		children?: Snippet;
+	}
 
 	let {
 		id,
@@ -12,17 +25,7 @@
 		required = false,
 		autocomplete,
 		children
-	} = $props<{
-		id?: string;
-		label?: string;
-		type?: string;
-		value?: string | number;
-		placeholder?: string;
-		disabled?: boolean;
-		required?: boolean;
-		autocomplete?: string;
-		children?: Snippet;
-	}>();
+	}: InputProps = $props();
 </script>
 
 {#if label}

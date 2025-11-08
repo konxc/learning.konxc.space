@@ -2,17 +2,14 @@
 	import { RADIUS, SPACING, TEXT, TRANSITION, COLOR } from '$lib/config/design';
 	import type { Snippet } from 'svelte';
 
-	const {
-		variant = 'primary',
-		type = 'button',
-		disabled = false,
-		children
-	} = $props<{
+	interface ButtonProps {
 		variant?: 'primary' | 'secondary' | 'ghost';
 		type?: 'button' | 'submit' | 'reset';
 		disabled?: boolean;
 		children?: Snippet;
-	}>();
+	}
+
+	let { variant = 'primary', type = 'button', disabled = false, children }: ButtonProps = $props();
 
 	const variantClasses: Record<string, string> = {
 		// WCAG AA: blue-600 on white with white text has 4.81:1 contrast (sufficient for buttons)

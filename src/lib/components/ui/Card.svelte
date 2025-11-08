@@ -2,11 +2,13 @@
 	import { RADIUS, ELEVATION, COLOR, SPACING, TEXT } from '$lib/config/design';
 	import type { Snippet } from 'svelte';
 
-	let { title, subtitle, children } = $props<{
+	interface CardProps {
 		title?: string;
 		subtitle?: string;
 		children?: Snippet;
-	}>();
+	}
+
+	let { title, subtitle, children }: CardProps = $props();
 </script>
 
 <div

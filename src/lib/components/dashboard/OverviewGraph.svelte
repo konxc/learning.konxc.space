@@ -1,9 +1,11 @@
 <script lang="ts">
 	// Placeholder grafik overview (bisa diganti chart lib)
-	const { title = 'Overview', description } = $props<{
+	interface OverviewGraphProps {
 		title?: string;
 		description?: string;
-	}>();
+	}
+
+	let { title = 'Overview', description }: OverviewGraphProps = $props();
 </script>
 
 <div class="rounded-lg border bg-white p-4 shadow-sm">

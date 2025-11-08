@@ -1,17 +1,19 @@
 <script lang="ts">
 	import { COLOR, TEXT } from '$lib/config/design';
 
-	const {
-		columns = [],
-		rows = [],
-		loading = false,
-		emptyText = 'Tidak ada data.'
-	} = $props<{
+	interface TableProps {
 		columns?: Array<{ key: string; label: string; width?: string }>;
 		rows?: Array<Record<string, any>>;
 		loading?: boolean;
 		emptyText?: string;
-	}>();
+	}
+
+	let {
+		columns = [],
+		rows = [],
+		loading = false,
+		emptyText = 'Tidak ada data.'
+	}: TableProps = $props();
 </script>
 
 <div

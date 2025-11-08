@@ -8,17 +8,14 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	let {
-		columns = $bindable([]),
-		rows = $bindable([]),
-		footer,
-		children
-	} = $props<{
+	interface TableProps {
 		columns?: Column<any>[];
 		rows?: any[];
 		footer?: Snippet;
 		children?: Snippet;
-	}>();
+	}
+
+	let { columns = $bindable([]), rows = $bindable([]), footer, children }: TableProps = $props();
 </script>
 
 <div class="overflow-x-auto">

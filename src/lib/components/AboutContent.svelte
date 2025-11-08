@@ -1,9 +1,11 @@
 <script lang="ts">
-	const { theme, getPrompt, getRightArrow } = $props<{
-		theme: string;
-		getPrompt: (t: string) => string;
-		getRightArrow: (t: string) => string;
-	}>();
+	interface AboutContentProps {
+		theme?: string;
+		getPrompt?: (t: string) => string;
+		getRightArrow?: (t: string) => string;
+	}
+
+	let { theme, getPrompt, getRightArrow }: AboutContentProps = $props();
 </script>
 
 <div class="about-content-wrapper">

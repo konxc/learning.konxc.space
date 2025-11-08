@@ -6,7 +6,13 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
 	import { COLOR, TEXT, SPACING } from '$lib/config/design';
-	const { data } = $props<{ data: any }>();
+	import { capitalize } from '$lib/utils/string';
+
+	interface DashboardAdminProps {
+		data: any;
+	}
+
+	let { data }: DashboardAdminProps = $props();
 
 	const columns = [
 		{ key: 'applicant', label: 'Applicant' },

@@ -47,10 +47,10 @@
 		if (defaultVariant) {
 			return;
 		}
-		rotationInterval = null;
-		// rotationInterval = setInterval(() => {
-		// 	currentIndex = (currentIndex + 1) % variants.length;
-		// }, rotationDuration);
+		// rotationInterval = null;
+		rotationInterval = setInterval(() => {
+			currentIndex = (currentIndex + 1) % variants.length;
+		}, rotationDuration);
 	});
 
 	onDestroy(() => {

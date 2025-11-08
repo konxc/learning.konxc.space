@@ -2,16 +2,7 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import AboutContent from '$lib/components/AboutContent.svelte';
 
-	const {
-		open = false,
-		title = 'About',
-		containerEl = null as HTMLElement | null,
-		overlayDim = false,
-		closeOnOverlayClick = false,
-		theme = '' as string,
-		getPrompt = ((t: string) => '') as (t: string) => string,
-		getRightArrow = ((t: string) => '') as (t: string) => string
-	} = $props<{
+	interface AboutWindowProps {
 		open?: boolean;
 		title?: string;
 		containerEl?: HTMLElement | null;
@@ -20,7 +11,18 @@
 		theme?: string;
 		getPrompt?: (t: string) => string;
 		getRightArrow?: (t: string) => string;
-	}>();
+	}
+
+	let {
+		open = false,
+		title = 'About',
+		containerEl = null as HTMLElement | null,
+		overlayDim = false,
+		closeOnOverlayClick = false,
+		theme = '' as string,
+		getPrompt = ((t: string) => '') as (t: string) => string,
+		getRightArrow = ((t: string) => '') as (t: string) => string
+	}: AboutWindowProps = $props();
 
 	const dispatch = createEventDispatcher();
 

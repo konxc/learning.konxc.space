@@ -1,5 +1,9 @@
 <script lang="ts">
-	const { rows = 5 } = $props<{ rows?: number }>();
+	interface SkeletonListProps {
+		rows?: number;
+	}
+
+	let { rows = 5 }: SkeletonListProps = $props();
 </script>
 
 <div class="divide-y">

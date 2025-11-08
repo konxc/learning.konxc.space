@@ -2,10 +2,12 @@
 	import { onMount, createEventDispatcher } from 'svelte';
 	import DropdownMenu from '$lib/components/DropdownMenu.svelte';
 
-	const { containerEl = null, aboutOpen = false } = $props<{
+	interface TerminalDemoProps {
 		containerEl?: HTMLElement | null;
 		aboutOpen?: boolean;
-	}>();
+	}
+
+	let { containerEl = null, aboutOpen = false }: TerminalDemoProps = $props();
 	const dispatch = createEventDispatcher();
 
 	let codeDisplay = $state('');

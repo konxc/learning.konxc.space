@@ -7,7 +7,12 @@
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
 	import { COLOR, TEXT, SPACING } from '$lib/config/design';
 	import { formatCurrency } from '$lib/utils/format';
-	const { data } = $props<{ data: any }>();
+
+	interface DashboardLearnerProps {
+		data: any;
+	}
+
+	let { data }: DashboardLearnerProps = $props();
 
 	const courseColumns = [
 		{ key: 'title', label: 'Course' },

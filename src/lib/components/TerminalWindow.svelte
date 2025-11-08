@@ -1,17 +1,25 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	const {
-		title = 'zsh',
-		actions,
-		children,
-		overlays
-	} = $props<{
+	interface TerminalWindowProps {
+		open?: boolean;
 		title?: string;
-		actions?: Snippet;
+		overlayDim?: boolean;
+		onClose?: () => void;
 		children?: Snippet;
+		actions?: Snippet;
 		overlays?: Snippet;
-	}>();
+	}
+
+	let {
+		open = false,
+		title = 'Terminal',
+		overlayDim = false,
+		onClose,
+		children,
+		actions,
+		overlays
+	}: TerminalWindowProps = $props();
 </script>
 
 <div class="terminal-window">

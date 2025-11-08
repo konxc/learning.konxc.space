@@ -1,19 +1,21 @@
 <script lang="ts">
 	import { onMount, createEventDispatcher, type Snippet } from 'svelte';
 
-	const {
-		align = 'right',
-		minWidth = 160,
-		zIndex = 1000,
-		trigger,
-		children
-	} = $props<{
+	interface DropdownMenuProps {
 		align?: 'left' | 'right';
 		minWidth?: number;
 		zIndex?: number;
 		trigger?: Snippet;
 		children?: Snippet;
-	}>();
+	}
+
+	let {
+		align = 'right',
+		minWidth = 160,
+		zIndex = 1000,
+		trigger,
+		children
+	}: DropdownMenuProps = $props();
 
 	let open = $state(false);
 	const dispatch = createEventDispatcher();
