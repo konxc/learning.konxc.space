@@ -3,8 +3,8 @@ import { requireMentor } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, desc, inArray } from 'drizzle-orm';
-import { fail } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
+import { actionFailure, actionSuccess } from '$lib/server/actions';
 
 type SubmissionRecord = typeof schema.submission.$inferSelect;
 type CourseRecord = typeof schema.course.$inferSelect;
@@ -116,12 +116,12 @@ export const actions: Actions = {
 		const feedbackValue = formData.get('feedback');
 
 		if (typeof submissionIdValue !== 'string' || submissionIdValue.trim().length === 0) {
-			return fail(400, { error: 'Submission ID and score are required' });
+			return actionFailure(400, 'Submission ID and score are required');
 		}
 
 		const parsedScore = typeof scoreValue === 'string' ? Number.parseInt(scoreValue, 10) : Number.NaN;
 		if (!Number.isFinite(parsedScore)) {
-			return fail(400, { error: 'Submission ID and score are required' });
+			return actionFailure(400, 'Submission ID and score are required');
 		}
 
 		const feedback = typeof feedbackValue === 'string' ? feedbackValue.trim() : '';
@@ -137,7 +137,7 @@ export const actions: Actions = {
 		})) as SubmissionWithCourse | undefined;
 
 		if (!submission?.course || submission.course.mentorId !== mentor.id) {
-			return fail(403, { error: 'Unauthorized' });
+			return actionFailure(403, 'Unauthorized');
 		}
 
 		// Check if already graded
@@ -148,7 +148,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (existingGrade.length > 0) {
-			return fail(400, { error: 'Submission already graded' });
+			return actionFailure(400, 'Submission already graded');
 		}
 
 		// Create grade
@@ -162,6 +162,6 @@ export const actions: Actions = {
 			feedback: feedback.length > 0 ? feedback : null
 		});
 
-		return { success: true };
+		return actionSuccess();
 	}
 } satisfies Actions;

@@ -1,11 +1,12 @@
 import { hashPassword } from '$lib/server/password';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
-import { fail, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import * as auth from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
 import type { Actions, PageServerLoad } from './$types';
+import { actionFailure } from '$lib/server/actions';
 
 export const load: PageServerLoad = async (event) => {
     if (event.locals.user) {
@@ -49,21 +50,22 @@ export const actions: Actions = {
 
         // Validation
         if (!validateUsername(username)) {
-            return fail(400, {
-                message: 'Username tidak valid (min 3, max 31 karakter, huruf kecil, angka, underscore atau tanda hubung)'
-            });
+            return actionFailure(
+                400,
+                'Username tidak valid (min 3, max 31 karakter, huruf kecil, angka, underscore atau tanda hubung)'
+            );
         }
 
         if (!validateEmail(email)) {
-            return fail(400, { message: 'Email tidak valid' });
+            return actionFailure(400, 'Email tidak valid');
         }
 
         if (!validatePassword(password)) {
-            return fail(400, { message: 'Password minimal 6 karakter' });
+            return actionFailure(400, 'Password minimal 6 karakter');
         }
 
         if (password !== confirmPassword) {
-            return fail(400, { message: 'Password tidak cocok' });
+            return actionFailure(400, 'Password tidak cocok');
         }
 
         // Check if username already exists
@@ -74,7 +76,7 @@ export const actions: Actions = {
             .limit(1);
 
         if (existingUser.length > 0) {
-            return fail(400, { message: 'Username sudah digunakan' });
+            return actionFailure(400, 'Username sudah digunakan');
         }
 
         // Check if email already exists
@@ -86,7 +88,7 @@ export const actions: Actions = {
                 .limit(1);
 
             if (existingEmail.length > 0) {
-                return fail(400, { message: 'Email sudah terdaftar' });
+                return actionFailure(400, 'Email sudah terdaftar');
             }
         }
 
@@ -120,7 +122,7 @@ export const actions: Actions = {
             if (err instanceof Error && err.message.includes('redirect')) {
                 throw err;
             }
-            return fail(500, { message: 'Terjadi kesalahan. Silakan coba lagi.' });
+            return actionFailure(500, 'Terjadi kesalahan. Silakan coba lagi.');
         }
     }
 };

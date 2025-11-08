@@ -3,8 +3,9 @@ import { requireMentor } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { fail, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
+import { actionFailure, actionSuccess } from '$lib/server/actions';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const mentor = await requireMentor({ user: locals.user });
@@ -62,7 +63,7 @@ export const actions: Actions = {
 		const title = formData.get('title') as string;
 
 		if (!title) {
-			return fail(400, { error: 'Title is required' });
+			return actionFailure(400, 'Title is required');
 		}
 
 		// Verify ownership
@@ -73,7 +74,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (course.length === 0) {
-			return fail(403, { error: 'Unauthorized' });
+			return actionFailure(403, 'Unauthorized');
 		}
 
 		// Get next order
@@ -90,7 +91,7 @@ export const actions: Actions = {
 			order
 		});
 
-		return { success: true };
+		return actionSuccess({ message: 'Modul berhasil dibuat.' });
 	},
 
 	createLesson: async ({ request, params, locals }) => {
@@ -102,7 +103,7 @@ export const actions: Actions = {
 		const title = formData.get('title') as string;
 
 		if (!moduleId || !title) {
-			return fail(400, { error: 'Module ID and title are required' });
+			return actionFailure(400, 'Module ID and title are required');
 		}
 
 		// Verify ownership
@@ -117,7 +118,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (module.length === 0) {
-			return fail(403, { error: 'Unauthorized' });
+			return actionFailure(403, 'Unauthorized');
 		}
 
 		// Get next order
@@ -137,7 +138,7 @@ export const actions: Actions = {
 			order
 		});
 
-		return { success: true };
+		return actionSuccess({ message: 'Lesson berhasil dibuat.' });
 	},
 
 	createMaterial: async ({ request, params, locals }) => {
@@ -151,7 +152,7 @@ export const actions: Actions = {
 		const url = formData.get('url') as string;
 
 		if (!lessonId || !type) {
-			return fail(400, { error: 'Lesson ID and type are required' });
+			return actionFailure(400, 'Lesson ID and type are required');
 		}
 
 		// Verify ownership
@@ -168,7 +169,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (lesson.length === 0) {
-			return fail(403, { error: 'Unauthorized' });
+			return actionFailure(403, 'Unauthorized');
 		}
 
 		// Get next order
@@ -190,6 +191,6 @@ export const actions: Actions = {
 			order
 		});
 
-		return { success: true };
+		return actionSuccess({ message: 'Materi berhasil ditambahkan.' });
 	}
 } satisfies Actions;

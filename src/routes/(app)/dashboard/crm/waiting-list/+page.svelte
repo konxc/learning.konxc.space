@@ -101,8 +101,10 @@
 
 	// Show toast messages for form results
 	$effect(() => {
-		if (form?.error && !form?.success) {
+		if (form?.error && form?.success === false) {
 			toast.error(form.error);
+		} else if (form?.success && form?.message) {
+			toast.success(form.message);
 		}
 	});
 </script>

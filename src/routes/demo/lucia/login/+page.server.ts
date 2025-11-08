@@ -1,12 +1,13 @@
 import { hashPassword, verifyPassword } from '$lib/server/password';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
-import { fail, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import * as auth from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
 import * as schema from '$lib/server/db/schema';
 import type { Actions, PageServerLoad } from './$types';
+import { actionFailure } from '$lib/server/actions';
 
 export const load: PageServerLoad = async (event) => {
 	if (event.locals.user) {
@@ -22,24 +23,25 @@ export const actions: Actions = {
 		const password = formData.get('password');
 
 		if (!validateUsername(username)) {
-			return fail(400, {
-				message: 'Invalid username (min 3, max 31 characters, alphanumeric only)'
-			});
+			return actionFailure(
+				400,
+				'Invalid username (min 3, max 31 characters, alphanumeric only)'
+			);
 		}
 		if (!validatePassword(password)) {
-			return fail(400, { message: 'Invalid password (min 6, max 255 characters)' });
+			return actionFailure(400, 'Invalid password (min 6, max 255 characters)');
 		}
 
 		const results = await db.select().from(table.user).where(eq(table.user.username, username));
 
 		const existingUser = results.at(0);
 		if (!existingUser) {
-			return fail(400, { message: 'Incorrect username or password' });
+			return actionFailure(400, 'Incorrect username or password');
 		}
 
 		const validPassword = await verifyPassword(existingUser.passwordHash, password);
 		if (!validPassword) {
-			return fail(400, { message: 'Incorrect username or password' });
+			return actionFailure(400, 'Incorrect username or password');
 		}
 
 		const sessionToken = auth.generateSessionToken();
@@ -69,10 +71,10 @@ export const actions: Actions = {
 		const password = formData.get('password');
 
 		if (!validateUsername(username)) {
-			return fail(400, { message: 'Invalid username' });
+			return actionFailure(400, 'Invalid username');
 		}
 		if (!validatePassword(password)) {
-			return fail(400, { message: 'Invalid password' });
+			return actionFailure(400, 'Invalid password');
 		}
 
 		const userId = generateUserId();
@@ -91,7 +93,7 @@ export const actions: Actions = {
 				return redirect(302, redirectUrl);
 			}
 		} catch {
-			return fail(500, { message: 'An error has occurred' });
+			return actionFailure(500, 'An error has occurred');
 		}
 		return redirect(302, '/dashboard');
 	}

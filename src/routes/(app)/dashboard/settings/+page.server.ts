@@ -1,9 +1,10 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { user } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { hashPassword, verifyPassword } from '$lib/server/password';
+import { actionFailure, actionSuccess } from '$lib/server/actions';
 
 function validateEmail(email: unknown): email is string {
 	if (typeof email !== 'string') return false;
@@ -54,21 +55,15 @@ export const actions: Actions = {
 
 		// Validation
 		if (fullName && fullName.length > 100) {
-			return fail(400, {
-				error: 'Nama lengkap maksimal 100 karakter'
-			});
+			return actionFailure(400, 'Nama lengkap maksimal 100 karakter');
 		}
 
 		if (email && !validateEmail(email)) {
-			return fail(400, {
-				error: 'Email tidak valid'
-			});
+			return actionFailure(400, 'Email tidak valid');
 		}
 
 		if (phoneValue && phoneValue.length > 20) {
-			return fail(400, {
-				error: 'Nomor telepon maksimal 20 karakter'
-			});
+			return actionFailure(400, 'Nomor telepon maksimal 20 karakter');
 		}
 
 		try {
@@ -81,14 +76,10 @@ export const actions: Actions = {
 				})
 				.where(eq(user.id, locals.user.id));
 
-			return {
-				success: 'Profil berhasil diperbarui!'
-			};
+			return actionSuccess({ message: 'Profil berhasil diperbarui!' });
 		} catch (e) {
 			console.error('Error updating profile:', e);
-			return fail(500, {
-				error: 'Terjadi kesalahan saat memperbarui profil'
-			});
+			return actionFailure(500, 'Terjadi kesalahan saat memperbarui profil');
 		}
 	},
 
@@ -104,21 +95,15 @@ export const actions: Actions = {
 
 		// Validation
 		if (!currentPassword) {
-			return fail(400, {
-				error: 'Password saat ini harus diisi'
-			});
+			return actionFailure(400, 'Password saat ini harus diisi');
 		}
 
 		if (!validatePassword(newPassword)) {
-			return fail(400, {
-				error: 'Password baru harus minimal 8 karakter'
-			});
+			return actionFailure(400, 'Password baru harus minimal 8 karakter');
 		}
 
 		if (newPassword !== confirmPassword) {
-			return fail(400, {
-				error: 'Password baru dan konfirmasi password tidak cocok'
-			});
+			return actionFailure(400, 'Password baru dan konfirmasi password tidak cocok');
 		}
 
 		// Get current user
@@ -127,18 +112,14 @@ export const actions: Actions = {
 		});
 
 		if (!currentUser) {
-			return fail(404, {
-				error: 'User tidak ditemukan'
-			});
+			return actionFailure(404, 'User tidak ditemukan');
 		}
 
 		// Verify current password
 		const isValidPassword = await verifyPassword(currentUser.passwordHash, currentPassword);
 
 		if (!isValidPassword) {
-			return fail(400, {
-				error: 'Password saat ini salah'
-			});
+			return actionFailure(400, 'Password saat ini salah');
 		}
 
 		try {
@@ -151,14 +132,10 @@ export const actions: Actions = {
 				.set({ passwordHash: newPasswordHash })
 				.where(eq(user.id, locals.user.id));
 
-			return {
-				success: 'Password berhasil diubah!'
-			};
+			return actionSuccess({ message: 'Password berhasil diubah!' });
 		} catch (e) {
 			console.error('Error changing password:', e);
-			return fail(500, {
-				error: 'Terjadi kesalahan saat mengubah password'
-			});
+			return actionFailure(500, 'Terjadi kesalahan saat mengubah password');
 		}
 	}
 };

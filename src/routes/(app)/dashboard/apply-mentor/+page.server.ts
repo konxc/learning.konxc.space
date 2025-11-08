@@ -3,7 +3,8 @@ import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
-import { redirect, fail } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
+import { actionFailure } from '$lib/server/actions';
 
 export const load: PageServerLoad = async (event) => {
     const user = await requireAuth(event);
@@ -33,7 +34,7 @@ export const actions: Actions = {
 
         // Check if user is already mentor/admin
         if (user.role === 'mentor' || user.role === 'admin') {
-            return fail(403, { message: 'Anda sudah menjadi mentor atau admin' });
+            return actionFailure(403, 'Anda sudah menjadi mentor atau admin');
         }
 
         const formData = await event.request.formData();
@@ -50,32 +51,32 @@ export const actions: Actions = {
 
         // Validation
         if (!fullName || typeof fullName !== 'string' || fullName.trim().length === 0) {
-            return fail(400, { message: 'Nama lengkap wajib diisi' });
+            return actionFailure(400, 'Nama lengkap wajib diisi');
         }
 
         if (!email || typeof email !== 'string' || email.trim().length === 0) {
-            return fail(400, { message: 'Email wajib diisi' });
+            return actionFailure(400, 'Email wajib diisi');
         }
 
         if (!phone || typeof phone !== 'string' || phone.trim().length === 0) {
-            return fail(400, { message: 'Nomor telepon wajib diisi' });
+            return actionFailure(400, 'Nomor telepon wajib diisi');
         }
 
         if (!bio || typeof bio !== 'string' || bio.trim().length === 0) {
-            return fail(400, { message: 'Bio wajib diisi' });
+            return actionFailure(400, 'Bio wajib diisi');
         }
 
         if (!expertise || typeof expertise !== 'string' || expertise.trim().length === 0) {
-            return fail(400, { message: 'Bidang keahlian wajib diisi' });
+            return actionFailure(400, 'Bidang keahlian wajib diisi');
         }
 
         const yearsExp = yearsExperience ? parseInt(yearsExperience as string) : 0;
         if (!yearsExperience || isNaN(yearsExp) || yearsExp < 0) {
-            return fail(400, { message: 'Tahun pengalaman wajib diisi dengan angka valid' });
+            return actionFailure(400, 'Tahun pengalaman wajib diisi dengan angka valid');
         }
 
         if (!motivation || typeof motivation !== 'string' || motivation.trim().length === 0) {
-            return fail(400, { message: 'Motivasi wajib diisi' });
+            return actionFailure(400, 'Motivasi wajib diisi');
         }
 
         // Check if user already has pending application
@@ -91,9 +92,7 @@ export const actions: Actions = {
             .limit(1);
 
         if (pendingApps.length > 0) {
-            return fail(400, {
-                message: 'Anda sudah memiliki aplikasi yang sedang dalam review'
-            });
+            return actionFailure(400, 'Anda sudah memiliki aplikasi yang sedang dalam review');
         }
 
         // Create application

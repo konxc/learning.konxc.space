@@ -3,8 +3,9 @@ import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { redirect, fail } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
+import { actionFailure, actionSuccess } from '$lib/server/actions';
 
 type QuizChoicePublic = Pick<typeof schema.quizChoice.$inferSelect, 'id' | 'text'>;
 type QuizChoiceWithAnswer = typeof schema.quizChoice.$inferSelect;
@@ -103,19 +104,19 @@ export const actions: Actions = {
 		})) as QuizWithQuestions<QuizChoiceWithAnswer> | undefined;
 
 		if (!quiz) {
-			return fail(404, { error: 'Quiz not found' });
+			return actionFailure(404, 'Quiz not found');
 		}
 
 		const rawAnswers = formData.get('answers');
 		if (typeof rawAnswers !== 'string') {
-			return fail(400, { error: 'Invalid answers payload' });
+			return actionFailure(400, 'Invalid answers payload');
 		}
 
 		let answers: QuizSubmissionAnswers;
 		try {
 			answers = JSON.parse(rawAnswers) as QuizSubmissionAnswers;
 		} catch (error) {
-			return fail(400, { error: 'Invalid answers payload' });
+			return actionFailure(400, 'Invalid answers payload');
 		}
 
 		// Check for existing submission
@@ -132,7 +133,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (existingSubmission.length > 0) {
-			return fail(400, { error: 'Quiz already submitted' });
+			return actionFailure(400, 'Quiz already submitted');
 		}
 
 		// Grade the quiz
@@ -142,7 +143,7 @@ export const actions: Actions = {
 		const totalQuestions = questions.length;
 
 		if (totalQuestions === 0) {
-			return fail(400, { error: 'Quiz has no questions' });
+			return actionFailure(400, 'Quiz has no questions');
 		}
 
 		for (const question of questions) {
@@ -171,11 +172,12 @@ export const actions: Actions = {
 			score: score
 		});
 
-		return {
-			success: true,
-			score,
-			passingScore: quiz.passingScore,
-			passed: score >= quiz.passingScore
-		};
+		return actionSuccess({
+			data: {
+				score,
+				passingScore: quiz.passingScore,
+				passed: score >= quiz.passingScore
+			}
+		});
 	}
 } satisfies Actions;

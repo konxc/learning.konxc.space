@@ -3,8 +3,9 @@ import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { fail, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
+import { actionFailure } from '$lib/server/actions';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
     const user = await requireAuth(locals);
@@ -57,17 +58,17 @@ export const actions: Actions = {
         const size = parseInt(formData.get('size') as string);
 
         if (!courseId || !dataBase64 || !mime || !size) {
-            return fail(400, { error: 'Missing required fields' });
+            return actionFailure(400, 'Missing required fields');
         }
 
         // Validate size (max 1MB after compression)
         if (size > 1024 * 1024) {
-            return fail(400, { error: 'File size exceeds 1MB limit' });
+            return actionFailure(400, 'File size exceeds 1MB limit');
         }
 
         // Validate mime type
         if (!['image/jpeg', 'image/png', 'image/webp'].includes(mime)) {
-            return fail(400, { error: 'Only JPEG, PNG, or WebP images are allowed' });
+            return actionFailure(400, 'Only JPEG, PNG, or WebP images are allowed');
         }
 
         // Verify enrollment exists and is pending
@@ -82,7 +83,7 @@ export const actions: Actions = {
             .limit(1);
 
         if (enrollment.length === 0) {
-            return fail(404, { error: 'Enrollment not found' });
+            return actionFailure(404, 'Enrollment not found');
         }
 
         // Check if proof already exists

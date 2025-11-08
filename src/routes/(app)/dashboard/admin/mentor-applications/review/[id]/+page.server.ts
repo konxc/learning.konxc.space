@@ -3,7 +3,8 @@ import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
-import { redirect, fail } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
+import { actionFailure } from '$lib/server/actions';
 
 export const load: PageServerLoad = async (event) => {
     await requireAdmin(event);
@@ -71,7 +72,7 @@ export const actions: Actions = {
             .limit(1);
 
         if (applications.length === 0) {
-            return fail(404, { message: 'Application not found' });
+            return actionFailure(404, 'Application not found');
         }
 
         const application = applications[0];
@@ -107,7 +108,7 @@ export const actions: Actions = {
         const adminNotes = formData.get('adminNotes');
 
         if (!adminNotes || typeof adminNotes !== 'string' || adminNotes.trim().length === 0) {
-            return fail(400, { message: 'Admin notes is required when rejecting' });
+            return actionFailure(400, 'Admin notes is required when rejecting');
         }
 
         // Get application
@@ -118,7 +119,7 @@ export const actions: Actions = {
             .limit(1);
 
         if (applications.length === 0) {
-            return fail(404, { message: 'Application not found' });
+            return actionFailure(404, 'Application not found');
         }
 
         // Update application status

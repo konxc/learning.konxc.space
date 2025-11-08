@@ -3,7 +3,7 @@ import { requireAdmin } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { fail } from '@sveltejs/kit';
+import { actionFailure, actionSuccess } from '$lib/server/actions';
 
 export const load: PageServerLoad = async (event) => {
     const user = await requireAdmin(event);
@@ -52,7 +52,7 @@ export const actions: Actions = {
         const proofId = formData.get('proofId') as string;
 
         if (!proofId) {
-            return fail(400, { error: 'Missing proof ID' });
+            return actionFailure(400, 'Missing proof ID');
         }
 
         // Get payment proof
@@ -63,7 +63,7 @@ export const actions: Actions = {
             .limit(1);
 
         if (proof.length === 0) {
-            return fail(404, { error: 'Payment proof not found' });
+            return actionFailure(404, 'Payment proof not found');
         }
 
         // Update proof status
@@ -84,7 +84,7 @@ export const actions: Actions = {
                 eq(schema.enrollment.courseId, proof[0].courseId)
             ));
 
-        return { success: true, message: 'Payment proof approved and enrollment activated' };
+        return actionSuccess({ message: 'Payment proof approved and enrollment activated' });
     },
 
     reject: async (event) => {
@@ -95,7 +95,7 @@ export const actions: Actions = {
         const notes = formData.get('notes') as string;
 
         if (!proofId) {
-            return fail(400, { error: 'Missing proof ID' });
+            return actionFailure(400, 'Missing proof ID');
         }
 
         // Update proof status
@@ -107,7 +107,7 @@ export const actions: Actions = {
             })
             .where(eq(schema.paymentProof.id, proofId));
 
-        return { success: true, message: 'Payment proof rejected' };
+        return actionSuccess({ message: 'Payment proof rejected' });
     }
 } satisfies Actions;
 

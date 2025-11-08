@@ -1,24 +1,19 @@
 <script lang="ts">
-	interface CheckoutData {
-		courseId: string;
-		clientKey: string;
-		success?: boolean;
-		snapToken?: string;
-		redirect_url?: string;
-		enrollmentId?: string;
-		error?: string;
-	}
+	import type { PageData, ActionData } from './$types';
 
 	interface CheckoutPageProps {
-		data: CheckoutData;
+		data: PageData;
+		form: ActionData;
 	}
 
-	let { data }: CheckoutPageProps = $props();
+	let { data, form }: CheckoutPageProps = $props();
 
 	// When action returns snapToken, trigger Snap pay
 	$effect(() => {
-		if (data?.success && data?.snapToken && typeof window !== 'undefined' && (window as any).snap) {
-			(window as any).snap.pay(data.snapToken, {
+		const transaction = form?.data;
+
+		if (form?.success && transaction?.snapToken && typeof window !== 'undefined' && (window as any).snap) {
+			(window as any).snap.pay(transaction.snapToken, {
 				onSuccess: function () {
 					location.href = '/dashboard';
 				},
@@ -44,8 +39,8 @@
 
 <div class="mx-auto max-w-xl p-6">
 	<h1 class="mb-4 text-2xl font-semibold">Checkout</h1>
-	{#if data.error}
-		<p class="mb-4 text-red-600">{data.error}</p>
+	{#if form?.error}
+		<p class="mb-4 text-red-600">{form.error}</p>
 	{/if}
 	<form method="post" class="space-y-4">
 		<input type="hidden" name="courseId" value={data.courseId} />

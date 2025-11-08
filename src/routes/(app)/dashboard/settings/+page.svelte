@@ -179,7 +179,7 @@
 				role="alert"
 			>
 				<strong class="font-semibold">Berhasil!</strong>
-				{form.success}
+				{form?.message ?? 'Perubahan berhasil disimpan.'}
 			</div>
 		</PageSection>
 	{/if}

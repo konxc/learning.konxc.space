@@ -1,7 +1,8 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { env as privateEnv } from '$env/dynamic/private';
 import { env as publicEnv } from '$env/dynamic/public';
+import { actionFailure, actionSuccess } from '$lib/server/actions';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const courseId = params.id;
@@ -38,13 +39,12 @@ export const actions: Actions = {
 
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({} as any));
-			return fail(res.status, { error: err.error || 'Gagal membuat transaksi' });
+			return actionFailure(res.status, err.error || 'Gagal membuat transaksi');
 		}
 
-		const data = await res.json();
-		return {
-			success: true,
-			...data
-		};
+		const transaction = await res.json();
+		return actionSuccess({
+			data: transaction
+		});
 	}
 };

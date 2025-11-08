@@ -220,12 +220,14 @@ let formData = $state({
 		onDestroy(() => window.removeEventListener('resize', onResize));
 
 		// Show toast notifications after mount (client-side only)
-		if (form?.error) {
-			toast.error(form.error);
-		}
-		if (form?.success) {
-			toast.success('Berhasil mendaftar! Terima kasih atas pendaftaran Anda.');
-		}
+	if (form?.error) {
+		toast.error(form.error);
+	}
+	if (form?.success) {
+		toast.success(
+			form?.message ?? 'Berhasil mendaftar! Terima kasih atas pendaftaran Anda.'
+		);
+	}
 	});
 
 	onDestroy(() => {
@@ -353,8 +355,8 @@ let formData = $state({
 					</div>
 					<h2>Terima Kasih! 🎉</h2>
 					<p>
-						Kamu telah berhasil mendaftar di waiting list. Kami akan menghubungi kamu segera setelah
-						batch dibuka.
+						{form?.message ??
+							'Kamu telah berhasil mendaftar di waiting list. Kami akan menghubungi kamu segera setelah batch dibuka.'}
 					</p>
 					<a href="/" class="home-link">Kembali ke Beranda</a>
 				</div>

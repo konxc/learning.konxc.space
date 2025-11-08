@@ -1,10 +1,10 @@
-import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { eq } from 'drizzle-orm';
 import sharp from 'sharp';
+import { actionFailure, actionSuccess } from '$lib/server/actions';
 
 // Disable prerendering because this page has server actions
 export const prerender = false;
@@ -32,33 +32,33 @@ export const actions: Actions = {
 		// Validation
 		const trimmedFullName = fullName.trim();
 		if (!trimmedFullName || trimmedFullName.length < 2) {
-			return fail(400, { error: 'Nama lengkap minimal 2 karakter' });
+			return actionFailure(400, 'Nama lengkap minimal 2 karakter');
 		}
 
 		if (!email) {
-			return fail(400, { error: 'Email wajib diisi' });
+			return actionFailure(400, 'Email wajib diisi');
 		}
 
 		// Email format validation
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(email)) {
-			return fail(400, { error: 'Format email tidak valid' });
+			return actionFailure(400, 'Format email tidak valid');
 		}
 
 		// Validate screenshot file
 		if (!screenshotFile || screenshotFile.size === 0) {
-			return fail(400, { error: 'Bukti screenshot wajib diisi' });
+			return actionFailure(400, 'Bukti screenshot wajib diisi');
 		}
 
 		// Validate file type
 		if (!screenshotFile.type.startsWith('image/')) {
-			return fail(400, { error: 'File harus berupa gambar' });
+			return actionFailure(400, 'File harus berupa gambar');
 		}
 
 		// Validate file size (max 5MB)
 		const maxSize = 5 * 1024 * 1024; // 5MB
 		if (screenshotFile.size > maxSize) {
-			return fail(400, { error: 'Ukuran gambar maksimal 5MB' });
+			return actionFailure(400, 'Ukuran gambar maksimal 5MB');
 		}
 
 		// Compress image before converting to base64
@@ -92,7 +92,7 @@ export const actions: Actions = {
 		// Validate Instagram username
 		const trimmedInstagramUsername = instagramUsername.trim();
 		if (!trimmedInstagramUsername || trimmedInstagramUsername.length < 1) {
-			return fail(400, { error: 'Username Instagram wajib diisi' });
+			return actionFailure(400, 'Username Instagram wajib diisi');
 		}
 
 		// Check if email already exists
@@ -103,9 +103,10 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (existing.length > 0) {
-			return fail(400, {
-				error: 'Email ini sudah terdaftar di waiting list. Kami akan menghubungi kamu segera!'
-			});
+			return actionFailure(
+				400,
+				'Email ini sudah terdaftar di waiting list. Kami akan menghubungi kamu segera!'
+			);
 		}
 
 		try {
@@ -130,10 +131,12 @@ export const actions: Actions = {
 				updatedAt: now
 			});
 
-			return { success: true };
+			return actionSuccess({
+				message: 'Berhasil mendaftar waiting list. Kami akan menghubungi kamu segera.'
+			});
 		} catch (err) {
 			console.error('Error saving to waiting list:', err);
-			return fail(500, { error: 'Terjadi kesalahan. Silakan coba lagi nanti.' });
+			return actionFailure(500, 'Terjadi kesalahan. Silakan coba lagi nanti.');
 		}
 	}
 };

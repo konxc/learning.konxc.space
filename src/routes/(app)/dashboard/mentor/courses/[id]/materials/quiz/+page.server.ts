@@ -3,8 +3,9 @@ import { requireMentor } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { fail, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
+import { actionFailure, actionSuccess } from '$lib/server/actions';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const mentor = await requireMentor({ user: locals.user });
@@ -59,7 +60,7 @@ export const actions: Actions = {
 		const passingScore = parseInt(formData.get('passingScore') as string);
 
 		if (!lessonId || !title || isNaN(passingScore)) {
-			return fail(400, { error: 'Lesson ID, title, and passing score are required' });
+			return actionFailure(400, 'Lesson ID, title, and passing score are required');
 		}
 
 		// Verify ownership
@@ -76,7 +77,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (lesson.length === 0) {
-			return fail(403, { error: 'Unauthorized' });
+			return actionFailure(403, 'Unauthorized');
 		}
 
 		// Check if quiz already exists for this lesson
@@ -87,7 +88,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (existingQuiz.length > 0) {
-			return fail(400, { error: 'Quiz already exists for this lesson' });
+			return actionFailure(400, 'Quiz already exists for this lesson');
 		}
 
 		const quizId = encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(10)));
@@ -99,7 +100,7 @@ export const actions: Actions = {
 			passingScore
 		});
 
-		return { success: true, quizId };
+		return actionSuccess({ data: { quizId }, message: 'Quiz berhasil dibuat.' });
 	},
 
 	addQuestion: async ({ request, locals }) => {
@@ -112,7 +113,7 @@ export const actions: Actions = {
 		const correctChoice = formData.get('correctChoice') as string;
 
 		if (!quizId || !question || !choicesText || !correctChoice) {
-			return fail(400, { error: 'All fields are required' });
+			return actionFailure(400, 'All fields are required');
 		}
 
 		// Verify ownership
@@ -131,7 +132,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (quiz.length === 0) {
-			return fail(403, { error: 'Unauthorized' });
+			return actionFailure(403, 'Unauthorized');
 		}
 
 		// Get current question count for order
@@ -164,7 +165,7 @@ export const actions: Actions = {
 			});
 		}
 
-		return { success: true };
+		return actionSuccess({ message: 'Pertanyaan berhasil ditambahkan.' });
 	}
 } satisfies Actions;
 
