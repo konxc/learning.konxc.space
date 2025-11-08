@@ -1,8 +1,10 @@
 <script lang="ts">
-	let { selectedMode = $bindable('classic'), onModeChange } = $props<{
+	interface ModeSelectorProps {
 		selectedMode?: 'classic' | 'programming';
 		onModeChange?: (mode: 'classic' | 'programming') => void;
-	}>();
+	}
+
+	let { selectedMode = $bindable('classic'), onModeChange }: ModeSelectorProps = $props();
 
 	function selectMode(mode: 'classic' | 'programming') {
 		selectedMode = mode;

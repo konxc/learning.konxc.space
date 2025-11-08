@@ -1,6 +1,6 @@
 <script lang="ts">
 	const contactWhatsApp =
-		'https://wa.me/6281212345678?text=Halo%20Naik%20Kelas,%20saya%20ingin%20mendapatkan%20info%20paket%20les%20dan%20ekstrakurikuler.';
+		'https://wa.me/6281212345678?text=Halo%20Naik%20Kelas,%20saya%20datang%20dari%20halaman%20Paket%20Les%20dan%20ingin%20membahas%20program%20yang%20tersedia.';
 
 	type PackageCategoryId = 'les-bimbel' | 'ekstrakurikuler';
 
@@ -194,6 +194,23 @@
 			description: 'Paket dokumentasi foto/video untuk portofolio sekolah dan publikasi kegiatan.'
 		}
 	] as const;
+
+	const crossLinks = [
+		{
+			title: 'Kemitraan Sekolah',
+			description:
+				'Lihat gambaran besar kolaborasi dan benefit yang akan diterima sekolah sebelum memilih paket biaya.',
+			cta: 'Buka ringkasan kemitraan',
+			href: '/school-partnership'
+		},
+		{
+			title: 'Detail Alur Kemitraan',
+			description:
+				'Pelajari model kerjasama, timeline, dan langkah onboarding lengkap yang mendampingi program paket ini.',
+			cta: 'Pelajari alur kemitraan',
+			href: '/kemitraan'
+		}
+	];
 </script>
 
 <svelte:head>
@@ -205,14 +222,17 @@
 </svelte:head>
 
 <main class="packages-page">
-	<section class="hero-section">
+	<section class="hero-section mt-10">
 		<div class="hero-content">
 			<div class="hero-text">
 				<h1 id="packages-title">Paket Les & Ekstrakurikuler Naik Kelas</h1>
 				<p>
 					Pilih paket belajar yang paling sesuai untuk sekolah atau komunitas Anda. Semua program
 					mencakup modul siap pakai, mentor tersertifikasi, laporan perkembangan, dan showcase akhir
-					periode.
+					periode. Gunakan halaman ini setelah membaca <a href="/school-partnership"
+						>ringkasan kemitraan</a
+					>
+					dan sebelum menutup MoU di <a href="/kemitraan">halaman detail kemitraan</a>.
 				</p>
 				<div class="hero-actions">
 					<a
@@ -231,6 +251,13 @@
 					>
 						Lihat Skema Kemitraan Sekolah
 					</a>
+					<a
+						class="hero-ghost"
+						href="/school-partnership"
+						aria-label="Kembali ke ringkasan kemitraan sekolah"
+					>
+						Kembali ke Ringkasan Kemitraan
+					</a>
 				</div>
 			</div>
 			<div class="hero-highlights" role="list">
@@ -245,9 +272,41 @@
 		</div>
 	</section>
 
+	<section class="funnel-links section-block" aria-labelledby="funnel-links-title">
+		<header class="section-header items-center text-center">
+			<h2 id="funnel-links-title">Hubungkan dengan Kemitraan</h2>
+			<p>
+				Sebelum memilih paket dan estimasi biaya, pastikan tim sekolah memahami gambaran kemitraan
+				dan alur implementasi yang tersedia.
+			</p>
+		</header>
+		<div class="funnel-grid" role="list">
+			{#each crossLinks as link}
+				<article class="funnel-card" role="listitem">
+					<h3>{link.title}</h3>
+					<p>{link.description}</p>
+					<a class="funnel-link" href={link.href}>
+						{link.cta}
+					</a>
+				</article>
+			{/each}
+		</div>
+	</section>
+
+	<section class="packages-intro section-block" aria-labelledby="programs-title">
+		<header class="section-header items-center text-center">
+			<h2 id="programs-title">Pilihan Paket Program</h2>
+			<p>
+				Telusuri paket les dan ekstrakurikuler dalam dua kategori utama. Setiap paket mencakup
+				detail fasilitas, estimasi biaya, serta catatan tambahan yang dapat disesuaikan dengan
+				kebutuhan sekolah atau komunitas Anda.
+			</p>
+		</header>
+	</section>
+
 	{#each packageSections as section}
-		<section class="package-section" id={section.id}>
-			<header class="section-header">
+		<section class="package-section section-block" id={section.id}>
+			<header class="section-header items-center text-center">
 				<h2>{section.title}</h2>
 				<p>{section.description}</p>
 				{#if section.tagline}
@@ -304,8 +363,8 @@
 		</section>
 	{/each}
 
-	<section class="add-ons-section" id="add-ons">
-		<header class="section-header">
+	<section class="add-ons-section section-block" id="add-ons">
+		<header class="section-header items-center text-center">
 			<h2>Add-on & Layanan Tambahan</h2>
 			<p>
 				Paket dapat dikombinasikan dengan layanan pendukung untuk meningkatkan pengalaman belajar
@@ -322,13 +381,13 @@
 		</div>
 	</section>
 
-	<section class="cta-section">
+	<section class="cta-section section-block">
 		<div class="cta-card">
 			<h2>Siap memilih paket yang tepat?</h2>
 			<p>
-				Tim kami akan membantu merancang jadwal, kurikulum, dan proyeksi biaya sesuai kebutuhan
-				sekolah Anda. Kami juga menyiapkan MoU, SOP operasional, dan materi komunikasi untuk orang
-				tua.
+				Setelah menentukan paket yang cocok, tim kami akan mengirim proposal biaya, contoh MoU, dan
+				akses dashboard monitoring untuk sekolah. Kami juga menyiapkan SOP operasional serta materi
+				komunikasi untuk orang tua.
 			</p>
 			<div class="cta-actions">
 				<a
@@ -356,8 +415,28 @@
 	@reference "../../../app.css";
 
 	.packages-page {
-		@apply relative flex flex-col gap-24 bg-(--color-bg-light,#f4f6fb) pt-32 pb-24 text-(--color-primary-dark,#0f172a);
+		@apply relative flex flex-col gap-28 bg-(--color-bg-light,#f4f6fb) pt-28 pb-32 text-(--color-primary-dark,#0f172a);
 		min-height: 100vh;
+	}
+
+	.section-block {
+		@apply mx-auto w-full max-w-[1120px] px-6;
+	}
+
+	.section-header {
+		@apply mx-auto mb-12 flex max-w-[820px] flex-col gap-4 text-center text-balance;
+	}
+
+	.section-header h2 {
+		@apply text-3xl font-semibold text-(--color-primary-dark,#0f172a) md:text-4xl;
+	}
+
+	.section-header p {
+		@apply text-base leading-relaxed text-(--color-primary-medium,#334155) md:text-lg;
+	}
+
+	.section-tagline {
+		@apply inline-flex items-center gap-2 rounded-full bg-(--color-gradient-purple-start,#667eea)/10 px-4 py-2 text-sm font-medium text-(--color-gradient-purple-mid,#764ba2);
 	}
 
 	.hero-section {
@@ -365,7 +444,7 @@
 	}
 
 	.hero-content {
-		@apply relative overflow-hidden rounded-[36px] border border-white/40 bg-linear-to-br from-white/80 via-white/60 to-white/80 p-10 shadow-[0_25px_70px_rgba(15,23,42,0.08)] backdrop-blur-[30px];
+		@apply relative grid gap-10 overflow-hidden rounded-[36px] border border-white/40 bg-linear-to-br from-white/85 via-white/70 to-white/85 p-10 shadow-[0_25px_70px_rgba(15,23,42,0.08)] backdrop-blur-[28px] md:grid-cols-[1.1fr,0.9fr];
 	}
 
 	.hero-content::after {
@@ -373,13 +452,9 @@
 		position: absolute;
 		inset: -20%;
 		background:
-			radial-gradient(
-				circle at 20% 20%,
-				var(--color-gradient-purple-start, #667eea) 0%,
-				transparent 55%
-			),
-			radial-gradient(circle at 80% 30%, rgba(20, 184, 166, 0.2) 0%, transparent 55%);
-		opacity: 0.35;
+			radial-gradient(circle at 20% 20%, rgba(102, 126, 234, 0.4), transparent 60%),
+			radial-gradient(circle at 82% 30%, rgba(45, 212, 191, 0.2), transparent 60%);
+		opacity: 0.4;
 		z-index: 0;
 	}
 
@@ -388,20 +463,20 @@
 		@apply relative z-10;
 	}
 
-	.hero-content {
-		@apply grid gap-10 md:grid-cols-[1.1fr,0.9fr];
-	}
-
 	.hero-text h1 {
-		@apply mb-5 text-4xl leading-tight font-semibold text-balance text-(--color-primary-dark,#0f172a) md:text-5xl;
+		@apply text-4xl leading-tight font-semibold text-balance text-(--color-primary-dark,#0f172a) md:text-5xl;
 	}
 
 	.hero-text p {
-		@apply mb-8 text-lg text-(--color-primary-medium,#334155) md:text-xl;
+		@apply mt-5 text-lg leading-relaxed text-(--color-primary-medium,#334155) md:text-xl;
+	}
+
+	.hero-text p a {
+		@apply text-(--color-gradient-purple-mid,#764ba2) underline-offset-4 transition-colors duration-200 hover:text-(--color-gradient-purple-start,#667eea);
 	}
 
 	.hero-actions {
-		@apply flex flex-wrap items-center gap-4;
+		@apply mt-8 flex flex-wrap items-center gap-5;
 	}
 
 	.hero-primary {
@@ -412,16 +487,20 @@
 		@apply inline-flex items-center justify-center rounded-2xl border border-(--color-gradient-purple-start,#667eea)/40 bg-white/70 px-6 py-4 text-base font-semibold text-(--color-gradient-purple-mid,#764ba2) shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-(--color-gradient-purple-start,#667eea)/60 hover:bg-white focus:-translate-y-0.5;
 	}
 
+	.hero-ghost {
+		@apply inline-flex items-center justify-center rounded-2xl border border-white/60 bg-white/30 px-6 py-4 text-base font-semibold text-(--color-primary-dark,#0f172a) transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/60 focus:-translate-y-0.5;
+	}
+
 	.hero-highlights {
-		@apply grid gap-4 sm:grid-cols-2;
+		@apply grid gap-5 sm:grid-cols-2;
 	}
 
 	.highlight-card {
-		@apply rounded-3xl border border-white/50 bg-white/80 p-6 shadow-[0_15px_40px_rgba(15,23,42,0.05)] backdrop-blur-lg;
+		@apply rounded-3xl border border-white/50 bg-white/85 p-6 shadow-[0_18px_48px_rgba(15,23,42,0.08)] backdrop-blur-[18px];
 	}
 
 	.highlight-label {
-		@apply text-sm font-medium tracking-[0.1em] text-(--color-primary-medium,#334155) uppercase;
+		@apply text-sm font-medium tracking-[0.12em] text-(--color-primary-medium,#334155) uppercase;
 	}
 
 	.highlight-value {
@@ -432,37 +511,36 @@
 		@apply mt-2 text-sm text-(--color-primary-medium,#334155);
 	}
 
-	.package-section,
-	.add-ons-section {
-		@apply mx-auto w-full max-w-[1120px] px-6;
+	.funnel-grid {
+		@apply mt-12 grid gap-8 md:grid-cols-2;
 	}
 
-	.section-header {
-		@apply mb-10 flex flex-col gap-3 text-balance;
+	.funnel-card {
+		@apply flex h-full flex-col gap-4 rounded-[26px] border border-white/60 bg-white/92 p-7 shadow-[0_18px_45px_rgba(15,23,42,0.07)] backdrop-blur-[22px];
 	}
 
-	.section-header h2 {
-		@apply text-3xl font-semibold text-(--color-primary-dark,#0f172a) md:text-4xl;
+	.funnel-card h3 {
+		@apply text-xl font-semibold text-(--color-primary-dark,#0f172a);
 	}
 
-	.section-header p {
-		@apply text-base text-(--color-primary-medium,#334155) md:text-lg;
+	.funnel-card p {
+		@apply flex-1 text-sm leading-relaxed text-(--color-primary-medium,#334155);
 	}
 
-	.section-tagline {
-		@apply inline-flex items-center gap-2 rounded-full bg-(--color-gradient-purple-start,#667eea)/10 px-4 py-2 text-sm font-medium text-(--color-gradient-purple-mid,#764ba2);
+	.funnel-link {
+		@apply inline-flex items-center gap-2 text-sm font-semibold text-(--color-gradient-purple-mid,#764ba2) no-underline transition-transform duration-200 hover:translate-x-1 hover:text-(--color-gradient-purple-start,#667eea);
 	}
 
 	.package-grid {
-		@apply grid gap-6 md:grid-cols-2;
+		@apply grid gap-8 md:grid-cols-2;
 	}
 
 	.package-card {
-		@apply flex h-full flex-col justify-between rounded-[28px] border border-white/40 bg-white/90 p-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur-[25px] transition-transform duration-300 hover:-translate-y-1;
+		@apply flex h-full flex-col justify-between gap-6 rounded-[28px] border border-white/40 bg-white/92 p-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur-[25px] transition-transform duration-300 hover:-translate-y-1;
 	}
 
 	.card-header {
-		@apply mb-6 flex flex-col gap-3;
+		@apply flex flex-col gap-3;
 	}
 
 	.card-meta {
@@ -486,7 +564,7 @@
 	}
 
 	.card-pricing {
-		@apply mb-6 rounded-2xl bg-(--color-primary-soft-blue,#60a5fa)/10 p-4 text-(--color-primary-dark,#0f172a);
+		@apply rounded-2xl bg-(--color-primary-soft-blue,#60a5fa)/10 p-4 text-(--color-primary-dark,#0f172a);
 	}
 
 	.price-range {
@@ -498,7 +576,7 @@
 	}
 
 	.card-body {
-		@apply flex flex-col gap-5 text-sm text-(--color-primary-medium,#334155);
+		@apply flex flex-col gap-5 text-sm leading-relaxed text-(--color-primary-medium,#334155);
 	}
 
 	.body-section h4 {
@@ -506,11 +584,7 @@
 	}
 
 	.body-section ul {
-		@apply flex flex-col gap-2;
-	}
-
-	.body-section li {
-		@apply leading-relaxed;
+		@apply flex flex-col gap-3;
 	}
 
 	.notes {
@@ -518,11 +592,11 @@
 	}
 
 	.add-on-grid {
-		@apply grid gap-4 md:grid-cols-2;
+		@apply grid gap-6 md:grid-cols-2;
 	}
 
 	.add-on-card {
-		@apply rounded-[24px] border border-white/30 bg-white/90 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.05)] backdrop-blur-[20px];
+		@apply rounded-[24px] border border-white/30 bg-white/92 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.05)] backdrop-blur-[20px];
 	}
 
 	.add-on-card h3 {
@@ -530,15 +604,11 @@
 	}
 
 	.add-on-card p {
-		@apply mt-2 text-sm text-(--color-primary-medium,#334155);
-	}
-
-	.cta-section {
-		@apply mx-auto w-full max-w-[1120px] px-6;
+		@apply mt-2 text-sm leading-relaxed text-(--color-primary-medium,#334155);
 	}
 
 	.cta-card {
-		@apply overflow-hidden rounded-[36px] border border-white/40 bg-linear-to-br from-(--color-gradient-purple-start,#667eea) via-(--color-gradient-purple-mid,#764ba2) to-(--color-gradient-purple-end,#a855f7) p-10 text-white shadow-[0_25px_70px_rgba(76,29,149,0.35)];
+		@apply overflow-hidden rounded-[36px] border border-white/40 bg-linear-to-br from-(--color-gradient-purple-start,#667eea) via-(--color-gradient-purple-mid,#764ba2) to-(--color-gradient-purple-end,#a855f7) p-12 text-white shadow-[0_25px_70px_rgba(76,29,149,0.35)];
 	}
 
 	.cta-card h2 {
@@ -546,11 +616,11 @@
 	}
 
 	.cta-card p {
-		@apply mt-4 max-w-[720px] text-base md:text-lg;
+		@apply mt-4 max-w-[720px] text-base leading-relaxed md:text-lg;
 	}
 
 	.cta-actions {
-		@apply mt-8 flex flex-wrap items-center gap-4;
+		@apply mt-10 flex flex-wrap items-center gap-5;
 	}
 
 	.cta-primary {
@@ -562,20 +632,112 @@
 	}
 
 	@media (max-width: 768px) {
+		.packages-page {
+			@apply gap-22 pt-20 pb-28;
+		}
+
+		.section-block {
+			@apply px-5;
+		}
+
+		.section-header {
+			@apply mb-10 gap-3;
+		}
+
 		.hero-content {
-			@apply grid-cols-1 p-8;
+			@apply grid-cols-1 gap-8 p-8;
 		}
 
 		.hero-text h1 {
 			@apply text-3xl;
 		}
 
-		.section-header h2 {
-			@apply text-2xl;
+		.hero-actions {
+			@apply gap-4;
+		}
+
+		.hero-highlights {
+			@apply gap-4;
+		}
+
+		.funnel-grid,
+		.package-grid,
+		.add-on-grid {
+			@apply gap-6;
 		}
 
 		.package-card {
+			@apply p-7;
+		}
+
+		.cta-card {
+			@apply p-9;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.packages-page {
+			@apply gap-16 pt-12 pb-20;
+		}
+
+		.section-block {
+			@apply px-4;
+		}
+
+		.section-header {
+			@apply mb-9 gap-3;
+		}
+
+		.hero-content {
+			@apply gap-7 p-6;
+		}
+
+		.hero-text h1 {
+			@apply text-[1.875rem] leading-snug;
+		}
+
+		.hero-text p {
+			@apply text-base;
+		}
+
+		.hero-actions {
+			@apply flex-col gap-3;
+		}
+
+		.hero-actions a {
+			@apply w-full justify-center;
+		}
+
+		.hero-highlights {
+			@apply gap-3;
+		}
+
+		.funnel-grid,
+		.package-grid,
+		.add-on-grid {
+			@apply gap-5;
+		}
+
+		.funnel-card,
+		.package-card,
+		.add-on-card {
 			@apply p-6;
+		}
+
+		.card-body {
+			@apply gap-4;
+		}
+
+		.cta-card {
+			@apply p-8;
+		}
+
+		.cta-actions {
+			@apply flex-col gap-3;
+		}
+
+		.cta-actions a {
+			@apply w-full justify-center;
 		}
 	}
 </style>

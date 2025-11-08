@@ -1,15 +1,19 @@
 <script lang="ts">
-	const { data } = $props<{
-		data: {
-			courseId: string;
-			clientKey: string;
-			success?: boolean;
-			snapToken?: string;
-			redirect_url?: string;
-			enrollmentId?: string;
-			error?: string;
-		};
-	}>();
+	interface CheckoutData {
+		courseId: string;
+		clientKey: string;
+		success?: boolean;
+		snapToken?: string;
+		redirect_url?: string;
+		enrollmentId?: string;
+		error?: string;
+	}
+
+	interface CheckoutPageProps {
+		data: CheckoutData;
+	}
+
+	let { data }: CheckoutPageProps = $props();
 
 	// When action returns snapToken, trigger Snap pay
 	$effect(() => {

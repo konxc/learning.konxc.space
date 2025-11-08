@@ -1,6 +1,6 @@
 <script lang="ts">
 	const contactEmail = 'mailto:partnership@konxc.id';
-	const demoLink = 'https://learning.konxc.space';
+	const aboutLink = '/tentang';
 
 	const heroHighlights = [
 		{
@@ -17,6 +17,23 @@
 			label: 'Mode Belajar',
 			value: 'On-site & Online',
 			description: 'Disesuaikan dengan fasilitas sekolah & preferensi siswa'
+		}
+	] as const;
+
+	const exploreLinks = [
+		{
+			title: 'Detail Alur Kemitraan',
+			description:
+				'Pelajari langkah implementasi, model bisnis, dan kebutuhan operasional pihak sekolah secara menyeluruh.',
+			href: '/kemitraan',
+			cta: 'Baca alur lengkap'
+		},
+		{
+			title: 'Paket Les & Ekstrakurikuler',
+			description:
+				'Lihat opsi bimbel dan ekstra, fasilitas yang didapatkan, serta estimasi biaya per kelas atau per siswa.',
+			href: '/paket-les',
+			cta: 'Lihat paket & biaya'
 		}
 	] as const;
 
@@ -155,6 +172,14 @@
 		'Materi komunikasi orang tua & dokumentasi publikasi'
 	] as const;
 
+	const postContactFlow = [
+		'Diskusi kebutuhan selama 30–45 menit via WhatsApp atau Google Meet untuk memetakan tujuan program.',
+		'Pengiriman proposal & MoU awal (≤3 hari kerja) lengkap dengan opsi biaya dan timeline.',
+		'Sesi pilot / showcase mini untuk validasi pengalaman belajar bersama siswa & orang tua.',
+		'Implementasi penuh dengan akses dashboard monitoring untuk tim sekolah.',
+		'Evaluasi triwulan dan rekomendasi scale-up / ekspansi topik.'
+	] as const;
+
 	const faqs = [
 		{
 			question: 'Berapa minimal jumlah siswa untuk memulai program?',
@@ -191,11 +216,17 @@
 	<section class="hero">
 		<div class="hero-content">
 			<div class="hero-text">
+				<nav class="breadcrumb" aria-label="Breadcrumb">
+					<a href="/">Beranda</a>
+					<span aria-hidden="true">/</span>
+					<span aria-current="page">Kemitraan Sekolah</span>
+				</nav>
 				<h1>Kemitraan Sekolah Naik Kelas</h1>
 				<p>
 					Naik Kelas by Koneksi bersama Yayasan Klub Fisika membantu sekolah menghadirkan bimbingan
 					belajar dan ekstrakurikuler STEM yang relevan, terukur, serta terintegrasi dengan
-					Kurikulum Merdeka.
+					Kurikulum Merdeka. Halaman ini adalah pintu masuk sebelum mengeksplor detail alur di
+					halaman kemitraan dan paket pembelajaran kami.
 				</p>
 				<div class="hero-actions">
 					<a class="btn-primary" href={contactEmail} aria-label="Hubungi admin kemitraan via email">
@@ -203,12 +234,13 @@
 					</a>
 					<a
 						class="btn-secondary"
-						href={demoLink}
-						target="_blank"
-						rel="noopener noreferrer"
-						aria-label="Lihat demo platform Naik Kelas"
+						href="/kemitraan"
+						aria-label="Pelajari alur kemitraan secara lengkap"
 					>
-						Lihat Demo
+						Pelajari Detail Program
+					</a>
+					<a class="btn-ghost" href={aboutLink} aria-label="Pelajari tentang Naik Kelas">
+						Tentang Naik Kelas
 					</a>
 				</div>
 			</div>
@@ -224,8 +256,29 @@
 		</div>
 	</section>
 
-	<section class="benefits" aria-labelledby="benefits-title">
-		<header class="section-header">
+	<section class="explore section-block" aria-labelledby="explore-title">
+		<header class="section-header items-center text-center">
+			<h2 id="explore-title">Eksplor Lebih Lanjut</h2>
+			<p>
+				Setelah memahami gambaran besar ini, telusuri detail alur kemitraan dan paket belajar untuk
+				menemukan cocoknya program dengan sumber daya sekolah Anda.
+			</p>
+		</header>
+		<div class="explore-grid" role="list">
+			{#each exploreLinks as link}
+				<article class="explore-card" role="listitem">
+					<h3>{link.title}</h3>
+					<p>{link.description}</p>
+					<a class="explore-link" href={link.href}>
+						{link.cta}
+					</a>
+				</article>
+			{/each}
+		</div>
+	</section>
+
+	<section class="benefits section-block" aria-labelledby="benefits-title">
+		<header class="section-header items-center text-center">
 			<h2 id="benefits-title">Mengapa Sekolah Bermitra dengan Naik Kelas?</h2>
 			<p>
 				Kami menyediakan dukungan ujung ke ujung, mulai dari perencanaan program, rekrutmen mentor,
@@ -242,8 +295,8 @@
 		</div>
 	</section>
 
-	<section class="programs" aria-labelledby="programs-title">
-		<header class="section-header">
+	<section class="programs section-block" aria-labelledby="programs-title">
+		<header class="section-header items-center text-center">
 			<h2 id="programs-title">Pilihan Program & Estimasi Harga</h2>
 			<p>
 				Setiap paket mencakup modul siap pakai, mentor tersertifikasi, dan laporan perkembangan.
@@ -279,8 +332,8 @@
 		</div>
 	</section>
 
-	<section class="models" aria-labelledby="models-title">
-		<header class="section-header">
+	<section class="models section-block" aria-labelledby="models-title">
+		<header class="section-header items-center text-center">
 			<h2 id="models-title">Model Kerjasama yang Fleksibel</h2>
 			<p>
 				Pilih struktur biaya sesuai kebutuhan sekolah. Kami terbiasa bekerja dengan sistem fee per
@@ -302,8 +355,8 @@
 		</div>
 	</section>
 
-	<section class="timeline" aria-labelledby="timeline-title">
-		<header class="section-header">
+	<section class="timeline section-block" aria-labelledby="timeline-title">
+		<header class="section-header items-center text-center">
 			<h2 id="timeline-title">Alur Kemitraan</h2>
 			<p>
 				Kami mendampingi sekolah di setiap tahap, memastikan transisi dari pilot ke implementasi
@@ -321,8 +374,8 @@
 		</div>
 	</section>
 
-	<section class="deliverables" aria-labelledby="deliverables-title">
-		<header class="section-header">
+	<section class="deliverables section-block" aria-labelledby="deliverables-title">
+		<header class="section-header items-center text-center">
 			<h2 id="deliverables-title">Deliverables yang Diterima Sekolah</h2>
 			<p>
 				Setiap program didesain agar sekolah dapat langsung memanfaatkan hasilnya untuk pelaporan
@@ -336,8 +389,23 @@
 		</ul>
 	</section>
 
-	<section class="faq" aria-labelledby="faq-title">
-		<header class="section-header">
+	<section class="next-steps section-block" aria-labelledby="next-steps-title">
+		<header class="section-header items-center text-center">
+			<h2 id="next-steps-title">Apa yang Terjadi Setelah Hubungi Kami?</h2>
+			<p>
+				Kami memastikan prosesnya ringan dan transparan. Berikut gambaran singkat perjalanan dari
+				sesi konsultasi hingga pemberian akses dashboard pengawasan sekolah.
+			</p>
+		</header>
+		<ul class="next-steps-list">
+			{#each postContactFlow as item}
+				<li>{item}</li>
+			{/each}
+		</ul>
+	</section>
+
+	<section class="faq section-block" aria-labelledby="faq-title">
+		<header class="section-header items-center text-center">
 			<h2 id="faq-title">Pertanyaan yang Sering Diajukan</h2>
 			<p>
 				Jika ada pertanyaan tambahan terkait kebutuhan khusus sekolah atau skema pembiayaan, tim
@@ -354,25 +422,20 @@
 		</div>
 	</section>
 
-	<section class="contact-cta">
+	<section class="contact-cta section-block">
 		<div class="cta-card">
 			<h2>Mulai Kolaborasi dengan Naik Kelas</h2>
 			<p>
 				Kirimkan kebutuhan sekolah Anda dan tim kami akan menyiapkan proposal dalam 3 hari kerja.
-				Kami siap mendampingi dari tahap perencanaan hingga evaluasi.
+				Setelah konsultasi, kami bantu finalisasi MoU, menjalankan pilot, serta menyiapkan akses
+				dashboard monitoring untuk tim sekolah.
 			</p>
 			<div class="cta-actions">
 				<a class="btn-primary" href={contactEmail} aria-label="Kirim email ke admin kemitraan">
 					Hubungi Admin
 				</a>
-				<a
-					class="btn-secondary"
-					href={demoLink}
-					target="_blank"
-					rel="noopener noreferrer"
-					aria-label="Lihat demo platform Naik Kelas"
-				>
-					Lihat Demo
+				<a class="btn-secondary" href={aboutLink} aria-label="Pelajari tentang Naik Kelas">
+					Tentang Naik Kelas
 				</a>
 			</div>
 		</div>
@@ -383,12 +446,16 @@
 	@reference "../../app.css";
 
 	.partnership-page {
-		@apply flex flex-col gap-24 bg-(--color-bg-light,#f1f5ff) pt-32 pb-28 text-(--color-primary-dark,#0f172a);
+		@apply flex flex-col gap-28 bg-(--color-bg-light,#f1f5ff) pt-12 pb-36 text-(--color-primary-dark,#0f172a);
 		min-height: 100vh;
 	}
 
+	.section-block {
+		@apply mx-auto w-full max-w-[1120px] px-6;
+	}
+
 	.section-header {
-		@apply mx-auto flex max-w-[900px] flex-col gap-3 px-6 text-center;
+		@apply mx-auto mb-12 flex max-w-[840px] flex-col gap-4 text-center text-balance;
 	}
 
 	.section-header h2 {
@@ -396,7 +463,7 @@
 	}
 
 	.section-header p {
-		@apply text-base text-(--color-primary-medium,#334155) md:text-lg;
+		@apply text-base leading-relaxed text-(--color-primary-medium,#334155) md:text-lg;
 	}
 
 	.hero {
@@ -428,11 +495,11 @@
 	}
 
 	.hero-text p {
-		@apply mt-5 text-lg text-(--color-primary-medium,#334155) md:text-xl;
+		@apply mt-5 text-lg leading-relaxed text-(--color-primary-medium,#334155) md:text-xl;
 	}
 
 	.hero-actions {
-		@apply mt-8 flex flex-wrap gap-4;
+		@apply mt-8 flex flex-wrap gap-5;
 	}
 
 	.btn-primary {
@@ -443,8 +510,12 @@
 		@apply inline-flex items-center justify-center rounded-2xl border border-(--color-gradient-purple-start,#667eea)/40 bg-white/70 px-6 py-4 text-base font-semibold text-(--color-gradient-purple-mid,#764ba2) shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-(--color-gradient-purple-start,#667eea)/60 hover:bg-white focus:-translate-y-0.5;
 	}
 
+	.btn-ghost {
+		@apply inline-flex items-center justify-center rounded-2xl border border-white/50 bg-white/30 px-6 py-4 text-base font-semibold text-(--color-primary-dark,#0f172a) transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/60 focus:-translate-y-0.5;
+	}
+
 	.hero-highlight-grid {
-		@apply grid gap-4 sm:grid-cols-2;
+		@apply grid gap-5 sm:grid-cols-2;
 	}
 
 	.highlight-card {
@@ -463,18 +534,36 @@
 		@apply mt-2 text-sm text-(--color-primary-medium,#334155);
 	}
 
-	.benefits,
-	.programs,
-	.models,
-	.timeline,
-	.deliverables,
-	.faq,
-	.contact-cta {
-		@apply mx-auto w-full max-w-[1120px] px-6;
+	.breadcrumb {
+		@apply mb-6 flex items-center gap-2 text-xs font-semibold tracking-[0.25em] text-(--color-primary-medium,#334155)/80 uppercase;
+	}
+
+	.breadcrumb a {
+		@apply text-(--color-gradient-purple-mid,#764ba2) no-underline transition-colors duration-200 hover:text-(--color-gradient-purple-start,#667eea);
 	}
 
 	.card-grid {
-		@apply mt-10 grid gap-6 md:grid-cols-2;
+		@apply mt-12 grid gap-8 md:grid-cols-2;
+	}
+
+	.explore-grid {
+		@apply mt-12 grid gap-8 md:grid-cols-2;
+	}
+
+	.explore-card {
+		@apply flex h-full flex-col gap-4 rounded-[26px] border border-white/60 bg-white/90 p-7 shadow-[0_18px_45px_rgba(15,23,42,0.07)] backdrop-blur-[22px];
+	}
+
+	.explore-card h3 {
+		@apply text-xl font-semibold text-(--color-primary-dark,#0f172a);
+	}
+
+	.explore-card p {
+		@apply flex-1 text-sm leading-relaxed text-(--color-primary-medium,#334155);
+	}
+
+	.explore-link {
+		@apply inline-flex items-center gap-2 text-sm font-semibold text-(--color-gradient-purple-mid,#764ba2) no-underline transition-transform duration-200 hover:translate-x-1 hover:text-(--color-gradient-purple-start,#667eea);
 	}
 
 	.info-card {
@@ -494,11 +583,11 @@
 	}
 
 	.program-grid {
-		@apply mt-10 grid gap-6 md:grid-cols-3;
+		@apply mt-12 grid gap-8 md:grid-cols-3;
 	}
 
 	.program-card {
-		@apply flex h-full flex-col gap-5 rounded-[30px] border border-white/60 bg-white/90 p-8 shadow-[0_22px_55px_rgba(15,23,42,0.1)] backdrop-blur-[25px];
+		@apply flex h-full flex-col gap-6 rounded-[30px] border border-white/60 bg-white/90 p-8 shadow-[0_22px_55px_rgba(15,23,42,0.1)] backdrop-blur-[25px];
 	}
 
 	.program-card h3 {
@@ -510,7 +599,7 @@
 	}
 
 	.program-meta {
-		@apply flex flex-col gap-1 rounded-2xl bg-(--color-primary-soft-blue,#60a5fa)/10 p-4 text-sm text-(--color-primary-dark,#0f172a);
+		@apply flex flex-col gap-2 rounded-2xl bg-(--color-primary-soft-blue,#60a5fa)/10 p-4 text-sm text-(--color-primary-dark,#0f172a);
 	}
 
 	.program-meta strong {
@@ -518,7 +607,7 @@
 	}
 
 	.program-notes {
-		@apply flex flex-col gap-2 text-sm text-(--color-primary-medium,#334155);
+		@apply flex flex-col gap-3 text-sm leading-relaxed text-(--color-primary-medium,#334155);
 	}
 
 	.program-includes h4 {
@@ -526,15 +615,15 @@
 	}
 
 	.program-includes ul {
-		@apply mt-2 flex flex-col gap-2 text-sm text-(--color-primary-medium,#334155);
+		@apply mt-2 flex flex-col gap-3 text-sm text-(--color-primary-medium,#334155);
 	}
 
 	.timeline-grid {
-		@apply mt-10 grid gap-4 md:grid-cols-5;
+		@apply mt-12 grid gap-6 md:grid-cols-5;
 	}
 
 	.timeline-card {
-		@apply relative flex flex-col gap-3 rounded-[26px] border border-white/50 bg-white/90 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)] backdrop-blur-[20px];
+		@apply relative flex flex-col gap-4 rounded-[26px] border border-white/50 bg-white/90 p-7 shadow-[0_18px_40px_rgba(15,23,42,0.08)] backdrop-blur-[20px];
 	}
 
 	.timeline-step {
@@ -550,7 +639,7 @@
 	}
 
 	.deliverables-list {
-		@apply mt-10 grid gap-3 rounded-[28px] border border-white/60 bg-white/90 p-8 text-(--color-primary-medium,#334155) shadow-[0_20px_45px_rgba(15,23,42,0.08)] backdrop-blur-[22px];
+		@apply mt-12 grid gap-4 rounded-[28px] border border-white/60 bg-white/90 p-8 text-(--color-primary-medium,#334155) shadow-[0_20px_45px_rgba(15,23,42,0.08)] backdrop-blur-[22px];
 	}
 
 	.deliverables-list li {
@@ -562,8 +651,21 @@
 		@apply absolute left-0 text-lg text-(--color-gradient-purple-mid,#764ba2);
 	}
 
+	.next-steps-list {
+		@apply mt-12 grid gap-4 rounded-[28px] border border-white/60 bg-white/90 p-8 text-(--color-primary-medium,#334155) shadow-[0_18px_45px_rgba(15,23,42,0.07)] backdrop-blur-[22px];
+	}
+
+	.next-steps-list li {
+		@apply relative pl-7 text-sm leading-relaxed;
+	}
+
+	.next-steps-list li::before {
+		content: '↗';
+		@apply absolute top-1 left-0 text-base text-(--color-gradient-purple-start,#667eea);
+	}
+
 	.faq-grid {
-		@apply mt-10 grid gap-6 md:grid-cols-2;
+		@apply mt-12 grid gap-8 md:grid-cols-2;
 	}
 
 	.faq-card {
@@ -578,12 +680,8 @@
 		@apply mt-3 text-sm text-(--color-primary-medium,#334155);
 	}
 
-	.contact-cta {
-		@apply w-full px-6;
-	}
-
 	.cta-card {
-		@apply mx-auto max-w-[960px] rounded-[36px] border border-white/60 bg-linear-to-br from-(--color-gradient-purple-start,#667eea) via-(--color-gradient-purple-mid,#764ba2) to-(--color-gradient-purple-end,#a855f7) p-10 text-white shadow-[0_35px_90px_rgba(76,29,149,0.32)];
+		@apply mx-auto max-w-[960px] rounded-[36px] border border-white/60 bg-linear-to-br from-(--color-gradient-purple-start,#667eea) via-(--color-gradient-purple-mid,#764ba2) to-(--color-gradient-purple-end,#a855f7) p-12 text-white shadow-[0_35px_90px_rgba(76,29,149,0.32)];
 	}
 
 	.cta-card h2 {
@@ -591,11 +689,11 @@
 	}
 
 	.cta-card p {
-		@apply mt-4 text-base md:text-lg md:leading-relaxed;
+		@apply mt-4 text-base leading-relaxed md:text-lg md:leading-relaxed;
 	}
 
 	.cta-actions {
-		@apply mt-8 flex flex-wrap gap-4;
+		@apply mt-10 flex flex-wrap gap-5;
 	}
 
 	@media (max-width: 960px) {
@@ -609,20 +707,115 @@
 	}
 
 	@media (max-width: 768px) {
+		.partnership-page {
+			@apply gap-20 pt-20 pb-28;
+		}
+
+		.section-block {
+			@apply px-5;
+		}
+
+		.section-header {
+			@apply mb-10 gap-3;
+		}
+
 		.hero-content {
-			@apply grid-cols-1 p-8;
+			@apply grid-cols-1 gap-8 p-8;
 		}
 
 		.hero-text h1 {
 			@apply text-3xl;
 		}
 
-		.section-header h2 {
-			@apply text-2xl;
+		.hero-actions {
+			@apply gap-4;
+		}
+
+		.explore-grid,
+		.card-grid,
+		.program-grid,
+		.timeline-grid,
+		.faq-grid {
+			@apply gap-6;
 		}
 
 		.cta-card {
-			@apply p-8;
+			@apply p-9;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.partnership-page {
+			@apply gap-14 pt-8 pb-20;
+		}
+
+		.section-block {
+			@apply px-4;
+		}
+
+		.section-header {
+			@apply mb-9 gap-3;
+		}
+
+		.hero-content {
+			@apply gap-7 p-6;
+		}
+
+		.hero-text h1 {
+			@apply text-[1.875rem] leading-snug;
+		}
+
+		.hero-text p {
+			@apply text-base;
+		}
+
+		.hero-actions {
+			@apply flex-col;
+		}
+
+		.hero-actions a {
+			@apply w-full justify-center;
+		}
+
+		.highlight-card {
+			@apply p-5;
+		}
+
+		.explore-grid,
+		.card-grid,
+		.program-grid,
+		.timeline-grid,
+		.faq-grid {
+			@apply gap-5;
+		}
+
+		.program-card,
+		.explore-card,
+		.info-card,
+		.timeline-card,
+		.faq-card {
+			@apply p-6;
+		}
+
+		.program-meta {
+			@apply gap-2 p-3;
+		}
+
+		.deliverables-list,
+		.next-steps-list {
+			@apply gap-3 p-6;
+		}
+
+		.cta-card {
+			@apply p-7;
+		}
+
+		.cta-actions {
+			@apply flex-col gap-3;
+		}
+
+		.cta-actions a {
+			@apply w-full justify-center;
 		}
 	}
 </style>

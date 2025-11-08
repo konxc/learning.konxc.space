@@ -1,14 +1,30 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { PUBLIC_DOCS_ACCESS_CODE } from '$env/static/public';
 
 	const EXPECTED_CODE = (PUBLIC_DOCS_ACCESS_CODE || '').trim();
 	const STORAGE_KEY = 'docs-access-granted';
 
-	let accessGranted = false;
-	let modalOpen = true;
-	let accessCodeInput = '';
-	let errorMessage = '';
+	let { children } = $props();
+
+	let modalOpen = $state(false);
+	let accessGranted = $state(false);
+	let accessCodeInput = $state('');
+	let errorMessage = $state<string | null>(null);
+
+	let accessInputRef = $state<HTMLInputElement | null>(null);
+
+	$effect(() => {
+		if (!browser) return;
+		if (!modalOpen || accessGranted) return;
+		const node = accessInputRef;
+		if (node) {
+			node.focus();
+			node.select();
+		}
+	});
 
 	onMount(() => {
 		try {
@@ -62,24 +78,24 @@
 				<label for="docs-access-code" class="docs-label">Kode Akses</label>
 				<input
 					autocomplete="off"
-					autofocus
 					id="docs-access-code"
 					type="password"
 					placeholder="Masukkan kode"
+					bind:this={accessInputRef}
 					bind:value={accessCodeInput}
-					on:keydown={handleKeydown}
+					onkeydown={handleKeydown}
 					class="docs-input"
 				/>
 				{#if errorMessage}
 					<p class="docs-error" role="alert">{errorMessage}</p>
 				{/if}
-				<button class="docs-button" type="button" on:click={verifyAccess}>Buka Halaman</button>
+				<button class="docs-button" type="button" onclick={verifyAccess}>Buka Halaman</button>
 			</div>
 		</div>
 	{/if}
 
 	<div class:docs-blurred={!accessGranted}>
-		<slot />
+		{@render children()}
 	</div>
 </div>
 
