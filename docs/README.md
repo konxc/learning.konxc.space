@@ -15,6 +15,7 @@ Selamat datang di dokumentasi project learning.konxc.space!
 
 ### Development Guides
 
+- [ONBOARDING.md](./ONBOARDING.md) - 🎯 **Panduan onboarding lengkap untuk developer baru**
 - [WORKFLOW.md](./WORKFLOW.md) - 📋 **Workflow pengembangan lengkap untuk tim**
 - [AI_CODING_GUIDE.md](./AI_CODING_GUIDE.md) - 🤖 **Panduan bekerja dengan AI coding assistant**
 - [TODO_GUIDE.md](./TODO_GUIDE.md) - ✅ **Panduan sistem TODO dan task management**
@@ -63,6 +64,7 @@ Selamat datang di dokumentasi project learning.konxc.space!
 ### 🚀 Quick Start untuk Developer Baru
 
 1. **First Time Setup**
+   - **Mulai dari [ONBOARDING.md](./ONBOARDING.md)** - Panduan lengkap untuk memahami project
    - Baca [WORKFLOW.md](./WORKFLOW.md) untuk memahami workflow pengembangan
    - Setup environment lokal (see WORKFLOW.md Quick Start section)
 

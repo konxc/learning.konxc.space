@@ -24,7 +24,7 @@ Aplikasi telah dikonfigurasi untuk SSR-first deployment dengan Cloudflare Pages/
 
 ### Required Variables
 
-```
+```dotenv
 DATABASE_URL=<turso-database-url>
 DATABASE_AUTH_TOKEN=<turso-auth-token>
 SESSION_SECRET=<random-secret-key>
@@ -191,7 +191,7 @@ pnpm run dev:cf
 
 ## File Structure
 
-```
+```text
 build/           # Build output untuk Cloudflare Pages
 wrangler.toml    # Cloudflare configuration
 .env             # Local environment variables (gitignored)
