@@ -5,4 +5,153 @@
 Loading svelte-check in workspace: /home/dev/web/koneksi/learning.konxc.space
 Getting Svelte diagnostics...
 
-svelte-check found 0 errors and 0 warnings
+/home/dev/web/koneksi/learning.konxc.space/src/lib/utils/markdown.ts:5:5
+Error: Object literal may only specify known properties, and 'highlight' does not exist in type 'MarkedOptions<string, string>'. 
+marked.setOptions({
+    highlight(code, language) {
+        if (language && hljs.getLanguage(language)) {
+
+/home/dev/web/koneksi/learning.konxc.space/src/lib/utils/markdown.ts:5:15
+Error: Parameter 'code' implicitly has an 'any' type. 
+marked.setOptions({
+    highlight(code, language) {
+        if (language && hljs.getLanguage(language)) {
+
+/home/dev/web/koneksi/learning.konxc.space/src/lib/utils/markdown.ts:5:21
+Error: Parameter 'language' implicitly has an 'any' type. 
+marked.setOptions({
+    highlight(code, language) {
+        if (language && hljs.getLanguage(language)) {
+
+/home/dev/web/koneksi/learning.konxc.space/src/lib/components/TerminalWindow.svelte:31:13
+Error: Cannot find name 'actions'. (ts)
+		<div class="terminal-actions">
+			{@render actions?.()}
+		</div>
+
+/home/dev/web/koneksi/learning.konxc.space/src/lib/components/TerminalWindow.svelte:37:11
+Error: Cannot find name 'overlays'. (ts)
+	</div>
+	{@render overlays?.()}
+	<!-- overlays for popovers/dropdowns that need to be siblings -->
+
+/home/dev/web/koneksi/learning.konxc.space/src/lib/components/Toaster.svelte:2:38
+Error: Cannot find module '$lib/stores/toaster' or its corresponding type declarations. (ts)
+<script lang="ts">
+	import type { ToasterMessage } from '$lib/stores/toaster';
+
+/home/dev/web/koneksi/learning.konxc.space/src/lib/components/ui/Input.svelte:41:2
+Error: Type 'string | undefined' is not assignable to type 'FullAutoFill | null | undefined'.
+  Type 'string' is not assignable to type 'FullAutoFill | null | undefined'. (ts)
+	{required}
+	autocomplete={autocomplete || undefined}
+/>
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/docs/+page.svelte:54:16
+Error: Type '{ label: string; href: string; }[]' is not assignable to type 'never'. (ts)
+	<section class="docs-header">
+		<Breadcrumb {breadcrumbs} />
+		<h1 id="docs-index-title">Dokumen Internal</h1>
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/docs/bmc/+page.svelte:26:16
+Error: Type '{ label: string; href: string; }[]' is not assignable to type 'never'. (ts)
+	<section class="doc-hero">
+		<Breadcrumb {breadcrumbs} />
+		<h1 id="doc-title" class="doc-title">Business Model Canvas</h1>
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/docs/brief-pricing/+page.svelte:26:16
+Error: Type '{ label: string; href: string; }[]' is not assignable to type 'never'. (ts)
+	<section class="doc-hero">
+		<Breadcrumb {breadcrumbs} />
+		<h1 id="doc-title" class="doc-title">Pricing & Subscription Brief</h1>
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/docs/deployment/+page.svelte:26:16
+Error: Type '{ label: string; href: string; }[]' is not assignable to type 'never'. (ts)
+	<section class="doc-hero">
+		<Breadcrumb {breadcrumbs} />
+		<h1 id="doc-title" class="doc-title">Deployment Guide</h1>
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/docs/pricing/+page.svelte:26:16
+Error: Type '{ label: string; href: string; }[]' is not assignable to type 'never'. (ts)
+	<section class="doc-hero">
+		<Breadcrumb {breadcrumbs} />
+		<h1 id="doc-title" class="doc-title">Pricing Framework</h1>
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/docs/roadmap/+page.svelte:26:16
+Error: Type '{ label: string; href: string; }[]' is not assignable to type 'never'. (ts)
+	<section class="doc-hero">
+		<Breadcrumb {breadcrumbs} />
+		<h1 id="doc-title" class="doc-title">Product Roadmap</h1>
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/kemitraan/+page.svelte:663:2
+Warn: Unused CSS selector ".implementation-support"
+https://svelte.dev/e/css_unused_selector (svelte)
+
+	.implementation-support {
+		@apply pt-0;
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/kemitraan/+page.svelte:667:2
+Warn: Unused CSS selector ".implementation-grid"
+https://svelte.dev/e/css_unused_selector (svelte)
+
+	.implementation-grid {
+		@apply grid gap-8 md:grid-cols-2;
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/kemitraan/+page.svelte:671:2
+Warn: Unused CSS selector ".implementation-card"
+https://svelte.dev/e/css_unused_selector (svelte)
+
+	.implementation-card {
+		@apply flex h-full flex-col gap-4 rounded-3xl border border-(--color-primary-soft-blue,#2563eb)/20 bg-white/95 p-7 shadow-[0_26px_60px_-42px_rgba(37,99,235,0.25)];
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/kemitraan/+page.svelte:675:2
+Warn: Unused CSS selector ".implementation-card h3"
+https://svelte.dev/e/css_unused_selector (svelte)
+
+	.implementation-card h3 {
+		@apply text-lg font-semibold;
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/kemitraan/+page.svelte:679:2
+Warn: Unused CSS selector ".implementation-card p"
+https://svelte.dev/e/css_unused_selector (svelte)
+
+	.implementation-card p {
+		@apply text-sm text-(--color-primary-medium,#4a5568);
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/kemitraan/+page.svelte:683:2
+Warn: Unused CSS selector ".implementation-icon"
+https://svelte.dev/e/css_unused_selector (svelte)
+
+	.implementation-icon {
+		@apply text-3xl;
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/kemitraan/+page.svelte:860:3
+Warn: Unused CSS selector ".section-header p"
+https://svelte.dev/e/css_unused_selector (svelte)
+		.section-intro,
+		.section-header p {
+			@apply text-base;
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/kemitraan/+page.svelte:897:3
+Warn: Unused CSS selector ".cta-card .hero-actions"
+https://svelte.dev/e/css_unused_selector (svelte)
+
+		.cta-card .hero-actions {
+			@apply flex-col gap-3;
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/kemitraan/+page.svelte:901:3
+Warn: Unused CSS selector ".cta-card .hero-actions a"
+https://svelte.dev/e/css_unused_selector (svelte)
+
+		.cta-card .hero-actions a {
+			@apply w-full justify-center;
+
+/home/dev/web/koneksi/learning.konxc.space/src/routes/(public)/kemitraan/+page.svelte:221:19
+Error: Type '{ label: string; href: string; }[]' is not assignable to type 'never'. (ts)
+				<div class="hero-breadcrumb">
+					<Breadcrumb {breadcrumbs} />
+				</div>
+
+====================================
+svelte-check found 14 errors and 9 warnings in 11 files
+ ELIFECYCLE  Command failed with exit code 1.
