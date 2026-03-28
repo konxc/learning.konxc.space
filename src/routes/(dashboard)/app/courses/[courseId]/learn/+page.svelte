@@ -133,9 +133,10 @@
 					>
 					Course List
 				</a>
-				<div class="flex items-center justify-between">
-					<h2 class={`${TEXT.h2} ${COLOR.textPrimary} line-clamp-2`}>{data.course.title}</h2>
-					<button
+				<div class="flex flex-col gap-3">
+					<div class="flex items-center justify-between">
+						<h2 class={`${TEXT.h2} ${COLOR.textPrimary} line-clamp-2`}>{data.course.title}</h2>
+						<button
 						class={`rounded-lg p-2 ${COLOR.neutralHover} ${TRANSITION.colors} text-blue-600 hover:text-blue-700`}
 						onclick={toggleAllModules}
 						title={expandedModules.size === data.modules.length ? 'Collapse All' : 'Expand All'}
