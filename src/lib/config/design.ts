@@ -1,6 +1,6 @@
 export const COLOR = {
 	bg: 'bg-zinc-50 dark:bg-zinc-950',
-	card: 'bg-white/80 backdrop-blur-md dark:bg-zinc-900/80',
+	card: 'bg-white/60 backdrop-blur-xl dark:bg-zinc-900/60',
 	cardBorder: 'border border-zinc-200/50 dark:border-zinc-800/50',
 	// High-contrast neutrals
 	textPrimary: 'text-zinc-900 dark:text-zinc-50',
@@ -41,9 +41,9 @@ export const RADIUS = {
 
 export const ELEVATION = {
 	base: 'shadow-[0_1px_3px_0_rgba(0,0,0,0.02),0_1px_2px_-1px_rgba(0,0,0,0.03)] dark:shadow-none',
-	card: 'shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]',
-	cardHover: 'hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] transition-all duration-500',
-	transition: 'transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1)'
+	card: 'shadow-[0_8px_30px_rgb(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.02)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2),0_4px_12px_rgba(0,0,0,0.1)]',
+	cardHover: 'hover:shadow-[0_30px_60px_rgba(0,0,0,0.08),0_12px_24px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_30px_60px_rgba(0,0,0,0.3),0_12px_24px_rgba(0,0,0,0.15)] transition-all duration-500',
+	transition: 'transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1)'
 };
 
 export const SHADOW = ELEVATION;
@@ -72,7 +72,8 @@ export const TEXT = {
 
 export const TRANSITION = {
 	colors: 'transition-colors duration-200 ease-out',
-	all: 'transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)',
+	all: 'transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1)',
 	shadow: 'transition-shadow duration-300 ease-out',
-	transform: 'transition-transform duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)'
+	transform: 'transition-transform duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)',
+	spring: 'transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)'
 };
