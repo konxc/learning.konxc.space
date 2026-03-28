@@ -342,6 +342,7 @@ export const cohort = sqliteTable('cohort', {
 	courseId: text('course_id')
 		.notNull()
 		.references(() => course.id),
+	facilitatorId: text('facilitator_id').references(() => user.id), // Assigned facilitator
 	startDate: integer('start_date', { mode: 'timestamp' }).notNull(),
 	endDate: integer('end_date', { mode: 'timestamp' }),
 	status: text('status').notNull().default('active'), // 'active' | 'archived'

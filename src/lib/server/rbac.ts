@@ -1,6 +1,6 @@
 import type { User } from './db/schema';
 
-export type UserRole = 'user' | 'mentor' | 'admin' | 'bd';
+export type UserRole = 'user' | 'mentor' | 'admin' | 'bd' | 'facilitator';
 
 export function hasRole(user: User | null, role: UserRole | UserRole[]): boolean {
 	if (!user) return false;
@@ -16,6 +16,10 @@ export function isAdmin(user: User | null): boolean {
 
 export function isMentor(user: User | null): boolean {
 	return hasRole(user, ['mentor', 'admin']);
+}
+
+export function isFacilitator(user: User | null): boolean {
+	return hasRole(user, ['facilitator', 'mentor', 'admin']);
 }
 
 export function isUser(user: User | null): boolean {
@@ -46,7 +50,7 @@ export function getNavItemsForRole(role: string): NavItem[] {
 		}
 	];
 
-	if (role === 'admin') {
+		if (role === 'admin') {
 		return [
 			...baseNav,
 			{
@@ -78,6 +82,24 @@ export function getNavItemsForRole(role: string): NavItem[] {
 				label: 'Payment Verification',
 				href: '/app/admin/payments',
 				icon: '💳',
+				category: 'admin'
+			},
+			{
+				label: 'Manage Batches',
+				href: '/app/admin/cohorts',
+				icon: '📅',
+				category: 'admin'
+			},
+			{
+				label: 'Partners',
+				href: '/app/admin/partner',
+				icon: '🏢',
+				category: 'admin'
+			},
+			{
+				label: 'Reports',
+				href: '/app/admin/reports',
+				icon: '📊',
 				category: 'admin'
 			},
 			{
@@ -126,6 +148,31 @@ export function getNavItemsForRole(role: string): NavItem[] {
 				label: 'My Students',
 				href: '/app/mentor/students',
 				icon: '👨‍🎓',
+				category: 'management'
+			}
+		];
+	}
+
+	// Facilitator role - supports cohorts but can't edit course content
+	if (role === 'facilitator') {
+		return [
+			...baseNav,
+			{
+				label: 'Browse Courses',
+				href: '/app/courses',
+				icon: '🔍',
+				category: 'learning'
+			},
+			{
+				label: 'My Courses',
+				href: '/app/my-courses',
+				icon: '📖',
+				category: 'learning'
+			},
+			{
+				label: 'My Batches',
+				href: '/app/facilitator/cohorts',
+				icon: '📅',
 				category: 'management'
 			}
 		];
