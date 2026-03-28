@@ -217,6 +217,27 @@ export const lessonProgress = sqliteTable('lesson_progress', {
 	completedAt: integer('completed_at', { mode: 'timestamp' })
 });
 
+// Lesson Notes (sync from localStorage to server)
+export const lessonNote = sqliteTable('lesson_note', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	courseId: text('course_id')
+		.notNull()
+		.references(() => course.id),
+	lessonId: text('lesson_id')
+		.notNull()
+		.references(() => lesson.id),
+	content: text('content').notNull(),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
 // Quiz & assessment
 export const quiz = sqliteTable('quiz', {
 	id: text('id').primaryKey(),
@@ -378,6 +399,7 @@ export type Module = typeof module.$inferSelect;
 export type Lesson = typeof lesson.$inferSelect;
 export type Material = typeof material.$inferSelect;
 export type LessonProgress = typeof lessonProgress.$inferSelect;
+export type LessonNote = typeof lessonNote.$inferSelect;
 export type Quiz = typeof quiz.$inferSelect;
 export type QuizQuestion = typeof quizQuestion.$inferSelect;
 export type QuizChoice = typeof quizChoice.$inferSelect;
@@ -390,6 +412,9 @@ export type Cohort = typeof cohort.$inferSelect;
 export type Partner = typeof partner.$inferSelect;
 export type Notification = typeof notification.$inferSelect;
 export type EmailLog = typeof emailLog.$inferSelect;
+export type WhatsAppLog = typeof whatsappLog.$inferSelect;
+export type AffiliateSale = typeof affiliateSale.$inferSelect;
+export type AffiliateLink = typeof affiliateLink.$inferSelect;
 export type CourseReview = typeof courseReview.$inferSelect;
 export type UserXP = typeof userXP.$inferSelect;
 export type Badge = typeof badge.$inferSelect;
@@ -397,6 +422,7 @@ export type UserBadge = typeof userBadge.$inferSelect;
 export type Checkpoint = typeof checkpoint.$inferSelect;
 export type CheckpointSubmission = typeof checkpointSubmission.$inferSelect;
 export type Discussion = typeof discussion.$inferSelect;
+export type BroadcastMessage = typeof broadcastMessage.$inferSelect;
 
 // Notifications
 export const notification = sqliteTable('notification', {
@@ -414,6 +440,25 @@ export const notification = sqliteTable('notification', {
 		.$defaultFn(() => new Date())
 });
 
+// Broadcast Messages (from mentor/admin to students)
+export const broadcastMessage = sqliteTable('broadcast_message', {
+	id: text('id').primaryKey(),
+	senderId: text('sender_id')
+		.notNull()
+		.references(() => user.id),
+	title: text('title').notNull(),
+	content: text('content').notNull(),
+	targetRole: text('target_role'), // 'all', 'mentor', 'learner', 'partner'
+	targetCohortId: text('target_cohort_id').references(() => cohort.id),
+	targetCourseId: text('target_course_id').references(() => course.id),
+	sentVia: text('sent_via').notNull().default('notification'), // 'notification', 'email', 'whatsapp', 'all'
+	status: text('status').notNull().default('pending'), // 'pending', 'sent', 'failed'
+	recipientCount: integer('recipient_count').default(0),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
 // Email notifications log
 export const emailLog = sqliteTable('email_log', {
 	id: text('id').primaryKey(),
@@ -423,6 +468,62 @@ export const emailLog = sqliteTable('email_log', {
 	status: text('status').notNull().default('pending'), // 'pending', 'sent', 'failed'
 	error: text('error'),
 	sentAt: integer('sent_at', { mode: 'timestamp' }),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// WhatsApp notifications log
+export const whatsappLog = sqliteTable('whatsapp_log', {
+	id: text('id').primaryKey(),
+	to: text('to').notNull(),
+	type: text('type').notNull(), // 'welcome', 'enrollment', 'grade', 'certificate', 'reminder'
+	status: text('status').notNull().default('pending'), // 'pending', 'sent', 'failed'
+	error: text('error'),
+	messageId: text('message_id'),
+	sentAt: integer('sent_at', { mode: 'timestamp' }),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Affiliate Sales Tracking
+export const affiliateSale = sqliteTable('affiliate_sale', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	affiliateLinkId: text('affiliate_link_id'), // Reference to the link used
+	productName: text('product_name').notNull(),
+	platform: text('platform').notNull(), // 'shopee', 'tokopedia', 'tiktok_shop', 'lazada', 'other'
+	saleAmount: integer('sale_amount').notNull(), // In rupiah
+	commissionAmount: integer('commission_amount'), // In rupiah
+	commissionRate: integer('commission_rate'), // Percentage (0-100)
+	currency: text('currency').notNull().default('IDR'),
+	transactionId: text('transaction_id'), // External transaction ID
+	link: text('link'), // URL to the product
+	status: text('status').notNull().default('pending'), // 'pending', 'confirmed', 'paid', 'cancelled'
+	notes: text('notes'),
+	recordedAt: integer('recorded_at', { mode: 'timestamp' }),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Affiliate Links/Products
+export const affiliateLink = sqliteTable('affiliate_link', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	name: text('name').notNull(),
+	platform: text('platform').notNull(), // 'shopee', 'tokopedia', 'tiktok_shop', 'lazada', 'other'
+	url: text('url').notNull(),
+	productPrice: integer('product_price'), // Recommended price
+	commissionRate: integer('commission_rate'), // Default commission rate
+	clicks: integer('clicks').notNull().default(0),
+	conversions: integer('conversions').notNull().default(0),
+	status: text('status').notNull().default('active'), // 'active', 'inactive'
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date())
