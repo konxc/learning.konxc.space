@@ -20,25 +20,25 @@ Kemitraan ini memungkinkan sekolah menghadirkan program **les akademik** dan **e
 
 **Mata Pelajaran:**
 
-* Matematika (SD–SMP)
-* Bahasa Inggris (SD–SMP)
+- Matematika (SD–SMP)
+- Bahasa Inggris (SD–SMP)
 
 **Format:**
 
-* 1–2 sesi/minggu (60–90 menit per sesi)
-* Metode pembelajaran interaktif, berbasis pemahaman konsep dan latihan adaptif
-* Dapat dilakukan di sekolah (luring) atau online melalui platform Naik Kelas
+- 1–2 sesi/minggu (60–90 menit per sesi)
+- Metode pembelajaran interaktif, berbasis pemahaman konsep dan latihan adaptif
+- Dapat dilakukan di sekolah (luring) atau online melalui platform Naik Kelas
 
 **Benefit untuk Sekolah:**
 
-* Sekolah mendapatkan program bimbel dengan pengajar terlatih
-* Peningkatan nilai akademik dan kepercayaan orang tua
-* Laporan perkembangan siswa setiap akhir periode
+- Sekolah mendapatkan program bimbel dengan pengajar terlatih
+- Peningkatan nilai akademik dan kepercayaan orang tua
+- Laporan perkembangan siswa setiap akhir periode
 
 **Model Bisnis:**
 
-* Sekolah membayar **fee per siswa per bulan**, atau sistem **revenue sharing** dengan Naik Kelas
-* Estimasi harga: Rp50.000–Rp100.000/siswa/bulan (tergantung jumlah dan format)
+- Sekolah membayar **fee per siswa per bulan**, atau sistem **revenue sharing** dengan Naik Kelas
+- Estimasi harga: Rp50.000–Rp100.000/siswa/bulan (tergantung jumlah dan format)
 
 ---
 
@@ -46,36 +46,36 @@ Kemitraan ini memungkinkan sekolah menghadirkan program **les akademik** dan **e
 
 **Topik Ekskul:**
 
-* Desain Digital & Kreativitas Visual
-* Robotik Dasar (STEM & Engineering)
-* Pemrograman Dasar (Scratch, Python Kids, Web Mini)
+- Desain Digital & Kreativitas Visual
+- Robotik Dasar (STEM & Engineering)
+- Pemrograman Dasar (Scratch, Python Kids, Web Mini)
 
 **Format:**
 
-* 8–16 sesi per semester (1 sesi/minggu)
-* Disertai proyek akhir (mini showcase / kompetisi sekolah)
-* Pengajar berasal dari Klub Fisika dan tim Naik Kelas
+- 8–16 sesi per semester (1 sesi/minggu)
+- Disertai proyek akhir (mini showcase / kompetisi sekolah)
+- Pengajar berasal dari Klub Fisika dan tim Naik Kelas
 
 **Benefit untuk Sekolah:**
 
-* Meningkatkan daya saing dan citra sekolah sebagai institusi berbasis teknologi
-* Materi ekskul siap pakai, mudah diimplementasikan
-* Mendukung Kurikulum Merdeka melalui project-based learning
+- Meningkatkan daya saing dan citra sekolah sebagai institusi berbasis teknologi
+- Materi ekskul siap pakai, mudah diimplementasikan
+- Mendukung Kurikulum Merdeka melalui project-based learning
 
 **Model Bisnis:**
 
-* Sekolah membeli paket ekskul per semester atau per siswa
-* Harga referensi: Rp250.000–Rp500.000/siswa/semester
-* Diskon 10–20% untuk sekolah dengan ≥50 peserta
+- Sekolah membeli paket ekskul per semester atau per siswa
+- Harga referensi: Rp250.000–Rp500.000/siswa/semester
+- Diskon 10–20% untuk sekolah dengan ≥50 peserta
 
 ---
 
 ## 🧩 Deliverables Naik Kelas
 
-* Modul pembelajaran digital (PDF, video, dan lembar aktivitas)
-* Pelatihan singkat untuk guru pendamping sekolah
-* Laporan perkembangan siswa per siklus (mid & end semester)
-* Sertifikat partisipasi untuk siswa dan sekolah mitra
+- Modul pembelajaran digital (PDF, video, dan lembar aktivitas)
+- Pelatihan singkat untuk guru pendamping sekolah
+- Laporan perkembangan siswa per siklus (mid & end semester)
+- Sertifikat partisipasi untuk siswa dan sekolah mitra
 
 ---
 
@@ -120,4 +120,4 @@ Divisi Kemitraan Pendidikan
 
 ---
 
-🧭 **Catatan:** Bagian ini dapat dimasukkan sebagai *appendix baru* pada dokumen `BRIEF_PRICING_SUBSCRIPTION.md` atau sebagai *proposal terpisah* berjudul **“Kerjasama Sekolah & Program Ekstrakurikuler Naik Kelas”**.
+🧭 **Catatan:** Bagian ini dapat dimasukkan sebagai _appendix baru_ pada dokumen `BRIEF_PRICING_SUBSCRIPTION.md` atau sebagai _proposal terpisah_ berjudul **“Kerjasama Sekolah & Program Ekstrakurikuler Naik Kelas”**.

@@ -266,23 +266,27 @@ Platform menawarkan **3 Learning Tracks**:
 #### Track 1: Technical (Programming & Development)
 
 **Stage 1: Fundamental**
+
 - Dasar teori pemrograman
 - Algoritma & logic thinking
 - Version control (Git & GitHub)
 - Workflow kolaboratif
 
 **Stage 2: Praktik & Eksperimen**
+
 - Proyek individu & tim
 - Integration dengan Replit, Codespaces, GitHub
 - Development dengan IDE berbasis web
 - Mini project: Landing page dengan AI Agent
 
 **Stage 3: AI-Enhanced Learning**
+
 - Penggunaan AI Agent untuk efisiensi
 - Prompt engineering untuk developer
 - Best practices AI-assisted coding
 
 **Stage 4: Output Showcase**
+
 - Minimal 1 deployable project per peserta
 - Portfolio display di platform
 - Deployment (Replit/Netlify)
@@ -290,24 +294,28 @@ Platform menawarkan **3 Learning Tracks**:
 #### Track 2: Business (Entrepreneurship & Digital Business)
 
 **Stage 1: Fundamental**
+
 - Dasar bisnis digital
 - Business model canvas
 - Market research & validation
 - Financial basics untuk bisnis
 
 **Stage 2: Digital Marketing Foundations**
+
 - Content strategy
 - Social media marketing
 - Email marketing
 - SEO fundamentals
 
 **Stage 3: Campaign Execution**
+
 - Campaign planning & execution
 - Analytics & measurement
 - A/B testing
 - Optimization strategies
 
 **Stage 4: Output Showcase**
+
 - Business plan atau marketing campaign yang dijalankan
 - Case study dan hasil measurement
 - Portfolio bisnis digital
@@ -315,24 +323,28 @@ Platform menawarkan **3 Learning Tracks**:
 #### Track 3: Hybrid (Digital Marketing - Technical + Business)
 
 **Stage 1: Foundation**
+
 - Digital marketing strategy
 - Technical SEO
 - Web analytics (Google Analytics, etc.)
 - Content management systems
 
 **Stage 2: Technical Implementation**
+
 - Landing page development
 - Marketing automation setup
 - API integration untuk marketing tools
 - Data tracking implementation
 
 **Stage 3: Campaign & Optimization**
+
 - Multi-channel campaign execution
 - Technical optimization (performance, conversion)
 - Data analysis & insights
 - AI tools untuk content & optimization
 
 **Stage 4: Output Showcase**
+
 - End-to-end marketing campaign dengan technical implementation
 - Measurement & reporting
 - Portfolio digital marketing
@@ -340,11 +352,13 @@ Platform menawarkan **3 Learning Tracks**:
 #### Kurikulum Integrasi (2 Bulan - Contoh)
 
 **Bulan 1 – Dasar & Lingkungan:**
+
 - **Track Technical**: Terminal, Git, HTML/CSS/JS dasar
 - **Track Business**: Business fundamentals, content strategy
 - **Track Hybrid**: Marketing tools, analytics setup, CMS basics
 
 **Bulan 2 – Proyek & Kolaborasi:**
+
 - **Track Technical**: Deployable web project
 - **Track Business**: Marketing campaign execution
 - **Track Hybrid**: Technical marketing campaign dengan measurable results
@@ -439,21 +453,25 @@ Phase 1: Foundation ✅ (Weeks 1-2)
 #### Learning Outcomes
 
 **Technical Track:**
+
 - Number of deployable projects created
 - GitHub activity metrics
 - Code quality assessments
 
 **Business Track:**
+
 - Number of marketing campaigns executed
 - Business plan submissions
 - Campaign performance metrics
 
 **Hybrid Track:**
+
 - Technical marketing campaigns completed
 - Measurement & reporting quality
 - ROI/performance improvements
 
 **Common:**
+
 - Skills progression tracking
 - Certification rate (per track)
 - Portfolio quality score
@@ -552,7 +570,7 @@ Career Support → Job Placement (Optional)
 #### Content Risks
 
 - **Risk**: Outdated curriculum (technical & business)
-- **Mitigation**: 
+- **Mitigation**:
   - Regular content review dengan technical & business experts
   - Industry expert involvement untuk semua track
   - Student feedback loop untuk continuous improvement

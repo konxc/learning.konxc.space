@@ -7,16 +7,19 @@ Landing page prototype untuk program "Naik Kelas by Koneksi".
 ### Color Palette
 
 **Primary Colors:**
+
 - `#5a7d9a` - Logo & Accent (Soft Blue)
 - `#2c3e50` - Heading Text (Dark Blue-Gray)
 - `#6b7c93` - Body Text (Medium Gray)
 
 **Gradient Colors:**
+
 - Hero Background: `linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%)`
 - CTA Section: `linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)`
 - Benefits Section: `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`
 
 **Background Colors:**
+
 - White: `#ffffff`
 - Light Gray: `#fafbfc`, `#f8f9fc`
 - Footer: `#2c3e50`
@@ -24,31 +27,37 @@ Landing page prototype untuk program "Naik Kelas by Koneksi".
 ### Typography
 
 **Font Family:**
+
 ```css
 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 ```
 
 **Font Sizes:**
+
 - Hero Title: `2.8em`
 - Section Headings: `2.5em`
 - Body Text: `1em` - `1.2em`
 - Small Text: `0.9em` - `1.1em`
 
 **Font Weights:**
+
 - Headings: `600`, `700`
 - Body: `300`, `400`
 
 ### Spacing & Layout
 
 **Container:**
+
 - Max Width: `1200px`
 - Padding: `20px`
 
 **Section Padding:**
+
 - Large: `100px - 120px`
 - Medium: `50px - 80px`
 
 **Card Padding:**
+
 - Feature Cards: `40px 30px`
 - Benefit Items: `30px`
 - Form: `50px` (desktop), `30px` (mobile)
@@ -58,68 +67,65 @@ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 ## 📐 Layout Sections
 
 ### 1. Hero Section
+
 ```html
 <section class="hero">
-  - Logo & Tagline
-  - Main Headline
-  - Description Text
-  - Scroll Hint (animated)
+	- Logo & Tagline - Main Headline - Description Text - Scroll Hint (animated)
 </section>
 ```
 
 **Features:**
+
 - Gradient background (soft blue-gray)
 - Centered content
 - Full viewport height (`min-height: 90vh`)
 - Animated scroll hint (bounce effect)
 
 ### 2. About Section
+
 ```html
-<section class="about">
-  - Section Heading
-  - Subtitle
-  - Feature Cards (4 cards in grid)
-</section>
+<section class="about">- Section Heading - Subtitle - Feature Cards (4 cards in grid)</section>
 ```
 
 **Feature Cards:**
+
 - 🎯 Mulai dari Nol
 - 💼 Langsung ke Industri
 - 🤝 Mentoring Personal
 - 🚀 Project-Based
 
 ### 3. Program Timeline
+
 ```html
 <section class="program">
-  - Section Heading
-  - Timeline Component
-    - Vertical line
-    - 4 Timeline Items (odd/even layout)
+	- Section Heading - Timeline Component - Vertical line - 4 Timeline Items (odd/even layout)
 </section>
 ```
 
 **Timeline Items:**
+
 1. Minggu 1-2: Foundation Setup
 2. Minggu 3-4: Python Programming
 3. Minggu 5-6: Web Development
 4. Minggu 7-8: Final Project
 
 **Design:**
+
 - Central vertical line (gradient)
 - Alternating left/right content
 - Dots on timeline
 - Responsive: mobile stacks to right side
 
 ### 4. Benefits Section
+
 ```html
 <section class="benefits">
-  - Gradient Purple Background
-  - Section Heading (white)
-  - Benefit Grid (6 items)
+	- Gradient Purple Background - Section Heading (white) - Benefit Grid (6 items)
 </section>
 ```
 
 **Benefits:**
+
 - 📚 Materi Lengkap
 - 🏆 Sertifikat
 - 🌐 Portfolio Project
@@ -128,30 +134,31 @@ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 - 🎓 Lifetime Access
 
 **Design:**
+
 - Glassmorphism effect (backdrop-filter blur)
 - Hover scale effect
 - Grid: auto-fit, minmax(250px)
 
 ### 5. CTA Section
+
 ```html
 <section class="cta-section">
-  - Badge (pulsing animation)
-  - Heading
-  - Description
-  - Code Snippet (decorative)
-  - Registration Form
+	- Badge (pulsing animation) - Heading - Description - Code Snippet (decorative) - Registration
+	Form
 </section>
 ```
 
 **Form Fields:**
-- Nama Lengkap *
-- Email *
-- WhatsApp *
-- Status Pendidikan * (dropdown)
+
+- Nama Lengkap \*
+- Email \*
+- WhatsApp \*
+- Status Pendidikan \* (dropdown)
 - Pengalaman Coding (textarea)
-- Kenapa Tertarik? * (textarea)
+- Kenapa Tertarik? \* (textarea)
 
 **Design:**
+
 - Gradient background with pattern overlay
 - Glass-morphism badge
 - Animated code snippet
@@ -159,13 +166,9 @@ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 - Submit button with gradient
 
 ### 6. Footer
+
 ```html
-<footer class="footer">
-  - Logo/Title
-  - Description
-  - Social Links
-  - Copyright
-</footer>
+<footer class="footer">- Logo/Title - Description - Social Links - Copyright</footer>
 ```
 
 ---
@@ -173,27 +176,51 @@ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 ## 🎭 Animations
 
 ### 1. Bounce (Scroll Hint)
+
 ```css
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-10px); }
-  60% { transform: translateY(-5px); }
+	0%,
+	20%,
+	50%,
+	80%,
+	100% {
+		transform: translateY(0);
+	}
+	40% {
+		transform: translateY(-10px);
+	}
+	60% {
+		transform: translateY(-5px);
+	}
 }
 ```
 
 ### 2. Pulse (CTA Badge)
+
 ```css
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
 }
 ```
 
 ### 3. Slide Up (Form)
+
 ```css
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 ```
 
@@ -204,26 +231,29 @@ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 ### Hover Effects
 
 **Feature Cards:**
+
 ```css
 .feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+	transform: translateY(-5px);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 ```
 
 **Benefit Items:**
+
 ```css
 .benefit-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: scale(1.05);
+	background: rgba(255, 255, 255, 0.15);
+	transform: scale(1.05);
 }
 ```
 
 **Submit Button:**
+
 ```css
 .btn-submit:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+	transform: translateY(-3px);
+	box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
 }
 ```
 
@@ -241,6 +271,7 @@ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 ### Breakpoint: 768px
 
 **Changes:**
+
 - Hero title: `2.8em` → `2em`
 - Timeline: Left-align all items (mobile)
 - Timeline line: move to left (30px)
@@ -253,6 +284,7 @@ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 ## 💡 Implementation Notes
 
 ### Current State
+
 - Static HTML prototype
 - Inline CSS (798 lines)
 - Client-side only form handling
@@ -325,12 +357,14 @@ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 ### Brand Identity
 
 **Tone:**
+
 - Edukatif namun ringan
 - Modern & AI-friendly
 - Inspiring & collaborative
 - Clean aesthetic
 
 **Voice:**
+
 - Friendly & encouraging
 - Direct & clear
 - Tech-savvy but accessible

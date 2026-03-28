@@ -7,11 +7,13 @@ Dashboard dengan role-based access control untuk Admin, Mentor, dan User biasa d
 ## Route Structure
 
 ### Base Layout
+
 - `/dashboard` - Dashboard overview
 - `/dashboard/+layout.svelte` - Group layout dengan sidebar navigation
 - `/dashboard/+layout.server.ts` - Auth check & role-based navigation
 
 ### User Routes (Role: user)
+
 - `/dashboard/courses` - Browse available courses (marketplace)
 - `/dashboard/courses/[id]` - Course detail page dengan enroll button
 - `/dashboard/my-courses` - Enrolled courses (enrollments)
@@ -19,12 +21,14 @@ Dashboard dengan role-based access control untuk Admin, Mentor, dan User biasa d
 - `/dashboard/my-mentor-application` - View application status
 
 ### Mentor Routes (Role: mentor)
+
 - `/dashboard/courses` - Browse available courses
 - `/dashboard/my-courses` - Enrolled courses sebagai user
 - `/dashboard/mentor/courses` - Manage assigned courses
 - `/dashboard/mentor/students` - View assigned students
 
 ### Admin Routes (Role: admin)
+
 - `/dashboard/admin/courses` - Manage all courses (CRUD)
 - `/dashboard/admin/courses/create` - Create course form
 - `/dashboard/admin/courses/edit/[id]` - Edit course form
@@ -38,6 +42,7 @@ Dashboard dengan role-based access control untuk Admin, Mentor, dan User biasa d
 ## Features per Role
 
 ### Admin
+
 - Full course management (create, edit, delete, publish)
 - Coupon management (create, view, edit, toggle)
 - User management (view, role assignment)
@@ -45,12 +50,14 @@ Dashboard dengan role-based access control untuk Admin, Mentor, dan User biasa d
 - Can assign mentors to courses
 
 ### Mentor
+
 - Browse and enroll courses (as regular user)
 - View assigned courses
 - View students in assigned courses
 - Can see all courses they teach
 
 ### User
+
 - Browse available courses
 - Enroll in courses (with coupon support)
 - View enrolled courses
@@ -60,6 +67,7 @@ Dashboard dengan role-based access control untuk Admin, Mentor, dan User biasa d
 ## Navigation Structure
 
 ### Admin Navigation
+
 1. Dashboard
 2. Manage Courses
 3. Coupons
@@ -67,6 +75,7 @@ Dashboard dengan role-based access control untuk Admin, Mentor, dan User biasa d
 5. Mentor Applications
 
 ### Mentor Navigation
+
 1. Dashboard
 2. Browse Courses
 3. My Enrollments
@@ -74,6 +83,7 @@ Dashboard dengan role-based access control untuk Admin, Mentor, dan User biasa d
 5. Students
 
 ### User Navigation
+
 1. Dashboard
 2. Browse Courses
 3. My Enrollments

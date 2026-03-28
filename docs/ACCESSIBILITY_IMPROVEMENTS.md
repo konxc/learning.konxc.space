@@ -10,14 +10,14 @@ Dokumentasi untuk accessibility improvements dan WCAG compliance.
 
 ### Current Status
 
-| Area | Status | Notes |
-|------|--------|-------|
-| ARIA Labels | 🟡 Partial | Beberapa komponen sudah ada, perlu ditambah |
-| Keyboard Navigation | 🟡 Partial | Beberapa interaksi sudah support |
-| Focus Management | 🟡 Partial | Need improvement |
-| Color Contrast | 🟢 Good | Menggunakan design system colors |
-| Screen Reader | 🟡 Partial | Perlu testing dan improvement |
-| Semantic HTML | 🟢 Good | Most sections menggunakan semantic tags |
+| Area                | Status     | Notes                                       |
+| ------------------- | ---------- | ------------------------------------------- |
+| ARIA Labels         | 🟡 Partial | Beberapa komponen sudah ada, perlu ditambah |
+| Keyboard Navigation | 🟡 Partial | Beberapa interaksi sudah support            |
+| Focus Management    | 🟡 Partial | Need improvement                            |
+| Color Contrast      | 🟢 Good    | Menggunakan design system colors            |
+| Screen Reader       | 🟡 Partial | Perlu testing dan improvement               |
+| Semantic HTML       | 🟢 Good    | Most sections menggunakan semantic tags     |
 
 ---
 
@@ -26,6 +26,7 @@ Dokumentasi untuk accessibility improvements dan WCAG compliance.
 ### 1. ARIA Labels & Roles
 
 #### Sections
+
 - [x] HeroSection - `aria-labelledby`, `aria-label`
 - [x] CTASection - `aria-labelledby`, `role="status"` untuk badge
 - [x] ProgramSection - `aria-labelledby`
@@ -36,6 +37,7 @@ Dokumentasi untuk accessibility improvements dan WCAG compliance.
 - [x] SocialProofSection - `aria-labelledby`, `role="list"`
 
 #### Components
+
 - [x] FloatingCTA - `aria-label`
 - [x] SectionNavigation - `role="navigation"`, `aria-label`
 - [x] FAQItem - `aria-labelledby`, `aria-expanded`
@@ -47,12 +49,14 @@ Dokumentasi untuk accessibility improvements dan WCAG compliance.
 ### 2. Keyboard Navigation
 
 #### Completed
+
 - [x] FAQItem - Keyboard support (Enter/Space)
 - [x] SectionNavigation - Keyboard navigation
 - [x] FloatingCTA - Keyboard accessible
 - [x] AboutWindow - Escape key untuk close
 
 #### Need Improvement
+
 - [ ] FloatingProfileMenu - Keyboard navigation untuk dropdown
 - [ ] BrandModeToggle - Keyboard support
 - [ ] All interactive cards - Keyboard focus management
@@ -61,6 +65,7 @@ Dokumentasi untuk accessibility improvements dan WCAG compliance.
 ### 3. Focus Management
 
 #### Need Implementation
+
 - [ ] Visible focus indicators untuk semua interactive elements
 - [ ] Focus trap untuk modals
 - [ ] Focus restoration setelah modal close
@@ -69,21 +74,25 @@ Dokumentasi untuk accessibility improvements dan WCAG compliance.
 ### 4. Color Contrast
 
 #### Status
+
 - ✅ Design system colors sudah memenuhi WCAG AA contrast ratios
 - ✅ Text colors vs background sudah di-test
 
 #### Need Verification
+
 - [ ] Test semua text combinations dengan contrast checker
 - [ ] Ensure interactive states (hover, focus) maintain contrast
 
 ### 5. Screen Reader Support
 
 #### Completed
+
 - [x] Semantic HTML structure
 - [x] ARIA labels untuk sections
 - [x] Alt text untuk images (where applicable)
 
 #### Need Improvement
+
 - [ ] Live regions untuk dynamic content updates
 - [ ] Announcements untuk state changes
 - [ ] Better descriptions untuk complex components
@@ -91,6 +100,7 @@ Dokumentasi untuk accessibility improvements dan WCAG compliance.
 ### 6. Skip Links
 
 #### Need Implementation
+
 - [ ] Skip to main content link
 - [ ] Skip to navigation link
 - [ ] Visible focus untuk skip links
@@ -148,20 +158,20 @@ Dokumentasi untuk accessibility improvements dan WCAG compliance.
 <a href="#main-content" class="skip-link">Skip to main content</a>
 
 <style>
-.skip-link {
-	position: absolute;
-	top: -40px;
-	left: 0;
-	background: var(--color-primary-dark);
-	color: white;
-	padding: 8px 16px;
-	text-decoration: none;
-	z-index: 10000;
-}
+	.skip-link {
+		position: absolute;
+		top: -40px;
+		left: 0;
+		background: var(--color-primary-dark);
+		color: white;
+		padding: 8px 16px;
+		text-decoration: none;
+		z-index: 10000;
+	}
 
-.skip-link:focus {
-	top: 0;
-}
+	.skip-link:focus {
+		top: 0;
+	}
 </style>
 ```
 
@@ -225,4 +235,3 @@ Dokumentasi untuk accessibility improvements dan WCAG compliance.
 - All images have alt text or aria-hidden
 - Color contrast: WCAG AA compliant
 - Screen reader: Full navigation support
-

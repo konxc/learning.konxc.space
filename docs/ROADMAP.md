@@ -508,6 +508,7 @@ Complete roadmaps untuk semua domains:
    - Keep content in HTML source
 
 **Files to create/update**:
+
 - `src/lib/utils/lazyLoading.ts` - Utility functions ✅
 - `src/lib/components/LazySection.svelte` - Wrapper component ✅
 - `docs/LAZY_LOADING_STRATEGY.md` - Strategy documentation ✅

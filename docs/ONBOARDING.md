@@ -40,24 +40,28 @@ Selamat datang di **Learning.konxc.space**! Dokumentasi ini akan membantu Anda m
 ## 🛠 Tech Stack
 
 ### Frontend
+
 - **Framework**: SvelteKit 5 dengan Svelte 5 Runes
 - **Styling**: Tailwind CSS 4
 - **i18n**: Paraglide (inlang) - Indonesian, English, Japanese
 - **Build Tool**: Vite 7
 
 ### Backend
+
 - **Runtime**: SvelteKit server-side (Node.js)
 - **Database**: Turso (LibSQL) - SQLite-compatible
 - **ORM**: Drizzle ORM
 - **Authentication**: Lucia v3
 
 ### Development Tools
+
 - **TypeScript**: Type safety
 - **ESLint + Prettier**: Code quality & formatting
 - **Playwright**: E2E testing
 - **Drizzle Kit**: Database migrations
 
 ### Deployment
+
 - **Production**: Cloudflare Pages
 - **CI/CD**: GitHub Actions (via deploy scripts)
 
@@ -125,20 +129,24 @@ Database menggunakan **Turso (LibSQL)** dengan Drizzle ORM. Schema utama:
 ### Core Tables
 
 #### `user`
+
 - `id` (PK), `username` (unique), `passwordHash`
 - `role` (default: 'user'), `fullName`, `email`, `phone`
 - `onboardingCompleted`, `createdAt`
 
 #### `session`
+
 - `id` (PK), `userId` (FK → user), `expiresAt`
 
 #### `course`
+
 - `id` (PK), `title`, `description`, `thumbnailUrl`
 - `price`, `duration` (weeks), `status` (default: 'draft')
 - `mentorId` (FK → user), `createdBy` (FK → user)
 - `createdAt`, `updatedAt`
 
 #### `enrollment`
+
 - `id` (PK), `userId` (FK), `courseId` (FK), `couponId` (FK)
 - `status` (default: 'pending'), `enrolledAt`, `activatedAt`, `completedAt`
 
@@ -196,6 +204,7 @@ pnpm run db:seed:reset
 - **Session Management**: Cookie-based dengan expiry
 
 File kunci:
+
 - `src/lib/server/auth.ts` - Lucia setup & session management
 - `src/lib/server/password.ts` - Password hashing (Argon2id via @oslojs)
 
@@ -204,12 +213,14 @@ File kunci:
 Role-based access control di `src/lib/server/rbac.ts`:
 
 **Roles:**
+
 - `user` / `learner` - Default role
 - `mentor` - Course creator & instructor
 - `admin` - Platform administrator
 - `business` - Business analytics viewer
 
 **Middleware:**
+
 - `requireAuth()` - Ensures user is logged in
 - `requireRole()` - Ensures user has specific role
 - Route-level protection via `+layout.server.ts`
@@ -248,11 +259,13 @@ routes/
 ### Layouts
 
 #### `PublicShell.svelte`
+
 - Untuk route grup `(public)`
 - Header dengan navigation
 - Footer
 
 #### `AppShell.svelte`
+
 - Untuk route grup `(app)`
 - Sidebar navigation
 - Header dengan user menu
@@ -308,6 +321,7 @@ lib/components/
 ```
 
 **Files menggunakan Button:**
+
 - `src/lib/components/dashboard/roles/DashboardBusiness.svelte`
 - `src/lib/components/dashboard/roles/DashboardAdmin.svelte`
 - `src/lib/components/dashboard/roles/DashboardMentor.svelte`
@@ -316,6 +330,7 @@ lib/components/
 #### Design System
 
 Design tokens di `src/lib/config/design.ts`:
+
 - `COLOR` - Color palette (OKLCH)
 - `SPACING` - Consistent spacing
 - `TEXT` - Typography scale
@@ -330,17 +345,20 @@ Design tokens di `src/lib/config/design.ts`:
 ### Setup Environment
 
 1. **Install dependencies:**
+
    ```bash
    pnpm install
    ```
 
 2. **Setup environment variables:**
+
    ```bash
    # Copy .env.example to .env
    # Set DATABASE_URL and DATABASE_AUTH_TOKEN (Turso)
    ```
 
 3. **Setup database:**
+
    ```bash
    pnpm run db:push        # Push schema
    pnpm run db:seed        # Seed initial data
@@ -412,20 +430,24 @@ pnpm run deploy:cf        # Deploy to Cloudflare Pages
 ### Implemented Features
 
 ✅ **Authentication System**
+
 - Login/Register dengan Lucia v3
 - Session management
 - Password hashing (Argon2id)
 
 ✅ **i18n Support**
+
 - Paraglide (inlang) integration
 - Indonesian, English, Japanese
 
 ✅ **Dashboard System**
+
 - Role-based dashboards (Learner, Mentor, Admin, Business)
 - Role switcher untuk testing
 - Analytics overview
 
 ✅ **UI Components**
+
 - Design system dengan OKLCH colors
 - Theme toggle (light/dark/system)
 - Command palette
@@ -433,6 +455,7 @@ pnpm run deploy:cf        # Deploy to Cloudflare Pages
 - Responsive layouts
 
 ✅ **Database Schema**
+
 - Complete schema untuk courses, enrollments, quizzes, etc.
 - Progress tracking
 - Payment proofs
@@ -441,17 +464,20 @@ pnpm run deploy:cf        # Deploy to Cloudflare Pages
 ### In Progress / Planned
 
 🚧 **Course Management**
+
 - Course creation & editing
 - Module/Lesson structure
 - Material upload
 
 🚧 **Learning System**
+
 - Video player integration
 - Quiz system
 - Assignment submission
 - Progress tracking
 
 🚧 **Payment Integration**
+
 - Midtrans integration
 - Payment verification
 - Coupon system
@@ -522,4 +548,3 @@ Untuk developer baru yang ingin mulai berkontribusi:
 **Maintained By**: Koneksi Development Team
 
 Jika ada pertanyaan atau butuh bantuan, silakan lihat dokumentasi terkait atau tanyakan ke tim development.
-
