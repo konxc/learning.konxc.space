@@ -76,7 +76,7 @@
 	<div class="grid auto-rows-[180px] grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-12">
 		<!-- Hero Card: Progress Visualization -->
 		<div
-			class={`row-span-2 md:col-span-4 lg:col-span-8 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} group relative flex flex-col justify-between overflow-hidden p-10 shadow-2xl transition-all duration-700 hover:-translate-y-1 hover:shadow-blue-500/10`}
+			class={`row-span-2 md:col-span-4 lg:col-span-8 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} group relative flex flex-col justify-between overflow-hidden p-10 ${ELEVATION.card} ${ELEVATION.cardHover} transition-all duration-700 hover:-translate-y-1 hover:shadow-blue-500/10`}
 			in:fly={{ y: 40, duration: 800, delay: 100 }}
 		>
 			<div
@@ -147,7 +147,7 @@
 
 		<!-- Square Card: Active Courses -->
 		<div
-			class={`row-span-1 md:col-span-2 lg:col-span-4 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} group flex cursor-pointer flex-col justify-between p-8 shadow-xl transition-all duration-500 hover:border-blue-500/50`}
+			class={`row-span-1 md:col-span-2 lg:col-span-4 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} group flex cursor-pointer flex-col justify-between p-8 ${ELEVATION.card} ${ELEVATION.cardHover} hover:-translate-y-1`}
 			in:fly={{ y: 40, duration: 800, delay: 200 }}
 		>
 			<div class="flex items-center justify-between">
@@ -176,7 +176,7 @@
 
 		<!-- Vertical Accent: Certificates -->
 		<div
-			class={`row-span-2 md:col-span-2 lg:col-span-2 ${RADIUS.card} ${GRADIENT.primary} group relative flex flex-col justify-between overflow-hidden p-8 text-white shadow-2xl`}
+			class={`row-span-2 md:col-span-2 lg:col-span-2 ${RADIUS.card} ${GRADIENT.primary} group relative flex flex-col justify-between overflow-hidden p-8 text-white ${ELEVATION.card} hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 hover:-translate-y-1`}
 			in:fly={{ y: 40, duration: 800, delay: 300 }}
 		>
 			<div
@@ -203,7 +203,7 @@
 
 		<!-- Horizontal Long: Activity Summary / Mini Graph -->
 		<div
-			class={`row-span-1 md:col-span-2 lg:col-span-2 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} flex flex-col justify-between p-6 shadow-xl`}
+			class={`row-span-1 md:col-span-2 lg:col-span-2 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} flex flex-col justify-between p-6 ${ELEVATION.card} ${ELEVATION.cardHover} hover:-translate-y-1`}
 			in:fly={{ y: 40, duration: 800, delay: 400 }}
 		>
 			<div class="flex items-center gap-3">
@@ -236,7 +236,7 @@
 				{#if data.courses && data.courses.length > 0}
 					{#each data.courses.slice(0, 3) as course}
 						<div
-							class={`${COLOR.card} ${RADIUS.card} ${COLOR.cardBorder} group flex items-center gap-6 p-6 shadow-lg transition-all duration-500 hover:border-blue-500/30 hover:shadow-2xl`}
+							class={`${COLOR.card} ${RADIUS.card} ${COLOR.cardBorder} group flex cursor-pointer items-center gap-6 p-6 ${ELEVATION.base} ${ELEVATION.cardHover} transition-all duration-500 hover:-translate-y-1`}
 						>
 							<div
 								class="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-zinc-100 shadow-inner transition-transform group-hover:scale-105 dark:bg-zinc-800"
@@ -312,7 +312,7 @@
 				<h2 class={`${TEXT.h2} font-black tracking-tight`}>Consistency</h2>
 			</div>
 			<div
-				class={`${COLOR.card} ${RADIUS.card} ${COLOR.cardBorder} relative flex flex-col items-center overflow-hidden p-10 text-center shadow-2xl`}
+				class={`${COLOR.card} ${RADIUS.card} ${COLOR.cardBorder} relative flex flex-col items-center overflow-hidden p-10 text-center ${ELEVATION.card} ${ELEVATION.cardHover}`}
 			>
 				<div class="absolute top-0 right-0 p-4">
 					<div
