@@ -137,147 +137,173 @@
 					<div class="flex items-center justify-between">
 						<h2 class={`${TEXT.h2} ${COLOR.textPrimary} line-clamp-2`}>{data.course.title}</h2>
 						<button
-						class={`rounded-lg p-2 ${COLOR.neutralHover} ${TRANSITION.colors} text-blue-600 hover:text-blue-700`}
-						onclick={toggleAllModules}
-						title={expandedModules.size === data.modules.length ? 'Collapse All' : 'Expand All'}
-					>
-						{#if expandedModules.size === data.modules.length}
-							<svg
-								width="18"
-								height="18"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								><polyline points="4 14 10 14 10 20" /><polyline points="20 10 14 10 14 4" /><line
-									x1="14"
-									y1="10"
-									x2="21"
-									y2="3"
-								/><line x1="3" y1="21" x2="10" y2="14" /></svg
-							>
-						{:else}
-							<svg
-								width="18"
-								height="18"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line
-									x1="21"
-									y1="3"
-									x2="14"
-									y2="10"
-								/><line x1="3" y1="21" x2="10" y2="14" /></svg
-							>
-						{/if}
-					</button>
-				</div>
-				<p class={`${TEXT.small} ${COLOR.textMuted} mt-2 leading-relaxed`}>
-					{data.course.description}
-				</p>
-			</div>
-
-			<div class="flex flex-col gap-2">
-				{#each data.modules as module (module.id)}
-					{@const modProgress = getModuleProgress(module)}
-					<div
-						class={`overflow-hidden border ${RADIUS.small} ${COLOR.cardBorder} transition-all duration-300 ${
-							expandedModules.has(module.id) ? 'shadow-md shadow-blue-500/5' : ''
-						}`}
-					>
-						<button
-							class={`flex w-full cursor-pointer items-center justify-between border-none px-4 py-3.5 ${COLOR.card} focus:ring-2 focus:ring-blue-600/70 focus:outline-none focus:ring-inset ${TRANSITION.colors} ${COLOR.neutralHover}`}
-							onclick={() => toggleModule(module.id)}
-							aria-expanded={expandedModules.has(module.id)}
-							type="button"
+							class={`rounded-lg p-2 ${COLOR.neutralHover} ${TRANSITION.colors} text-blue-600 hover:text-blue-700`}
+							onclick={toggleAllModules}
+							title={expandedModules.size === data.modules.length ? 'Collapse All' : 'Expand All'}
 						>
-							<div class="flex flex-col items-start gap-1 text-left">
-								<span class={`${TEXT.button} ${COLOR.textPrimary} font-bold`}>{module.title}</span>
-								<div class="flex items-center gap-2">
-									<div
-										class="h-1 w-16 overflow-hidden rounded-full bg-gray-100 dark:bg-neutral-800"
-									>
-										<div
-											class="h-full bg-blue-500 transition-all duration-500"
-											style="width: {modProgress.percentage}%"
-										></div>
-									</div>
-									<span class="text-[10px] font-medium text-gray-400"
-										>{modProgress.completed}/{modProgress.total} Selesai</span
-									>
-								</div>
-							</div>
-							<div class="flex items-center gap-2">
-								{#if modProgress.percentage === 100}
-									<span
-										class="rounded-full bg-green-500/10 px-1.5 py-0.5 text-[10px] font-bold text-green-500 uppercase"
-										>Selesai</span
-									>
-								{/if}
+							{#if expandedModules.size === data.modules.length}
 								<svg
-									class={`h-4 w-4 ${COLOR.textMuted} ${TRANSITION.transform} ${
-										expandedModules.has(module.id) ? 'rotate-180' : ''
-									}`}
-									width="20"
-									height="20"
-									viewBox="0 0 20 20"
+									width="18"
+									height="18"
+									viewBox="0 0 24 24"
 									fill="none"
-									aria-hidden="true"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									><polyline points="4 14 10 14 10 20" /><polyline points="20 10 14 10 14 4" /><line
+										x1="14"
+										y1="10"
+										x2="21"
+										y2="3"
+									/><line x1="3" y1="21" x2="10" y2="14" /></svg
 								>
-									<path
-										d="M5 7.5L10 12.5L15 7.5"
-										stroke="currentColor"
-										stroke-width="2.5"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-									/>
-								</svg>
-							</div>
+							{:else}
+								<svg
+									width="18"
+									height="18"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line
+										x1="21"
+										y1="3"
+										x2="14"
+										y2="10"
+									/><line x1="3" y1="21" x2="10" y2="14" /></svg
+								>
+							{/if}
 						</button>
-
-						{#if expandedModules.has(module.id)}
-							<div class={`flex flex-col p-2 ${COLOR.neutral}`}>
-								{#each module.lessons as lesson (lesson.id)}
-									<button
-										class={`w-full rounded-lg px-3 py-2.5 text-left ${TRANSITION.all} flex items-center justify-between gap-2 ${
-											lesson.id === selectedLessonId
-												? 'bg-linear-to-r from-blue-600 to-purple-600 text-white'
-												: `${COLOR.card} ${COLOR.textPrimary} hover:${COLOR.neutralHover}`
-										} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
-										onclick={() => selectLesson(lesson.id)}
-										type="button"
-									>
-										<span class={`${TEXT.small} truncate`}>{lesson.title}</span>
-										{#if lesson.progress?.completedAt}
-											<svg
-												class="h-5 w-5 shrink-0"
-												width="20"
-												height="20"
-												viewBox="0 0 20 20"
-												fill="none"
-												aria-hidden="true"
-											>
-												<path
-													d="M16.6667 5L7.50004 14.1667L3.33337 10"
-													stroke="currentColor"
-													stroke-width="2"
-													stroke-linecap="round"
-													stroke-linejoin="round"
-												/>
-											</svg>
-										{/if}
-									</button>
-								{/each}
+						<!-- Progress Bar -->
+						<div class="mt-3">
+							<div class="mb-1.5 flex items-center justify-between">
+								<span class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+									{data.completedLessons} / {data.totalLessons} lessons
+								</span>
+								<span
+									class="text-xs font-black {data.progressPercent >= 100
+										? 'text-green-600 dark:text-green-400'
+										: 'text-blue-600 dark:text-blue-400'}"
+								>
+									{data.progressPercent}%
+								</span>
 							</div>
-						{/if}
+							<div class="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
+								<div
+									class="h-full rounded-full transition-all duration-700 {data.progressPercent >=
+									100
+										? 'bg-green-500'
+										: 'bg-gradient-to-r from-blue-500 to-indigo-600'}"
+									style="width: {data.progressPercent}%"
+								></div>
+							</div>
+						</div>
+						<p class={`${TEXT.small} ${COLOR.textMuted} mt-2 leading-relaxed`}>
+							{data.course.description}
+						</p>
 					</div>
-				{/each}
+				</div>
+
+				<div class="flex flex-col gap-2">
+					{#each data.modules as module (module.id)}
+						{@const modProgress = getModuleProgress(module)}
+						<div
+							class={`overflow-hidden border ${RADIUS.small} ${COLOR.cardBorder} transition-all duration-300 ${
+								expandedModules.has(module.id) ? 'shadow-md shadow-blue-500/5' : ''
+							}`}
+						>
+							<button
+								class={`flex w-full cursor-pointer items-center justify-between border-none px-4 py-3.5 ${COLOR.card} focus:ring-2 focus:ring-blue-600/70 focus:outline-none focus:ring-inset ${TRANSITION.colors} ${COLOR.neutralHover}`}
+								onclick={() => toggleModule(module.id)}
+								aria-expanded={expandedModules.has(module.id)}
+								type="button"
+							>
+								<div class="flex flex-col items-start gap-1 text-left">
+									<span class={`${TEXT.button} ${COLOR.textPrimary} font-bold`}>{module.title}</span
+									>
+									<div class="flex items-center gap-2">
+										<div
+											class="h-1 w-16 overflow-hidden rounded-full bg-gray-100 dark:bg-neutral-800"
+										>
+											<div
+												class="h-full bg-blue-500 transition-all duration-500"
+												style="width: {modProgress.percentage}%"
+											></div>
+										</div>
+										<span class="text-[10px] font-medium text-gray-400"
+											>{modProgress.completed}/{modProgress.total} Selesai</span
+										>
+									</div>
+								</div>
+								<div class="flex items-center gap-2">
+									{#if modProgress.percentage === 100}
+										<span
+											class="rounded-full bg-green-500/10 px-1.5 py-0.5 text-[10px] font-bold text-green-500 uppercase"
+											>Selesai</span
+										>
+									{/if}
+									<svg
+										class={`h-4 w-4 ${COLOR.textMuted} ${TRANSITION.transform} ${
+											expandedModules.has(module.id) ? 'rotate-180' : ''
+										}`}
+										width="20"
+										height="20"
+										viewBox="0 0 20 20"
+										fill="none"
+										aria-hidden="true"
+									>
+										<path
+											d="M5 7.5L10 12.5L15 7.5"
+											stroke="currentColor"
+											stroke-width="2.5"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+										/>
+									</svg>
+								</div>
+							</button>
+
+							{#if expandedModules.has(module.id)}
+								<div class={`flex flex-col p-2 ${COLOR.neutral}`}>
+									{#each module.lessons as lesson (lesson.id)}
+										<button
+											class={`w-full rounded-lg px-3 py-2.5 text-left ${TRANSITION.all} flex items-center justify-between gap-2 ${
+												lesson.id === selectedLessonId
+													? 'bg-linear-to-r from-blue-600 to-purple-600 text-white'
+													: `${COLOR.card} ${COLOR.textPrimary} hover:${COLOR.neutralHover}`
+											} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
+											onclick={() => selectLesson(lesson.id)}
+											type="button"
+										>
+											<span class={`${TEXT.small} truncate`}>{lesson.title}</span>
+											{#if lesson.progress?.completedAt}
+												<svg
+													class="h-5 w-5 shrink-0"
+													width="20"
+													height="20"
+													viewBox="0 0 20 20"
+													fill="none"
+													aria-hidden="true"
+												>
+													<path
+														d="M16.6667 5L7.50004 14.1667L3.33337 10"
+														stroke="currentColor"
+														stroke-width="2"
+														stroke-linecap="round"
+														stroke-linejoin="round"
+													/>
+												</svg>
+											{/if}
+										</button>
+									{/each}
+								</div>
+							{/if}
+						</div>
+					{/each}
+				</div>
 			</div>
 		</aside>
 
