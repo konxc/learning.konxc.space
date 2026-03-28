@@ -1,6 +1,6 @@
 import { db } from './db';
 import * as schema from './db/schema';
-import { eq, count, and } from 'drizzle-orm';
+import { eq, count, and, isNotNull } from 'drizzle-orm';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { createNotification } from './email';
 
@@ -114,7 +114,7 @@ export async function checkAndAwardBadges(userId: string) {
 		.where(
 			and(
 				eq(schema.lessonProgress.userId, userId),
-				schema.lessonProgress.completedAt !== null
+				isNotNull(schema.lessonProgress.completedAt)
 			)
 		);
 
