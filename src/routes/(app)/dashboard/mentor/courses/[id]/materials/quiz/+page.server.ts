@@ -168,4 +168,3 @@ export const actions: Actions = {
 		return actionSuccess({ message: 'Pertanyaan berhasil ditambahkan.' });
 	}
 } satisfies Actions;
-

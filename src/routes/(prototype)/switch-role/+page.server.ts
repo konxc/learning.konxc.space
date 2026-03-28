@@ -19,14 +19,14 @@ export const load: PageServerLoad = async (event) => {
 		throw redirect(303, '/dashboard');
 	}
 
-  if (requestedRole && ['admin', 'mentor', 'siswa'].includes(requestedRole)) {
-    event.cookies.set(ACTIVE_ROLE_COOKIE, requestedRole, {
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax'
-    });
-    await logAudit(event, 'switch_role', { userId: user.id, to: requestedRole });
-  }
+	if (requestedRole && ['admin', 'mentor', 'siswa'].includes(requestedRole)) {
+		event.cookies.set(ACTIVE_ROLE_COOKIE, requestedRole, {
+			path: '/',
+			httpOnly: true,
+			sameSite: 'lax'
+		});
+		await logAudit(event, 'switch_role', { userId: user.id, to: requestedRole });
+	}
 
 	const back = event.request.headers.get('referer') ?? '/dashboard';
 	throw redirect(303, back);

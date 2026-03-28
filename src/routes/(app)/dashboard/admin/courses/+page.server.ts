@@ -4,12 +4,12 @@ import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async (event) => {
-    await requireAdmin(event);
+	await requireAdmin(event);
 
-    // Get all courses
-    const courses = await db.select().from(schema.course);
+	// Get all courses
+	const courses = await db.select().from(schema.course);
 
-    return {
-        courses
-    };
+	return {
+		courses
+	};
 };

@@ -27,12 +27,7 @@ export const load: PageServerLoad = async (event) => {
 		const pendingEnrollment = await db
 			.select()
 			.from(schema.enrollment)
-			.where(
-				and(
-					eq(schema.enrollment.userId, user.id),
-					eq(schema.enrollment.courseId, courseId)
-				)
-			)
+			.where(and(eq(schema.enrollment.userId, user.id), eq(schema.enrollment.courseId, courseId)))
 			.limit(1);
 
 		if (pendingEnrollment.length > 0) {
@@ -92,10 +87,7 @@ export const load: PageServerLoad = async (event) => {
 		.select()
 		.from(schema.lessonProgress)
 		.where(
-			and(
-				eq(schema.lessonProgress.userId, user.id),
-				eq(schema.lessonProgress.courseId, courseId)
-			)
+			and(eq(schema.lessonProgress.userId, user.id), eq(schema.lessonProgress.courseId, courseId))
 		);
 
 	// Structure data hierarchically
@@ -122,8 +114,7 @@ export const load: PageServerLoad = async (event) => {
 	});
 
 	// Get first lesson for redirect if no specific lesson selected
-	const firstLesson =
-		structuredModules[0]?.lessons?.[0] || null;
+	const firstLesson = structuredModules[0]?.lessons?.[0] || null;
 
 	return {
 		course,
@@ -136,4 +127,3 @@ export const load: PageServerLoad = async (event) => {
 		firstLesson
 	};
 };
-

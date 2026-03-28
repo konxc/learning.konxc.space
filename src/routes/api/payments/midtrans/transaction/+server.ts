@@ -8,7 +8,7 @@ import { validateCoupon, applyCoupon } from '$lib/server/coupon';
 
 export const POST: RequestHandler = async (event) => {
 	const user = await requireAuth(event);
-	const data = await event.request.json().catch(() => ({} as any));
+	const data = await event.request.json().catch(() => ({}) as any);
 	const courseId = data.courseId as string | undefined;
 	const couponCode = (data.couponCode as string | undefined) || undefined;
 
@@ -44,7 +44,9 @@ export const POST: RequestHandler = async (event) => {
 	if (couponCode) {
 		const validation = await validateCoupon(couponCode, course.price, courseId);
 		if (!validation.isValid) {
-			return new Response(JSON.stringify({ error: validation.error || 'Invalid coupon' }), { status: 400 });
+			return new Response(JSON.stringify({ error: validation.error || 'Invalid coupon' }), {
+				status: 400
+			});
 		}
 		finalPrice = validation.finalPrice;
 		discountAmount = validation.discountAmount;
@@ -90,9 +92,7 @@ export const POST: RequestHandler = async (event) => {
 			email: user.email || undefined,
 			phone: user.phone || undefined
 		},
-		itemDetails: [
-			{ id: course.id, price: finalPrice, quantity: 1, name: course.title }
-		],
+		itemDetails: [{ id: course.id, price: finalPrice, quantity: 1, name: course.title }],
 		expiryMinutes: 60
 	});
 

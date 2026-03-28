@@ -18,7 +18,7 @@ function validatePassword(password: unknown): password is string {
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) {
-		throw redirect(302, '/login');
+		throw redirect(302, '/auth/signin');
 	}
 
 	const currentUser = await db.query.user.findFirst({
@@ -45,7 +45,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 export const actions: Actions = {
 	updateProfile: async ({ request, locals }) => {
 		if (!locals.user) {
-			throw redirect(302, '/login');
+			throw redirect(302, '/auth/signin');
 		}
 
 		const formData = await request.formData();
@@ -85,7 +85,7 @@ export const actions: Actions = {
 
 	changePassword: async ({ request, locals }) => {
 		if (!locals.user) {
-			throw redirect(302, '/login');
+			throw redirect(302, '/auth/signin');
 		}
 
 		const formData = await request.formData();

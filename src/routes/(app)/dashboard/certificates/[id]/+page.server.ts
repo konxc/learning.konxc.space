@@ -44,4 +44,3 @@ export const load: PageServerLoad = async (event) => {
 		user: users[0]
 	};
 };
-

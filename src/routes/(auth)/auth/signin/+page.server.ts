@@ -23,10 +23,7 @@ export const actions: Actions = {
 		const password = formData.get('password');
 
 		if (!validateUsername(username)) {
-			return actionFailure(
-				400,
-				'Invalid username (min 3, max 31 characters, alphanumeric only)'
-			);
+			return actionFailure(400, 'Invalid username (min 3, max 31 characters, alphanumeric only)');
 		}
 		if (!validatePassword(password)) {
 			return actionFailure(400, 'Invalid password (min 6, max 255 characters)');

@@ -49,4 +49,3 @@ export const load: PageServerLoad = async (event) => {
 	const referer = event.request.headers.get('referer') || '/dashboard';
 	throw redirect(303, referer);
 };
-

@@ -49,27 +49,27 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		.orderBy(desc(schema.submission.createdAt));
 
 	// Get quiz details for quiz submissions
-const quizSubmissions = submissions.filter((s) => s.submission.type === 'quiz');
-const quizIds = quizSubmissions
-	.map((s) => s.submission.quizId)
-	.filter((id): id is string => typeof id === 'string' && id.length > 0);
+	const quizSubmissions = submissions.filter((s) => s.submission.type === 'quiz');
+	const quizIds = quizSubmissions
+		.map((s) => s.submission.quizId)
+		.filter((id): id is string => typeof id === 'string' && id.length > 0);
 
-const quizzes =
-	quizIds.length > 0
-		? await db.select().from(schema.quiz).where(inArray(schema.quiz.id, quizIds))
-		: [] as typeof schema.quiz.$inferSelect[];
+	const quizzes =
+		quizIds.length > 0
+			? await db.select().from(schema.quiz).where(inArray(schema.quiz.id, quizIds))
+			: ([] as (typeof schema.quiz.$inferSelect)[]);
 
 	const quizMap = new Map(quizzes.map((q) => [q.id, q]));
 
 	// Get grades for submissions
-const gradedSubmissionIds = submissions.map((s) => s.submission.id);
-const grades =
-	gradedSubmissionIds.length > 0
-		? await db
-				.select()
-				.from(schema.submissionGrade)
-				.where(inArray(schema.submissionGrade.submissionId, gradedSubmissionIds))
-		: [] as typeof schema.submissionGrade.$inferSelect[];
+	const gradedSubmissionIds = submissions.map((s) => s.submission.id);
+	const grades =
+		gradedSubmissionIds.length > 0
+			? await db
+					.select()
+					.from(schema.submissionGrade)
+					.where(inArray(schema.submissionGrade.submissionId, gradedSubmissionIds))
+			: ([] as (typeof schema.submissionGrade.$inferSelect)[]);
 
 	const gradeMap = new Map(grades.map((g) => [g.submissionId, g]));
 
@@ -119,7 +119,8 @@ export const actions: Actions = {
 			return actionFailure(400, 'Submission ID and score are required');
 		}
 
-		const parsedScore = typeof scoreValue === 'string' ? Number.parseInt(scoreValue, 10) : Number.NaN;
+		const parsedScore =
+			typeof scoreValue === 'string' ? Number.parseInt(scoreValue, 10) : Number.NaN;
 		if (!Number.isFinite(parsedScore)) {
 			return actionFailure(400, 'Submission ID and score are required');
 		}

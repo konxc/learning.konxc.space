@@ -80,12 +80,7 @@ export const POST: RequestHandler = async (event) => {
 		.set({
 			completedAt: new Date()
 		})
-		.where(
-			and(
-				eq(schema.enrollment.userId, user.id),
-				eq(schema.enrollment.courseId, courseId)
-			)
-		);
+		.where(and(eq(schema.enrollment.userId, user.id), eq(schema.enrollment.courseId, courseId)));
 
 	return json({
 		success: true,
@@ -93,4 +88,3 @@ export const POST: RequestHandler = async (event) => {
 		serial
 	});
 };
-

@@ -28,7 +28,12 @@ export const POST: RequestHandler = async ({ request }) => {
 	// Map status to enrollment status
 	let newStatus: 'active' | 'pending' | 'cancelled' = 'pending';
 	if (transaction_status === 'settlement' || transaction_status === 'capture') newStatus = 'active';
-	if (transaction_status === 'deny' || transaction_status === 'cancel' || transaction_status === 'expire') newStatus = 'cancelled';
+	if (
+		transaction_status === 'deny' ||
+		transaction_status === 'cancel' ||
+		transaction_status === 'expire'
+	)
+		newStatus = 'cancelled';
 
 	// Update enrollment
 	await db

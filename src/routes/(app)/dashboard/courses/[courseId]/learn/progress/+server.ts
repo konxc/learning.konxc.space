@@ -72,4 +72,3 @@ export const POST: RequestHandler = async (event) => {
 
 	return json({ success: true });
 };
-

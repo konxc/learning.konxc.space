@@ -12,4 +12,3 @@ Sitemap: https://learning.konxc.space/sitemap.xml`;
 		}
 	});
 }
-

@@ -38,7 +38,7 @@ export const actions: Actions = {
 		});
 
 		if (!res.ok) {
-			const err = await res.json().catch(() => ({} as any));
+			const err = await res.json().catch(() => ({}) as any);
 			return actionFailure(res.status, err.error || 'Gagal membuat transaksi');
 		}
 
