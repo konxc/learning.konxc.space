@@ -2,7 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, desc, count } from 'drizzle-orm';
+import { eq, desc, count, isNotNull } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 
@@ -33,23 +33,64 @@ export const load: PageServerLoad = async (event) => {
 		.innerJoin(schema.course, eq(schema.cohort.courseId, schema.course.id))
 		.orderBy(desc(schema.cohort.createdAt));
 
-	// Get enrollment counts per cohort
-	const enrollmentCounts = await db
+	// Get enrollment counts and stats per cohort
+	const allEnrollments = await db
 		.select({
 			cohortId: schema.enrollment.cohortId,
-			count: count(schema.enrollment.id)
+			status: schema.enrollment.status,
+			track: schema.enrollment.track
 		})
 		.from(schema.enrollment)
-		.groupBy(schema.enrollment.cohortId);
+		.where(isNotNull(schema.enrollment.cohortId));
 
-	const countMap = new Map(enrollmentCounts.map((e) => [e.cohortId, e.count]));
+	// Process stats per cohort
+	const statsMap = new Map<string, {
+		total: number;
+		active: number;
+		pending: number;
+		completed: number;
+		tracks: { creator: number; seller: number; affiliate: number; unassigned: number };
+	}>();
 
-	const enrichedCohorts = cohorts.map((c) => ({
-		...c,
-		enrollmentCount: countMap.get(c.id) ?? 0
-	}));
+	for (const c of cohorts) {
+		statsMap.set(c.id, {
+			total: 0,
+			active: 0,
+			pending: 0,
+			completed: 0,
+			tracks: { creator: 0, seller: 0, affiliate: 0, unassigned: 0 }
+		});
+	}
 
-	return { courses, cohorts: enrichedCohorts };
+	for (const e of allEnrollments) {
+		if (!e.cohortId) continue;
+		const stats = statsMap.get(e.cohortId);
+		if (!stats) continue;
+		stats.total++;
+		if (e.status === 'active') stats.active++;
+		else if (e.status === 'pending') stats.pending++;
+		else if (e.status === 'completed') stats.completed++;
+		if (e.track === 'creator') stats.tracks.creator++;
+		else if (e.track === 'seller') stats.tracks.seller++;
+		else if (e.track === 'affiliate') stats.tracks.affiliate++;
+		else stats.tracks.unassigned++;
+	}
+
+	const enrichedCohorts = cohorts.map((c) => {
+		const stats = statsMap.get(c.id) || { total: 0, active: 0, pending: 0, completed: 0, tracks: { creator: 0, seller: 0, affiliate: 0, unassigned: 0 } };
+		return {
+			...c,
+			enrollmentCount: stats.total,
+			stats
+		};
+	});
+
+	// Overall admin stats
+	const totalStudents = allEnrollments.length;
+	const activeStudents = allEnrollments.filter(e => e.status === 'active').length;
+	const pendingPayments = allEnrollments.filter(e => e.status === 'pending').length;
+
+	return { courses, cohorts: enrichedCohorts, adminStats: { totalStudents, activeStudents, pendingPayments } };
 };
 
 export const actions: Actions = {

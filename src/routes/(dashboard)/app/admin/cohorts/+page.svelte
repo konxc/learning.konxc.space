@@ -142,6 +142,24 @@
 		</div>
 	{/if}
 
+	<!-- Admin Stats Summary -->
+	{#if data.adminStats.totalStudents > 0}
+		<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
+				<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Total Students</p>
+				<p class={`text-3xl font-black ${COLOR.textPrimary} mt-1`}>{data.adminStats.totalStudents}</p>
+			</div>
+			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
+				<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Active Students</p>
+				<p class="text-3xl font-black text-green-600 mt-1">{data.adminStats.activeStudents}</p>
+			</div>
+			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
+				<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Pending Payments</p>
+				<p class="text-3xl font-black text-amber-600 mt-1">{data.adminStats.pendingPayments}</p>
+			</div>
+		</div>
+	{/if}
+
 	<!-- Cohorts Table -->
 	{#if data.cohorts.length === 0}
 		<div class="flex flex-col items-center justify-center py-20 text-center">
@@ -185,8 +203,25 @@
 									</p>
 								</td>
 								<td class="px-5 py-4">
-									<span class="text-lg font-black text-blue-600">{cohort.enrollmentCount}</span>
-									<span class={`ml-1 text-xs ${COLOR.textMuted}`}>peserta</span>
+									<div class="flex flex-col gap-1">
+										<div class="flex items-center gap-2">
+											<span class="text-lg font-black text-blue-600">{cohort.enrollmentCount}</span>
+											<span class={`text-xs ${COLOR.textMuted}`}>peserta</span>
+										</div>
+										{#if cohort.stats && cohort.enrollmentCount > 0}
+											<div class="flex gap-2 text-[10px]">
+												{#if cohort.stats.tracks.creator > 0}
+													<span class="text-purple-600">🎥 {cohort.stats.tracks.creator}</span>
+												{/if}
+												{#if cohort.stats.tracks.seller > 0}
+													<span class="text-orange-600">🛒 {cohort.stats.tracks.seller}</span>
+												{/if}
+												{#if cohort.stats.tracks.affiliate > 0}
+													<span class="text-teal-600">🔗 {cohort.stats.tracks.affiliate}</span>
+												{/if}
+											</div>
+										{/if}
+									</div>
 								</td>
 								<td class="px-5 py-4">
 									<span class={`inline-block rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${statusColors[cohort.status] ?? 'bg-gray-100 text-gray-500'}`}>
