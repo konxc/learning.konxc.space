@@ -98,15 +98,23 @@
 		<!-- Summary Stats -->
 		<div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
 			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-				<p class={`text-[10px] font-black uppercase tracking-widest ${COLOR.textMuted} mb-1`}>Filtered Students</p>
+				<p class={`text-[10px] font-black tracking-widest uppercase ${COLOR.textMuted} mb-1`}>
+					Filtered Students
+				</p>
 				<p class={`text-3xl font-black ${COLOR.textPrimary}`}>{uniqueStudentIds.size}</p>
 			</div>
 			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-				<p class={`text-[10px] font-black uppercase tracking-widest ${COLOR.textMuted} mb-1`}>Total Enrollments</p>
+				<p class={`text-[10px] font-black tracking-widest uppercase ${COLOR.textMuted} mb-1`}>
+					Total Enrollments
+				</p>
 				<p class="text-3xl font-black text-blue-600">{data.students.length}</p>
 			</div>
-			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 col-span-2 sm:col-span-1`}>
-				<p class={`text-[10px] font-black uppercase tracking-widest ${COLOR.textMuted} mb-1`}>Active Programs</p>
+			<div
+				class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} col-span-2 p-5 sm:col-span-1`}
+			>
+				<p class={`text-[10px] font-black tracking-widest uppercase ${COLOR.textMuted} mb-1`}>
+					Active Programs
+				</p>
 				<p class="text-3xl font-black text-green-600">
 					{data.students.filter((s) => s.status === 'active').length}
 				</p>
@@ -114,29 +122,48 @@
 		</div>
 
 		<!-- Student Table -->
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} overflow-hidden`}>
+		<div
+			class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} overflow-hidden`}
+		>
 			<div class="overflow-x-auto">
 				<table class="w-full text-left">
 					<thead>
 						<tr class="border-b border-gray-100 bg-gray-50/70">
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Student</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted} hidden md:table-cell`}>Course / Batch</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted} hidden sm:table-cell`}>Track</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Status</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Action</th>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Student</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted} hidden md:table-cell`}
+								>Course / Batch</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted} hidden sm:table-cell`}
+								>Track</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Status</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Action</th
+							>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-gray-50">
 						{#each data.students as s}
-							<tr class="group hover:bg-blue-50/30 transition-colors duration-150">
+							<tr class="group transition-colors duration-150 hover:bg-blue-50/30">
 								<!-- Student -->
 								<td class="px-5 py-4">
 									<div class="flex items-center gap-3">
-										<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-700 text-sm font-black text-white shadow-sm">
+										<div
+											class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-700 text-sm font-black text-white shadow-sm"
+										>
 											{(s.student.fullName || s.student.username)?.[0]?.toUpperCase() ?? 'S'}
 										</div>
 										<div>
-											<p class={`font-semibold text-sm ${COLOR.textPrimary} leading-none`}>
+											<p class={`text-sm font-semibold ${COLOR.textPrimary} leading-none`}>
 												{s.student.fullName || s.student.username}
 											</p>
 											{#if s.student.email}
@@ -147,28 +174,34 @@
 								</td>
 
 								<!-- Course / Batch -->
-								<td class="px-5 py-4 hidden md:table-cell">
-									<p class={`text-sm font-medium ${COLOR.textPrimary} max-w-[200px] truncate`}>{s.course.title}</p>
+								<td class="hidden px-5 py-4 md:table-cell">
+									<p class={`text-sm font-medium ${COLOR.textPrimary} max-w-[200px] truncate`}>
+										{s.course.title}
+									</p>
 									{#if s.cohort}
-										<p class="text-[10px] font-bold text-blue-600 uppercase tracking-tight mt-0.5">
+										<p class="mt-0.5 text-[10px] font-bold tracking-tight text-blue-600 uppercase">
 											{s.cohort.name}
 										</p>
 									{:else}
-										<p class="text-[10px] font-bold text-gray-400 uppercase tracking-tight mt-0.5">
+										<p class="mt-0.5 text-[10px] font-bold tracking-tight text-gray-400 uppercase">
 											No Batch
 										</p>
 									{/if}
 								</td>
 
 								<!-- Track -->
-								<td class="px-5 py-4 hidden sm:table-cell">
+								<td class="hidden px-5 py-4 sm:table-cell">
 									{#if s.track && trackLabels[s.track]}
-										<span class={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-tight ${trackLabels[s.track].color}`}>
+										<span
+											class={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-black tracking-tight uppercase ${trackLabels[s.track].color}`}
+										>
 											<span class="text-xs">{trackLabels[s.track].icon}</span>
 											{trackLabels[s.track].label}
 										</span>
 									{:else}
-										<span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-tight text-gray-500">
+										<span
+											class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-black tracking-tight text-gray-500 uppercase"
+										>
 											General
 										</span>
 									{/if}
@@ -176,13 +209,15 @@
 
 								<!-- Status -->
 								<td class="px-5 py-4">
-									<span class={`inline-block rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${
-										s.status === 'active'
-											? 'bg-green-100 text-green-700'
-											: s.status === 'completed'
-												? 'bg-blue-100 text-blue-700'
-												: 'bg-amber-100 text-amber-700'
-									}`}>
+									<span
+										class={`inline-block rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase ${
+											s.status === 'active'
+												? 'bg-green-100 text-green-700'
+												: s.status === 'completed'
+													? 'bg-blue-100 text-blue-700'
+													: 'bg-amber-100 text-amber-700'
+										}`}
+									>
 										{s.status}
 									</span>
 								</td>
@@ -194,7 +229,14 @@
 										class="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-600 no-underline transition-all hover:bg-blue-100 hover:shadow-sm"
 									>
 										Monitor
-										<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+										<svg
+											width="12"
+											height="12"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2.5"
+										>
 											<line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
 										</svg>
 									</a>
