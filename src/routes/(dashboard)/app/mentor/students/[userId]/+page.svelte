@@ -1,10 +1,15 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
-	import { COLOR, RADIUS, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
+	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
+	import { enhance } from '$app/forms';
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
+
+	let gradingSubmission = $state<string | null>(null);
+	let gradingScore = $state(80);
+	let gradingFeedback = $state('');
 
 	const { student, courseProgress, submissions } = data;
 
@@ -231,50 +236,125 @@
 					{@const payload = typeof sub.payload === 'string' ? JSON.parse(sub.payload) : sub.payload}
 					{@const metadata = typeof sub.metadata === 'string' ? JSON.parse(sub.metadata) : sub.metadata}
 					<div class={`${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} p-5`}>
-						<div class="flex items-start justify-between gap-4">
-							<div class="flex-1">
-								<div class="flex items-center gap-2 mb-2">
-									<span class={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-										sub.type === 'action' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
-									}`}>
-										{sub.type}
-									</span>
-									<span class="text-xs text-gray-400">{sub.lesson?.title}</span>
-								</div>
-								{#if payload?.url}
-									<a 
-										href={payload.url} 
-										target="_blank" 
-										rel="noopener noreferrer"
-										class="text-sm font-medium text-blue-600 hover:underline break-all"
-									>
-										{payload.url}
-									</a>
-								{/if}
-								{#if payload?.note}
-									<p class="mt-2 text-sm text-gray-600 italic">"{payload.note}"</p>
-								{/if}
-								<p class="mt-2 text-xs text-gray-400">
-									Submitted: {new Date(sub.createdAt).toLocaleDateString('id-ID')}
-								</p>
-							</div>
-							<div class="shrink-0 text-right">
-								{#if sub.grade}
-									<div class="text-right">
-										<span class={`text-lg font-bold ${sub.grade.score >= 70 ? 'text-green-600' : 'text-amber-600'}`}>
-											{sub.grade.score}/100
-										</span>
-										{#if sub.grade.feedback}
-											<p class="mt-1 max-w-xs text-xs text-gray-500">{sub.grade.feedback}</p>
-										{/if}
+						{#if gradingSubmission === sub.id}
+							<form
+								method="POST"
+								action="?/grade"
+								use:enhance={() => {
+									return async ({ update }) => {
+										await update();
+										gradingSubmission = null;
+										gradingFeedback = '';
+									};
+								}}
+								class="space-y-4"
+							>
+								<input type="hidden" name="submissionId" value={sub.id} />
+								<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<div>
+										<label class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+											Score (0-100)
+										</label>
+										<input
+											type="number"
+											name="score"
+											bind:value={gradingScore}
+											min="0"
+											max="100"
+											class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
+										/>
 									</div>
-								{:else}
-									<span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
-										Pending Review
-									</span>
-								{/if}
+									<div class="flex items-end gap-2">
+										<button
+											type="submit"
+											class={`${RADIUS.button} ${COLOR.accentBg} px-4 py-2 text-sm font-bold text-white ${TRANSITION.all} hover:-translate-y-0.5 hover:shadow-lg`}
+										>
+											Save Grade
+										</button>
+										<button
+											type="button"
+											onclick={() => (gradingSubmission = null)}
+											class={`${RADIUS.button} border ${COLOR.cardBorder} px-4 py-2 text-sm font-semibold ${COLOR.textSecondary} ${TRANSITION.all} hover:bg-gray-50`}
+										>
+											Cancel
+										</button>
+									</div>
+								</div>
+								<div>
+									<label class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+										Feedback (Optional)
+									</label>
+									<textarea
+										name="feedback"
+										bind:value={gradingFeedback}
+										rows="2"
+										placeholder="Give feedback to the student..."
+										class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 resize-none`}
+									></textarea>
+								</div>
+							</form>
+						{:else}
+							<div class="flex items-start justify-between gap-4">
+								<div class="flex-1">
+									<div class="flex items-center gap-2 mb-2">
+										<span class={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+											sub.type === 'action' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+										}`}>
+											{sub.type}
+										</span>
+										<span class="text-xs text-gray-400">{sub.lesson?.title}</span>
+									</div>
+									{#if payload?.url}
+										<a 
+											href={payload.url} 
+											target="_blank" 
+											rel="noopener noreferrer"
+											class="text-sm font-medium text-blue-600 hover:underline break-all"
+										>
+											{payload.url}
+										</a>
+									{/if}
+									{#if payload?.note}
+										<p class="mt-2 text-sm text-gray-600 italic">"{payload.note}"</p>
+									{/if}
+									<p class="mt-2 text-xs text-gray-400">
+										Submitted: {new Date(sub.createdAt).toLocaleDateString('id-ID')}
+									</p>
+								</div>
+								<div class="shrink-0 text-right">
+									{#if sub.grade}
+										<div class="text-right">
+											<span class={`text-lg font-bold ${sub.grade.score >= 70 ? 'text-green-600' : 'text-amber-600'}`}>
+												{sub.grade.score}/100
+											</span>
+											{#if sub.grade.feedback}
+												<p class="mt-1 max-w-xs text-xs text-gray-500">{sub.grade.feedback}</p>
+											{/if}
+											<button
+												onclick={() => {
+													gradingSubmission = sub.id;
+													gradingScore = sub.grade?.score || 80;
+													gradingFeedback = sub.grade?.feedback || '';
+												}}
+												class="mt-2 text-xs text-blue-600 hover:underline"
+											>
+												Edit Grade
+											</button>
+										</div>
+									{:else}
+										<span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
+											Pending Review
+										</span>
+										<button
+											onclick={() => (gradingSubmission = sub.id)}
+											class="mt-2 block text-xs text-blue-600 hover:underline"
+										>
+											Review
+										</button>
+									{/if}
+								</div>
 							</div>
-						</div>
+						{/if}
 					</div>
 				{/each}
 			</div>

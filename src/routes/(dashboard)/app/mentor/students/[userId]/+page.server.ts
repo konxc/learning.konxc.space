@@ -1,9 +1,10 @@
 import { requireMentor } from '$lib/server/middleware';
-import type { PageServerLoad } from './$types';
+import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, isNotNull, count, or } from 'drizzle-orm';
-import { error } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
+import { encodeBase32LowerCase } from '@oslojs/encoding';
 
 export const load: PageServerLoad = async (event) => {
 	const mentor = await requireMentor(event);
@@ -178,4 +179,73 @@ export const load: PageServerLoad = async (event) => {
 			grade: grades[s.id] || null
 		}))
 	};
+};
+
+export const actions: Actions = {
+	grade: async (event) => {
+		const mentor = await requireMentor(event);
+		const { userId } = event.params;
+
+		const formData = await event.request.formData();
+		const submissionId = formData.get('submissionId') as string;
+		const score = parseInt(formData.get('score') as string);
+		const feedback = formData.get('feedback') as string;
+
+		if (!submissionId || isNaN(score) || score < 0 || score > 100) {
+			return fail(400, { error: 'Score must be between 0-100' });
+		}
+
+		// Verify submission belongs to a student in mentor's course
+		const submission = await db
+			.select()
+			.from(schema.submission)
+			.where(eq(schema.submission.id, submissionId))
+			.limit(1);
+
+		if (!submission[0] || submission[0].userId !== userId) {
+			return fail(403, { error: 'Submission not found' });
+		}
+
+		// Verify course belongs to mentor
+		const course = await db
+			.select()
+			.from(schema.course)
+			.where(eq(schema.course.id, submission[0].courseId))
+			.limit(1);
+
+		if (!course[0] || course[0].mentorId !== mentor.id) {
+			return fail(403, { error: 'Not authorized to grade this submission' });
+		}
+
+		// Check if grade already exists
+		const existingGrade = await db
+			.select()
+			.from(schema.submissionGrade)
+			.where(eq(schema.submissionGrade.submissionId, submissionId))
+			.limit(1);
+
+		if (existingGrade[0]) {
+			// Update existing grade
+			await db
+				.update(schema.submissionGrade)
+				.set({
+					score,
+					feedback: feedback || null,
+					gradedAt: new Date()
+				})
+				.where(eq(schema.submissionGrade.id, existingGrade[0].id));
+		} else {
+			// Create new grade
+			await db.insert(schema.submissionGrade).values({
+				id: encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(10))),
+				submissionId,
+				gradedBy: mentor.id,
+				score,
+				feedback: feedback || null,
+				gradedAt: new Date()
+			});
+		}
+
+		return { success: true };
+	}
 };

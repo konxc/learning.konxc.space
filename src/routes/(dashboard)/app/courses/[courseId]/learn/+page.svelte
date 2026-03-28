@@ -178,6 +178,17 @@
 								>
 							{/if}
 						</button>
+						<!-- Track Indicator -->
+						{#if data.enrollment?.track}
+							{@const trackInfo = {
+								creator: { label: '🎥 Content Creator', color: 'bg-purple-100 text-purple-700 border-purple-200' },
+								seller: { label: '🛒 Seller / Dropshipper', color: 'bg-orange-100 text-orange-700 border-orange-200' },
+								affiliate: { label: '🔗 Affiliator', color: 'bg-teal-100 text-teal-700 border-teal-200' }
+							}[data.enrollment.track]}
+							<div class="mt-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold {trackInfo?.color || 'bg-gray-100 text-gray-700'}">
+								{trackInfo?.label || data.enrollment.track}
+							</div>
+						{/if}
 						<!-- Progress Bar -->
 						<div class="mt-3">
 							<div class="mb-1.5 flex items-center justify-between">

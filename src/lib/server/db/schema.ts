@@ -53,6 +53,7 @@ export const enrollment = sqliteTable('enrollment', {
 	cohortId: text('cohort_id').references(() => cohort.id),
 	track: text('track'), // 'creator' | 'seller' | 'affiliate'
 	couponId: text('coupon_id').references(() => coupon.id),
+	partnerId: text('partner_id'), // Partner organization ID (e.g., 'yayasan-asib')
 	status: text('status').notNull().default('pending'),
 	enrolledAt: integer('enrolled_at', { mode: 'timestamp' })
 		.notNull()
@@ -349,6 +350,18 @@ export const cohort = sqliteTable('cohort', {
 		.$defaultFn(() => new Date())
 });
 
+export const partner = sqliteTable('partner', {
+	id: text('id').primaryKey(), // e.g., 'yayasan-asib'
+	name: text('name').notNull(), // e.g., 'Yayasan ASIB'
+	description: text('description'),
+	contactEmail: text('contact_email'),
+	contactPhone: text('contact_phone'),
+	status: text('status').notNull().default('active'), // 'active' | 'inactive'
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
 export type Session = typeof session.$inferSelect;
 export type User = typeof user.$inferSelect;
 export type Course = typeof course.$inferSelect;
@@ -370,3 +383,4 @@ export type Certificate = typeof certificate.$inferSelect;
 export type PaymentProof = typeof paymentProof.$inferSelect;
 export type Transaction = typeof transaction.$inferSelect;
 export type Cohort = typeof cohort.$inferSelect;
+export type Partner = typeof partner.$inferSelect;
