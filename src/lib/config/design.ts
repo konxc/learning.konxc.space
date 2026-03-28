@@ -49,7 +49,7 @@ export const ELEVATION = {
 };
 
 export const SPACING = {
-	page: 'px-3 md:px-4 lg:px-8 py-2',
+	page: 'px-6 md:px-10 lg:px-12 py-6',
 	section: 'space-y-8 md:space-y-10',
 	cardPadding: 'p-6 md:p-8',
 	button: 'px-4 py-2.5',

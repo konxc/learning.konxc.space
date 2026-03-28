@@ -19,9 +19,10 @@
 		material: Material;
 		lessonId: string;
 		courseId: string;
+		onComplete?: () => void;
 	}
 
-	let { material, lessonId, courseId }: Props = $props();
+	let { material, lessonId, courseId, onComplete }: Props = $props();
 
 	let videoElement = $state<HTMLVideoElement | undefined>(undefined);
 	let lastPosition = 0;
@@ -53,6 +54,7 @@
 			} else if (completed) {
 				hasCompleted = true;
 				await invalidateAll();
+				if (onComplete) onComplete();
 			}
 		} catch (error) {
 			console.error('Error saving progress:', error);
@@ -115,7 +117,7 @@
 			</button>
 		</div>
 	{:else if material.type === 'video'}
-		<div class="mb-8 overflow-hidden rounded-2xl shadow-2xl">
+		<div class="mb-8 overflow-hidden rounded-2xl shadow-2xl relative group">
 			{#if material.url?.includes('youtube.com') || material.url?.includes('youtu.be')}
 				{@const videoId = material.url?.includes('youtu.be')
 					? material.url.split('/').pop()
@@ -150,6 +152,22 @@
 					controls
 					class="aspect-video w-full bg-black object-contain"
 					ontimeupdate={handleVideoTimeUpdate}
+					onerror={(e) => {
+						// Fallback UI when video fails to load
+						const parent = (e.target as HTMLElement).parentElement;
+						if (parent) {
+							parent.innerHTML = `
+								<div class="aspect-video flex flex-col items-center justify-center bg-neutral-900 border-2 border-dashed border-neutral-700 rounded-2xl p-8 text-center">
+									<div class="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-4">
+										<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+									</div>
+									<h3 class="text-white font-bold text-xl mb-2">Video Tidak Tersedia</h3>
+									<p class="text-neutral-400 max-w-sm mb-6">Maaf, tautan video ini nampaknya rusak atau telah dihapus oleh penyedia konten.</p>
+									<a href="mailto:support@naikkelas.id?subject=Masalah Video: ${material.id}" class="px-6 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl transition-colors font-medium">Laporkan Masalah</a>
+								</div>
+							`;
+						}
+					}}
 				>
 					<track kind="captions" src="" srclang="en" label="English" default />
 					<source src={material.url || ''} type="video/mp4" />
