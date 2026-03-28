@@ -309,6 +309,29 @@ export const paymentProof = sqliteTable('payment_proof', {
 		.$defaultFn(() => new Date())
 });
 
+// Midtrans Transactions
+export const transaction = sqliteTable('transaction', {
+	id: text('id').primaryKey(), // Order ID (e.g. NC-TRX-...)
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	courseId: text('course_id')
+		.notNull()
+		.references(() => course.id),
+	amount: integer('amount').notNull(),
+	status: text('status').notNull().default('pending'), // 'pending', 'settlement', 'expire', 'cancel', 'deny'
+	paymentType: text('payment_type'),
+	snapToken: text('snap_token'),
+	snapUrl: text('snap_url'),
+	payload: text('payload'), // JSON from Midtrans
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
 export type Session = typeof session.$inferSelect;
 export type User = typeof user.$inferSelect;
 export type Course = typeof course.$inferSelect;
@@ -328,3 +351,4 @@ export type Submission = typeof submission.$inferSelect;
 export type SubmissionGrade = typeof submissionGrade.$inferSelect;
 export type Certificate = typeof certificate.$inferSelect;
 export type PaymentProof = typeof paymentProof.$inferSelect;
+export type Transaction = typeof transaction.$inferSelect;
