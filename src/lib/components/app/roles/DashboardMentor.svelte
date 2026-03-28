@@ -30,7 +30,7 @@
 	<div class="mb-8 flex items-center justify-between gap-4">
 		<div>
 			<h1 class={`${TEXT.h1} ${COLOR.textPrimary} mb-2`}>Mentor Center</h1>
-			<p class={`${TEXT.body} ${COLOR.textSecondary}`}>Kelola kursus dan siswa Anda</p>
+			<p class={`${TEXT.body} ${COLOR.textSecondary}`}>Manage your courses and students</p>
 		</div>
 		<div class="w-40"><RoleSwitcher /></div>
 	</div>
@@ -45,7 +45,7 @@
 	<PageSection>
 		<OverviewGraph
 			title="Teaching Overview"
-			description="Aktivitas mengajar 30 hari terakhir"
+			description="Teaching activity over the last 30 days"
 			noCard={true}
 		/>
 	</PageSection>
@@ -53,7 +53,7 @@
 	<PageSection>
 		<div class="mb-4 flex items-center justify-between">
 			<h2 class={`${TEXT.h3} ${COLOR.textPrimary}`}>My Courses</h2>
-			<a href="/app/mentor/courses"><Button variant="ghost">Kelola</Button></a>
+			<a href="/app/mentor/courses"><Button variant="ghost">Manage</Button></a>
 		</div>
 		<Table {columns} {rows} />
 	</PageSection>

@@ -30,7 +30,7 @@
 	<div class="mb-8 flex items-center justify-between gap-4">
 		<div>
 			<h1 class={`${TEXT.h1} ${COLOR.textPrimary} mb-2`}>Admin Console</h1>
-			<p class={`${TEXT.body} ${COLOR.textSecondary}`}>Kontrol panel untuk mengelola platform</p>
+			<p class={`${TEXT.body} ${COLOR.textSecondary}`}>Control panel for managing the platform</p>
 		</div>
 		<div class="w-40"><RoleSwitcher /></div>
 	</div>
@@ -43,17 +43,13 @@
 	</div>
 
 	<PageSection>
-		<OverviewGraph
-			title="System Overview"
-			description="Kesehatan sistem dan aktivitas"
-			noCard={true}
-		/>
+		<OverviewGraph title="System Overview" description="System health and activity" noCard={true} />
 	</PageSection>
 
 	<PageSection>
 		<div class="mb-4 flex items-center justify-between">
 			<h2 class={`${TEXT.h3} ${COLOR.textPrimary}`}>Mentor Applications</h2>
-			<a href="/app/admin/mentor-applications"><Button variant="ghost">Kelola</Button></a>
+			<a href="/app/admin/mentor-applications"><Button variant="ghost">Manage</Button></a>
 		</div>
 		<Table {columns} {rows} />
 	</PageSection>

@@ -44,10 +44,10 @@
 		});
 
 		if (response.ok) {
-			toast.success('Pembayaran disetujui');
+			toast.success('Payment approved');
 			await goto('/app/admin/payments', { invalidateAll: true });
 		} else {
-			toast.error('Gagal menyetujui');
+			toast.error('Failed to approve');
 		}
 	}
 
@@ -62,10 +62,10 @@
 		});
 
 		if (response.ok) {
-			toast.info('Pembayaran ditolak');
+			toast.info('Payment rejected');
 			await goto('/app/admin/payments', { invalidateAll: true });
 		} else {
-			toast.error('Gagal menolak');
+			toast.error('Failed to reject');
 		}
 	}
 </script>
@@ -76,8 +76,8 @@
 
 <PageWrapper>
 	<PageHeader
-		title="Detail Bukti Pembayaran"
-		description="Verifikasi bukti pembayaran dan tentukan keputusan"
+		title="Payment Proof Details"
+		description="Verify payment proof and make a decision"
 	/>
 
 	<PageSection>
@@ -122,7 +122,7 @@
 					}}
 					class={`inline-flex items-center ${RADIUS.button} ${COLOR.cardBorder} ${SPACING.button} ${TEXT.button} ${COLOR.card} ${TRANSITION.colors} ${COLOR.neutralHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2`}
 				>
-					{expandedProof ? 'Sembunyikan' : 'Lihat Bukti Pembayaran'}
+					{expandedProof ? 'Hide' : 'View Payment Proof'}
 				</button>
 
 				{#if expandedProof}
@@ -130,7 +130,7 @@
 						{#await loadProofImage() then imageUrl}
 							<img
 								src={imageUrl}
-								alt="Bukti pembayaran"
+								alt="Payment proof"
 								class="h-auto w-full"
 								loading="lazy"
 								decoding="async"
@@ -148,13 +148,13 @@
 						onclick={handleApprove}
 						class={`inline-flex items-center justify-center ${RADIUS.button} bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/70 focus-visible:ring-offset-2`}
 					>
-						Setujui Pembayaran
+						Approve Payment
 					</button>
 
 					<div class="flex flex-col gap-2">
 						<input
 							type="text"
-							placeholder="Catatan penolakan (opsional)"
+							placeholder="Rejection notes (optional)"
 							value={rejectionNotes}
 							oninput={(e) => {
 								rejectionNotes = (e.target as HTMLInputElement).value;
@@ -166,7 +166,7 @@
 							onclick={handleReject}
 							class={`inline-flex items-center justify-center ${RADIUS.button} bg-rose-600 hover:bg-rose-700 dark:bg-rose-600 dark:hover:bg-rose-700 ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-600/70 focus-visible:ring-offset-2`}
 						>
-							Tolak Pembayaran
+							Reject Payment
 						</button>
 					</div>
 				</div>
