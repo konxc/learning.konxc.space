@@ -50,6 +50,8 @@ export const enrollment = sqliteTable('enrollment', {
 	courseId: text('course_id')
 		.notNull()
 		.references(() => course.id),
+	cohortId: text('cohort_id').references(() => cohort.id),
+	track: text('track'), // 'creator' | 'seller' | 'affiliate'
 	couponId: text('coupon_id').references(() => coupon.id),
 	status: text('status').notNull().default('pending'),
 	enrolledAt: integer('enrolled_at', { mode: 'timestamp' })
@@ -254,7 +256,8 @@ export const submission = sqliteTable('submission', {
 	lessonId: text('lesson_id').references(() => lesson.id),
 	quizId: text('quiz_id').references(() => quiz.id),
 	type: text('type').notNull(), // 'quiz' | 'assignment'
-	payload: text('payload'), // JSON string
+	payload: text('payload'), // JSON string (answers or content)
+	metadata: text('metadata'), // JSON string (links, stats, tracking etc)
 	score: integer('score'),
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
@@ -332,6 +335,20 @@ export const transaction = sqliteTable('transaction', {
 		.$defaultFn(() => new Date())
 });
 
+export const cohort = sqliteTable('cohort', {
+	id: text('id').primaryKey(),
+	name: text('name').notNull(),
+	courseId: text('course_id')
+		.notNull()
+		.references(() => course.id),
+	startDate: integer('start_date', { mode: 'timestamp' }).notNull(),
+	endDate: integer('end_date', { mode: 'timestamp' }),
+	status: text('status').notNull().default('active'), // 'active' | 'archived'
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
 export type Session = typeof session.$inferSelect;
 export type User = typeof user.$inferSelect;
 export type Course = typeof course.$inferSelect;
@@ -352,3 +369,4 @@ export type SubmissionGrade = typeof submissionGrade.$inferSelect;
 export type Certificate = typeof certificate.$inferSelect;
 export type PaymentProof = typeof paymentProof.$inferSelect;
 export type Transaction = typeof transaction.$inferSelect;
+export type Cohort = typeof cohort.$inferSelect;

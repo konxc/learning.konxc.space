@@ -14,6 +14,11 @@ export const actions = {
 		const formData = await event.request.formData();
 		const courseId = event.params.id;
 		const couponCode = formData.get('couponCode') as string | null;
+		const track = formData.get('track') as string | null; // 'creator' | 'seller' | 'affiliate'
+
+		// Validate track value
+		const validTracks = ['creator', 'seller', 'affiliate'];
+		const validatedTrack = track && validTracks.includes(track) ? track : null;
 
 		// Check if course exists
 		const courses = await db
@@ -54,7 +59,7 @@ export const actions = {
 			couponId = couponValidation.coupon!.id;
 		}
 
-		// Create enrollment
+		// Create enrollment with track
 		const enrollmentId = crypto.randomUUID();
 
 		await db.insert(schema.enrollment).values({
@@ -62,6 +67,7 @@ export const actions = {
 			userId: user.id,
 			courseId: course.id,
 			couponId,
+			track: validatedTrack,
 			status: finalPrice === 0 ? 'active' : 'pending'
 		});
 

@@ -5,9 +5,16 @@
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
 	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
 	import { page } from '$app/stores';
+
 	let { data }: { data: PageData } = $props();
 
 	const showSuccess = $page.url.searchParams.has('payment');
+
+	const trackInfo: Record<string, { icon: string; label: string; color: string }> = {
+		creator: { icon: '🎥', label: 'Kreator', color: 'bg-purple-100 text-purple-700' },
+		seller: { icon: '🛒', label: 'Seller', color: 'bg-orange-100 text-orange-700' },
+		affiliate: { icon: '🔗', label: 'Affiliator', color: 'bg-blue-100 text-blue-700' }
+	};
 </script>
 
 <svelte:head>
@@ -65,12 +72,13 @@
 								decoding="async"
 							/>
 						{:else}
-							<div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+							<div class="flex h-full w-full items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100">
 								<span class="text-5xl">📚</span>
 							</div>
 						{/if}
-						<!-- Status badge -->
-						<div class="absolute top-3 right-3">
+
+						<!-- Badges overlay -->
+						<div class="absolute top-3 right-3 flex flex-col items-end gap-1.5">
 							{#if enrollment.status === 'active'}
 								<span class="rounded-full bg-green-500/90 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white backdrop-blur-sm">
 									Active
@@ -80,11 +88,23 @@
 									Pending
 								</span>
 							{/if}
+							{#if enrollment.track && trackInfo[enrollment.track]}
+								<span class={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide backdrop-blur-sm ${trackInfo[enrollment.track].color}`}>
+									{trackInfo[enrollment.track].icon} {trackInfo[enrollment.track].label}
+								</span>
+							{/if}
 						</div>
 					</div>
 
 					<!-- Body -->
 					<div class="flex flex-1 flex-col p-5">
+						<!-- Cohort / Batch -->
+						{#if enrollment.cohortName}
+							<p class="mb-2 text-[10px] font-black uppercase tracking-widest text-blue-600">
+								📅 {enrollment.cohortName}
+							</p>
+						{/if}
+
 						<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-1 line-clamp-2 leading-snug`}>
 							{enrollment.course.title}
 						</h3>
@@ -92,7 +112,23 @@
 							{enrollment.course.description}
 						</p>
 
-						<!-- Progress Section (only for active) -->
+						<!-- No track prompt -->
+						{#if enrollment.status === 'active' && !enrollment.track}
+							<div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+								<p class="text-xs font-bold text-amber-700">⚡ Belum pilih jalur specialisasi!</p>
+								<p class="mt-0.5 text-[11px] text-amber-600">
+									Pilih jalur Creator, Seller, atau Affiliator untuk pengalaman belajar lebih terarah.
+								</p>
+								<a
+									href="/app/courses/{enrollment.course.id}"
+									class="mt-2 inline-block text-[11px] font-bold text-amber-700 underline underline-offset-2"
+								>
+									Pilih Jalur Sekarang →
+								</a>
+							</div>
+						{/if}
+
+						<!-- Progress (active only) -->
 						{#if enrollment.status === 'active'}
 							<div class="mb-5 mt-auto">
 								<div class="mb-2 flex items-center justify-between">
@@ -108,15 +144,13 @@
 										class={`h-full rounded-full transition-all duration-700 ${
 											enrollment.progressPercent >= 100
 												? 'bg-green-500'
-												: 'bg-gradient-to-r from-blue-500 to-indigo-600'
+												: 'bg-linear-to-r from-blue-500 to-indigo-600'
 										}`}
 										style="width: {enrollment.progressPercent}%"
 									></div>
 								</div>
 								{#if enrollment.progressPercent >= 100}
-									<p class="mt-2 text-center text-xs font-bold text-green-600">
-										🎉 Course Complete!
-									</p>
+									<p class="mt-2 text-center text-xs font-bold text-green-600">🎉 Course Complete!</p>
 								{/if}
 							</div>
 
@@ -134,6 +168,7 @@
 										? 'Review Course'
 										: 'Continue Learning →'}
 							</a>
+
 						{:else if enrollment.status === 'pending'}
 							<div class={`mt-auto ${SPACING.cardPadding} ${RADIUS.button} ${COLOR.warning} mb-4`}>
 								{#if enrollment.paymentProofStatus === 'pending'}
@@ -142,25 +177,17 @@
 										<p class={`${COLOR.textSecondary} ${TEXT.small} font-semibold`}>Payment proof under review</p>
 									</div>
 								{:else if enrollment.paymentProofStatus === 'rejected'}
-									<p class={`${TEXT.small} mb-3 font-bold text-red-600`}>
-										⚠️ Payment proof rejected. Please reupload.
-									</p>
+									<p class={`${TEXT.small} mb-3 font-bold text-red-600`}>⚠️ Payment proof rejected. Please reupload.</p>
 									<a
 										href="/app/payments?courseId={enrollment.course.id}"
 										class={`inline-block no-underline ${RADIUS.button} ${COLOR.accentBg} text-white ${SPACING.button} ${TEXT.button} font-semibold ${TRANSITION.all} ${ELEVATION.base}`}
-									>
-										Upload Payment Proof
-									</a>
+									>Upload Payment Proof</a>
 								{:else}
-									<p class={`${COLOR.textSecondary} mb-3 ${TEXT.small}`}>
-										Upload payment proof to activate course access
-									</p>
+									<p class={`${COLOR.textSecondary} mb-3 ${TEXT.small}`}>Upload payment proof to activate course access</p>
 									<a
 										href="/app/payments?courseId={enrollment.course.id}"
 										class={`inline-block no-underline ${RADIUS.button} ${COLOR.accentBg} text-white ${SPACING.button} ${TEXT.button} font-semibold ${TRANSITION.all} ${ELEVATION.base}`}
-									>
-										Upload Payment Proof
-									</a>
+									>Upload Payment Proof</a>
 								{/if}
 							</div>
 						{/if}
@@ -168,12 +195,12 @@
 						<!-- Footer meta -->
 						<div class="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
 							<span class={`${TEXT.small} ${COLOR.textMuted}`}>
-								Enrolled {new Date(enrollment.enrolledAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+								Enrolled {new Date(enrollment.enrolledAt).toLocaleDateString('id-ID', {
+									day: 'numeric', month: 'short', year: 'numeric'
+								})}
 							</span>
 							{#if enrollment.course.duration}
-								<span class={`${TEXT.small} ${COLOR.textMuted}`}>
-									{enrollment.course.duration}w
-								</span>
+								<span class={`${TEXT.small} ${COLOR.textMuted}`}>{enrollment.course.duration} minggu</span>
 							{/if}
 						</div>
 					</div>

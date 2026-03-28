@@ -183,15 +183,36 @@
 								</a>
 							</div>
 						{:else}
-							<form action="/app/courses/{data.course.id}/enroll" method="POST">
-								<button
-									type="submit"
-									class={`block w-full cursor-pointer border-none text-center py-5 bg-linear-to-r from-blue-600 to-indigo-700 text-white rounded-2xl font-black text-lg shadow-lg shadow-blue-500/30 hover:shadow-xl hover:-translate-y-1 transition-all no-underline`}
-								>
-									Enroll Now
-								</button>
-							</form>
-							<p class="text-center mt-6 text-[10px] text-gray-400 font-medium">7-day money back guarantee.</p>
+				<form action="/app/courses/{data.course.id}/enroll" method="POST" class="space-y-5">
+					<!-- Track Selection -->
+					<div>
+						<p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Pilih Jalur Specialisasi Kamu</p>
+						<div class="grid grid-cols-1 gap-2">
+							{#each [
+								{ value: 'creator', icon: '🎥', label: 'Konten Kreator', desc: 'Buat konten & bangun audiens' },
+								{ value: 'seller', icon: '🛒', label: 'Seller / Dropshipper', desc: 'Jualan di marketplace' },
+								{ value: 'affiliate', icon: '🔗', label: 'Affiliator', desc: 'Hasilkan komisi dari promosi' }
+							] as track}
+								<label class="flex items-center gap-3 cursor-pointer rounded-xl border-2 border-gray-100 p-3.5 transition-all hover:border-blue-300 hover:bg-blue-50/50 has-checked:border-blue-500 has-checked:bg-blue-50 has-checked:shadow-sm">
+									<input type="radio" name="track" value={track.value} class="accent-blue-600 h-4 w-4 shrink-0" required />
+									<span class="text-xl leading-none">{track.icon}</span>
+									<span class="flex-1 min-w-0">
+										<span class="block text-sm font-bold text-gray-800 leading-none mb-0.5">{track.label}</span>
+										<span class="block text-[11px] text-gray-400">{track.desc}</span>
+									</span>
+								</label>
+							{/each}
+						</div>
+					</div>
+
+					<button
+						type="submit"
+						class="block w-full cursor-pointer border-none text-center py-4 bg-linear-to-r from-blue-600 to-indigo-700 text-white rounded-2xl font-black text-base shadow-lg shadow-blue-500/30 hover:shadow-xl hover:-translate-y-1 transition-all"
+					>
+						Daftar Sekarang →
+					</button>
+				</form>
+				<p class="text-center mt-4 text-[10px] text-gray-400 font-medium">Kamu bisa ganti jalur kapan saja setelah mendaftar.</p>
 						{/if}
 					</div>
 					

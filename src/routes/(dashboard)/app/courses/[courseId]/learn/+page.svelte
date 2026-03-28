@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { page } from '$app/stores';
 	import MaterialViewer from '$lib/components/MaterialViewer.svelte';
+	import ActionSubmitter from '$lib/components/ActionSubmitter.svelte';
 	import { onMount } from 'svelte';
 	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
 
@@ -196,7 +197,7 @@
 									class="h-full rounded-full transition-all duration-700 {data.progressPercent >=
 									100
 										? 'bg-green-500'
-										: 'bg-gradient-to-r from-blue-500 to-indigo-600'}"
+										: 'bg-linear-to-r from-blue-500 to-indigo-600'}"
 									style="width: {data.progressPercent}%"
 								></div>
 							</div>
@@ -375,6 +376,16 @@
 								courseId={data.course.id}
 								onComplete={handleMaterialComplete}
 							/>
+
+							{#if selectedMaterialIndex === selectedLesson.materials.length - 1}
+								<div class="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+									<ActionSubmitter
+										lessonId={selectedLesson.id}
+										courseId={data.course.id}
+										existingSubmission={selectedLesson.submission}
+									/>
+								</div>
+							{/if}
 						{:else}
 							<div class="px-5 py-16 text-center">
 								<p class={COLOR.textSecondary}>No material available for this lesson.</p>

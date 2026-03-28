@@ -7,13 +7,16 @@ import { eq, and } from 'drizzle-orm';
 export const load: PageServerLoad = async (event) => {
 	const mentor = await requireMentor(event);
 
-	// Get the course filter if provided
+	// Get the filters if provided
 	const courseId = event.url.searchParams.get('course');
+	const cohortId = event.url.searchParams.get('cohort');
+	const track = event.url.searchParams.get('track');
 
 	// Get courses assigned to mentor
 	const mentorCourses = await db
 		.select({
-			id: schema.course.id
+			id: schema.course.id,
+			title: schema.course.title
 		})
 		.from(schema.course)
 		.where(eq(schema.course.mentorId, mentor.id));
@@ -24,73 +27,71 @@ export const load: PageServerLoad = async (event) => {
 		return {
 			students: [],
 			courses: [],
-			selectedCourse: null
+			cohorts: [],
+			selectedCourse: null,
+			selectedCohort: null,
+			selectedTrack: null
 		};
 	}
 
-	// Get enrollments for mentor's courses
-	let students;
+	// Get cohorts for mentor's courses
+	const cohorts = await db
+		.select({
+			id: schema.cohort.id,
+			name: schema.cohort.name,
+			courseId: schema.cohort.courseId
+		})
+		.from(schema.cohort)
+		.where(courseId ? eq(schema.cohort.courseId, courseId) : undefined);
 
+	// Build the query for students
+	let studentsQuery = db
+		.select({
+			id: schema.enrollment.id,
+			status: schema.enrollment.status,
+			track: schema.enrollment.track,
+			enrolledAt: schema.enrollment.enrolledAt,
+			completedAt: schema.enrollment.completedAt,
+			student: {
+				id: schema.user.id,
+				username: schema.user.username,
+				fullName: schema.user.fullName,
+				email: schema.user.email
+			},
+			course: {
+				id: schema.course.id,
+				title: schema.course.title
+			},
+			cohort: {
+				id: schema.cohort.id,
+				name: schema.cohort.name
+			}
+		})
+		.from(schema.enrollment)
+		.innerJoin(schema.user, eq(schema.enrollment.userId, schema.user.id))
+		.innerJoin(schema.course, eq(schema.enrollment.courseId, schema.course.id))
+		.leftJoin(schema.cohort, eq(schema.enrollment.cohortId, schema.cohort.id));
+
+	// Apply filters
+	const conditions = [eq(schema.course.mentorId, mentor.id)];
 	if (courseId && courseIds.includes(courseId)) {
-		// Filter by specific course if provided
-		students = await db
-			.select({
-				id: schema.enrollment.id,
-				status: schema.enrollment.status,
-				enrolledAt: schema.enrollment.enrolledAt,
-				completedAt: schema.enrollment.completedAt,
-				student: {
-					id: schema.user.id,
-					username: schema.user.username,
-					fullName: schema.user.fullName,
-					email: schema.user.email
-				},
-				course: {
-					id: schema.course.id,
-					title: schema.course.title
-				}
-			})
-			.from(schema.enrollment)
-			.innerJoin(schema.user, eq(schema.enrollment.userId, schema.user.id))
-			.innerJoin(schema.course, eq(schema.enrollment.courseId, schema.course.id))
-			.where(and(eq(schema.course.mentorId, mentor.id), eq(schema.enrollment.courseId, courseId)));
-	} else {
-		// Get all enrollments for mentor's courses
-		students = await db
-			.select({
-				id: schema.enrollment.id,
-				status: schema.enrollment.status,
-				enrolledAt: schema.enrollment.enrolledAt,
-				completedAt: schema.enrollment.completedAt,
-				student: {
-					id: schema.user.id,
-					username: schema.user.username,
-					fullName: schema.user.fullName,
-					email: schema.user.email
-				},
-				course: {
-					id: schema.course.id,
-					title: schema.course.title
-				}
-			})
-			.from(schema.enrollment)
-			.innerJoin(schema.user, eq(schema.enrollment.userId, schema.user.id))
-			.innerJoin(schema.course, eq(schema.enrollment.courseId, schema.course.id))
-			.where(eq(schema.course.mentorId, mentor.id));
+		conditions.push(eq(schema.enrollment.courseId, courseId));
+	}
+	if (cohortId) {
+		conditions.push(eq(schema.enrollment.cohortId, cohortId));
+	}
+	if (track) {
+		conditions.push(eq(schema.enrollment.track, track));
 	}
 
-	// Get all courses for dropdown
-	const courses = await db
-		.select({
-			id: schema.course.id,
-			title: schema.course.title
-		})
-		.from(schema.course)
-		.where(eq(schema.course.mentorId, mentor.id));
+	const students = await studentsQuery.where(and(...conditions));
 
 	return {
 		students,
-		courses,
-		selectedCourse: courseId || null
+		courses: mentorCourses,
+		cohorts,
+		selectedCourse: courseId || null,
+		selectedCohort: cohortId || null,
+		selectedTrack: track || null
 	};
 };

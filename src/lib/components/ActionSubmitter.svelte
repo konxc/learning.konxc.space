@@ -1,0 +1,108 @@
+<script lang="ts">
+	import { COLOR, RADIUS, SPACING, TEXT, TRANSITION } from '$lib/config/design';
+	import { enhance } from '$app/forms';
+
+	interface Props {
+		lessonId: string;
+		courseId: string;
+		existingSubmission?: any;
+		onSuccess?: () => void;
+	}
+
+	let { lessonId, courseId, existingSubmission, onSuccess }: Props = $props();
+
+	let submitting = $state(false);
+	let url = $state(existingSubmission?.payload?.url || '');
+	let note = $state(existingSubmission?.payload?.note || '');
+	let showSuccess = $state(false);
+
+	const trackLabels: Record<string, string> = {
+		creator: 'Video/Konten URL',
+		seller: 'Link Toko/Produk',
+		affiliate: 'Link Affiliate'
+	};
+</script>
+
+<div class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} p-6 shadow-sm`}>
+	<div class="mb-6 flex items-center justify-between">
+		<div>
+			<h3 class={`${TEXT.h3} ${COLOR.textPrimary}`}>Lapor Progres (Action)</h3>
+			<p class={`${TEXT.small} ${COLOR.textMuted} mt-1`}>
+				Kirimkan link hasil praktek Anda untuk dipantau oleh Mentor.
+			</p>
+		</div>
+		<div class="text-3xl">🚀</div>
+	</div>
+
+	{#if showSuccess}
+		<div
+			class="animate-in fade-in zoom-in rounded-xl bg-green-50 p-6 text-center text-green-700 duration-500"
+		>
+			<div class="mb-2 text-3xl">✅</div>
+			<p class="font-bold">Laporan Berhasil Terkirim!</p>
+			<p class="mt-1 text-sm opacity-80">Mentor akan segera mereview progres Anda.</p>
+			<button
+				class="mt-4 text-xs font-bold underline"
+				onclick={() => {
+					showSuccess = false;
+				}}>Kirim Ulang / Perbarui</button
+			>
+		</div>
+	{:else}
+		<form
+			method="POST"
+			action="?/submitAction"
+			use:enhance={() => {
+				submitting = true;
+				return async ({ result }) => {
+					submitting = false;
+					if (result.type === 'success') {
+						showSuccess = true;
+						if (onSuccess) onSuccess();
+					}
+				};
+			}}
+			class="space-y-4"
+		>
+			<input type="hidden" name="lessonId" value={lessonId} />
+			<input type="hidden" name="courseId" value={courseId} />
+
+			<div>
+				<label for="url" class={`mb-1.5 block text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>
+					Link Hasil Praktek (TikTok/IG/Marketplace)
+				</label>
+				<input
+					type="url"
+					id="url"
+					name="url"
+					bind:value={url}
+					required
+					placeholder="https://..."
+					class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
+				/>
+			</div>
+
+			<div>
+				<label for="note" class={`mb-1.5 block text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>
+					Catatan Tambahan (Opsional)
+				</label>
+				<textarea
+					id="note"
+					name="note"
+					bind:value={note}
+					placeholder="Apa yang Anda pelajari atau kendala yang dihadapi..."
+					rows="3"
+					class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 resize-none`}
+				></textarea>
+			</div>
+
+			<button
+				type="submit"
+				disabled={submitting}
+				class={`w-full ${RADIUS.button} ${COLOR.accentBg} py-3.5 ${TEXT.button} font-bold text-white shadow-lg ${TRANSITION.all} hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50`}
+			>
+				{submitting ? 'Mengirim...' : 'Kirim Laporan Progres'}
+			</button>
+		</form>
+	{/if}
+</div>

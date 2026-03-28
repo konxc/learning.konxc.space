@@ -1,16 +1,18 @@
-import type { PageServerLoad } from './$types';
+import type { PageServerLoad, Actions } from './$types';
 import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, asc } from 'drizzle-orm';
 import { redirect } from '@sveltejs/kit';
+import { encodeBase32LowerCase } from '@oslojs/encoding';
+import { actionFailure, actionSuccess } from '$lib/server/actions';
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
 	const courseId = event.params.courseId;
 
 	// Verify enrollment with active status
-	const enrollment = await db
+	const enrollmentSelection = await db
 		.select()
 		.from(schema.enrollment)
 		.where(
@@ -22,7 +24,7 @@ export const load: PageServerLoad = async (event) => {
 		)
 		.limit(1);
 
-	if (enrollment.length === 0) {
+	if (enrollmentSelection.length === 0) {
 		// Check if user is enrolled but pending
 		const pendingEnrollment = await db
 			.select()
@@ -36,6 +38,8 @@ export const load: PageServerLoad = async (event) => {
 
 		throw redirect(303, `/app/courses/${courseId}`);
 	}
+
+	const enrollment = enrollmentSelection[0];
 
 	// Get course details
 	const courses = await db
@@ -90,6 +94,12 @@ export const load: PageServerLoad = async (event) => {
 			and(eq(schema.lessonProgress.userId, user.id), eq(schema.lessonProgress.courseId, courseId))
 		);
 
+	// Get user's submissions
+	const submissions = await db
+		.select()
+		.from(schema.submission)
+		.where(and(eq(schema.submission.userId, user.id), eq(schema.submission.courseId, courseId)));
+
 	// Structure data hierarchically
 	const structuredModules = modules.map((module) => {
 		const moduleLessons = lessons
@@ -98,12 +108,20 @@ export const load: PageServerLoad = async (event) => {
 				const lessonMaterials = materials.filter((m) => m.material.lessonId === l.lesson.id);
 				const lessonProgress = progress.find((p) => p.lessonId === l.lesson.id);
 				const lessonQuiz = quizzes.find((q) => q.quiz.lessonId === l.lesson.id);
+				const lessonSubmission = submissions.find((s) => s.lessonId === l.lesson.id);
 
 				return {
 					...l.lesson,
 					materials: lessonMaterials.map((m) => m.material),
 					progress: lessonProgress || null,
-					quiz: lessonQuiz ? lessonQuiz.quiz : null
+					quiz: lessonQuiz ? lessonQuiz.quiz : null,
+					submission: lessonSubmission
+						? {
+								...lessonSubmission,
+								payload: lessonSubmission.payload ? JSON.parse(lessonSubmission.payload) : null,
+								metadata: lessonSubmission.metadata ? JSON.parse(lessonSubmission.metadata) : null
+							}
+						: null
 				};
 			});
 
@@ -122,6 +140,8 @@ export const load: PageServerLoad = async (event) => {
 	const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
 	return {
+		user,
+		enrollment,
 		course,
 		modules: structuredModules,
 		progress: progress.map((p) => ({
@@ -134,4 +154,67 @@ export const load: PageServerLoad = async (event) => {
 		completedLessons,
 		progressPercent
 	};
+};
+
+export const actions: Actions = {
+	submitAction: async (event) => {
+		const user = await requireAuth(event);
+		const formData = await event.request.formData();
+
+		const lessonId = formData.get('lessonId') as string;
+		const courseId = formData.get('courseId') as string;
+		const urlString = formData.get('url') as string;
+		const note = formData.get('note') as string;
+
+		if (!lessonId || !courseId || !urlString) {
+			return actionFailure(400, 'Link (URL) wajib diisi.');
+		}
+
+		try {
+			new URL(urlString);
+		} catch (e) {
+			return actionFailure(400, 'Format URL tidak valid.');
+		}
+
+		const submissionId = encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(10)));
+
+		// Check if already submitted for this lesson
+		const existing = await db
+			.select()
+			.from(schema.submission)
+			.where(
+				and(
+					eq(schema.submission.userId, user.id),
+					eq(schema.submission.lessonId, lessonId),
+					eq(schema.submission.type, 'assignment')
+				)
+			)
+			.limit(1);
+
+		const payload = JSON.stringify({ url: urlString, note });
+		const metadata = JSON.stringify({ submitted_at: new Date().toISOString() });
+
+		if (existing.length > 0) {
+			await db
+				.update(schema.submission)
+				.set({
+					payload,
+					metadata,
+					createdAt: new Date()
+				})
+				.where(eq(schema.submission.id, existing[0].id));
+		} else {
+			await db.insert(schema.submission).values({
+				id: submissionId,
+				userId: user.id,
+				courseId,
+				lessonId,
+				type: 'assignment',
+				payload,
+				metadata
+			});
+		}
+
+		return actionSuccess();
+	}
 };

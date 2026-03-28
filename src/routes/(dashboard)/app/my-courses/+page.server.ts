@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		return { enrollments: [] };
 	}
 
-	// Get user's enrollments with course details
+	// Get user's enrollments with course details including track and cohort
 	const enrollments = await db
 		.select({
 			id: schema.enrollment.id,
@@ -16,6 +16,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 			enrolledAt: schema.enrollment.enrolledAt,
 			activatedAt: schema.enrollment.activatedAt,
 			completedAt: schema.enrollment.completedAt,
+			track: schema.enrollment.track,
+			cohortId: schema.enrollment.cohortId,
 			course: {
 				id: schema.course.id,
 				title: schema.course.title,
@@ -28,6 +30,18 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.from(schema.enrollment)
 		.innerJoin(schema.course, eq(schema.enrollment.courseId, schema.course.id))
 		.where(eq(schema.enrollment.userId, locals.user.id));
+
+	// Fetch cohort names for enrolled cohorts
+	const cohortIds = [...new Set(enrollments.map((e) => e.cohortId).filter(Boolean))] as string[];
+	const cohortMap = new Map<string, string>();
+	for (const cohortId of cohortIds) {
+		const cohort = await db
+			.select({ id: schema.cohort.id, name: schema.cohort.name })
+			.from(schema.cohort)
+			.where(eq(schema.cohort.id, cohortId))
+			.limit(1);
+		if (cohort.length > 0) cohortMap.set(cohortId, cohort[0].name);
+	}
 
 	// Get payment proofs for pending enrollments
 	const paymentProofs = await db
@@ -84,6 +98,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		return {
 			...enrollment,
 			paymentProofStatus: proofMap.get(enrollment.course.id) || null,
+			cohortName: enrollment.cohortId ? (cohortMap.get(enrollment.cohortId) ?? null) : null,
 			progressPercent,
 			completedLessons,
 			totalLessons

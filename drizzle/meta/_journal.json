@@ -36,6 +36,13 @@
       "when": 1761798668841,
       "tag": "0004_mute_jamie_braddock",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1774715487384,
+      "tag": "0005_talented_strong_guy",
+      "breakpoints": true
     }
   ]
 }
