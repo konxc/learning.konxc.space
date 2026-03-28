@@ -29,6 +29,13 @@
 			}
 		}
 	});
+	
+	// Reactively save notes to localStorage
+	$effect(() => {
+		if (lessonNotes && Object.keys(lessonNotes).length > 0) {
+			localStorage.setItem('nk-lesson-notes', JSON.stringify(lessonNotes));
+		}
+	});
 
 	function toggleModule(moduleId: string) {
 		if (expandedModules.has(moduleId)) {
@@ -327,12 +334,7 @@
 						<textarea
 							class={`w-full min-h-[300px] p-6 ${RADIUS.card} ${COLOR.bg} border-2 border-dashed ${COLOR.cardBorder} focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/5 ${TEXT.body} ${COLOR.textPrimary} resize-none`}
 							placeholder="Tulis catatan Anda di sini... Catatan ini disimpan otomatis ke perangkat Anda."
-							bind:value={lessonNotes[selectedLesson.id] || ''}
-							oninput={(e) => {
-								const val = (e.target as HTMLTextAreaElement).value;
-								lessonNotes[selectedLesson.id] = val;
-								localStorage.setItem('nk-lesson-notes', JSON.stringify(lessonNotes));
-							}}
+							bind:value={lessonNotes[selectedLesson.id]}
 						></textarea>
 						<p class="mt-4 text-xs text-gray-400 italic">
 							* Catatan bersifat lokal di browser Anda. Segera hadir: sinkronisasi awan.
@@ -423,14 +425,6 @@
 							</div>
 						</div>
 					</div>
-				{:else}
-					<div class="px-5 py-16 text-center">
-						<p class={`${COLOR.textSecondary} mb-2`}>No materials available for this lesson yet.</p>
-						<p class={`${TEXT.small} ${COLOR.textMuted}`}>
-							Please check back later or contact your mentor.
-						</p>
-					</div>
-				{/if}
 			{:else}
 				<div class="px-5 py-16 text-center">
 					<p class={COLOR.textSecondary}>Please select a lesson to begin learning.</p>
