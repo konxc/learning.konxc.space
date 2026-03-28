@@ -11,6 +11,7 @@
 	import { COLOR, RADIUS, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import type { NavItem } from '$lib/server/rbac';
 	import { createPageMetadata } from '$lib/stores/pageMetadata';
+	import { fly, fade } from 'svelte/transition';
 
 	export interface AppShellData {
 		user?: {
@@ -127,9 +128,7 @@
 
 		<main
 			id="main-content"
-			class="min-w-0 flex-1 overflow-x-hidden scroll-smooth {sidebarCollapsed
-				? 'md:ml-16'
-				: 'md:ml-64'} ${TRANSITION.all}"
+			class={`min-w-0 flex-1 overflow-x-hidden scroll-smooth ${sidebarCollapsed ? 'md:ml-16' : 'md:ml-64'} ${TRANSITION.spring}`}
 		>
 			<!-- Skip to content link for accessibility -->
 			<a
@@ -139,10 +138,18 @@
 			>
 
 			<div class="min-h-[calc(100vh-56px)] w-full">
-				<!-- Page Content -->
+				<!-- Page Content with Smooth Transition -->
 				<div class="min-h-[calc(100vh-116px)] pb-6 md:pb-8">
-					<div class="w-full">
-						{@render children?.()}
+					<div class="relative w-full">
+						{#key $page.url.pathname}
+							<div
+								in:fly={{ y: 15, duration: 400, delay: 200, opacity: 0 }}
+								out:fade={{ duration: 150 }}
+								class="w-full"
+							>
+								{@render children?.()}
+							</div>
+						{/key}
 					</div>
 				</div>
 			</div>
