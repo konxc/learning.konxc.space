@@ -54,15 +54,15 @@ export const load: PageServerLoad = async (event) => {
 
 		const avgProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
-	return {
-		stats: {
-			myCourses: activeEnrollments.length,
-			progress: avgProgress,
-			certificates: certificates.length,
-			pendingPayments: pendingEnrollments.length
-		},
-		user: event.locals.user
-	};
+		return {
+			stats: {
+				myCourses: activeEnrollments.length,
+				progress: avgProgress,
+				certificates: certificates.length,
+				pendingPayments: pendingEnrollments.length
+			},
+			user: event.locals.user
+		};
 	} else if (user.role === 'mentor' || user.role === 'admin') {
 		// Get mentor's courses
 		const mentorCourses = await db
@@ -91,10 +91,7 @@ export const load: PageServerLoad = async (event) => {
 				.select()
 				.from(schema.submission)
 				.where(
-					and(
-						eq(schema.submission.courseId, courseId),
-						eq(schema.submission.type, 'assignment')
-					)
+					and(eq(schema.submission.courseId, courseId), eq(schema.submission.type, 'assignment'))
 				);
 
 			for (const submission of submissions) {
@@ -150,4 +147,3 @@ export const load: PageServerLoad = async (event) => {
 		user: event.locals.user
 	};
 };
-
