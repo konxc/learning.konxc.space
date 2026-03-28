@@ -7,7 +7,7 @@ import { redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { actionFailure } from '$lib/server/actions';
 import { snap } from '$lib/server/midtrans';
-import { PUBLIC_MIDTRANS_CLIENT_KEY } from '$env/static/public';
+import { MIDTRANS_CLIENT_KEY } from '$env/static/private';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const user = await requireAuth(locals);
@@ -43,7 +43,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			paymentProof: proofMap.get(e.courseId)
 		})),
 		selectedCourseId: courseId,
-		midtransClientKey: PUBLIC_MIDTRANS_CLIENT_KEY
+		midtransClientKey: MIDTRANS_CLIENT_KEY
 	};
 };
 
