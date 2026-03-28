@@ -5,6 +5,7 @@ import * as schema from '$lib/server/db/schema';
 import { eq, and, isNotNull, count, or } from 'drizzle-orm';
 import { error, fail } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
+import { sendEmail, createNotification } from '$lib/server/email';
 
 export const load: PageServerLoad = async (event) => {
 	const mentor = await requireMentor(event);
@@ -245,6 +246,41 @@ export const actions: Actions = {
 				gradedAt: new Date()
 			});
 		}
+
+		// Notify student
+		const studentDetails = await db
+			.select({ email: schema.user.email, name: schema.user.fullName, username: schema.user.username })
+			.from(schema.user)
+			.where(eq(schema.user.id, userId))
+			.limit(1);
+
+		let lessonTitle = 'Task Submission';
+		if (submission[0].lessonId) {
+			const lessonDetails = await db
+				.select({ title: schema.lesson.title })
+				.from(schema.lesson)
+				.where(eq(schema.lesson.id, submission[0].lessonId))
+				.limit(1);
+			if (lessonDetails[0]) lessonTitle = lessonDetails[0].title;
+		}
+
+		if (studentDetails[0] && studentDetails[0].email) {
+			sendEmail(studentDetails[0].email, 'grade', {
+				name: studentDetails[0].name || studentDetails[0].username,
+				lessonName: lessonTitle,
+				score: score.toString(),
+				feedback: feedback || '',
+				viewUrl: `${event.url.origin}/app/courses/${course[0].id}/learn`
+			}).catch(console.error);
+		}
+
+		createNotification(
+			userId,
+			'grade',
+			'Submission Graded 📝',
+			`Your submission for ${lessonTitle} has been graded with a score of ${score}/100.`,
+			`/app/courses/${course[0].id}/learn`
+		).catch(console.error);
 
 		return { success: true };
 	}

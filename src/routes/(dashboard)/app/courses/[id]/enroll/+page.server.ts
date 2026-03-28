@@ -6,6 +6,7 @@ import { eq, and } from 'drizzle-orm';
 import { redirect } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
 import { validateCoupon, applyCoupon } from '$lib/server/coupon';
+import { sendEmail, createNotification } from '$lib/server/email';
 
 export const actions = {
 	default: async (event) => {
@@ -75,6 +76,25 @@ export const actions = {
 		if (couponCode && couponId) {
 			await applyCoupon(couponId, user.id, courseId, course.price, discountAmount);
 		}
+
+		// Send email if user has an email and notification
+		if (user.email) {
+			sendEmail(user.email, 'enrollment', {
+				name: user.fullName || user.username,
+				courseName: course.title,
+				track: track || 'Regular',
+				cohort: 'Open enrollment',
+				learnUrl: `${event.url.origin}/app/courses/${courseId}/learn`
+			}).catch(console.error);
+		}
+
+		createNotification(
+			user.id,
+			'enrollment',
+			'Enrollment Successful 📚',
+			`You are now enrolled in ${course.title}. Start learning!`,
+			`/app/courses/${courseId}/learn`
+		).catch(console.error);
 
 		throw redirect(303, '/app/my-courses');
 	}

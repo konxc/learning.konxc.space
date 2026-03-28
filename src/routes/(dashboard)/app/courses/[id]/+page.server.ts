@@ -1,7 +1,9 @@
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
+import { encodeBase32LowerCase } from '@oslojs/encoding';
+import { fail } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const courseId = params.id;
@@ -89,10 +91,106 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		lessons: allLessons.filter((l) => l.moduleId === m.id)
 	}));
 
+	// Get course reviews
+	const reviews = await db
+		.select({
+			id: schema.courseReview.id,
+			rating: schema.courseReview.rating,
+			comment: schema.courseReview.comment,
+			createdAt: schema.courseReview.createdAt,
+			user: {
+				fullName: schema.user.fullName,
+				username: schema.user.username
+			}
+		})
+		.from(schema.courseReview)
+		.innerJoin(schema.user, eq(schema.courseReview.userId, schema.user.id))
+		.where(
+			and(
+				eq(schema.courseReview.courseId, courseId),
+				eq(schema.courseReview.moderationStatus, 'approved')
+			)
+		)
+		.orderBy(desc(schema.courseReview.createdAt));
+
+	// Calculate average rating
+	const avgRating = reviews.length > 0 
+		? reviews.reduce((acc, rev) => acc + rev.rating, 0) / reviews.length 
+		: 0;
+
 	return {
 		course: courseData.course,
 		mentor: courseData.mentor,
 		isEnrolled,
-		modules: modulesWithLessons
+		modules: modulesWithLessons,
+		reviews,
+		avgRating
 	};
+};
+
+export const actions = {
+	submitReview: async (event) => {
+		const formData = await event.request.formData();
+		const courseId = event.params.id;
+		const rating = parseInt(formData.get('rating') as string);
+		const comment = (formData.get('comment') as string) || '';
+
+		if (!event.locals.user) {
+			return fail(401, { error: 'You must be logged in to review' });
+		}
+
+		if (isNaN(rating) || rating < 1 || rating > 5) {
+			return fail(400, { error: 'Invalid rating (1-5)' });
+		}
+
+		// Check if user is enrolled
+		const enrollment = await db
+			.select()
+			.from(schema.enrollment)
+			.where(
+				and(eq(schema.enrollment.userId, event.locals.user.id), eq(schema.enrollment.courseId, courseId))
+			)
+			.limit(1);
+
+		if (enrollment.length === 0) {
+			return fail(403, { error: 'Only enrolled students can leave a review' });
+		}
+
+		// Check if user already reviewed
+		const existingReview = await db
+			.select()
+			.from(schema.courseReview)
+			.where(
+				and(eq(schema.courseReview.userId, event.locals.user.id), eq(schema.courseReview.courseId, courseId))
+			)
+			.limit(1);
+
+		if (existingReview.length > 0) {
+			// Update review
+			await db
+				.update(schema.courseReview)
+				.set({
+					rating,
+					comment,
+					moderationStatus: 'pending', // Re-moderate on edit
+					updatedAt: new Date()
+				})
+				.where(eq(schema.courseReview.id, existingReview[0].id));
+		} else {
+			// Create review
+			const id = encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(10)));
+			await db.insert(schema.courseReview).values({
+				id,
+				userId: event.locals.user.id,
+				courseId,
+				rating,
+				comment,
+				moderationStatus: 'pending',
+				createdAt: new Date(),
+				updatedAt: new Date()
+			});
+		}
+
+		return { success: true, message: 'Review submitted and is pending moderation.' };
+	}
 };

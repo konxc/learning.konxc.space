@@ -7,6 +7,7 @@ import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
 import type { Actions, PageServerLoad } from './$types';
 import { actionFailure } from '$lib/server/actions';
+import { sendEmail, createNotification } from '$lib/server/email';
 
 export const load: PageServerLoad = async (event) => {
 	if (event.locals.user) {
@@ -105,6 +106,23 @@ export const actions: Actions = {
 				fullName: fullName && typeof fullName === 'string' ? fullName : null,
 				role: 'user'
 			});
+
+			if (email && typeof email === 'string') {
+				// We don't await this to avoid blocking the response
+				sendEmail(email, 'welcome', {
+					name: fullName && typeof fullName === 'string' ? fullName : (username as string),
+					loginUrl: `${event.url.origin}/auth/signin`
+				}).catch(console.error);
+			}
+
+			// We don't await this either
+			createNotification(
+				userId,
+				'system',
+				'Welcome to Naik Kelas! 🎉',
+				'Your account has been created successfully. Complete your profile to get started.',
+				'/app/settings'
+			).catch(console.error);
 
 			const sessionToken = auth.generateSessionToken();
 			const session = await auth.createSession(sessionToken, userId);

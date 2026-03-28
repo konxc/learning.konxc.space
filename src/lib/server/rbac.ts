@@ -103,6 +103,12 @@ export function getNavItemsForRole(role: string): NavItem[] {
 				category: 'admin'
 			},
 			{
+				label: 'Course Reviews',
+				href: '/app/admin/reviews',
+				icon: '⭐',
+				category: 'admin'
+			},
+			{
 				label: 'CRM Waiting List',
 				href: '/app/crm/waiting-list',
 				icon: '⏳',
@@ -132,14 +138,20 @@ export function getNavItemsForRole(role: string): NavItem[] {
 				icon: '🔍',
 				category: 'learning'
 			},
-			{
-				label: 'My Courses',
-				href: '/app/my-courses',
-				icon: '📖',
-				category: 'learning'
-			},
-			{
-				label: 'Course Management',
+		{
+			label: 'My Courses',
+			href: '/app/my-courses',
+			icon: '📖',
+			category: 'learning'
+		},
+		{
+			label: 'My Progress',
+			href: '/app/my-progress',
+			icon: '📈',
+			category: 'learning'
+		},
+		{
+			label: 'Course Management',
 				href: '/app/mentor/courses',
 				icon: '🎓',
 				category: 'management'
@@ -170,6 +182,12 @@ export function getNavItemsForRole(role: string): NavItem[] {
 				category: 'learning'
 			},
 			{
+				label: 'My Progress',
+				href: '/app/my-progress',
+				icon: '📈',
+				category: 'learning'
+			},
+			{
 				label: 'My Batches',
 				href: '/app/facilitator/cohorts',
 				icon: '📅',
@@ -191,6 +209,18 @@ export function getNavItemsForRole(role: string): NavItem[] {
 			label: 'My Courses',
 			href: '/app/my-courses',
 			icon: '📖',
+			category: 'learning'
+		},
+		{
+			label: 'My Progress',
+			href: '/app/my-progress',
+			icon: '📈',
+			category: 'learning'
+		},
+		{
+			label: 'Leaderboard',
+			href: '/app/leaderboard',
+			icon: '🏆',
 			category: 'learning'
 		},
 		{

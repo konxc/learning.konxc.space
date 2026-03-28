@@ -146,6 +146,79 @@
 							{/each}
 						</div>
 					</section>
+
+					<!-- Reviews Section -->
+					<section class="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+						<header class="flex items-center gap-3 mb-6">
+							<div class="h-8 w-1 bg-yellow-400 rounded-full"></div>
+							<h2 class={`${TEXT.h2} ${COLOR.textPrimary}`}>Student Reviews</h2>
+						</header>
+
+                        {#if data.avgRating > 0}
+                            <div class="flex items-center gap-4 mb-6 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                                <span class="text-4xl font-black text-gray-900">{data.avgRating.toFixed(1)}</span>
+                                <div class="flex flex-col">
+                                    <div class="flex items-center gap-1 text-yellow-400 mb-1">
+                                        {#each Array(5) as _, i}
+                                            <svg class={`w-5 h-5 ${i < Math.round(data.avgRating) ? 'text-yellow-400 fill-current' : 'text-gray-200 fill-current'}`} viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                        {/each}
+                                    </div>
+                                    <span class="text-xs text-gray-500 font-medium">Berdasarkan {data.reviews?.length || 0} ulasan</span>
+                                </div>
+                            </div>
+                        {:else}
+                            <p class="text-gray-500 italic mb-6">Belum ada ulasan untuk kursus ini.</p>
+                        {/if}
+
+                        <!-- Write Review Form -->
+                        {#if data.isEnrolled}
+                            <form action="?/submitReview" method="POST" class="mb-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
+                                <h3 class="font-bold text-gray-900 mb-4">Tulis Ulasan Anda</h3>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Rating</label>
+                                    <select name="rating" required class="w-full p-3 rounded-lg border border-gray-300 bg-white">
+                                        <option value="5">5 Bintang - Sangat Bagus</option>
+                                        <option value="4">4 Bintang - Bagus</option>
+                                        <option value="3">3 Bintang - Cukup</option>
+                                        <option value="2">2 Bintang - Kurang</option>
+                                        <option value="1">1 Bintang - Sangat Kurang</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Ulasan</label>
+                                    <textarea name="comment" rows="3" placeholder="Ceritakan pengalaman Anda..." class="w-full p-3 rounded-lg border border-gray-300 resize-none"></textarea>
+                                </div>
+                                <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">Kirim Ulasan</button>
+                            </form>
+                        {/if}
+
+                        <!-- Review List -->
+                        {#if data.reviews && data.reviews.length > 0}
+                            <div class="space-y-4">
+                                {#each data.reviews as review}
+                                    <div class="p-5 bg-white border border-gray-100 rounded-xl shadow-sm">
+                                        <div class="flex items-center gap-3 mb-3">
+                                            <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                                                {review.user.fullName?.[0] || review.user.username[0] || '?'}
+                                            </div>
+                                            <div>
+                                                <p class="font-bold text-gray-900 text-sm leading-none mb-1">{review.user.fullName || review.user.username}</p>
+                                                <div class="flex items-center gap-1">
+                                                    {#each Array(5) as _, i}
+                                                        <svg class={`w-3 h-3 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-200 fill-current'}`} viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                                    {/each}
+                                                </div>
+                                            </div>
+                                            <span class="ml-auto text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString('id-ID')}</span>
+                                        </div>
+                                        {#if review.comment}
+                                            <p class="text-gray-600 text-sm italic">"{review.comment}"</p>
+                                        {/if}
+                                    </div>
+                                {/each}
+                            </div>
+                        {/if}
+					</section>
 				</div>
 			</div>
 

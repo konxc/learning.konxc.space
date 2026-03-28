@@ -385,3 +385,159 @@ export type PaymentProof = typeof paymentProof.$inferSelect;
 export type Transaction = typeof transaction.$inferSelect;
 export type Cohort = typeof cohort.$inferSelect;
 export type Partner = typeof partner.$inferSelect;
+export type Notification = typeof notification.$inferSelect;
+export type EmailLog = typeof emailLog.$inferSelect;
+export type CourseReview = typeof courseReview.$inferSelect;
+export type UserXP = typeof userXP.$inferSelect;
+export type Badge = typeof badge.$inferSelect;
+export type UserBadge = typeof userBadge.$inferSelect;
+export type Checkpoint = typeof checkpoint.$inferSelect;
+export type CheckpointSubmission = typeof checkpointSubmission.$inferSelect;
+export type Discussion = typeof discussion.$inferSelect;
+
+// Notifications
+export const notification = sqliteTable('notification', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	type: text('type').notNull(), // 'enrollment', 'grade', 'submission', 'certificate', 'system'
+	title: text('title').notNull(),
+	message: text('message').notNull(),
+	link: text('link'), // URL to navigate to
+	read: integer('read', { mode: 'boolean' }).notNull().default(false),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Email notifications log
+export const emailLog = sqliteTable('email_log', {
+	id: text('id').primaryKey(),
+	to: text('to').notNull(),
+	subject: text('subject').notNull(),
+	type: text('type').notNull(), // 'welcome', 'enrollment', 'grade', 'certificate', 'reminder'
+	status: text('status').notNull().default('pending'), // 'pending', 'sent', 'failed'
+	error: text('error'),
+	sentAt: integer('sent_at', { mode: 'timestamp' }),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Course Reviews
+export const courseReview = sqliteTable('course_review', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	courseId: text('course_id')
+		.notNull()
+		.references(() => course.id),
+	rating: integer('rating').notNull(), // 1-5 stars
+	comment: text('comment'),
+	moderationStatus: text('moderation_status').notNull().default('pending'), // 'pending', 'approved', 'rejected'
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// User XP/Points for gamification
+export const userXP = sqliteTable('user_xp', {
+	userId: text('user_id')
+		.primaryKey()
+		.references(() => user.id),
+	points: integer('points').notNull().default(0),
+	level: integer('level').notNull().default(1),
+	streakDays: integer('streak_days').notNull().default(0),
+	lastActiveAt: integer('last_active_at', { mode: 'timestamp' }),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Badges/Achievements
+export const badge = sqliteTable('badge', {
+	id: text('id').primaryKey(),
+	name: text('name').notNull(),
+	description: text('description'),
+	icon: text('icon'), // emoji or icon name
+	criteria: text('criteria').notNull(), // JSON criteria
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// User Badges
+export const userBadge = sqliteTable('user_badge', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	badgeId: text('badge_id')
+		.notNull()
+		.references(() => badge.id),
+	earnedAt: integer('earned_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Weekly Checkpoints for batches
+export const checkpoint = sqliteTable('checkpoint', {
+	id: text('id').primaryKey(),
+	cohortId: text('cohort_id')
+		.notNull()
+		.references(() => cohort.id),
+	title: text('title').notNull(),
+	description: text('description'),
+	weekNumber: integer('week_number').notNull(),
+	dueDate: integer('due_date', { mode: 'timestamp' }),
+	isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Student Checkpoint Submissions
+export const checkpointSubmission = sqliteTable('checkpoint_submission', {
+	id: text('id').primaryKey(),
+	checkpointId: text('checkpoint_id')
+		.notNull()
+		.references(() => checkpoint.id),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	notes: text('notes'),
+	completed: integer('completed', { mode: 'boolean' }).notNull().default(false),
+	submittedAt: integer('submitted_at', { mode: 'timestamp' }),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Discussion/Forum
+export const discussion = sqliteTable('discussion', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	courseId: text('course_id').references(() => course.id),
+	lessonId: text('lesson_id').references(() => lesson.id),
+	parentId: text('parent_id').references(() => discussion.id),
+	title: text('title'),
+	content: text('content').notNull(),
+	upvotes: integer('upvotes').notNull().default(0),
+	isPinned: integer('is_pinned', { mode: 'boolean' }).notNull().default(false),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
