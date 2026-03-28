@@ -6,7 +6,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const { student, courseProgress } = data;
+	const { student, courseProgress, submissions } = data;
 
 	// Group lesson details by module within each course
 	function groupByModule(lessonDetails: typeof courseProgress[0]['lessonDetails']) {
@@ -204,4 +204,63 @@
 			</div>
 		{/each}
 	</div>
+
+	<!-- Submissions / Action Reports -->
+	{#if submissions && submissions.length > 0}
+		<div class="mt-8">
+			<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-4`}>📝 Action Submissions</h3>
+			<div class="space-y-4">
+				{#each submissions as sub}
+					{@const payload = typeof sub.payload === 'string' ? JSON.parse(sub.payload) : sub.payload}
+					{@const metadata = typeof sub.metadata === 'string' ? JSON.parse(sub.metadata) : sub.metadata}
+					<div class={`${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} p-5`}>
+						<div class="flex items-start justify-between gap-4">
+							<div class="flex-1">
+								<div class="flex items-center gap-2 mb-2">
+									<span class={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+										sub.type === 'action' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+									}`}>
+										{sub.type}
+									</span>
+									<span class="text-xs text-gray-400">{sub.lesson?.title}</span>
+								</div>
+								{#if payload?.url}
+									<a 
+										href={payload.url} 
+										target="_blank" 
+										rel="noopener noreferrer"
+										class="text-sm font-medium text-blue-600 hover:underline break-all"
+									>
+										{payload.url}
+									</a>
+								{/if}
+								{#if payload?.note}
+									<p class="mt-2 text-sm text-gray-600 italic">"{payload.note}"</p>
+								{/if}
+								<p class="mt-2 text-xs text-gray-400">
+									Submitted: {new Date(sub.createdAt).toLocaleDateString('id-ID')}
+								</p>
+							</div>
+							<div class="shrink-0 text-right">
+								{#if sub.grade}
+									<div class="text-right">
+										<span class={`text-lg font-bold ${sub.grade.score >= 70 ? 'text-green-600' : 'text-amber-600'}`}>
+											{sub.grade.score}/100
+										</span>
+										{#if sub.grade.feedback}
+											<p class="mt-1 max-w-xs text-xs text-gray-500">{sub.grade.feedback}</p>
+										{/if}
+									</div>
+								{:else}
+									<span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
+										Pending Review
+									</span>
+								{/if}
+							</div>
+						</div>
+					</div>
+				{/each}
+			</div>
+		</div>
+	{/if}
 </PageWrapper>

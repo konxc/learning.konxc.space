@@ -2,7 +2,7 @@ import { requireMentor } from '$lib/server/middleware';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, and, isNotNull, count } from 'drizzle-orm';
+import { eq, and, isNotNull, count, or } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async (event) => {
@@ -129,8 +129,52 @@ export const load: PageServerLoad = async (event) => {
 		})
 	);
 
+	// Get submissions for this student
+	const submissions = await db
+		.select({
+			id: schema.submission.id,
+			type: schema.submission.type,
+			payload: schema.submission.payload,
+			metadata: schema.submission.metadata,
+			score: schema.submission.score,
+			createdAt: schema.submission.createdAt,
+			lesson: {
+				id: schema.lesson.id,
+				title: schema.lesson.title
+			},
+			course: {
+				id: schema.course.id,
+				title: schema.course.title
+			}
+		})
+		.from(schema.submission)
+		.innerJoin(schema.lesson, eq(schema.submission.lessonId, schema.lesson.id))
+		.innerJoin(schema.course, eq(schema.submission.courseId, schema.course.id))
+		.where(eq(schema.submission.userId, userId))
+		.orderBy(schema.submission.createdAt);
+
+	// Get grades for submissions
+	const submissionIds = submissions.map((s) => s.id);
+	let grades: Record<string, typeof schema.submissionGrade.$inferSelect> = {};
+	if (submissionIds.length > 0) {
+		const gradesResult = await db
+			.select()
+			.from(schema.submissionGrade)
+			.where(
+				// @ts-ignore - dynamic where clause
+				or(...submissionIds.map((id) => eq(schema.submissionGrade.submissionId, id)))
+			);
+		for (const g of gradesResult) {
+			grades[g.submissionId] = g;
+		}
+	}
+
 	return {
 		student,
-		courseProgress
+		courseProgress,
+		submissions: submissions.map((s) => ({
+			...s,
+			grade: grades[s.id] || null
+		}))
 	};
 };
