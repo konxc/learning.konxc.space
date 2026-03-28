@@ -54,6 +54,27 @@ export const load: PageServerLoad = async (event) => {
 
 	const course = courses[0];
 
+	// Get cohort info for drip content calculation
+	let cohortStartDate: Date | null = null;
+	if (enrollment.cohortId) {
+		const cohort = await db
+			.select({ startDate: schema.cohort.startDate })
+			.from(schema.cohort)
+			.where(eq(schema.cohort.id, enrollment.cohortId))
+			.limit(1);
+		if (cohort[0]?.startDate) {
+			cohortStartDate = cohort[0].startDate;
+		}
+	}
+
+	// Calculate current week number based on cohort start date
+	let currentWeek = 1;
+	const now = new Date();
+	if (cohortStartDate) {
+		const daysSinceStart = Math.floor((now.getTime() - cohortStartDate.getTime()) / (1000 * 60 * 60 * 24));
+		currentWeek = Math.min(Math.floor(daysSinceStart / 7) + 1, 12); // Max 12 weeks
+	}
+
 	// Get modules with lessons and materials
 	const modules = await db
 		.select()
@@ -110,6 +131,15 @@ export const load: PageServerLoad = async (event) => {
 				const lessonQuiz = quizzes.find((q) => q.quiz.lessonId === l.lesson.id);
 				const lessonSubmission = submissions.find((s) => s.lessonId === l.lesson.id);
 
+				// Drip content: check if lesson is locked
+				const lessonWeek = l.lesson.weekNumber || 1;
+				const isLocked = !l.lesson.isFree && !!cohortStartDate && lessonWeek > currentWeek;
+				const availableFrom = l.lesson.availableFrom 
+					? new Date(l.lesson.availableFrom) 
+					: cohortStartDate 
+						? new Date(cohortStartDate.getTime() + (lessonWeek - 1) * 7 * 24 * 60 * 60 * 1000)
+						: null;
+
 				return {
 					...l.lesson,
 					materials: lessonMaterials.map((m) => m.material),
@@ -121,7 +151,10 @@ export const load: PageServerLoad = async (event) => {
 								payload: lessonSubmission.payload ? JSON.parse(lessonSubmission.payload) : null,
 								metadata: lessonSubmission.metadata ? JSON.parse(lessonSubmission.metadata) : null
 							}
-						: null
+						: null,
+					isLocked,
+					availableFrom,
+					lessonWeek
 				};
 			});
 
@@ -152,7 +185,12 @@ export const load: PageServerLoad = async (event) => {
 		firstLesson,
 		totalLessons,
 		completedLessons,
-		progressPercent
+		progressPercent,
+		dripContent: {
+			enabled: !!cohortStartDate,
+			currentWeek,
+			cohortStartDate
+		}
 	};
 };
 

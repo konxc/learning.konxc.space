@@ -172,6 +172,9 @@ export const lesson = sqliteTable('lesson', {
 		.references(() => module.id),
 	title: text('title').notNull(),
 	order: integer('order_index').notNull(),
+	availableFrom: integer('available_from', { mode: 'timestamp' }), // Drip content: lesson unlocked after this date
+	weekNumber: integer('week_number'), // Which week this lesson belongs to (1-8)
+	isFree: integer('is_free', { mode: 'boolean' }).default(false), // Preview lesson (always accessible)
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date()),

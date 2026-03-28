@@ -14,6 +14,7 @@
 	let expandedModules = $state<Set<string>>(new Set([data.modules[0]?.id || '']));
 	let activeTab = $state<'content' | 'notes'>('content');
 	let lessonNotes = $state<Record<string, string>>({});
+	let mobileMenuOpen = $state(false);
 
 	onMount(() => {
 		if (data.firstLesson) {
@@ -111,9 +112,20 @@
 </svelte:head>
 
 <div class={`${SPACING.page} ${SPACING.section}`}>
-	<div class="grid min-h-[calc(100vh-100px)] grid-cols-1 gap-6 md:grid-cols-[300px_1fr]">
+	<!-- Mobile Menu Toggle -->
+	<div class="mb-4 md:hidden">
+		<button
+			onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
+			class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700"
+		>
+			<span>📚 {selectedLesson?.title || 'Select Lesson'}</span>
+			<span>{mobileMenuOpen ? '▲' : '▼'}</span>
+		</button>
+	</div>
+	
+	<div class={`grid min-h-[calc(100vh-100px)] grid-cols-1 gap-6 md:grid-cols-[300px_1fr] ${mobileMenuOpen ? 'block' : 'hidden md:block'}`}>
 		<aside
-			class={`h-fit overflow-y-auto md:sticky md:top-6 md:max-h-[calc(100vh-3rem)] ${RADIUS.card} ${COLOR.card} ${SPACING.cardPadding} ${ELEVATION.base} border border-gray-100 dark:border-neutral-800`}
+			class={`h-fit overflow-y-auto md:sticky md:top-6 md:max-h-[calc(100vh-3rem)] ${RADIUS.card} ${COLOR.card} ${SPACING.cardPadding} ${ELEVATION.base} border border-gray-100 dark:border-neutral-800 ${mobileMenuOpen ? 'block' : 'hidden md:block'}`}
 		>
 			<div class="mb-8">
 				<a
@@ -187,6 +199,12 @@
 							}[data.enrollment.track]}
 							<div class="mt-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold {trackInfo?.color || 'bg-gray-100 text-gray-700'}">
 								{trackInfo?.label || data.enrollment.track}
+							</div>
+						{/if}
+						<!-- Drip Content Indicator -->
+						{#if data.dripContent?.enabled}
+							<div class="mt-3 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+								📅 Week {data.dripContent.currentWeek}
 							</div>
 						{/if}
 						<!-- Progress Bar -->
@@ -285,13 +303,25 @@
 											class={`w-full rounded-lg px-3 py-2.5 text-left ${TRANSITION.all} flex items-center justify-between gap-2 ${
 												lesson.id === selectedLessonId
 													? 'bg-linear-to-r from-blue-600 to-purple-600 text-white'
-													: `${COLOR.card} ${COLOR.textPrimary} hover:${COLOR.neutralHover}`
+													: lesson.isLocked 
+														? 'opacity-50 cursor-not-allowed bg-gray-50'
+														: `${COLOR.card} ${COLOR.textPrimary} hover:${COLOR.neutralHover}`
 											} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
-											onclick={() => selectLesson(lesson.id)}
+											onclick={() => !lesson.isLocked && selectLesson(lesson.id)}
 											type="button"
+											disabled={lesson.isLocked}
 										>
-											<span class={`${TEXT.small} truncate`}>{lesson.title}</span>
-											{#if lesson.progress?.completedAt}
+											<span class={`${TEXT.small} truncate flex items-center gap-2`}>
+												{#if lesson.isLocked}
+													🔒
+												{:else if lesson.progress?.completedAt}
+													✅
+												{:else if lesson.weekNumber}
+													<span class="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">W{lesson.weekNumber}</span>
+												{/if}
+												{lesson.title}
+											</span>
+											{#if lesson.progress?.completedAt && !lesson.isLocked}
 												<svg
 													class="h-5 w-5 shrink-0"
 													width="20"
