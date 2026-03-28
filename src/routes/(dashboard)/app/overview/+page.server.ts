@@ -73,6 +73,7 @@ export const load: PageServerLoad = async (event) => {
 		// Get total students across mentor's courses
 		const courseIds = mentorCourses.map((c) => c.id);
 		let totalStudents = 0;
+		let trackCounts = { creator: 0, seller: 0, affiliate: 0, unassigned: 0 };
 
 		for (const courseId of courseIds) {
 			const students = await db
@@ -82,10 +83,19 @@ export const load: PageServerLoad = async (event) => {
 					and(eq(schema.enrollment.courseId, courseId), eq(schema.enrollment.status, 'active'))
 				);
 			totalStudents += students.length;
+			
+			// Count tracks
+			for (const s of students) {
+				if (s.track === 'creator') trackCounts.creator++;
+				else if (s.track === 'seller') trackCounts.seller++;
+				else if (s.track === 'affiliate') trackCounts.affiliate++;
+				else trackCounts.unassigned++;
+			}
 		}
 
-		// Get pending submissions
+		// Get pending submissions (action type)
 		let pendingSubmissions = 0;
+		let totalActionSubmissions = 0;
 		for (const courseId of courseIds) {
 			const submissions = await db
 				.select()
@@ -93,6 +103,7 @@ export const load: PageServerLoad = async (event) => {
 				.where(
 					and(eq(schema.submission.courseId, courseId), eq(schema.submission.type, 'assignment'))
 				);
+			totalActionSubmissions += submissions.length;
 
 			for (const submission of submissions) {
 				const grade = await db
@@ -107,11 +118,20 @@ export const load: PageServerLoad = async (event) => {
 			}
 		}
 
+		// Get active cohorts
+		const cohorts = await db
+			.select()
+			.from(schema.cohort)
+			.where(eq(schema.cohort.status, 'active'));
+
 		return {
 			stats: {
 				myCourses: mentorCourses.length,
 				totalStudents: totalStudents,
-				pendingSubmissions: pendingSubmissions
+				pendingSubmissions: pendingSubmissions,
+				totalActionSubmissions: totalActionSubmissions,
+				trackCounts: trackCounts,
+				activeCohorts: cohorts.length
 			},
 			user: event.locals.user
 		};

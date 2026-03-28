@@ -8,6 +8,17 @@
 
 	const { student, courseProgress, submissions } = data;
 
+	const trackLabels: Record<string, { label: string; color: string; icon: string }> = {
+		creator: { label: 'Creator', color: 'bg-purple-100 text-purple-700', icon: '🎥' },
+		seller: { label: 'Seller', color: 'bg-orange-100 text-orange-700', icon: '🛒' },
+		affiliate: { label: 'Affiliate', color: 'bg-blue-100 text-blue-700', icon: '🔗' }
+	};
+
+	const getTrackLabel = (track: string | null | undefined) => {
+		if (!track) return null;
+		return trackLabels[track] || null;
+	};
+
 	// Group lesson details by module within each course
 	function groupByModule(lessonDetails: typeof courseProgress[0]['lessonDetails']) {
 		const map = new Map<string, { moduleTitle: string; moduleOrder: number; lessons: typeof lessonDetails }>();
@@ -129,10 +140,16 @@
 						{/if}
 						<div>
 							<h3 class={`font-bold ${COLOR.textPrimary} leading-snug`}>{cp.enrollment.course.title}</h3>
-							<div class="mt-1 flex items-center gap-3">
+							<div class="mt-1 flex items-center gap-3 flex-wrap">
 								<span class={`text-xs ${COLOR.textMuted}`}>
 									{cp.completedLessons}/{cp.totalLessons} lessons
 								</span>
+								{#if cp.enrollment.track && getTrackLabel(cp.enrollment.track)}
+									{@const track = getTrackLabel(cp.enrollment.track)}
+									<span class={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${track?.color}`}>
+										{track?.icon} {track?.label}
+									</span>
+								{/if}
 								<span class={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
 									cp.enrollment.status === 'active' ? `${COLOR.successBg}` : `${COLOR.warningBg}`
 								}`}>

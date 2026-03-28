@@ -45,6 +45,7 @@ export const load: PageServerLoad = async (event) => {
 		.select({
 			id: schema.enrollment.id,
 			status: schema.enrollment.status,
+			track: schema.enrollment.track,
 			enrolledAt: schema.enrollment.enrolledAt,
 			completedAt: schema.enrollment.completedAt,
 			course: {
