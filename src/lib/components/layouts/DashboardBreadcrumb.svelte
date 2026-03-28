@@ -19,7 +19,7 @@
 		let acc = '';
 		for (const part of parts) {
 			acc += '/' + part;
-			const name = labelMapping[part.toLowerCase()] || part.charAt(0).toUpperCase() + part.slice(1);
+			const name = labelMapping[part.toLowerCase()] || (part.charAt(0).toUpperCase() + part.slice(1));
 			items.push({ name, href: acc });
 		}
 		return items;
@@ -32,30 +32,26 @@
 		itemscope
 		itemtype="https://schema.org/BreadcrumbList"
 	>
-		<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-			<a
-				href="/app"
-				itemprop="item"
-				class={`inline-flex items-center no-underline ${TEXT.small} ${COLOR.textSecondary} ${TRANSITION.colors} hover:text-gray-900 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1 dark:hover:text-gray-100 ${RADIUS.small}`}
-			>
-				<span itemprop="name">{m.home()}</span>
-			</a>
-			<meta itemprop="position" content="1" />
-		</li>
-		{#if segments($page.url.pathname).length > 1}
-			<li class="flex shrink-0 items-center" aria-hidden="true">
-				<svg
-					class="h-3 w-3 ${COLOR.textMuted}"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					aria-hidden="true"
-				>
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-				</svg>
-			</li>
-			{#each segments($page.url.pathname).slice(1, -1) as s, i}
-				<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+		{#each segments($page.url.pathname) as s, i}
+			{#if i > 0}
+				<li class="flex shrink-0 items-center" aria-hidden="true">
+					<svg
+						class={`h-3 w-3 ${COLOR.textMuted}`}
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+						aria-hidden="true"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+					</svg>
+				</li>
+			{/if}
+			<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+				{#if i === segments($page.url.pathname).length - 1}
+					<span class={`truncate ${TEXT.small} ${COLOR.textPrimary} font-medium`} aria-current="page">
+						{s.name}
+					</span>
+				{:else}
 					<a
 						href={s.href}
 						itemprop="item"
@@ -63,30 +59,9 @@
 					>
 						<span itemprop="name">{s.name}</span>
 					</a>
-					<meta itemprop="position" content={String(i + 2)} />
-				</li>
-				<li class="flex shrink-0 items-center" aria-hidden="true">
-					<svg
-						class="h-3 w-3 ${COLOR.textMuted}"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-						aria-hidden="true"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 5l7 7-7 7"
-						/>
-					</svg>
-				</li>
-			{/each}
-			{#if segments($page.url.pathname).length}
-				<li class={`truncate ${TEXT.small} ${COLOR.textPrimary} font-medium`} aria-current="page">
-					{segments($page.url.pathname).at(-1)?.name}
-				</li>
-			{/if}
-		{/if}
+				{/if}
+				<meta itemprop="position" content={String(i + 1)} />
+			</li>
+		{/each}
 	</ol>
 </nav>

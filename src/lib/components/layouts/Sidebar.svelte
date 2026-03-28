@@ -3,7 +3,7 @@
 	import { COLOR, RADIUS, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
 	import type { NavItem, NavGroup } from '$lib/server/rbac';
 	import Logo from './Logo.svelte';
-	import SidebarHeader from './SidebarHeader.svelte';
+	import WorkspaceSwitcher from './WorkspaceSwitcher.svelte';
 
 	function groupNavItems(items: NavItem[]): NavGroup[] {
 		const groups: Record<string, NavItem[]> = {};
@@ -148,74 +148,17 @@
 	role="navigation"
 >
 	<div class="flex h-full flex-col">
-		<!-- Logo Section -->
+		<!-- Top Header: Logo -->
 		<div
-			class="flex items-center {isCollapsed
-				? 'flex-col justify-center gap-2'
-				: 'justify-between'} border-b border-gray-200/60 px-3 py-3 dark:border-neutral-800/60"
+			class={`flex items-center justify-center px-6 py-5 ${isCollapsed ? 'scale-90 transition-transform' : ''}`}
 		>
-			{#if !isCollapsed}
-				<div class="ml-4">
-					<Logo size="md" showText={true} />
-				</div>
-				<button
-					type="button"
-					onclick={handleToggle}
-					aria-label="Collapse sidebar"
-					class={`${RADIUS.button} p-1.5 ${COLOR.textSecondary} ${TRANSITION.all} hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 dark:hover:bg-neutral-800`}
-				>
-					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M11 19l-7-7m0 0l7-7m-7 7h18"
-						/>
-					</svg>
-				</button>
-			{:else}
-				<Logo size="sm" showText={false} />
-				<button
-					type="button"
-					onclick={handleToggle}
-					aria-label="Expand sidebar"
-					class={`w-full ${RADIUS.button} p-2 ${COLOR.textSecondary} bg-blue-50/50 dark:bg-blue-950/20 ${TRANSITION.all} hover:bg-blue-100 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 dark:hover:bg-blue-950/30`}
-				>
-					<svg class="mx-auto h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M13 5l7 7m0 0l-7 7m7-7H6"
-						/>
-					</svg>
-				</button>
-			{/if}
+			<Logo size={isCollapsed ? 'sm' : 'md'} showText={!isCollapsed} />
 		</div>
+		
+		<!-- Top Padding replaced SidebarHeader/Switcher -->
+		<div class="h-1"></div>
 
-		<!-- Workspace Context in Sidebar -->
-		{#if workspaces && !isCollapsed}
-			<SidebarHeader {workspaces} />
-		{:else if workspaces && isCollapsed}
-			<div class="p-2 border-b border-gray-100 flex justify-center">
-				<div class={`h-8 w-8 rounded-lg flex items-center justify-center text-xs font-black text-white ${workspaces.activeId === 'personal' ? 'bg-blue-600' : 'bg-indigo-600'}`}>
-					{workspaces.activeId === 'personal' ? 'P' : (workspaces.activeOrg?.name?.[0] || 'O')}
-				</div>
-			</div>
-		{/if}
 
-		<!-- Search Bar -->
-		{#if searchable && !isCollapsed}
-			<div class="border-b border-gray-200/60 p-2 dark:border-neutral-800/60">
-				<input
-					type="text"
-					placeholder="Cari menu..."
-					value={searchInputValue}
-					class={`w-full ${RADIUS.input} border border-gray-300 px-3 py-2 dark:border-neutral-600 ${TEXT.small} ${COLOR.textPrimary} bg-white outline-none dark:bg-neutral-800 ${TRANSITION.all} placeholder:text-gray-400 hover:border-gray-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:placeholder:text-neutral-500 dark:hover:border-neutral-500 dark:focus:border-blue-500 dark:focus:ring-blue-900/50`}
-					oninput={(e) => handleSearchInput((e.target as HTMLInputElement).value)}
-				/>
-			</div>
-		{/if}
 
 		<!-- Navigation -->
 		<nav class="sidebar-nav flex-1 space-y-2 overflow-y-auto p-3" aria-label="Main navigation">
@@ -248,7 +191,7 @@
 										<path
 											stroke-linecap="round"
 											stroke-linejoin="round"
-											stroke-width="3"
+											stroke-width="2.5"
 											d="M9 5l7 7-7 7"
 										/>
 									</svg>
@@ -305,12 +248,6 @@
 													{item.badge}
 												</span>
 											{/if}
-											{#if active}
-												<span
-													class="absolute right-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600 opacity-60 dark:bg-blue-400"
-													aria-hidden="true"
-												></span>
-											{/if}
 										{:else if item.badge && showBadges}
 											<span
 												class={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full ${TEXT.small} leading-none text-white ${
@@ -335,6 +272,13 @@
 				{/each}
 			{/if}
 		</nav>
+
+		<!-- Workspace Switcher at the Bottom -->
+		{#if workspaces}
+			<div class={`px-3 pt-2 pb-4 border-t border-gray-100 dark:border-neutral-800 ${isCollapsed ? 'px-2' : ''}`}>
+				<WorkspaceSwitcher {workspaces} fullWidth={true} {isCollapsed} />
+			</div>
+		{/if}
 	</div>
 </aside>
 

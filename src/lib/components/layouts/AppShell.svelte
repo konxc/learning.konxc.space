@@ -105,6 +105,7 @@
 		{themeAccordionRef}
 		{roleAccordionRef}
 		{sidebarCollapsed}
+		onSidebarToggle={() => (sidebarCollapsed = !sidebarCollapsed)}
 		notifications={data.user?.notifications}
 		unreadCount={data.user?.unreadCount}
 		workspaces={data.workspaces}

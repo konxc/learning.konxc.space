@@ -3,12 +3,14 @@
 	import { invalidateAll, goto } from '$app/navigation';
 	import { toast } from '$lib/stores/toast';
 
-	let { workspaces }: { 
+	let { workspaces, fullWidth = false, isCollapsed = false }: { 
 		workspaces: { 
 			organizations: any[], 
 			activeId: string, 
 			activeOrg: any 
-		} 
+		},
+		fullWidth?: boolean,
+		isCollapsed?: boolean
 	} = $props();
 
 	let isOpen = $state(false);
@@ -41,37 +43,57 @@
 	}
 </script>
 
-<div class="relative">
+<div class={`relative ${fullWidth ? 'w-full' : ''}`}>
 	<button
 		onclick={() => (isOpen = !isOpen)}
-		class={`flex items-center gap-2 px-3 py-1.5 ${RADIUS.button} bg-gray-50 border border-gray-200 dark:bg-neutral-800 dark:border-neutral-700 hover:bg-gray-100 transition-all group`}
+		class={`flex items-center gap-3 ${isCollapsed ? 'justify-center p-2' : 'p-2.5 w-full'} ${RADIUS.card} bg-zinc-50/50 dark:bg-zinc-900/40 border border-zinc-200/50 dark:border-zinc-800/50 hover:bg-white dark:hover:bg-zinc-800/60 transition-all group relative overflow-hidden active:scale-[0.98]`}
+		aria-expanded={isOpen}
+		aria-haspopup="listbox"
 	>
-		<div class="flex items-center gap-2 min-w-0">
+		<!-- Interaction Surface -->
+		<div class="absolute inset-0 bg-linear-to-br from-blue-500/0 to-indigo-500/0 group-hover:from-blue-500/5 group-hover:to-indigo-500/5 transition-all"></div>
+
+		<div class="flex items-center gap-3 min-w-0 relative z-10 w-full">
 			{#if workspaces.activeId === 'personal'}
-				<div class="h-5 w-5 rounded-md bg-blue-600 flex items-center justify-center text-[10px] text-white font-bold">P</div>
-				<span class="text-xs font-bold text-gray-700 dark:text-gray-200 truncate">Personal Workspace</span>
-			{:else}
-				{#if workspaces.activeOrg?.logoUrl}
-					<img src={workspaces.activeOrg.logoUrl} alt="" class="h-5 w-5 rounded-md object-cover" />
-				{:else}
-					<div class="h-5 w-5 rounded-md bg-indigo-600 flex items-center justify-center text-[10px] text-white font-bold">
-						{workspaces.activeOrg?.name?.[0].toUpperCase() || 'O'}
+				<div class={`flex items-center justify-center shrink-0 rounded-lg bg-blue-600 text-white font-black shadow-md ${isCollapsed ? 'h-8 w-8 text-xs' : 'h-8 w-8 text-sm'}`}>P</div>
+				{#if !isCollapsed}
+					<div class="flex-1 text-left min-w-0">
+						<p class="text-[10px] font-black uppercase tracking-widest text-blue-600 leading-none mb-1">Personal</p>
+						<p class="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">Account</p>
 					</div>
 				{/if}
-				<span class="text-xs font-bold text-gray-700 dark:text-gray-200 truncate">{workspaces.activeOrg?.name}</span>
+			{:else}
+				<div class={`shrink-0 rounded-lg overflow-hidden shadow-md ring-1 ring-black/5 dark:ring-white/10 ${isCollapsed ? 'h-8 w-8' : 'h-8 w-8'}`}>
+					{#if workspaces.activeOrg?.logoUrl}
+						<img src={workspaces.activeOrg.logoUrl} alt="" class="h-full w-full object-cover" />
+					{:else}
+						<div class="h-full w-full bg-indigo-600 flex items-center justify-center text-sm text-white font-black">
+							{workspaces.activeOrg?.name?.[0].toUpperCase() || 'O'}
+						</div>
+					{/if}
+				</div>
+				{#if !isCollapsed}
+					<div class="flex-1 text-left min-w-0">
+						<p class="text-[10px] font-black uppercase tracking-widest text-indigo-600 leading-none mb-1">Organization</p>
+						<p class="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">{workspaces.activeOrg?.name}</p>
+					</div>
+				{/if}
+			{/if}
+			
+			{#if !isCollapsed}
+				<svg class={`h-4 w-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-all duration-300 ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+					<polyline points="6 9 12 15 18 9"></polyline>
+				</svg>
 			{/if}
 		</div>
-		<svg class={`h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-transform ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-			<polyline points="6 9 12 15 18 9"></polyline>
-		</svg>
 	</button>
 
 	{#if isOpen}
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="fixed inset-0 z-40" onclick={() => (isOpen = false)}></div>
+		<div class="fixed inset-0 z-40 bg-black/5 backdrop-blur-[1px]" onclick={() => (isOpen = false)}></div>
 		
-		<div class={`absolute left-0 mt-2 w-64 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} border ${ELEVATION.card} z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200`}>
+		<div class={`absolute ${isCollapsed ? 'left-full ml-2 bottom-0' : 'left-0 bottom-full mb-2 w-full'} ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} border ${ELEVATION.card} z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200 backdrop-blur-xl bg-white/95 dark:bg-zinc-900/95`}>
 			<div class="p-2">
 				<p class="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-gray-400">Select Workspace</p>
 				
@@ -106,9 +128,9 @@
 								{org.name[0].toUpperCase()}
 							</div>
 						{/if}
-						<div class="text-left">
-							<p class="text-xs font-bold leading-none mb-1">{org.name}</p>
-							<p class="text-[10px] opacity-70">{org.role.charAt(0).toUpperCase() + org.role.slice(1)}</p>
+						<div class="text-left flex-1 min-w-0">
+							<p class="text-xs font-bold leading-none mb-1 truncate">{org.name}</p>
+							<p class="text-[10px] opacity-70 uppercase tracking-wider font-black">{org.role}</p>
 						</div>
 						{#if workspaces.activeId === org.id}
 							<svg class="ml-auto h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
