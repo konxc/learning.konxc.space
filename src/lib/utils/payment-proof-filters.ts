@@ -54,7 +54,8 @@ export function filterPaymentProofs<T extends PaymentProof>(
 ): T[] {
 	return proofs.filter(
 		(proof) =>
-			matchesPaymentProofSearch(proof, searchQuery) && matchesPaymentProofStatus(proof, statusFilter)
+			matchesPaymentProofSearch(proof, searchQuery) &&
+			matchesPaymentProofStatus(proof, statusFilter)
 	);
 }
 
@@ -78,4 +79,3 @@ export function countPaymentProofsByStatus<T extends PaymentProof>(
 
 	return counts;
 }
-

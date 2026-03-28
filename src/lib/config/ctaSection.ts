@@ -79,4 +79,3 @@ export const CTA_OVERLAY_CONFIG = {
 		]
 	}
 } as const;
-

@@ -17,4 +17,3 @@ export const PROGRAM_BACKGROUND_GRADIENT = `
 		),
 		linear-gradient(to bottom, #ffffff 0%, var(--color-bg-lighter) 100%);
 ` as const;
-

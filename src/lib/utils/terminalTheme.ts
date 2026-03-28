@@ -1,6 +1,6 @@
 /**
  * Terminal Theme Utilities
- * 
+ *
  * Shared utilities untuk terminal theme configuration
  */
 
@@ -49,4 +49,3 @@ export function getRightArrow(theme: TerminalTheme): string {
 export function getFullPrompt(theme: TerminalTheme): string {
 	return `${getPrompt(theme)}${TERMINAL_CONFIG.directory}${TERMINAL_CONFIG.gitBranch}${getRightArrow(theme)} `;
 }
-

@@ -1,6 +1,6 @@
 /**
  * Analytics Tracking Utilities
- * 
+ *
  * Centralized analytics tracking untuk events, conversions, dan user behavior.
  * Support untuk multiple analytics providers (Google Analytics, Plausible, dll).
  */
@@ -120,11 +120,7 @@ export function trackPageView(page: string, title?: string): void {
 /**
  * Track CTA click
  */
-export function trackCTAClick(
-	ctaLocation: string,
-	ctaText: string,
-	destination?: string
-): void {
+export function trackCTAClick(ctaLocation: string, ctaText: string, destination?: string): void {
 	trackEvent({
 		type: 'cta_click',
 		category: 'conversion',
@@ -325,4 +321,3 @@ declare global {
 		dataLayer?: any[];
 	}
 }
-

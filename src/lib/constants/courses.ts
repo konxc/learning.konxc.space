@@ -10,4 +10,3 @@ export const COURSE_STATUS_LABELS: Record<CourseStatus, string> = {
 	draft: 'Draft',
 	published: 'Published'
 };
-

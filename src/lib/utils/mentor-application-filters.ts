@@ -78,4 +78,3 @@ export function countMentorApplicationsByStatus<T extends { status: string }>(
 
 	return counts;
 }
-

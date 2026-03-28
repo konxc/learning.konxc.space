@@ -22,11 +22,7 @@ export interface PatternConfig {
 /**
  * Generate CSS background pattern berdasarkan type
  */
-export function getPatternCSS(
-	pattern: CTAPatternType,
-	intensity = 0.03,
-	size = 20
-): string {
+export function getPatternCSS(pattern: CTAPatternType, intensity = 0.03, size = 20): string {
 	const opacity = intensity;
 	const color = `rgba(255, 255, 255, ${opacity})`;
 
@@ -125,4 +121,3 @@ export function getPatternSize(pattern: CTAPatternType): number {
 			return 20;
 	}
 }
-

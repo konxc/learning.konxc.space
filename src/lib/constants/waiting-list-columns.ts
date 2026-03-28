@@ -21,4 +21,3 @@ export const WAITING_LIST_COLUMNS: TableColumn[] = [
 export function getDefaultColumnVisibility(): Record<string, boolean> {
 	return Object.fromEntries(WAITING_LIST_COLUMNS.map((col) => [col.key, true]));
 }
-

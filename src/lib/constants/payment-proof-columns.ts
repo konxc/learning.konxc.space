@@ -19,4 +19,3 @@ export const PAYMENT_PROOF_COLUMNS: TableColumn[] = [
 export function getDefaultPaymentProofColumnVisibility(): Record<string, boolean> {
 	return Object.fromEntries(PAYMENT_PROOF_COLUMNS.map((col) => [col.key, true]));
 }
-

@@ -1,6 +1,6 @@
 /**
  * Social Proof Data
- * 
+ *
  * Metrics, statistics, dan partner information untuk Social Proof Section.
  */
 
@@ -71,4 +71,3 @@ export const MEDIA_MENTIONS: MediaMention[] = [
 	// 	date: '2025-01-15'
 	// }
 ];
-

@@ -19,10 +19,6 @@ export function setToVisibilityRecord(
 /**
  * Check if a column is visible
  */
-export function isColumnVisible(
-	key: string,
-	visibility: Record<string, boolean>
-): boolean {
+export function isColumnVisible(key: string, visibility: Record<string, boolean>): boolean {
 	return visibility[key] ?? true;
 }
-

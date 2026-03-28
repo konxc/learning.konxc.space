@@ -1,9 +1,5 @@
 import { fail } from '@sveltejs/kit';
-import type {
-	FormActionFailure,
-	FormActionResult,
-	FormActionSuccess
-} from '$lib/types/actions';
+import type { FormActionFailure, FormActionResult, FormActionSuccess } from '$lib/types/actions';
 
 type SuccessConfig<T> = {
 	message?: string;
@@ -16,9 +12,7 @@ type FailureConfig<FieldErrors, T> = {
 	data?: T;
 };
 
-export function actionSuccess<T = undefined>(
-	config: SuccessConfig<T> = {}
-): FormActionSuccess<T> {
+export function actionSuccess<T = undefined>(config: SuccessConfig<T> = {}): FormActionSuccess<T> {
 	return {
 		success: true,
 		...config
@@ -38,4 +32,3 @@ export function actionFailure<FieldErrors = Record<string, string> | undefined, 
 		data: config.data
 	}) as never;
 }
-

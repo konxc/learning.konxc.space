@@ -11,4 +11,3 @@ export const PAYMENT_PROOF_STATUS_LABELS: Record<PaymentProofStatus, string> = {
 	approved: 'Approved',
 	rejected: 'Rejected'
 };
-

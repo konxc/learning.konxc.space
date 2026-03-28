@@ -33,10 +33,7 @@ export async function checkCourseCompletion(
 		.select()
 		.from(schema.lessonProgress)
 		.where(
-			and(
-				eq(schema.lessonProgress.userId, userId),
-				eq(schema.lessonProgress.courseId, courseId)
-			)
+			and(eq(schema.lessonProgress.userId, userId), eq(schema.lessonProgress.courseId, courseId))
 		);
 
 	const completedLessonIds = new Set(completedLessons.map((p) => p.lessonId));
@@ -73,7 +70,11 @@ export async function checkCourseCompletion(
 			)
 			.limit(1);
 
-		if (submission.length > 0 && submission[0].score !== null && submission[0].score >= quiz.quiz.passingScore) {
+		if (
+			submission.length > 0 &&
+			submission[0].score !== null &&
+			submission[0].score >= quiz.quiz.passingScore
+		) {
 			completedQuizCount++;
 		} else {
 			missing.push(`Quiz: ${quiz.quiz.title} (need ${quiz.quiz.passingScore}% to pass)`);
@@ -119,4 +120,3 @@ export async function checkCourseCompletion(
 		}
 	};
 }
-

@@ -1,6 +1,6 @@
 /**
  * Shared Overlay Configurations untuk semua Sections
- * 
+ *
  * Centralized configuration untuk AuroraOverlay dan GlowOrbs
  */
 
@@ -267,4 +267,3 @@ export const TESTIMONIALS_OVERLAY_CONFIG = {
 		}
 	])
 };
-

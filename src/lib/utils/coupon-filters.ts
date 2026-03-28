@@ -62,7 +62,9 @@ export function filterCoupons<T extends Coupon>(
 /**
  * Count coupons by filter type
  */
-export function countCouponsByFilter<T extends Coupon>(coupons: T[]): {
+export function countCouponsByFilter<T extends Coupon>(
+	coupons: T[]
+): {
 	all: number;
 	active: number;
 	expired: number;
@@ -83,4 +85,3 @@ export function countCouponsByFilter<T extends Coupon>(coupons: T[]): {
 
 	return counts;
 }
-

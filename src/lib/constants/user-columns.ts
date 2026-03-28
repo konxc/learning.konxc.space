@@ -20,4 +20,3 @@ export const USER_COLUMNS: TableColumn[] = [
 export function getDefaultUserColumnVisibility(): Record<string, boolean> {
 	return Object.fromEntries(USER_COLUMNS.map((col) => [col.key, true]));
 }
-

@@ -9,4 +9,3 @@ export interface TableColumn {
 	width?: string;
 	align?: 'left' | 'center' | 'right';
 }
-

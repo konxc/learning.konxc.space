@@ -20,4 +20,3 @@ export const COURSE_COLUMNS: TableColumn[] = [
 export function getDefaultCourseColumnVisibility(): Record<string, boolean> {
 	return Object.fromEntries(COURSE_COLUMNS.map((col) => [col.key, true]));
 }
-

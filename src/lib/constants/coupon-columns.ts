@@ -21,4 +21,3 @@ export const COUPON_COLUMNS: TableColumn[] = [
 export function getDefaultCouponColumnVisibility(): Record<string, boolean> {
 	return Object.fromEntries(COUPON_COLUMNS.map((col) => [col.key, true]));
 }
-

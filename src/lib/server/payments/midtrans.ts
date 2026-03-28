@@ -46,9 +46,7 @@ export async function createSnapTransaction(
 		},
 		customer_details: payload.customer,
 		item_details: payload.itemDetails,
-		expiry: payload.expiryMinutes
-			? { unit: 'minutes', duration: payload.expiryMinutes }
-			: undefined
+		expiry: payload.expiryMinutes ? { unit: 'minutes', duration: payload.expiryMinutes } : undefined
 	};
 
 	const res = await fetch(url, {

@@ -1,6 +1,6 @@
 /**
  * SEO Utility Functions
- * 
+ *
  * Helper functions untuk generate dynamic meta tags dan structured data
  * berdasarkan domain selection.
  */
@@ -218,4 +218,3 @@ export function getLandingPageStructuredData(domain: CareerOption = 'Developer')
 		hasCourse: getCourseStructuredData(domain)
 	};
 }
-

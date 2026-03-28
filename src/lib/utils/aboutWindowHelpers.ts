@@ -1,6 +1,6 @@
 /**
  * AboutWindow Helper Functions
- * 
+ *
  * Wrapper functions untuk AboutWindow props
  */
 
@@ -19,4 +19,3 @@ export function createPromptGetter() {
 export function createRightArrowGetter() {
 	return (t: string) => getRightArrow(t as TerminalTheme);
 }
-

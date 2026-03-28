@@ -36,4 +36,3 @@ export const TIMELINE_CONSTANTS = {
 	/** Timeout untuk observer setup (ms) */
 	OBSERVER_SETUP_TIMEOUT: 100
 } as const;
-

@@ -1,6 +1,6 @@
 /**
  * Pattern Styling Utilities
- * 
+ *
  * Helper functions untuk generate pattern styling
  */
 
@@ -9,10 +9,7 @@ import { getPatternCSS, getPatternSize, type CTAPatternType } from '$lib/types/c
 /**
  * Generate pattern background style string
  */
-export function getPatternBackgroundStyle(
-	pattern: CTAPatternType,
-	intensity: number
-): string {
+export function getPatternBackgroundStyle(pattern: CTAPatternType, intensity: number): string {
 	if (pattern === 'none') {
 		return 'background: none;';
 	}
@@ -36,4 +33,3 @@ export function getPatternOverlayClass(pattern: CTAPatternType): string {
 export function isSpecialPattern(pattern: CTAPatternType): boolean {
 	return pattern === 'matrix-rain';
 }
-

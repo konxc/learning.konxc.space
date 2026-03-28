@@ -65,4 +65,3 @@ export function countUsersByRole<T extends { role: string }>(
 
 	return counts;
 }
-

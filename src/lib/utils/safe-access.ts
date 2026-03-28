@@ -5,7 +5,7 @@
 /**
  * Safely get a nested property value from an object
  * Returns the value if it exists, or a fallback value otherwise
- * 
+ *
  * @example
  * safeGet(entry, 'user', 'fullName', '—')
  * safeGet(entry, ['user', 'username'], 'Unknown')
@@ -44,7 +44,7 @@ export function safeGetTyped<T, K extends keyof T>(
 /**
  * Safely access nested object property chain
  * Returns the value if entire chain exists, or fallback otherwise
- * 
+ *
  * @example
  * safeChain(entry, 'user', 'email', '—')
  * safeChain(entry?.user, 'fullName', entry?.user?.username, '—')
@@ -61,4 +61,3 @@ export function safeChain<T>(
 	}
 	return fallback;
 }
-
