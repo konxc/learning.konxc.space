@@ -18,7 +18,8 @@ export async function seedMentorApplications(db: LibSQLDatabase<typeof schema>, 
 			portfolioUrl: 'https://portfolio-sari.dev',
 			githubUrl: 'https://github.com/saridewi',
 			linkedinUrl: 'https://linkedin.com/in/saridewi',
-			motivation: 'Ingin berbagi pengetahuan dan membantu developer baru untuk berkembang di industri tech.',
+			motivation:
+				'Ingin berbagi pengetahuan dan membantu developer baru untuk berkembang di industri tech.',
 			status: 'pending',
 			adminNotes: null,
 			createdAt: new Date('2024-01-25'),
@@ -38,7 +39,7 @@ export async function seedWaitingList(db: LibSQLDatabase<typeof schema>) {
 	logSection('Seeding waiting list');
 
 	const waitingListEntries = [
-        {
+		{
 			id: generateId(),
 			fullName: 'Rizki Ahmad',
 			email: 'rizki.ahmad@email.com',

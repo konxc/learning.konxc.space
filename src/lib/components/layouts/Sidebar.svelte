@@ -3,6 +3,7 @@
 	import { COLOR, RADIUS, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
 	import type { NavItem, NavGroup } from '$lib/server/rbac';
 	import Logo from './Logo.svelte';
+	import SidebarHeader from './SidebarHeader.svelte';
 
 	function groupNavItems(items: NavItem[]): NavGroup[] {
 		const groups: Record<string, NavItem[]> = {};
@@ -37,9 +38,20 @@
 		};
 		isCollapsed?: boolean;
 		onToggle?: () => void;
+		workspaces?: {
+			organizations: any[];
+			activeId: string;
+			activeOrg: any;
+		};
 	}
 
-	let { items, config = {}, isCollapsed = $bindable(false), onToggle }: SidebarProps = $props();
+	let {
+		items,
+		config = {},
+		isCollapsed = $bindable(false),
+		onToggle,
+		workspaces
+	}: SidebarProps = $props();
 	const { collapsible = true, grouped = true, searchable = true, showBadges = true } = config;
 
 	// Sync state dengan localStorage dan data attribute
@@ -180,6 +192,17 @@
 				</button>
 			{/if}
 		</div>
+
+		<!-- Workspace Context in Sidebar -->
+		{#if workspaces && !isCollapsed}
+			<SidebarHeader {workspaces} />
+		{:else if workspaces && isCollapsed}
+			<div class="p-2 border-b border-gray-100 flex justify-center">
+				<div class={`h-8 w-8 rounded-lg flex items-center justify-center text-xs font-black text-white ${workspaces.activeId === 'personal' ? 'bg-blue-600' : 'bg-indigo-600'}`}>
+					{workspaces.activeId === 'personal' ? 'P' : (workspaces.activeOrg?.name?.[0] || 'O')}
+				</div>
+			</div>
+		{/if}
 
 		<!-- Search Bar -->
 		{#if searchable && !isCollapsed}

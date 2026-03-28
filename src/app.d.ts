@@ -7,7 +7,21 @@ declare global {
 			session: import('$lib/server/auth').SessionValidationResult['session'];
 		}
 		// interface Error {}
-		// interface PageData {}
+		interface PageData {
+			workspaces?: {
+				organizations: Array<{
+					id: string;
+					name: string;
+					slug: string;
+					logoUrl: string | null;
+					brandColor: string | null;
+					planType: string;
+					role: string;
+				}>;
+				activeId: string;
+				activeOrg: any;
+			};
+		}
 		// interface Platform {}
 	}
 	interface Window {

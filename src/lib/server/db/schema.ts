@@ -9,6 +9,7 @@ export const user = sqliteTable('user', {
 	email: text('email'),
 	phone: text('phone'),
 	onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' }).default(false),
+	lastWorkspaceId: text('last_workspace_id'), // To remember user's last active workspace
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date())
@@ -24,12 +25,15 @@ export const session = sqliteTable('session', {
 
 export const course = sqliteTable('course', {
 	id: text('id').primaryKey(),
+	orgId: text('org_id').references(() => organization.id), // Owner organization
+	category: text('category').default('general'), // 'marketing', 'technical', 'business'
 	title: text('title').notNull(),
 	description: text('description').notNull(),
 	thumbnailUrl: text('thumbnail_url'),
 	price: integer('price').notNull(),
 	duration: integer('duration'), // in weeks
 	status: text('status').notNull().default('draft'),
+	featuresConfig: text('features_config'), // JSON string: { tracks: boolean, affiliate: boolean, performance: boolean }
 	mentorId: text('mentor_id').references(() => user.id),
 	createdBy: text('created_by')
 		.notNull()
@@ -156,7 +160,7 @@ export const module = sqliteTable('module', {
 		.notNull()
 		.references(() => course.id),
 	title: text('title').notNull(),
-	order: integer('order_index').notNull(),
+	order: integer('order').notNull(),
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date()),
@@ -171,10 +175,10 @@ export const lesson = sqliteTable('lesson', {
 		.notNull()
 		.references(() => module.id),
 	title: text('title').notNull(),
-	order: integer('order_index').notNull(),
-	availableFrom: integer('available_from', { mode: 'timestamp' }), // Drip content: lesson unlocked after this date
-	weekNumber: integer('week_number'), // Which week this lesson belongs to (1-8)
-	isFree: integer('is_free', { mode: 'boolean' }).default(false), // Preview lesson (always accessible)
+	order: integer('order').notNull(),
+	availableFrom: integer('available_from', { mode: 'timestamp' }), // Drip content
+	weekNumber: integer('week_number'),
+	isFree: integer('is_free', { mode: 'boolean' }).default(false),
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date()),
@@ -188,10 +192,10 @@ export const material = sqliteTable('material', {
 	lessonId: text('lesson_id')
 		.notNull()
 		.references(() => lesson.id),
-	type: text('type').notNull(), // 'text' | 'video' | 'link'
-	content: text('content'), // for 'text'
-	url: text('url'), // for 'video' | 'link'
-	order: integer('order_index').notNull(),
+	type: text('type').notNull(),
+	content: text('content'),
+	url: text('url'),
+	order: integer('order').notNull(),
 	durationMs: integer('duration_ms'),
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
@@ -387,6 +391,56 @@ export const partner = sqliteTable('partner', {
 		.$defaultFn(() => new Date())
 });
 
+// Organization/Workspace Support
+export const organization = sqliteTable('organization', {
+	id: text('id').primaryKey(),
+	slug: text('slug').notNull().unique(),
+	name: text('name').notNull(),
+	logoUrl: text('logo_url'),
+	brandColor: text('brand_color').default('#4f46e5'),
+	planType: text('plan_type').notNull().default('free'), // 'free' | 'pro' | 'enterprise'
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const organizationMember = sqliteTable('organization_member', {
+	id: text('id').primaryKey(),
+	orgId: text('org_id')
+		.notNull()
+		.references(() => organization.id),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	role: text('role').notNull().default('member'), // 'owner' | 'admin' | 'creator' | 'facilitator' | 'member'
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const organizationInvitation = sqliteTable('organization_invitation', {
+	id: text('id').primaryKey(),
+	orgId: text('org_id')
+		.notNull()
+		.references(() => organization.id),
+	email: text('email').notNull(),
+	role: text('role').notNull().default('member'),
+	token: text('token').notNull().unique(),
+	invitedBy: text('invited_by')
+		.notNull()
+		.references(() => user.id),
+	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
 export type Session = typeof session.$inferSelect;
 export type User = typeof user.$inferSelect;
 export type Course = typeof course.$inferSelect;
@@ -410,6 +464,9 @@ export type PaymentProof = typeof paymentProof.$inferSelect;
 export type Transaction = typeof transaction.$inferSelect;
 export type Cohort = typeof cohort.$inferSelect;
 export type Partner = typeof partner.$inferSelect;
+export type Organization = typeof organization.$inferSelect;
+export type OrganizationMember = typeof organizationMember.$inferSelect;
+export type OrganizationInvitation = typeof organizationInvitation.$inferSelect;
 export type Notification = typeof notification.$inferSelect;
 export type EmailLog = typeof emailLog.$inferSelect;
 export type WhatsAppLog = typeof whatsappLog.$inferSelect;
@@ -628,7 +685,10 @@ export const checkpointSubmission = sqliteTable('checkpoint_submission', {
 // Discussion/Forum
 export const discussion = sqliteTable('discussion', (t) => ({
 	id: t.text('id').primaryKey(),
-	userId: t.text('user_id').notNull().references(() => user.id),
+	userId: t
+		.text('user_id')
+		.notNull()
+		.references(() => user.id),
 	courseId: t.text('course_id').references(() => course.id),
 	lessonId: t.text('lesson_id').references(() => lesson.id),
 	parentId: t.text('parent_id').references((): any => discussion.id),
@@ -636,10 +696,12 @@ export const discussion = sqliteTable('discussion', (t) => ({
 	content: t.text('content').notNull(),
 	upvotes: t.integer('upvotes').notNull().default(0),
 	isPinned: t.integer('is_pinned', { mode: 'boolean' }).notNull().default(false),
-	createdAt: t.integer('created_at', { mode: 'timestamp' })
+	createdAt: t
+		.integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: t.integer('updated_at', { mode: 'timestamp' })
+	updatedAt: t
+		.integer('updated_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date())
 }));

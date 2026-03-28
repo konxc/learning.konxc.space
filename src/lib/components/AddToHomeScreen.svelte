@@ -33,14 +33,14 @@
 
 	async function install() {
 		if (!deferredPrompt) return;
-		
+
 		deferredPrompt.prompt();
 		const { outcome } = await deferredPrompt.userChoice;
-		
+
 		if (outcome === 'accepted') {
 			installed = true;
 		}
-		
+
 		showPrompt = false;
 		deferredPrompt = null;
 	}
@@ -52,7 +52,9 @@
 </script>
 
 {#if showPrompt && !installed && deferredPrompt}
-	<div class={`fixed bottom-4 right-4 z-50 max-w-sm ${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} p-4 shadow-xl animate-in slide-in-from-bottom-4`}>
+	<div
+		class={`fixed right-4 bottom-4 z-50 max-w-sm ${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} animate-in slide-in-from-bottom-4 p-4 shadow-xl`}
+	>
 		<div class="flex items-start gap-3">
 			<div class="text-3xl">📱</div>
 			<div class="flex-1">

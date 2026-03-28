@@ -2,14 +2,19 @@ import * as schema from '../../src/lib/server/db/schema.js';
 import { logSection, logSuccess, generateId } from './utils.js';
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
 
-export async function seedCourses(db: LibSQLDatabase<typeof schema>, adminId: string, mentorId: string) {
+export async function seedCourses(
+	db: LibSQLDatabase<typeof schema>,
+	adminId: string,
+	mentorId: string
+) {
 	logSection('Seeding courses');
 
 	const courses = [
 		{
 			id: 'course-001',
 			title: 'Python Programming Fundamentals',
-			description: 'Belajar Python dari dasar hingga mahir. Kursus lengkap untuk pemula yang ingin menguasai programming dengan Python.',
+			description:
+				'Belajar Python dari dasar hingga mahir. Kursus lengkap untuk pemula yang ingin menguasai programming dengan Python.',
 			thumbnailUrl: null,
 			price: 1500000,
 			duration: 8,
@@ -22,7 +27,8 @@ export async function seedCourses(db: LibSQLDatabase<typeof schema>, adminId: st
 		{
 			id: 'course-002',
 			title: 'Full Stack Web Development',
-			description: 'Pelajari HTML, CSS, JavaScript, dan framework modern untuk menjadi full stack developer yang handal.',
+			description:
+				'Pelajari HTML, CSS, JavaScript, dan framework modern untuk menjadi full stack developer yang handal.',
 			thumbnailUrl: null,
 			price: 2500000,
 			duration: 12,
@@ -35,7 +41,8 @@ export async function seedCourses(db: LibSQLDatabase<typeof schema>, adminId: st
 		{
 			id: 'course-003',
 			title: 'React.js Advanced',
-			description: 'Materi advanced React.js dengan hooks, context API, dan best practices untuk production.',
+			description:
+				'Materi advanced React.js dengan hooks, context API, dan best practices untuk production.',
 			thumbnailUrl: null,
 			price: 1800000,
 			duration: 6,
@@ -48,11 +55,15 @@ export async function seedCourses(db: LibSQLDatabase<typeof schema>, adminId: st
 		{
 			id: 'course-004',
 			title: 'Database Design & SQL',
-			description: 'Pelajari database design, normalization, dan SQL queries untuk database management yang efektif.',
-			thumbnailUrl: null,
+			description:
+				'Pelajari database design, normalization, dan SQL queries untuk database management yang efektif.',
+			thumbnailUrl:
+				'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?q=80&w=2021&auto=format&fit=crop',
 			price: 1200000,
 			duration: 6,
 			status: 'published',
+			category: 'technical',
+			featuresConfig: JSON.stringify({ tracks: false, affiliate: false, performance: false }),
 			mentorId: null,
 			createdBy: adminId,
 			createdAt: new Date('2024-01-13'),
@@ -61,7 +72,8 @@ export async function seedCourses(db: LibSQLDatabase<typeof schema>, adminId: st
 		{
 			id: 'course-005',
 			title: 'Backend API Development',
-			description: 'Bangun RESTful API dengan Node.js, Express, dan best practices untuk scalable backend applications.',
+			description:
+				'Bangun RESTful API dengan Node.js, Express, dan best practices untuk scalable backend applications.',
 			thumbnailUrl: null,
 			price: 2000000,
 			duration: 10,
@@ -74,15 +86,35 @@ export async function seedCourses(db: LibSQLDatabase<typeof schema>, adminId: st
 		{
 			id: 'course-006',
 			title: 'Mobile App Development',
-			description: 'Kembangkan aplikasi mobile dengan React Native dan Flutter untuk iOS dan Android.',
+			description:
+				'Kembangkan aplikasi mobile dengan React Native dan Flutter untuk iOS dan Android.',
 			thumbnailUrl: null,
 			price: 2200000,
 			duration: 10,
 			status: 'draft',
+			category: 'technical',
+			featuresConfig: JSON.stringify({ tracks: false, affiliate: false, performance: false }),
 			mentorId: null,
 			createdBy: adminId,
 			createdAt: new Date('2024-01-15'),
 			updatedAt: new Date('2024-01-15')
+		},
+		{
+			id: 'course-dm-001',
+			title: 'Akselerasi Bisnis Digital (Naik Kelas)',
+			description:
+				'Program akselerasi bisnis untuk UMKM dan Content Creator. Praktek langsung membangun bisnis dari nol hingga profit.',
+			thumbnailUrl:
+				'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop',
+			price: 1500000,
+			duration: 8,
+			status: 'published',
+			category: 'marketing',
+			featuresConfig: JSON.stringify({ tracks: true, affiliate: true, performance: true }),
+			mentorId: mentorId,
+			createdBy: adminId,
+			createdAt: new Date('2024-02-01'),
+			updatedAt: new Date('2024-02-01')
 		}
 	];
 
@@ -159,7 +191,12 @@ export async function seedCoupons(db: LibSQLDatabase<typeof schema>, adminId: st
 	return coupons;
 }
 
-export async function seedEnrollments(db: LibSQLDatabase<typeof schema>, userIds: string[], courseIds: string[], couponIds: string[]) {
+export async function seedEnrollments(
+	db: LibSQLDatabase<typeof schema>,
+	userIds: string[],
+	courseIds: string[],
+	couponIds: string[]
+) {
 	logSection('Seeding enrollments');
 
 	const enrollments = [

@@ -73,7 +73,10 @@
 			<input type="hidden" name="courseId" value={courseId} />
 
 			<div>
-				<label for="url" class={`mb-1.5 block text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>
+				<label
+					for="url"
+					class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
+				>
 					Link Hasil Praktek (TikTok/IG/Marketplace)
 				</label>
 				<input
@@ -88,7 +91,10 @@
 			</div>
 
 			<div>
-				<label for="note" class={`mb-1.5 block text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>
+				<label
+					for="note"
+					class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
+				>
 					Catatan Tambahan (Opsional)
 				</label>
 				<textarea
@@ -97,12 +103,12 @@
 					bind:value={note}
 					placeholder="Apa yang Anda pelajari atau kendala yang dihadapi..."
 					rows="3"
-					class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 resize-none`}
+					class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} resize-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 				></textarea>
 			</div>
 
 			{#if errorMessage}
-				<div class="rounded-lg bg-red-50 p-3 text-sm text-red-600 border border-red-200">
+				<div class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
 					{errorMessage}
 				</div>
 			{/if}

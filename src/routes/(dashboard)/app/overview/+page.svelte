@@ -13,17 +13,14 @@
 		const role = (data.user.role || 'user').toLowerCase();
 		try {
 			if (role === 'user' || role === 'learner') {
-				RoleComponent = (await import('$lib/components/app/roles/DashboardLearner.svelte'))
-					.default;
+				RoleComponent = (await import('$lib/components/app/roles/DashboardLearner.svelte')).default;
 			} else if (role === 'mentor') {
-				RoleComponent = (await import('$lib/components/app/roles/DashboardMentor.svelte'))
-					.default;
+				RoleComponent = (await import('$lib/components/app/roles/DashboardMentor.svelte')).default;
 			} else if (role === 'business') {
 				RoleComponent = (await import('$lib/components/app/roles/DashboardBusiness.svelte'))
 					.default;
 			} else if (role === 'admin') {
-				RoleComponent = (await import('$lib/components/app/roles/DashboardAdmin.svelte'))
-					.default;
+				RoleComponent = (await import('$lib/components/app/roles/DashboardAdmin.svelte')).default;
 			}
 		} catch (e) {
 			// fallback silently

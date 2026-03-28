@@ -41,18 +41,34 @@ export const load: PageServerLoad = async (event) => {
 
 	const enrollment = enrollmentSelection[0];
 
-	// Get course details
-	const courses = await db
-		.select()
+	const courseSelection = await db
+		.select({
+			id: schema.course.id,
+			title: schema.course.title,
+			description: schema.course.description,
+			thumbnailUrl: schema.course.thumbnailUrl,
+			price: schema.course.price,
+			duration: schema.course.duration,
+			status: schema.course.status,
+			featuresConfig: schema.course.featuresConfig,
+			orgId: schema.course.orgId,
+			organization: {
+				id: schema.organization.id,
+				name: schema.organization.name,
+				logoUrl: schema.organization.logoUrl,
+				brandColor: schema.organization.brandColor
+			}
+		})
 		.from(schema.course)
+		.leftJoin(schema.organization, eq(schema.course.orgId, schema.organization.id))
 		.where(eq(schema.course.id, courseId))
 		.limit(1);
 
-	if (courses.length === 0) {
+	if (courseSelection.length === 0) {
 		throw redirect(303, '/app/courses');
 	}
 
-	const course = courses[0];
+	const course = courseSelection[0];
 
 	// Get cohort info for drip content calculation
 	let cohortStartDate: Date | null = null;
@@ -71,7 +87,9 @@ export const load: PageServerLoad = async (event) => {
 	let currentWeek = 1;
 	const now = new Date();
 	if (cohortStartDate) {
-		const daysSinceStart = Math.floor((now.getTime() - cohortStartDate.getTime()) / (1000 * 60 * 60 * 24));
+		const daysSinceStart = Math.floor(
+			(now.getTime() - cohortStartDate.getTime()) / (1000 * 60 * 60 * 24)
+		);
 		currentWeek = Math.min(Math.floor(daysSinceStart / 7) + 1, 12); // Max 12 weeks
 	}
 
@@ -134,9 +152,9 @@ export const load: PageServerLoad = async (event) => {
 				// Drip content: check if lesson is locked
 				const lessonWeek = l.lesson.weekNumber || 1;
 				const isLocked = !l.lesson.isFree && !!cohortStartDate && lessonWeek > currentWeek;
-				const availableFrom = l.lesson.availableFrom 
-					? new Date(l.lesson.availableFrom) 
-					: cohortStartDate 
+				const availableFrom = l.lesson.availableFrom
+					? new Date(l.lesson.availableFrom)
+					: cohortStartDate
 						? new Date(cohortStartDate.getTime() + (lessonWeek - 1) * 7 * 24 * 60 * 60 * 1000)
 						: null;
 
@@ -170,7 +188,8 @@ export const load: PageServerLoad = async (event) => {
 	// Compute progress summary
 	const totalLessons = structuredModules.reduce((sum, m) => sum + m.lessons.length, 0);
 	const completedLessons = progress.filter((p) => p.completedAt !== null).length;
-	const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+	const progressPercent =
+		totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
 	return {
 		user,

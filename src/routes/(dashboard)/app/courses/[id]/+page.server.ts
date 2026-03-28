@@ -19,6 +19,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				price: schema.course.price,
 				duration: schema.course.duration,
 				status: schema.course.status,
+				orgId: schema.course.orgId,
+				category: schema.course.category,
+				featuresConfig: schema.course.featuresConfig,
 				createdAt: schema.course.createdAt,
 				updatedAt: schema.course.updatedAt
 			},
@@ -114,9 +117,28 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		.orderBy(desc(schema.courseReview.createdAt));
 
 	// Calculate average rating
-	const avgRating = reviews.length > 0 
-		? reviews.reduce((acc, rev) => acc + rev.rating, 0) / reviews.length 
-		: 0;
+	const avgRating =
+		reviews.length > 0 ? reviews.reduce((acc, rev) => acc + rev.rating, 0) / reviews.length : 0;
+
+	// Parse features configuration
+	let features = { tracks: false, affiliate: false, performance: false };
+	try {
+		if (courseData.course.featuresConfig) {
+			features = JSON.parse(courseData.course.featuresConfig);
+		} else {
+			// Sane defaults based on category
+			const category = courseData.course.category?.toLowerCase() || '';
+			const isMarketing = category === 'marketing' || category === 'business';
+			
+			features = { 
+				tracks: isMarketing, 
+				affiliate: isMarketing, 
+				performance: true // Performance tracking generally useful
+			};
+		}
+	} catch (e) {
+		console.error('Error parsing featuresConfig:', e);
+	}
 
 	return {
 		course: courseData.course,
@@ -124,7 +146,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		isEnrolled,
 		modules: modulesWithLessons,
 		reviews,
-		avgRating
+		avgRating,
+		features
 	};
 };
 
@@ -148,7 +171,10 @@ export const actions = {
 			.select()
 			.from(schema.enrollment)
 			.where(
-				and(eq(schema.enrollment.userId, event.locals.user.id), eq(schema.enrollment.courseId, courseId))
+				and(
+					eq(schema.enrollment.userId, event.locals.user.id),
+					eq(schema.enrollment.courseId, courseId)
+				)
 			)
 			.limit(1);
 
@@ -161,7 +187,10 @@ export const actions = {
 			.select()
 			.from(schema.courseReview)
 			.where(
-				and(eq(schema.courseReview.userId, event.locals.user.id), eq(schema.courseReview.courseId, courseId))
+				and(
+					eq(schema.courseReview.userId, event.locals.user.id),
+					eq(schema.courseReview.courseId, courseId)
+				)
 			)
 			.limit(1);
 

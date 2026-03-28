@@ -27,32 +27,47 @@
 </svelte:head>
 
 <PageWrapper>
-	<PageHeader title="Weekly Checkpoints" description="Complete your weekly action items to track your progress" />
+	<PageHeader
+		title="Weekly Checkpoints"
+		description="Complete your weekly action items to track your progress"
+	/>
 
 	<!-- Stats -->
 	<div class="mb-8 grid grid-cols-3 gap-4">
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 text-center`}>
+		<div
+			class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 text-center`}
+		>
 			<p class="text-3xl font-black text-blue-600">{data.stats.total}</p>
-			<p class={`text-xs font-bold uppercase tracking-widest ${COLOR.textMuted}`}>Total</p>
+			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Total</p>
 		</div>
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 text-center`}>
+		<div
+			class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 text-center`}
+		>
 			<p class="text-3xl font-black text-green-600">{data.stats.completed}</p>
-			<p class={`text-xs font-bold uppercase tracking-widest ${COLOR.textMuted}`}>Completed</p>
+			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Completed</p>
 		</div>
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 text-center`}>
+		<div
+			class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 text-center`}
+		>
 			<p class="text-3xl font-black text-amber-500">{data.stats.pending}</p>
-			<p class={`text-xs font-bold uppercase tracking-widest ${COLOR.textMuted}`}>Pending</p>
+			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Pending</p>
 		</div>
 	</div>
 
 	{#if data.checkpoints.length === 0}
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-12 text-center`}>
-			<div class="text-5xl mb-4">📋</div>
+		<div
+			class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-12 text-center`}
+		>
+			<div class="mb-4 text-5xl">📋</div>
 			<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-2`}>No Active Checkpoints</h3>
 			<p class={`${COLOR.textSecondary} mb-6`}>
-				You don't have any weekly checkpoints yet. This could be because you haven't joined a batch/cohort.
+				You don't have any weekly checkpoints yet. This could be because you haven't joined a
+				batch/cohort.
 			</p>
-			<a href="/app/my-courses" class={`inline-block ${RADIUS.button} ${COLOR.accentBg} px-6 py-3 ${TEXT.button} font-bold text-white`}>
+			<a
+				href="/app/my-courses"
+				class={`inline-block ${RADIUS.button} ${COLOR.accentBg} px-6 py-3 ${TEXT.button} font-bold text-white`}
+			>
 				View My Courses
 			</a>
 		</div>
@@ -63,32 +78,44 @@
 				{@const isExpanded = expandedCheckpoint === checkpoint.id}
 				{@const overdue = !isCompleted && isOverdue(checkpoint.dueDate)}
 
-				<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border-2 ${isCompleted ? 'border-green-200 bg-green-50/50' : overdue ? 'border-red-200 bg-red-50/30' : COLOR.cardBorder} overflow-hidden transition-all`}>
+				<div
+					class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border-2 ${isCompleted ? 'border-green-200 bg-green-50/50' : overdue ? 'border-red-200 bg-red-50/30' : COLOR.cardBorder} overflow-hidden transition-all`}
+				>
 					<button
-						class="w-full p-5 text-left flex items-center justify-between"
-						onclick={() => expandedCheckpoint = isExpanded ? null : checkpoint.id}
+						class="flex w-full items-center justify-between p-5 text-left"
+						onclick={() => (expandedCheckpoint = isExpanded ? null : checkpoint.id)}
 					>
 						<div class="flex items-center gap-4">
-							<div class={`h-12 w-12 rounded-full flex items-center justify-center text-xl font-bold ${
-								isCompleted ? 'bg-green-100 text-green-600' : 
-								overdue ? 'bg-red-100 text-red-600' : 
-								'bg-blue-100 text-blue-600'
-							}`}>
+							<div
+								class={`flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold ${
+									isCompleted
+										? 'bg-green-100 text-green-600'
+										: overdue
+											? 'bg-red-100 text-red-600'
+											: 'bg-blue-100 text-blue-600'
+								}`}
+							>
 								{isCompleted ? '✓' : checkpoint.weekNumber}
 							</div>
 							<div>
-								<div class="flex items-center gap-2 mb-1">
+								<div class="mb-1 flex items-center gap-2">
 									<h3 class={`font-bold ${COLOR.textPrimary}`}>{checkpoint.title}</h3>
 									{#if checkpoint.track && trackLabels[checkpoint.track]}
-										<span class={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${trackLabels[checkpoint.track].color}`}>
-											{trackLabels[checkpoint.track].icon} {trackLabels[checkpoint.track].label}
+										<span
+											class={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${trackLabels[checkpoint.track].color}`}
+										>
+											{trackLabels[checkpoint.track].icon}
+											{trackLabels[checkpoint.track].label}
 										</span>
 									{/if}
 								</div>
 								<p class={`text-xs ${COLOR.textMuted}`}>
 									{checkpoint.courseTitle} • Week {checkpoint.weekNumber}
 									{#if checkpoint.dueDate}
-										• Due: {new Date(checkpoint.dueDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+										• Due: {new Date(checkpoint.dueDate).toLocaleDateString('id-ID', {
+											day: 'numeric',
+											month: 'short'
+										})}
 									{/if}
 								</p>
 							</div>
@@ -107,7 +134,10 @@
 									Pending
 								</span>
 							{/if}
-							<span class={`text-${COLOR.textMuted} transition-transform ${isExpanded ? 'rotate-180' : ''}`}>▼</span>
+							<span
+								class={`text-${COLOR.textMuted} transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+								>▼</span
+							>
 						</div>
 					</button>
 
@@ -119,16 +149,21 @@
 
 							{#if isCompleted && checkpoint.submission?.notes}
 								<div class="mb-4 rounded-lg bg-gray-50 p-4">
-									<p class={`text-xs font-bold uppercase tracking-widest ${COLOR.textMuted} mb-2`}>Your Submission</p>
+									<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted} mb-2`}>
+										Your Submission
+									</p>
 									<p class={`${COLOR.textPrimary}`}>{checkpoint.submission.notes}</p>
 									<p class={`text-xs ${COLOR.textMuted} mt-2`}>
-										Submitted: {new Date(checkpoint.submission.submittedAt!).toLocaleDateString('id-ID', { 
-											day: 'numeric', 
-											month: 'long', 
-											year: 'numeric',
-											hour: '2-digit',
-											minute: '2-digit'
-										})}
+										Submitted: {new Date(checkpoint.submission.submittedAt!).toLocaleDateString(
+											'id-ID',
+											{
+												day: 'numeric',
+												month: 'long',
+												year: 'numeric',
+												hour: '2-digit',
+												minute: '2-digit'
+											}
+										)}
 									</p>
 								</div>
 							{:else}
@@ -147,7 +182,10 @@
 								>
 									<input type="hidden" name="checkpointId" value={checkpoint.id} />
 									<div class="mb-4">
-										<label for="notes-{checkpoint.id}" class={`mb-1.5 block text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>
+										<label
+											for="notes-{checkpoint.id}"
+											class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
+										>
 											Notes / Progress Update
 										</label>
 										<textarea
@@ -156,7 +194,7 @@
 											required
 											rows="3"
 											placeholder="What did you accomplish this week? Any challenges?"
-											class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} p-3 ${TEXT.body} outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 resize-none`}
+											class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} p-3 ${TEXT.body} resize-none outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 										></textarea>
 									</div>
 									<button

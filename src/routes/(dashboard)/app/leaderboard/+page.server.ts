@@ -52,10 +52,7 @@ export const load: PageServerLoad = async (event) => {
 		.where(eq(schema.userBadge.userId, user.id));
 
 	// Get all available badges
-	const allBadges = await db
-		.select()
-		.from(schema.badge)
-		.orderBy(schema.badge.name);
+	const allBadges = await db.select().from(schema.badge).orderBy(schema.badge.name);
 
 	return {
 		leaderboard: leaderboard.map((u, i) => ({ ...u, rank: i + 1 })),

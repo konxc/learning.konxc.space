@@ -1,7 +1,7 @@
 # Naik Kelas - Analisis Fitur & Rencana Pengembangan
 
 > **STATUS:** ✅ 100% COMPLETE + 3 ENHANCEMENTS - SIAP PRODUKSI
-> 
+>
 > **Last Updated**: 29 Maret 2026
 
 ---
@@ -64,6 +64,7 @@
 - ✅ Assessment criteria per track
 
 **Lokasi Implementasi**:
+
 - Schema: `enrollment.track` field
 - UI: Track selection saat enroll
 - Dashboard: Track badges di my-courses
@@ -78,6 +79,7 @@
 - ✅ Status batch (ongoing, completed, archived)
 
 **Lokasi Implementasi**:
+
 - Schema: `cohort` table
 - Admin: `/app/admin/cohorts`
 - UI: Cohort management CRUD
@@ -92,6 +94,7 @@
 - ✅ Progress tracker per deliverable
 
 **Lokasi Implementasi**:
+
 - Schema: `submission.metadata` JSON field
 - Component: `ActionSubmitter.svelte`
 - Weekly Checkpoints: `/app/checkpoints`
@@ -107,6 +110,7 @@
 - ✅ Bulk enrollment per batch
 
 **Lokasi Implementasi**:
+
 - Schema: `partner` table
 - Admin: `/app/admin/partner`
 - Enrollment: `enrollment.partnerId` field
@@ -122,6 +126,7 @@
 - ✅ Export student data (CSV)
 
 **Lokasi Implementasi**:
+
 - Dashboard: `/app/mentor/students`
 - Detail: `/app/mentor/students/[userId]`
 - Analytics: Stats cards dengan track breakdown
@@ -136,6 +141,7 @@
 - ✅ Export reports (CSV)
 
 **Lokasi Implementasi**:
+
 - Admin Reports: `/app/admin/reports`
 - My Progress: `/app/my-progress`
 - Cohort analytics di admin cohorts page
@@ -412,11 +418,11 @@ export const PARTNER_ADMIN_PERMISSIONS = {
 
 ### Remaining Items (Optional Enhancement)
 
-| Item | Status | Notes |
-|------|--------|-------|
-| Broadcast message to students | ✅ Selesai | `/app/mentor/broadcast` - Kirim pesan ke semua siswa |
+| Item                                  | Status     | Notes                                                       |
+| ------------------------------------- | ---------- | ----------------------------------------------------------- |
+| Broadcast message to students         | ✅ Selesai | `/app/mentor/broadcast` - Kirim pesan ke semua siswa        |
 | Revenue/sales tracking per affiliator | ✅ Selesai | `/app/affiliate` - Dashboard affiliate dengan links & sales |
-| Mobile native app | ✅ Selesai | Web PWA + Add to Home Screen prompt |
+| Mobile native app                     | ✅ Selesai | Web PWA + Add to Home Screen prompt                         |
 
 ---
 
@@ -426,28 +432,29 @@ Platform **Naik Kelas by Koneksi** sudah **100% COMPLETE** dan siap untuk produc
 
 ### Fitur Utama yang Sudah Diimplementasikan:
 
-| No | Fitur | Status |
-|----|-------|--------|
-| 1 | Track System (Creator/Seller/Affiliate) | ✅ |
-| 2 | Batch/Cohort Management | ✅ |
-| 3 | Action-Based Learning (ActionSubmitter) | ✅ |
-| 4 | Weekly Checkpoints | ✅ |
-| 5 | Partner/Yayasan Integration | ✅ |
-| 6 | Mentor Dashboard dengan Analytics | ✅ |
-| 7 | Admin Reports & Analytics | ✅ |
-| 8 | Gamifikasi (XP, Badges, Streak, Leaderboard) | ✅ |
-| 9 | Discussion Forum | ✅ |
-| 10 | Certificate with Verification | ✅ |
-| 11 | Notifications (In-app, Email, WhatsApp) | ✅ |
-| 12 | Lesson Notes (Cloud Sync) | ✅ |
-| 13 | Facilitator Role | ✅ |
-| 14 | Course Reviews & Moderation | ✅ |
-| 15 | Drip Content (Unlock per minggu) | ✅ |
-| 16 | Mobile-Optimized Learn Page | ✅ |
-| 17 | Broadcast Message (Mentor/Admin) | ✅ |
-| 18 | Affiliate Dashboard (Links & Sales) | ✅ |
+| No  | Fitur                                        | Status |
+| --- | -------------------------------------------- | ------ |
+| 1   | Track System (Creator/Seller/Affiliate)      | ✅     |
+| 2   | Batch/Cohort Management                      | ✅     |
+| 3   | Action-Based Learning (ActionSubmitter)      | ✅     |
+| 4   | Weekly Checkpoints                           | ✅     |
+| 5   | Partner/Yayasan Integration                  | ✅     |
+| 6   | Mentor Dashboard dengan Analytics            | ✅     |
+| 7   | Admin Reports & Analytics                    | ✅     |
+| 8   | Gamifikasi (XP, Badges, Streak, Leaderboard) | ✅     |
+| 9   | Discussion Forum                             | ✅     |
+| 10  | Certificate with Verification                | ✅     |
+| 11  | Notifications (In-app, Email, WhatsApp)      | ✅     |
+| 12  | Lesson Notes (Cloud Sync)                    | ✅     |
+| 13  | Facilitator Role                             | ✅     |
+| 14  | Course Reviews & Moderation                  | ✅     |
+| 15  | Drip Content (Unlock per minggu)             | ✅     |
+| 16  | Mobile-Optimized Learn Page                  | ✅     |
+| 17  | Broadcast Message (Mentor/Admin)             | ✅     |
+| 18  | Affiliate Dashboard (Links & Sales)          | ✅     |
 
 ### Tech Stack:
+
 - **Frontend**: SvelteKit 5 + Tailwind CSS 4
 - **Database**: SQLite (Turso) + Drizzle ORM
 - **Auth**: Custom session-based auth

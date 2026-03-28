@@ -70,8 +70,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	// Remove duplicates
-	const uniqueRecipients = recipients.filter((r, index, self) => 
-		index === self.findIndex(r2 => r2.id === r.id)
+	const uniqueRecipients = recipients.filter(
+		(r, index, self) => index === self.findIndex((r2) => r2.id === r.id)
 	);
 
 	// Save broadcast message
@@ -97,7 +97,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	for (const recipient of uniqueRecipients) {
 		try {
 			if (sentVia === 'all' || sentVia === 'notification' || sentVia === 'whatsapp') {
-				const channel = sentVia === 'whatsapp' ? 'whatsapp' : sentVia === 'all' ? 'both' : 'notification';
+				const channel =
+					sentVia === 'whatsapp' ? 'whatsapp' : sentVia === 'all' ? 'both' : 'notification';
 				await sendNotification({
 					userId: recipient.id,
 					type: 'broadcast',

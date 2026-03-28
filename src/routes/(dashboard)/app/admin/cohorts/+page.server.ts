@@ -44,13 +44,16 @@ export const load: PageServerLoad = async (event) => {
 		.where(isNotNull(schema.enrollment.cohortId));
 
 	// Process stats per cohort
-	const statsMap = new Map<string, {
-		total: number;
-		active: number;
-		pending: number;
-		completed: number;
-		tracks: { creator: number; seller: number; affiliate: number; unassigned: number };
-	}>();
+	const statsMap = new Map<
+		string,
+		{
+			total: number;
+			active: number;
+			pending: number;
+			completed: number;
+			tracks: { creator: number; seller: number; affiliate: number; unassigned: number };
+		}
+	>();
 
 	for (const c of cohorts) {
 		statsMap.set(c.id, {
@@ -77,7 +80,13 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	const enrichedCohorts = cohorts.map((c) => {
-		const stats = statsMap.get(c.id) || { total: 0, active: 0, pending: 0, completed: 0, tracks: { creator: 0, seller: 0, affiliate: 0, unassigned: 0 } };
+		const stats = statsMap.get(c.id) || {
+			total: 0,
+			active: 0,
+			pending: 0,
+			completed: 0,
+			tracks: { creator: 0, seller: 0, affiliate: 0, unassigned: 0 }
+		};
 		return {
 			...c,
 			enrollmentCount: stats.total,
@@ -87,10 +96,14 @@ export const load: PageServerLoad = async (event) => {
 
 	// Overall admin stats
 	const totalStudents = allEnrollments.length;
-	const activeStudents = allEnrollments.filter(e => e.status === 'active').length;
-	const pendingPayments = allEnrollments.filter(e => e.status === 'pending').length;
+	const activeStudents = allEnrollments.filter((e) => e.status === 'active').length;
+	const pendingPayments = allEnrollments.filter((e) => e.status === 'pending').length;
 
-	return { courses, cohorts: enrichedCohorts, adminStats: { totalStudents, activeStudents, pendingPayments } };
+	return {
+		courses,
+		cohorts: enrichedCohorts,
+		adminStats: { totalStudents, activeStudents, pendingPayments }
+	};
 };
 
 export const actions: Actions = {

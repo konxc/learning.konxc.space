@@ -60,7 +60,11 @@ export async function seedAffiliateLinks(db: LibSQLDatabase<typeof schema>, user
 	return links;
 }
 
-export async function seedAffiliateSales(db: LibSQLDatabase<typeof schema>, userIds: string[], linkIds: string[]) {
+export async function seedAffiliateSales(
+	db: LibSQLDatabase<typeof schema>,
+	userIds: string[],
+	linkIds: string[]
+) {
 	logSection('Seeding affiliate sales');
 
 	const sales = [

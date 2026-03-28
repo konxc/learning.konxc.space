@@ -11,7 +11,8 @@ export async function seedNotifications(db: LibSQLDatabase<typeof schema>, userI
 			userId: userIds[0],
 			type: 'welcome',
 			title: 'Selamat datang di Naik Kelas!',
-			message: 'Halo Ahmad Rizki, selamat datang di platform pembelajaran digital marketing dari Koneksi dan Yayasan ASIB.',
+			message:
+				'Halo Ahmad Rizki, selamat datang di platform pembelajaran digital marketing dari Koneksi dan Yayasan ASIB.',
 			link: '/app/onboarding',
 			read: true,
 			createdAt: new Date('2024-01-20')
@@ -41,7 +42,8 @@ export async function seedNotifications(db: LibSQLDatabase<typeof schema>, userI
 			userId: userIds[1],
 			type: 'welcome',
 			title: 'Selamat datang di Naik Kelas!',
-			message: 'Halo Sari Dewi, selamat datang di platform pembelajaran digital marketing dari Koneksi dan Yayasan ASIB.',
+			message:
+				'Halo Sari Dewi, selamat datang di platform pembelajaran digital marketing dari Koneksi dan Yayasan ASIB.',
 			link: '/app/onboarding',
 			read: true,
 			createdAt: new Date('2024-01-21')
@@ -51,7 +53,8 @@ export async function seedNotifications(db: LibSQLDatabase<typeof schema>, userI
 			userId: userIds[1],
 			type: 'certificate',
 			title: 'Selamat! Anda menyelesaikan course',
-			message: 'Felicidades! Anda telah menyelesaikan course React.js Advanced dengan nilai memuaskan.',
+			message:
+				'Felicidades! Anda telah menyelesaikan course React.js Advanced dengan nilai memuaskan.',
 			link: '/app/certificates',
 			read: true,
 			createdAt: new Date('2024-01-28')
@@ -61,7 +64,8 @@ export async function seedNotifications(db: LibSQLDatabase<typeof schema>, userI
 			userId: userIds[2],
 			type: 'action_required',
 			title: 'Lengkapi onboarding Anda',
-			message: 'Silakan lengkapi profil dan preferensi belajar Anda untuk memulai perjalanan belajar.',
+			message:
+				'Silakan lengkapi profil dan preferensi belajar Anda untuk memulai perjalanan belajar.',
 			link: '/app/onboarding',
 			read: false,
 			createdAt: new Date('2024-01-27')
@@ -75,7 +79,11 @@ export async function seedNotifications(db: LibSQLDatabase<typeof schema>, userI
 	logSuccess(`Seeded ${notifications.length} notifications`);
 }
 
-export async function seedBroadcastMessages(db: LibSQLDatabase<typeof schema>, adminId: string, mentorId: string) {
+export async function seedBroadcastMessages(
+	db: LibSQLDatabase<typeof schema>,
+	adminId: string,
+	mentorId: string
+) {
 	logSection('Seeding broadcast messages');
 
 	const broadcasts = [
@@ -83,7 +91,8 @@ export async function seedBroadcastMessages(db: LibSQLDatabase<typeof schema>, a
 			id: generateId(),
 			senderId: adminId,
 			title: '📢 Pengumuman: Platform Naik Kelas Resmi Launch!',
-			content: 'Halo pebbles! Dengan penuh kebahagiaan kami mengumumkan bahwa platform Naik Kelas by Koneksi resmi launch hari ini. Mari bersama-sama belajar dan berkembang!',
+			content:
+				'Halo pebbles! Dengan penuh kebahagiaan kami mengumumkan bahwa platform Naik Kelas by Koneksi resmi launch hari ini. Mari bersama-sama belajar dan berkembang!',
 			targetRole: 'user',
 			targetCohortId: null,
 			targetCourseId: null,
@@ -96,7 +105,8 @@ export async function seedBroadcastMessages(db: LibSQLDatabase<typeof schema>, a
 			id: generateId(),
 			senderId: mentorId,
 			title: '📚 Tips Belajar Minggu Ini',
-			content: 'Hai pebbles! Jangan lupa untuk selalu praktik langsung setelah menonton video lesson. Karena belajar coding itu perlu latihan, bukan hanya teori!',
+			content:
+				'Hai pebbles! Jangan lupa untuk selalu praktik langsung setelah menonton video lesson. Karena belajar coding itu perlu latihan, bukan hanya teori!',
 			targetRole: 'user',
 			targetCohortId: null,
 			targetCourseId: null,
@@ -109,7 +119,8 @@ export async function seedBroadcastMessages(db: LibSQLDatabase<typeof schema>, a
 			id: generateId(),
 			senderId: adminId,
 			title: '🎯 Reminder: Checkpoint Deadline',
-			content: 'Pebbles Batch 1 dan Batch 2, besok adalah deadline checkpoint minggu pertama. Pastikan semua tugas sudah dikumpulkan ya!',
+			content:
+				'Pebbles Batch 1 dan Batch 2, besok adalah deadline checkpoint minggu pertama. Pastikan semua tugas sudah dikumpulkan ya!',
 			targetRole: null,
 			targetCohortId: 'cohort-001',
 			targetCourseId: null,
@@ -127,7 +138,11 @@ export async function seedBroadcastMessages(db: LibSQLDatabase<typeof schema>, a
 	logSuccess(`Seeded ${broadcasts.length} broadcast messages`);
 }
 
-export async function seedCourseReviews(db: LibSQLDatabase<typeof schema>, userIds: string[], courseIds: string[]) {
+export async function seedCourseReviews(
+	db: LibSQLDatabase<typeof schema>,
+	userIds: string[],
+	courseIds: string[]
+) {
 	logSection('Seeding course reviews');
 
 	const reviews = [
@@ -136,7 +151,8 @@ export async function seedCourseReviews(db: LibSQLDatabase<typeof schema>, userI
 			userId: userIds[1],
 			courseId: courseIds[2],
 			rating: 5,
-			comment: 'Course yang sangat bagus! Penjelasannya jelas dan mudah dipahami. Mentor juga sangat helpful.',
+			comment:
+				'Course yang sangat bagus! Penjelasannya jelas dan mudah dipahami. Mentor juga sangat helpful.',
 			moderationStatus: 'approved',
 			createdAt: new Date('2024-01-28')
 		},

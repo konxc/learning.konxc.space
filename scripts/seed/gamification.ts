@@ -75,9 +75,33 @@ export async function seedUserXP(db: LibSQLDatabase<typeof schema>, userIds: str
 	logSection('Seeding user XP');
 
 	const xpData = [
-		{ userId: userIds[0], points: 1250, level: 5, streakDays: 7, lastActiveAt: new Date(), createdAt: new Date(), updatedAt: new Date() },
-		{ userId: userIds[1], points: 2100, level: 7, streakDays: 14, lastActiveAt: new Date(), createdAt: new Date(), updatedAt: new Date() },
-		{ userId: userIds[2], points: 450, level: 2, streakDays: 3, lastActiveAt: new Date(), createdAt: new Date(), updatedAt: new Date() }
+		{
+			userId: userIds[0],
+			points: 1250,
+			level: 5,
+			streakDays: 7,
+			lastActiveAt: new Date(),
+			createdAt: new Date(),
+			updatedAt: new Date()
+		},
+		{
+			userId: userIds[1],
+			points: 2100,
+			level: 7,
+			streakDays: 14,
+			lastActiveAt: new Date(),
+			createdAt: new Date(),
+			updatedAt: new Date()
+		},
+		{
+			userId: userIds[2],
+			points: 450,
+			level: 2,
+			streakDays: 3,
+			lastActiveAt: new Date(),
+			createdAt: new Date(),
+			updatedAt: new Date()
+		}
 	];
 
 	for (const xp of xpData) {

@@ -9,7 +9,7 @@
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
 	const cohortId = $page.params.id;
-	
+
 	const statusColors: Record<string, string> = {
 		upcoming: 'bg-amber-100 text-amber-700',
 		active: 'bg-green-100 text-green-700',
@@ -44,13 +44,17 @@
 	</PageHeader>
 
 	{#if form?.error}
-		<div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700">
+		<div
+			class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700"
+		>
 			⚠️ {form.error}
 		</div>
 	{/if}
 
 	{#if form?.success && form?.message}
-		<div class="mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700 animate-in fade-in">
+		<div
+			class="animate-in fade-in mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700"
+		>
 			✅ {form.message}
 		</div>
 	{/if}
@@ -62,29 +66,43 @@
 			<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-4`}>📅 Cohort Details</h3>
 			<div class="space-y-3">
 				<div>
-					<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Course</p>
+					<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>Course</p>
 					<p class={`font-semibold ${COLOR.textPrimary}`}>{data.cohort.course.title}</p>
 				</div>
 				<div>
-					<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Period</p>
+					<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>Period</p>
 					<p class={`text-sm ${COLOR.textSecondary}`}>
-						{new Date(data.cohort.startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+						{new Date(data.cohort.startDate).toLocaleDateString('id-ID', {
+							day: 'numeric',
+							month: 'long',
+							year: 'numeric'
+						})}
 						{#if data.cohort.endDate}
 							<span class="mx-1">→</span>
-							{new Date(data.cohort.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+							{new Date(data.cohort.endDate).toLocaleDateString('id-ID', {
+								day: 'numeric',
+								month: 'long',
+								year: 'numeric'
+							})}
 						{/if}
 					</p>
 				</div>
 				<div>
-					<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Status</p>
-					<span class={`inline-block rounded-full px-3 py-1 text-xs font-bold uppercase ${statusColors[data.cohort.status]}`}>
+					<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>Status</p>
+					<span
+						class={`inline-block rounded-full px-3 py-1 text-xs font-bold uppercase ${statusColors[data.cohort.status]}`}
+					>
 						{data.cohort.status}
 					</span>
 				</div>
 				<div>
-					<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Facilitator</p>
+					<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
+						Facilitator
+					</p>
 					{#if data.cohort.facilitator}
-						<p class={`text-sm ${COLOR.textPrimary}`}>{data.cohort.facilitator.fullName || 'No name'}</p>
+						<p class={`text-sm ${COLOR.textPrimary}`}>
+							{data.cohort.facilitator.fullName || 'No name'}
+						</p>
 						<p class={`text-xs ${COLOR.textMuted}`}>{data.cohort.facilitator.email}</p>
 					{:else}
 						<p class={`text-sm ${COLOR.textMuted}`}>Not assigned</p>
@@ -93,20 +111,18 @@
 			</div>
 
 			<!-- Assign Facilitator Form -->
-			<form
-				method="POST"
-				action="?/assignFacilitator"
-				use:enhance
-				class="mt-6 space-y-3"
-			>
+			<form method="POST" action="?/assignFacilitator" use:enhance class="mt-6 space-y-3">
 				<div>
 					<select
 						name="facilitatorId"
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} cursor-pointer focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 					>
 						<option value="">-- Assign Facilitator --</option>
 						{#each data.facilitators as facilitator}
-							<option value={facilitator.id} selected={data.cohort.facilitator?.id === facilitator.id}>
+							<option
+								value={facilitator.id}
+								selected={data.cohort.facilitator?.id === facilitator.id}
+							>
 								{facilitator.fullName || facilitator.email}
 							</option>
 						{/each}
@@ -127,25 +143,27 @@
 			<div class="grid grid-cols-2 gap-4">
 				<div class="rounded-xl bg-blue-50 p-4 text-center">
 					<p class="text-3xl font-black text-blue-600">{data.stats.totalStudents}</p>
-					<p class={`text-xs font-bold uppercase tracking-widest ${COLOR.textMuted}`}>Total</p>
+					<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Total</p>
 				</div>
 				<div class="rounded-xl bg-green-50 p-4 text-center">
 					<p class="text-3xl font-black text-green-600">{data.stats.activeStudents}</p>
-					<p class={`text-xs font-bold uppercase tracking-widest ${COLOR.textMuted}`}>Active</p>
+					<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Active</p>
 				</div>
 				<div class="rounded-xl bg-amber-50 p-4 text-center">
 					<p class="text-3xl font-black text-amber-600">{data.stats.pendingStudents}</p>
-					<p class={`text-xs font-bold uppercase tracking-widest ${COLOR.textMuted}`}>Pending</p>
+					<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Pending</p>
 				</div>
 				<div class="rounded-xl bg-purple-50 p-4 text-center">
 					<p class="text-3xl font-black text-purple-600">{data.stats.completedStudents}</p>
-					<p class={`text-xs font-bold uppercase tracking-widest ${COLOR.textMuted}`}>Completed</p>
+					<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Completed</p>
 				</div>
 			</div>
 
 			<!-- Track Distribution -->
 			<div class="mt-6">
-				<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted} mb-3`}>Track Distribution</p>
+				<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted} mb-3`}>
+					Track Distribution
+				</p>
 				<div class="flex flex-wrap gap-2">
 					{#if data.stats.tracks.creator > 0}
 						<span class="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold text-purple-700">
@@ -177,7 +195,11 @@
 			<div class="space-y-3">
 				<form method="POST" action="?/updateStatus">
 					<input type="hidden" name="cohortId" value={cohortId} />
-					<input type="hidden" name="status" value={data.cohort.status === 'active' ? 'completed' : 'active'} />
+					<input
+						type="hidden"
+						name="status"
+						value={data.cohort.status === 'active' ? 'completed' : 'active'}
+					/>
 					<button
 						type="submit"
 						class={`${RADIUS.button} w-full px-4 py-2.5 text-sm font-bold ${TRANSITION.all} ${
@@ -194,7 +216,9 @@
 	</div>
 
 	<!-- Student List -->
-	<div class={`mt-8 ${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} overflow-hidden`}>
+	<div
+		class={`mt-8 ${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} overflow-hidden`}
+	>
 		<div class="border-b border-gray-100 bg-gray-50/70 px-6 py-4">
 			<h3 class={`${TEXT.h3} ${COLOR.textPrimary}`}>👥 Students ({data.enrollments.length})</h3>
 		</div>
@@ -209,37 +233,63 @@
 				<table class="w-full text-left">
 					<thead>
 						<tr class="border-b border-gray-100">
-							<th class={`px-6 py-3 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Student</th>
-							<th class={`px-6 py-3 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Track</th>
-							<th class={`px-6 py-3 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Status</th>
-							<th class={`px-6 py-3 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Enrolled</th>
-							<th class={`px-6 py-3 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Actions</th>
+							<th
+								class={`px-6 py-3 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Student</th
+							>
+							<th
+								class={`px-6 py-3 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Track</th
+							>
+							<th
+								class={`px-6 py-3 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Status</th
+							>
+							<th
+								class={`px-6 py-3 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Enrolled</th
+							>
+							<th
+								class={`px-6 py-3 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Actions</th
+							>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-gray-50">
 						{#each data.enrollments as enrollment}
-							<tr class="hover:bg-blue-50/20 transition-colors">
+							<tr class="transition-colors hover:bg-blue-50/20">
 								<td class="px-6 py-4">
-									<p class={`font-semibold ${COLOR.textPrimary}`}>{enrollment.user.fullName || enrollment.user.username}</p>
+									<p class={`font-semibold ${COLOR.textPrimary}`}>
+										{enrollment.user.fullName || enrollment.user.username}
+									</p>
 									<p class={`text-xs ${COLOR.textMuted}`}>{enrollment.user.email}</p>
 								</td>
 								<td class="px-6 py-4">
 									{#if enrollment.track && trackLabels[enrollment.track]}
-										<span class={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${trackLabels[enrollment.track].color}`}>
-											{trackLabels[enrollment.track].icon} {trackLabels[enrollment.track].label}
+										<span
+											class={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${trackLabels[enrollment.track].color}`}
+										>
+											{trackLabels[enrollment.track].icon}
+											{trackLabels[enrollment.track].label}
 										</span>
 									{:else}
 										<span class="text-xs text-gray-400">Not set</span>
 									{/if}
 								</td>
 								<td class="px-6 py-4">
-									<span class={`inline-block rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${statusBadgeColors[enrollment.status] || 'bg-gray-100 text-gray-600'}`}>
+									<span
+										class={`inline-block rounded-full px-3 py-1 text-[10px] font-bold tracking-widest uppercase ${statusBadgeColors[enrollment.status] || 'bg-gray-100 text-gray-600'}`}
+									>
 										{enrollment.status}
 									</span>
 								</td>
 								<td class="px-6 py-4">
 									<p class={`text-sm ${COLOR.textSecondary}`}>
-										{new Date(enrollment.enrolledAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+										{new Date(enrollment.enrolledAt).toLocaleDateString('id-ID', {
+											day: 'numeric',
+											month: 'short',
+											year: 'numeric'
+										})}
 									</p>
 								</td>
 								<td class="px-6 py-4">
@@ -255,7 +305,9 @@
 											<button
 												type="submit"
 												class="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 transition-all hover:bg-red-100"
-												onclick={(e) => { if (!confirm('Remove this student from the batch?')) e.preventDefault(); }}
+												onclick={(e) => {
+													if (!confirm('Remove this student from the batch?')) e.preventDefault();
+												}}
 											>
 												Remove
 											</button>

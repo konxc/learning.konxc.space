@@ -25,14 +25,11 @@
 		}
 
 		try {
-			const response = await fetch(
-				`/app/admin/coupons/edit/${data.coupon.id}?action=checkCode`,
-				{
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ code, currentId: data.coupon.id })
-				}
-			);
+			const response = await fetch(`/app/admin/coupons/edit/${data.coupon.id}?action=checkCode`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ code, currentId: data.coupon.id })
+			});
 
 			const result = await response.json();
 

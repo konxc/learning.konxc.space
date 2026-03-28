@@ -3,13 +3,17 @@ import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, isNotNull, count } from 'drizzle-orm';
 
-export const load: PageServerLoad = async ({ locals }) => {
-	if (!locals.user) {
+export const load: PageServerLoad = async (event) => {
+	const user = event.locals.user;
+	if (!user) {
 		return { enrollments: [] };
 	}
 
+	const parentData = await event.parent();
+	const activeWorkspaceId = parentData.workspaces?.activeId || 'personal';
+
 	// Get user's enrollments with course details including track and cohort
-	const enrollments = await db
+	let query = db
 		.select({
 			id: schema.enrollment.id,
 			status: schema.enrollment.status,
@@ -24,12 +28,46 @@ export const load: PageServerLoad = async ({ locals }) => {
 				description: schema.course.description,
 				thumbnailUrl: schema.course.thumbnailUrl,
 				duration: schema.course.duration,
-				price: schema.course.price
+				price: schema.course.price,
+				orgId: schema.course.orgId
 			}
 		})
 		.from(schema.enrollment)
 		.innerJoin(schema.course, eq(schema.enrollment.courseId, schema.course.id))
-		.where(eq(schema.enrollment.userId, locals.user.id));
+		.where(eq(schema.enrollment.userId, user.id));
+
+	if (activeWorkspaceId !== 'personal') {
+		query = db
+			.select({
+				id: schema.enrollment.id,
+				status: schema.enrollment.status,
+				enrolledAt: schema.enrollment.enrolledAt,
+				activatedAt: schema.enrollment.activatedAt,
+				completedAt: schema.enrollment.completedAt,
+				track: schema.enrollment.track,
+				cohortId: schema.enrollment.cohortId,
+				course: {
+					id: schema.course.id,
+					title: schema.course.title,
+					description: schema.course.description,
+					thumbnailUrl: schema.course.thumbnailUrl,
+					duration: schema.course.duration,
+					price: schema.course.price,
+					orgId: schema.course.orgId
+				}
+			})
+			.from(schema.enrollment)
+			.innerJoin(
+				schema.course,
+				and(
+					eq(schema.enrollment.courseId, schema.course.id),
+					eq(schema.course.orgId, activeWorkspaceId)
+				)
+			)
+			.where(eq(schema.enrollment.userId, user.id));
+	}
+
+	const enrollments = await query;
 
 	// Fetch cohort names for enrolled cohorts
 	const cohortIds = [...new Set(enrollments.map((e) => e.cohortId).filter(Boolean))] as string[];
@@ -50,7 +88,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			status: schema.paymentProof.status
 		})
 		.from(schema.paymentProof)
-		.where(eq(schema.paymentProof.userId, locals.user.id));
+		.where(eq(schema.paymentProof.userId, user.id));
 
 	// Create a map of courseId -> payment proof status
 	const proofMap = new Map(paymentProofs.map((p) => [p.courseId, p.status]));
@@ -75,7 +113,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 				.from(schema.lessonProgress)
 				.where(
 					and(
-						eq(schema.lessonProgress.userId, locals.user.id),
+						eq(schema.lessonProgress.userId, user.id),
 						eq(schema.lessonProgress.courseId, courseId),
 						isNotNull(schema.lessonProgress.completedAt)
 					)
@@ -93,7 +131,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		const prog = progressMap.get(enrollment.course.id);
 		const totalLessons = prog?.totalLessons ?? 0;
 		const completedLessons = prog?.completedLessons ?? 0;
-		const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+		const progressPercent =
+			totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
 		return {
 			...enrollment,

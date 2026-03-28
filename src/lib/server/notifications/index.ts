@@ -3,16 +3,20 @@ import * as schema from '$lib/server/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { sendEmail } from '$lib/server/email';
-import {
-	sendWhatsAppNotification,
-	getUserPhoneNumber
-} from '$lib/server/notifications/whatsapp';
+import { sendWhatsAppNotification, getUserPhoneNumber } from '$lib/server/notifications/whatsapp';
 
 export type NotificationChannel = 'email' | 'whatsapp' | 'both' | 'notification';
 
 interface SendNotificationOptions {
 	userId: string;
-	type: 'welcome' | 'enrollment' | 'grade' | 'certificate' | 'reminder' | 'action_required' | 'broadcast';
+	type:
+		| 'welcome'
+		| 'enrollment'
+		| 'grade'
+		| 'certificate'
+		| 'reminder'
+		| 'action_required'
+		| 'broadcast';
 	title: string;
 	message: string;
 	link?: string;
@@ -121,10 +125,7 @@ export async function getUnreadNotifications(userId: string) {
 }
 
 export async function markNotificationRead(id: string) {
-	await db
-		.update(schema.notification)
-		.set({ read: true })
-		.where(eq(schema.notification.id, id));
+	await db.update(schema.notification).set({ read: true }).where(eq(schema.notification.id, id));
 }
 
 export async function getUnreadNotificationCount(userId: string): Promise<number> {

@@ -48,18 +48,22 @@ export const load: PageServerLoad = async (event) => {
 	};
 
 	const allReviews = await db
-		.select({ rating: schema.courseReview.rating, moderationStatus: schema.courseReview.moderationStatus })
+		.select({
+			rating: schema.courseReview.rating,
+			moderationStatus: schema.courseReview.moderationStatus
+		})
 		.from(schema.courseReview);
 
 	stats.total = allReviews.length;
-	stats.pending = allReviews.filter(r => r.moderationStatus === 'pending').length;
-	stats.approved = allReviews.filter(r => r.moderationStatus === 'approved').length;
-	stats.rejected = allReviews.filter(r => r.moderationStatus === 'rejected').length;
-	
-	const ratings = allReviews.filter(r => r.moderationStatus === 'approved').map(r => r.rating);
-	stats.avgRating = ratings.length > 0 
-		? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 
-		: 0;
+	stats.pending = allReviews.filter((r) => r.moderationStatus === 'pending').length;
+	stats.approved = allReviews.filter((r) => r.moderationStatus === 'approved').length;
+	stats.rejected = allReviews.filter((r) => r.moderationStatus === 'rejected').length;
+
+	const ratings = allReviews.filter((r) => r.moderationStatus === 'approved').map((r) => r.rating);
+	stats.avgRating =
+		ratings.length > 0
+			? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10
+			: 0;
 
 	return { reviews, statusFilter, stats };
 };
@@ -102,9 +106,7 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const reviewId = formData.get('reviewId') as string;
 
-		await db
-			.delete(schema.courseReview)
-			.where(eq(schema.courseReview.id, reviewId));
+		await db.delete(schema.courseReview).where(eq(schema.courseReview.id, reviewId));
 
 		return { success: true, message: 'Review deleted.' };
 	}

@@ -41,7 +41,9 @@
 	</PageHeader>
 
 	{#if form?.success && form?.message}
-		<div class="mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700 animate-in fade-in">
+		<div
+			class="animate-in fade-in mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700"
+		>
 			✅ {form.message}
 		</div>
 	{/if}
@@ -51,7 +53,7 @@
 		{#each statusFilters as filter}
 			<a
 				href="?status={filter.value}"
-				class={`rounded-full px-4 py-2 text-sm font-bold transition-all {data.statusFilter === filter.value ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+				class={`{data.statusFilter === filter.value ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'} rounded-full px-4 py-2 text-sm font-bold text-gray-600 transition-all`}
 			>
 				{filter.label}
 				<span class="ml-1 opacity-70">({filter.count})</span>
@@ -71,44 +73,53 @@
 	{:else}
 		<div class="space-y-4">
 			{#each data.reviews as review}
-				<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-6`}>
+				<div
+					class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-6`}
+				>
 					<div class="flex items-start justify-between gap-4">
 						<div class="flex-1">
-							<div class="flex items-center gap-3 mb-3">
+							<div class="mb-3 flex items-center gap-3">
 								<div class="flex items-center gap-2">
-									<span class="text-lg font-bold text-amber-500">{getRatingStars(review.rating)}</span>
+									<span class="text-lg font-bold text-amber-500"
+										>{getRatingStars(review.rating)}</span
+									>
 									<span class="text-sm font-bold text-gray-700">{review.rating}/5</span>
 								</div>
-								<span class={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${statusColors[review.moderationStatus]}`}>
+								<span
+									class={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${statusColors[review.moderationStatus]}`}
+								>
 									{review.moderationStatus}
 								</span>
 							</div>
-							
+
 							{#if review.comment}
 								<p class={`${COLOR.textPrimary} mb-3`}>{review.comment}</p>
 							{/if}
-							
+
 							<div class="flex items-center gap-4 text-sm">
 								<p class={`${COLOR.textSecondary}`}>
 									<strong>{review.user.fullName || review.user.username}</strong>
 								</p>
 								<span class={`${COLOR.textMuted}`}>on</span>
-								<a href="/app/courses/{review.course.id}" class="font-medium text-blue-600 hover:underline">
+								<a
+									href="/app/courses/{review.course.id}"
+									class="font-medium text-blue-600 hover:underline"
+								>
 									{review.course.title}
 								</a>
 							</div>
-							
+
 							<p class={`text-xs ${COLOR.textMuted} mt-2`}>
-								{new Date(review.createdAt).toLocaleDateString('id-ID', { 
-									day: 'numeric', 
-									month: 'long', 
+								{new Date(review.createdAt).toLocaleDateString('id-ID', {
+									day: 'numeric',
+									month: 'long',
 									year: 'numeric',
 									hour: '2-digit',
 									minute: '2-digit'
 								})}
 							</p>
 						</div>
-						
+
 						{#if review.moderationStatus === 'pending'}
 							<div class="flex flex-col gap-2">
 								<form method="POST" action="?/approve" use:enhance>

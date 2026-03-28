@@ -5,9 +5,19 @@
 	import type { Theme } from '$lib/stores/theme';
 	import type { User as DbUser } from '$lib/server/db/schema';
 	import DashboardBreadcrumb from './DashboardBreadcrumb.svelte';
+	import WorkspaceSwitcher from './WorkspaceSwitcher.svelte';
 	import { enhance } from '$app/forms';
 
-	type HeaderUser = Partial<DbUser> & { avatarUrl?: string | null; notifications?: any[]; unreadCount?: number };
+	type HeaderUser = Partial<DbUser> & {
+		avatarUrl?: string | null;
+		notifications?: any[];
+		unreadCount?: number;
+		workspaces?: {
+			organizations: any[];
+			activeId: string;
+			activeOrg: any;
+		};
+	};
 
 	let {
 		user,
@@ -21,7 +31,8 @@
 		roleAccordionRef,
 		sidebarCollapsed = false,
 		notifications = [],
-		unreadCount = 0
+		unreadCount = 0,
+		workspaces = { organizations: [], activeId: 'personal', activeOrg: null }
 	}: {
 		user: HeaderUser | null;
 		theme: Theme;
@@ -35,10 +46,15 @@
 		sidebarCollapsed?: boolean;
 		notifications?: any[];
 		unreadCount?: number;
+		workspaces?: {
+			organizations: any[];
+			activeId: string;
+			activeOrg: any;
+		};
 	} = $props();
 
 	const pageMetadataStore = getPageMetadata();
-	
+
 	let showNotifications = $state(false);
 </script>
 
@@ -51,7 +67,10 @@
 
 		<!-- Main Header Content: Title + Profile Menu -->
 		<div
-			class={`flex min-h-[56px] w-full flex-1 items-center justify-between gap-4 ${SPACING.page.split(' ').filter((p) => p.startsWith('px') || p.includes(':px')).join(' ')} py-3`}
+			class={`flex min-h-[56px] w-full flex-1 items-center justify-between gap-4 ${SPACING.page
+				.split(' ')
+				.filter((p) => p.startsWith('px') || p.includes(':px'))
+				.join(' ')} py-3`}
 		>
 			<!-- Breadcrumb Navigation -->
 			<div class="flex min-w-0 flex-1 items-center">
@@ -69,14 +88,18 @@
 						>
 							🔔
 							{#if unreadCount && unreadCount > 0}
-								<span class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+								<span
+									class="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
+								>
 									{unreadCount > 9 ? '9+' : unreadCount}
 								</span>
 							{/if}
 						</button>
-						
+
 						{#if showNotifications}
-							<div class="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-gray-200 bg-white shadow-lg">
+							<div
+								class="absolute top-full right-0 z-50 mt-2 w-80 rounded-xl border border-gray-200 bg-white shadow-lg"
+							>
 								<div class="border-b border-gray-100 px-4 py-3">
 									<h3 class="font-bold text-gray-900">Notifications</h3>
 								</div>
@@ -85,23 +108,31 @@
 										{#each notifications as notif}
 											<a
 												href={notif.link || '#'}
-												class="block border-b border-gray-50 px-4 py-3 hover:bg-gray-50 {!notif.read ? 'bg-blue-50' : ''}"
+												class="block border-b border-gray-50 px-4 py-3 hover:bg-gray-50 {!notif.read
+													? 'bg-blue-50'
+													: ''}"
 											>
 												<p class="text-sm font-medium text-gray-900">{notif.title}</p>
-												<p class="text-xs text-gray-500 mt-0.5">{notif.message}</p>
-												<p class="text-xs text-gray-400 mt-1">
-													{new Date(notif.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+												<p class="mt-0.5 text-xs text-gray-500">{notif.message}</p>
+												<p class="mt-1 text-xs text-gray-400">
+													{new Date(notif.createdAt).toLocaleDateString('id-ID', {
+														day: 'numeric',
+														month: 'short',
+														hour: '2-digit',
+														minute: '2-digit'
+													})}
 												</p>
 											</a>
 										{/each}
 									{:else}
-										<div class="px-4 py-8 text-center text-sm text-gray-500">
-											No notifications
-										</div>
+										<div class="px-4 py-8 text-center text-sm text-gray-500">No notifications</div>
 									{/if}
 								</div>
 								{#if notifications && notifications.length > 0}
-									<a href="/app/notifications" class="block border-t border-gray-100 px-4 py-3 text-center text-sm font-medium text-blue-600 hover:bg-gray-50">
+									<a
+										href="/app/notifications"
+										class="block border-t border-gray-100 px-4 py-3 text-center text-sm font-medium text-blue-600 hover:bg-gray-50"
+									>
 										View All Notifications
 									</a>
 								{/if}
@@ -109,7 +140,11 @@
 						{/if}
 					</div>
 				{/if}
-				
+
+				{#if workspaces}
+					<WorkspaceSwitcher {workspaces} />
+				{/if}
+
 				<ProfileMenu
 					{user}
 					{theme}

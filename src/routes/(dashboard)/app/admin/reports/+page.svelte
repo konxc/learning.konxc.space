@@ -27,13 +27,17 @@
 	<PageHeader title="Reports & Analytics" />
 
 	{#if form?.error}
-		<div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700">
+		<div
+			class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700"
+		>
 			⚠️ {form.error}
 		</div>
 	{/if}
 
 	{#if form?.success}
-		<div class="mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700 animate-in fade-in">
+		<div
+			class="animate-in fade-in mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700"
+		>
 			✅ Export/Report generated successfully!
 		</div>
 	{/if}
@@ -41,20 +45,22 @@
 	<!-- Overview Stats -->
 	<div class="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
 		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-			<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Total Students</p>
+			<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
+				Total Students
+			</p>
 			<p class={`text-3xl font-black ${COLOR.textPrimary} mt-1`}>{data.stats.totalStudents}</p>
 		</div>
 		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-			<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Active</p>
-			<p class="text-3xl font-black text-green-600 mt-1">{data.stats.activeStudents}</p>
+			<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>Active</p>
+			<p class="mt-1 text-3xl font-black text-green-600">{data.stats.activeStudents}</p>
 		</div>
 		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-			<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Completed</p>
-			<p class="text-3xl font-black text-blue-600 mt-1">{data.stats.completedStudents}</p>
+			<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>Completed</p>
+			<p class="mt-1 text-3xl font-black text-blue-600">{data.stats.completedStudents}</p>
 		</div>
 		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-			<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Courses</p>
-			<p class="text-3xl font-black text-purple-600 mt-1">{data.stats.totalCourses}</p>
+			<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>Courses</p>
+			<p class="mt-1 text-3xl font-black text-purple-600">{data.stats.totalCourses}</p>
 		</div>
 	</div>
 
@@ -62,27 +68,37 @@
 	<div class="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
 		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
 			<div class="flex items-center gap-3">
-				<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-2xl">🎥</div>
+				<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-2xl">
+					🎥
+				</div>
 				<div>
-					<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Content Creator</p>
+					<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
+						Content Creator
+					</p>
 					<p class="text-2xl font-black text-purple-600">{data.stats.byTrack.creator}</p>
 				</div>
 			</div>
 		</div>
 		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
 			<div class="flex items-center gap-3">
-				<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-2xl">🛒</div>
+				<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-2xl">
+					🛒
+				</div>
 				<div>
-					<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Seller</p>
+					<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>Seller</p>
 					<p class="text-2xl font-black text-orange-600">{data.stats.byTrack.seller}</p>
 				</div>
 			</div>
 		</div>
 		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
 			<div class="flex items-center gap-3">
-				<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 text-2xl">🔗</div>
+				<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 text-2xl">
+					🔗
+				</div>
 				<div>
-					<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Affiliator</p>
+					<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
+						Affiliator
+					</p>
 					<p class="text-2xl font-black text-teal-600">{data.stats.byTrack.affiliate}</p>
 				</div>
 			</div>
@@ -101,8 +117,13 @@
 					return async ({ update, result }) => {
 						await update();
 						exporting = false;
-						
-						if (result.type === 'success' && result.data && 'download' in result.data && (result.data as any).download) {
+
+						if (
+							result.type === 'success' &&
+							result.data &&
+							'download' in result.data &&
+							(result.data as any).download
+						) {
 							const blob = new Blob([(result.data as any).content as string], { type: 'text/csv' });
 							const url = URL.createObjectURL(blob);
 							const a = document.createElement('a');
@@ -116,26 +137,32 @@
 				class="space-y-4"
 			>
 				<div>
-					<label for="format" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+					<label
+						for="format"
+						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+					>
 						Format
 					</label>
 					<select
 						id="format"
 						name="format"
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} cursor-pointer focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 					>
 						<option value="csv">CSV (Excel)</option>
 					</select>
 				</div>
 
 				<div>
-					<label for="courseId" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+					<label
+						for="courseId"
+						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+					>
 						Course (Optional)
 					</label>
 					<select
 						id="courseId"
 						name="courseId"
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} cursor-pointer focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 					>
 						<option value="">All Courses</option>
 						{#each data.courses as course}
@@ -145,13 +172,16 @@
 				</div>
 
 				<div>
-					<label for="cohortId" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+					<label
+						for="cohortId"
+						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+					>
 						Cohort (Optional)
 					</label>
 					<select
 						id="cohortId"
 						name="cohortId"
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} cursor-pointer focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 					>
 						<option value="">All Cohorts</option>
 						{#each data.cohorts as cohort}
@@ -161,13 +191,16 @@
 				</div>
 
 				<div>
-					<label for="partnerId" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+					<label
+						for="partnerId"
+						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+					>
 						Partner (Optional)
 					</label>
 					<select
 						id="partnerId"
 						name="partnerId"
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} cursor-pointer focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 					>
 						<option value="">All Partners</option>
 						{#each data.partners as partner}
@@ -177,13 +210,16 @@
 				</div>
 
 				<div>
-					<label for="status" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+					<label
+						for="status"
+						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+					>
 						Status (Optional)
 					</label>
 					<select
 						id="status"
 						name="status"
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} cursor-pointer focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 					>
 						<option value="">All Status</option>
 						<option value="pending">Pending</option>
@@ -219,13 +255,16 @@
 				class="space-y-4"
 			>
 				<div>
-					<label for="period" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+					<label
+						for="period"
+						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+					>
 						Period
 					</label>
 					<select
 						id="period"
 						name="period"
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} cursor-pointer focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 					>
 						{#each periodOptions as opt}
 							<option value={opt.value}>{opt.label}</option>
@@ -245,7 +284,15 @@
 			{#if form?.success && form?.summary}
 				{@const s = form.summary}
 				<div class="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-4">
-					<h4 class="font-bold text-blue-800 mb-3">Summary: {s.period === 'week' ? 'Last 7 Days' : s.period === 'month' ? 'Last 30 Days' : s.period === 'quarter' ? 'Last 90 Days' : 'All Time'}</h4>
+					<h4 class="mb-3 font-bold text-blue-800">
+						Summary: {s.period === 'week'
+							? 'Last 7 Days'
+							: s.period === 'month'
+								? 'Last 30 Days'
+								: s.period === 'quarter'
+									? 'Last 90 Days'
+									: 'All Time'}
+					</h4>
 					<div class="grid grid-cols-2 gap-3 text-sm">
 						<div>
 							<span class="text-gray-500">New Enrollments:</span>
@@ -259,9 +306,9 @@
 							<span class="text-gray-500">Completed:</span>
 							<span class="ml-2 font-bold text-purple-700">{s.completedEnrollments}</span>
 						</div>
-						<div class="col-span-2 mt-2 pt-2 border-t border-blue-200">
-							<span class="text-gray-500 text-xs uppercase tracking-widest">Tracks:</span>
-							<div class="flex gap-3 mt-1">
+						<div class="col-span-2 mt-2 border-t border-blue-200 pt-2">
+							<span class="text-xs tracking-widest text-gray-500 uppercase">Tracks:</span>
+							<div class="mt-1 flex gap-3">
 								<span class="text-purple-600">🎥 {s.tracks.creator}</span>
 								<span class="text-orange-600">🛒 {s.tracks.seller}</span>
 								<span class="text-teal-600">🔗 {s.tracks.affiliate}</span>

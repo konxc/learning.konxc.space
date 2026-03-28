@@ -7,6 +7,7 @@
 	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
 
 	let { data }: { data: PageData } = $props();
+	const brandColor = $derived(data.organization?.brandColor || '#2563eb');
 	let certificateElement: HTMLDivElement | undefined;
 	let isDownloading = $state(false);
 
@@ -61,23 +62,32 @@
 		</div>
 
 		<div
-			class="mb-8 bg-linear-to-br from-blue-50/50 to-purple-50/50 p-10 dark:from-blue-950/20 dark:to-purple-950/20 ${RADIUS.card}"
+			class="mb-8 p-10 ${RADIUS.card}"
+			style="background: {brandColor}11"
 		>
 			<div
 				bind:this={certificateElement}
-				class={`${RADIUS.small} ${COLOR.card} ${ELEVATION.card} overflow-hidden border-4 border-blue-600`}
+				class={`${RADIUS.small} ${COLOR.card} ${ELEVATION.card} overflow-hidden border-4`}
+				style="border-color: {brandColor}"
 			>
 				<div class="flex min-h-[600px] flex-col justify-between p-16 print:p-16">
 					<div class="certificate-header">
+						<div class="flex justify-center mb-8">
+							{#if data.organization?.logoUrl}
+								<img src={data.organization.logoUrl} alt={data.organization.name} class="h-20 object-contain" />
+							{:else}
+								<span class="text-5xl">🎓</span>
+							{/if}
+						</div>
 						<h2
-							class="mb-4 text-center text-5xl font-bold text-blue-600 dark:text-blue-400"
-							style="font-size: 3em;"
+							class="mb-4 text-center text-5xl font-bold"
+							style="font-size: 3em; color: {brandColor};"
 						>
 							Certificate of Completion
 						</h2>
 						<div
-							class="mx-auto mb-10 h-1 w-48 bg-linear-to-r from-transparent via-blue-600 to-transparent"
-							style="height: 3px; width: 200px;"
+							class="mx-auto mb-10 h-1 w-48"
+							style="height: 3px; width: 200px; background: linear-gradient(to right, transparent, {brandColor}, transparent);"
 						></div>
 					</div>
 
@@ -95,10 +105,13 @@
 							has successfully completed the course
 						</p>
 						<p
-							class={`mt-5 text-3xl font-semibold text-blue-600 dark:text-blue-400`}
-							style="font-size: 1.8em; margin-top: 20px;"
+							class={`mt-5 text-3xl font-semibold`}
+							style="font-size: 1.8em; margin-top: 20px; color: {brandColor};"
 						>
 							{data.course.title}
+						</p>
+						<p class={`${TEXT.body} text-base mt-2 ${COLOR.textMuted}`} style="font-size: 0.9em; margin-top: 10px;">
+							Awarded by {data.organization?.name || 'Naik Kelas'}
 						</p>
 					</div>
 

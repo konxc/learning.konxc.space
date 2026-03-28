@@ -138,30 +138,63 @@ const templates: Record<string, (data: Record<string, string>) => EmailTemplate>
 	}),
 
 	reminder: (data) => ({
-		subject: `Don't forget: Continue your learning journey 📚`,
+		subject: 'Reminder: Complete your learning tasks! 📚',
 		html: `
 			<!DOCTYPE html>
 			<html>
-			<head><meta charset="utf-8"></head>
+			<head>
+				<meta charset="utf-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
 				<div style="text-align: center; margin-bottom: 30px;">
 					<h1 style="color: #2563eb; margin: 0;">Naik Kelas 🎓</h1>
+					<p style="color: #666; margin: 5px 0;">by Koneksi</p>
 				</div>
-				<div style="background: #f8fafc; border-radius: 12px; padding: 30px;">
-					<h2 style="margin-top: 0;">Ready to continue learning? 🚀</h2>
-					<p>Hi ${data.name},</p>
-					<p>${data.message || 'We noticed you haven\'t continued your course lately. Keep up the momentum!'}</p>
-					<p><strong>Course:</strong> ${data.courseName}</p>
-					<p><strong>Progress:</strong> ${data.progress}% complete</p>
-					<a href="${data.continueUrl}" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none;">Continue Learning</a>
+				<div style="background: #fef3c7; border-radius: 12px; padding: 30px; margin-bottom: 20px;">
+					<h2 style="margin-top: 0;">⏰ Friendly Reminder</h2>
+					<p>Hi ${data.name || 'Student'},</p>
+					<p>${data.message || 'You have pending tasks to complete. Keep up the momentum!'}</p>
+					<a href="${data.actionUrl}" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin-top: 20px;">Continue Learning</a>
 				</div>
-				<p style="color: #888; font-size: 12px; text-align: center; margin-top: 20px;">
-					© 2026 Naik Kelas by Koneksi
+				<p style="color: #888; font-size: 12px; text-align: center;">
+					© 2026 Naik Kelas by Koneksi. All rights reserved.<br>
+					In partnership with Yayasan ASIB
 				</p>
 			</body>
 			</html>
 		`,
-		text: `Don't forget to continue your learning! Course: ${data.courseName}, Progress: ${data.progress}%`
+		text: `Reminder: ${data.message || 'You have pending tasks.'} Continue at ${data.actionUrl}`
+	}),
+	org_invitation: (data) => ({
+		subject: `You're invited to join ${data.orgName} on Naik Kelas`,
+		html: `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<meta charset="utf-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			</head>
+			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="text-align: center; margin-bottom: 30px;">
+					<h1 style="color: #2563eb; margin: 0;">Naik Kelas 🎓</h1>
+					<p style="color: #666; margin: 5px 0;">by Koneksi</p>
+				</div>
+				<div style="background: #f0fdf4; border-radius: 12px; padding: 30px; margin-bottom: 20px;">
+					<h2 style="margin-top: 0;">You're Invited! 🎉</h2>
+					<p>Hi there!</p>
+					<p><strong>${data.inviterName}</strong> has invited you to join <strong>${data.orgName}</strong> on Naik Kelas as a <strong>${data.role}</strong>.</p>
+					<a href="${data.inviteLink}" style="display: inline-block; background: #22c55e; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin-top: 20px;">Accept Invitation</a>
+					<p style="color: #888; font-size: 12px; margin-top: 20px;">This invitation will expire in 7 days.</p>
+				</div>
+				<p style="color: #888; font-size: 12px; text-align: center;">
+					© 2026 Naik Kelas by Koneksi. All rights reserved.<br>
+					In partnership with Yayasan ASIB
+				</p>
+			</body>
+			</html>
+		`,
+		text: `You're invited to join ${data.orgName} as a ${data.role}. Accept: ${data.inviteLink}`
 	})
 };
 
@@ -190,7 +223,7 @@ export async function sendEmail(
 
 		// TODO: Replace with actual email service integration
 		// const response = await fetch('https://api.sendgrid.com/v3/mail/send', { ... });
-		
+
 		console.log(`[EMAIL] Sending ${type} email to ${to}: ${template.subject}`);
 
 		// Update status to sent
@@ -202,15 +235,15 @@ export async function sendEmail(
 		return { success: true };
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-		
+
 		// Log the error
 		await db
 			.update(schema.emailLog)
 			.set({ status: 'failed', error: errorMessage })
 			.where(eq(schema.emailLog.id, emailId));
 
-	return { success: false, error: errorMessage };
-	};
+		return { success: false, error: errorMessage };
+	}
 }
 
 export async function createNotification(
@@ -221,7 +254,7 @@ export async function createNotification(
 	link?: string
 ): Promise<void> {
 	const id = encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(10)));
-	
+
 	await db.insert(schema.notification).values({
 		id,
 		userId,
@@ -244,8 +277,5 @@ export async function getUnreadNotifications(userId: string) {
 }
 
 export async function markNotificationRead(id: string) {
-	await db
-		.update(schema.notification)
-		.set({ read: true })
-		.where(eq(schema.notification.id, id));
+	await db.update(schema.notification).set({ read: true }).where(eq(schema.notification.id, id));
 }

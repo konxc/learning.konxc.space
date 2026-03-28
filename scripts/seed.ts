@@ -11,9 +11,19 @@ import { seedCourseContent } from './seed/content.ts';
 import { seedPartners, seedCohorts } from './seed/partners.js';
 import { seedMentorApplications, seedWaitingList } from './seed/applications.js';
 import { seedBadges, seedUserXP, seedUserBadges } from './seed/gamification.js';
-import { seedCheckpoints, seedCheckpointSubmissions, seedDiscussions, seedLessonNotes } from './seed/interactions.js';
-import { seedNotifications, seedBroadcastMessages, seedCourseReviews } from './seed/notifications.js';
+import {
+	seedCheckpoints,
+	seedCheckpointSubmissions,
+	seedDiscussions,
+	seedLessonNotes
+} from './seed/interactions.js';
+import {
+	seedNotifications,
+	seedBroadcastMessages,
+	seedCourseReviews
+} from './seed/notifications.js';
 import { seedAffiliateLinks, seedAffiliateSales } from './seed/affiliates.js';
+import { seedOrganizations, assignCoursesToOrganizations } from './seed/organizations.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -93,45 +103,54 @@ async function main() {
 		if (shouldReset) await resetTables();
 
 		const users = await seedUsers(db);
-		const userIds = users.map(u => u.id);
+		const userIds = users.map((u) => u.id);
 		const adminId = userIds[0];
 		const mentorId = userIds[2];
 
 		const courses = await seedCourses(db, adminId, mentorId);
-		const courseIds = courses.map(c => c.id);
+		const courseIds = courses.map((c) => c.id);
 
 		const coupons = await seedCoupons(db, adminId);
-		const couponIds = coupons.map(c => c.id);
+		const couponIds = coupons.map((c) => c.id);
 
 		await seedEnrollments(db, userIds, courseIds, couponIds);
 		await seedMentorApplications(db, userIds.slice(4)); // student2
 		await seedWaitingList(db);
 		await seedCourseContent(db, courseIds);
 		await seedPartners(db);
-		
+
+		// Seed organizations and assign members
+		const adminIds = [userIds[0], userIds[1], userIds[2]]; // admin, bd, mentor
+		await seedOrganizations(db, adminIds);
+		await assignCoursesToOrganizations(db, courseIds);
+
 		const cohorts = await seedCohorts(db, [mentorId], courseIds);
-		const cohortIds = cohorts.map(c => c.id);
+		const cohortIds = cohorts.map((c) => c.id);
 
 		await seedCheckpoints(db, cohortIds);
-		
+
 		const moreStudents = await seedMoreStudents(db);
-		const studentIds = moreStudents.map(u => u.id);
-		
+		const studentIds = moreStudents.map((u) => u.id);
+
 		await seedBadges(db);
 		await seedUserXP(db, studentIds);
 		await seedUserBadges(db, studentIds);
-		
-		const checkpointIds = (await db.select().from(schema.checkpoint)).map(c => c.id);
+
+		const checkpointIds = (await db.select().from(schema.checkpoint)).map((c) => c.id);
 		await seedCheckpointSubmissions(db, studentIds, checkpointIds);
-		
+
 		const lessonIds = ['lesson-001', 'lesson-002', 'lesson-003'];
 		await seedDiscussions(db, studentIds, courseIds, lessonIds);
 		await seedLessonNotes(db, studentIds, lessonIds, courseIds);
 		await seedNotifications(db, studentIds);
 		await seedBroadcastMessages(db, adminId, mentorId);
-		
+
 		const links = await seedAffiliateLinks(db, studentIds);
-		await seedAffiliateSales(db, studentIds, links.map(l => l.id));
+		await seedAffiliateSales(
+			db,
+			studentIds,
+			links.map((l) => l.id)
+		);
 		await seedCourseReviews(db, studentIds, courseIds);
 
 		console.log('\n✨ Seeding completed successfully!');

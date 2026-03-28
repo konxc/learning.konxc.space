@@ -52,20 +52,16 @@ export const load: PageServerLoad = async (event) => {
 				username: schema.user.username,
 				fullName: schema.user.fullName
 			},
-			replyCount: (db
-				.select({ count: schema.discussion.id })
-				.from(schema.discussion)
-				.where(eq(schema.discussion.parentId, schema.discussion.id)) as any
+			replyCount: (
+				db
+					.select({ count: schema.discussion.id })
+					.from(schema.discussion)
+					.where(eq(schema.discussion.parentId, schema.discussion.id)) as any
 			)._.as('reply_count')
 		})
 		.from(schema.discussion)
 		.innerJoin(schema.user, eq(schema.discussion.userId, schema.user.id))
-		.where(
-			and(
-				eq(schema.discussion.courseId, courseId),
-				isNull(schema.discussion.parentId)
-			)
-		)
+		.where(and(eq(schema.discussion.courseId, courseId), isNull(schema.discussion.parentId)))
 		.orderBy(desc(schema.discussion.isPinned), desc(schema.discussion.createdAt));
 
 	// Get reply counts separately

@@ -16,11 +16,19 @@ export const load: PageServerLoad = async (event) => {
 			course: {
 				id: schema.course.id,
 				title: schema.course.title,
-				description: schema.course.description
+				description: schema.course.description,
+				orgId: schema.course.orgId
+			},
+			organization: {
+				id: schema.organization.id,
+				name: schema.organization.name,
+				logoUrl: schema.organization.logoUrl,
+				brandColor: schema.organization.brandColor
 			}
 		})
 		.from(schema.certificate)
 		.innerJoin(schema.course, eq(schema.certificate.courseId, schema.course.id))
+		.leftJoin(schema.organization, eq(schema.course.orgId, schema.organization.id))
 		.where(eq(schema.certificate.id, certificateId))
 		.limit(1);
 
@@ -41,6 +49,7 @@ export const load: PageServerLoad = async (event) => {
 	return {
 		certificate: certificateData.certificate,
 		course: certificateData.course,
+		organization: certificateData.organization,
 		user: users[0]
 	};
 };

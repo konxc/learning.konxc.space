@@ -59,9 +59,7 @@ export const load: PageServerLoad = async (event) => {
 		})
 		.from(schema.enrollment)
 		.innerJoin(schema.course, eq(schema.enrollment.courseId, schema.course.id))
-		.where(
-			and(eq(schema.enrollment.userId, userId), eq(schema.course.mentorId, mentor.id))
-		);
+		.where(and(eq(schema.enrollment.userId, userId), eq(schema.course.mentorId, mentor.id)));
 
 	if (enrollments.length === 0) {
 		throw error(404, 'This student is not enrolled in any of your courses');
@@ -249,7 +247,11 @@ export const actions: Actions = {
 
 		// Notify student
 		const studentDetails = await db
-			.select({ email: schema.user.email, name: schema.user.fullName, username: schema.user.username })
+			.select({
+				email: schema.user.email,
+				name: schema.user.fullName,
+				username: schema.user.username
+			})
 			.from(schema.user)
 			.where(eq(schema.user.id, userId))
 			.limit(1);

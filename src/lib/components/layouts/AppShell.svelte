@@ -24,6 +24,11 @@
 		} | null;
 		navItems: NavItem[];
 		activeRole?: string | null;
+		workspaces?: {
+			organizations: any[];
+			activeId: string;
+			activeOrg: any;
+		};
 	}
 
 	let { data, children }: { data: AppShellData; children: Snippet } = $props();
@@ -102,6 +107,7 @@
 		{sidebarCollapsed}
 		notifications={data.user?.notifications}
 		unreadCount={data.user?.unreadCount}
+		workspaces={data.workspaces}
 	/>
 
 	<div class="flex">
@@ -115,6 +121,7 @@
 				showBadges: true
 			}}
 			bind:isCollapsed={sidebarCollapsed}
+			workspaces={data.workspaces}
 		/>
 
 		<main

@@ -27,13 +27,17 @@
 	</PageHeader>
 
 	{#if form?.error}
-		<div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700">
+		<div
+			class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700"
+		>
 			⚠️ {form.error}
 		</div>
 	{/if}
 
 	{#if form?.success}
-		<div class="mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700 animate-in fade-in">
+		<div
+			class="animate-in fade-in mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700"
+		>
 			✅ Discussion posted successfully!
 		</div>
 	{/if}
@@ -63,7 +67,10 @@
 			<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-4`}>Start a New Discussion</h3>
 			<div class="space-y-4">
 				<div>
-					<label for="title" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+					<label
+						for="title"
+						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+					>
 						Title <span class="text-red-500">*</span>
 					</label>
 					<input
@@ -76,7 +83,10 @@
 					/>
 				</div>
 				<div>
-					<label for="content" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+					<label
+						for="content"
+						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+					>
 						Description <span class="text-red-500">*</span>
 					</label>
 					<textarea
@@ -85,7 +95,7 @@
 						rows="4"
 						required
 						placeholder="Provide details about your question or discussion topic..."
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 resize-none`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} resize-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 					></textarea>
 				</div>
 				<button
@@ -110,24 +120,30 @@
 	{:else}
 		<div class="space-y-4">
 			{#each data.discussions as discussion}
-				<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${discussion.isPinned ? 'border-amber-200 bg-amber-50/50' : COLOR.cardBorder} p-5`}>
+				<div
+					class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${discussion.isPinned ? 'border-amber-200 bg-amber-50/50' : COLOR.cardBorder} p-5`}
+				>
 					{#if discussion.isPinned}
 						<div class="mb-2 text-xs font-bold text-amber-600">📌 Pinned</div>
 					{/if}
-					
+
 					<h3 class={`font-bold ${COLOR.textPrimary} mb-2`}>{discussion.title}</h3>
 					<p class={`text-sm ${COLOR.textSecondary} mb-4 line-clamp-3`}>{discussion.content}</p>
-					
+
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-4 text-sm">
 							<span class={`${COLOR.textMuted}`}>
 								<strong>{discussion.user.fullName || discussion.user.username}</strong>
 							</span>
 							<span class={`${COLOR.textMuted} text-xs`}>
-								{new Date(discussion.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+								{new Date(discussion.createdAt).toLocaleDateString('id-ID', {
+									day: 'numeric',
+									month: 'short',
+									year: 'numeric'
+								})}
 							</span>
 						</div>
-						
+
 						<div class="flex items-center gap-3">
 							<form method="POST" action="?/upvote" use:enhance>
 								<input type="hidden" name="discussionId" value={discussion.id} />
@@ -138,7 +154,7 @@
 									👍 {discussion.upvotes}
 								</button>
 							</form>
-							
+
 							<button
 								onclick={() => (replyingTo = replyingTo === discussion.id ? null : discussion.id)}
 								class="text-xs font-bold text-blue-600 hover:underline"
@@ -162,7 +178,7 @@
 									}
 								};
 							}}
-							class="mt-4 pt-4 border-t border-gray-100"
+							class="mt-4 border-t border-gray-100 pt-4"
 						>
 							<input type="hidden" name="parentId" value={discussion.id} />
 							<textarea
@@ -170,7 +186,7 @@
 								bind:value={replyContent}
 								rows="2"
 								placeholder="Write a reply..."
-								class={`mb-3 w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 resize-none`}
+								class={`mb-3 w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} resize-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 							></textarea>
 							<button
 								type="submit"

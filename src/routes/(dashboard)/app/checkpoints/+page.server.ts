@@ -30,7 +30,12 @@ export const load: PageServerLoad = async (event) => {
 		const checkpoints = await db
 			.select()
 			.from(schema.checkpoint)
-			.where(and(eq(schema.checkpoint.cohortId, enrollment.cohortId), eq(schema.checkpoint.isActive, true)))
+			.where(
+				and(
+					eq(schema.checkpoint.cohortId, enrollment.cohortId),
+					eq(schema.checkpoint.isActive, true)
+				)
+			)
 			.orderBy(asc(schema.checkpoint.weekNumber));
 
 		for (const checkpoint of checkpoints) {

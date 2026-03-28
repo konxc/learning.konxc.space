@@ -6,9 +6,14 @@ import { eq, and } from 'drizzle-orm';
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
+	const parentData = await event.parent();
+	const activeWorkspaceId = parentData.workspaces?.activeId || 'personal';
+	const activeOrg = parentData.workspaces?.activeOrg;
+
+	const roleInContext = parentData.effectiveRole || user.role;
 
 	// Role-specific statistics
-	if (user.role === 'user') {
+	if (roleInContext === 'user') {
 		// Get user's enrollment stats
 		const activeEnrollments = await db
 			.select()
@@ -26,7 +31,6 @@ export const load: PageServerLoad = async (event) => {
 			.where(eq(schema.certificate.userId, user.id));
 
 		// Calculate average progress
-		let totalProgress = 0;
 		let completedLessons = 0;
 		let totalLessons = 0;
 
@@ -54,75 +58,119 @@ export const load: PageServerLoad = async (event) => {
 
 		const avgProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
+		// Get active course details for the "Continue Learning" section
+		const enrolledCourses = [];
+		for (const enrollment of activeEnrollments) {
+			const course = await db.query.course.findFirst({
+				where: eq(schema.course.id, enrollment.courseId)
+			});
+			if (course) {
+				const courseLessons = await db
+					.select()
+					.from(schema.lesson)
+					.innerJoin(schema.module, eq(schema.lesson.moduleId, schema.module.id))
+					.where(eq(schema.module.courseId, course.id));
+				
+				const courseProgress = await db
+					.select()
+					.from(schema.lessonProgress)
+					.where(and(eq(schema.lessonProgress.userId, user.id), eq(schema.lessonProgress.courseId, course.id)));
+				
+				enrolledCourses.push({
+					...course,
+					progress: courseLessons.length > 0 ? Math.round((courseProgress.length / courseLessons.length) * 100) : 0
+				});
+			}
+		}
+
 		return {
 			stats: {
 				myCourses: activeEnrollments.length,
 				progress: avgProgress,
+				completedLessons,
+				totalLessons,
 				certificates: certificates.length,
 				pendingPayments: pendingEnrollments.length
 			},
-			user: event.locals.user
+			courses: enrolledCourses,
+			user: user,
+			workspace: { id: activeWorkspaceId, org: activeOrg }
 		};
-	} else if (user.role === 'mentor' || user.role === 'admin') {
-		// Get mentor's courses
-		const mentorCourses = await db
+	} else if (roleInContext === 'mentor' || roleInContext === 'facilitator' || roleInContext === 'admin') {
+		// Get mentor's courses filtered by workspace
+		let mentorCoursesQuery = db
 			.select()
 			.from(schema.course)
 			.where(eq(schema.course.mentorId, user.id));
+
+		if (activeWorkspaceId !== 'personal') {
+			mentorCoursesQuery = db
+				.select()
+				.from(schema.course)
+				.where(
+					and(
+						eq(schema.course.orgId, activeWorkspaceId),
+						eq(schema.course.mentorId, user.id)
+					)
+				);
+		}
+
+		const mentorCourses = await mentorCoursesQuery;
 
 		// Get total students across mentor's courses
 		const courseIds = mentorCourses.map((c) => c.id);
 		let totalStudents = 0;
 		let trackCounts = { creator: 0, seller: 0, affiliate: 0, unassigned: 0 };
 
-		for (const courseId of courseIds) {
-			const students = await db
-				.select()
-				.from(schema.enrollment)
-				.where(
-					and(eq(schema.enrollment.courseId, courseId), eq(schema.enrollment.status, 'active'))
-				);
-			totalStudents += students.length;
-			
-			// Count tracks
-			for (const s of students) {
-				if (s.track === 'creator') trackCounts.creator++;
-				else if (s.track === 'seller') trackCounts.seller++;
-				else if (s.track === 'affiliate') trackCounts.affiliate++;
-				else trackCounts.unassigned++;
-			}
-		}
-
-		// Get pending submissions (action type)
-		let pendingSubmissions = 0;
-		let totalActionSubmissions = 0;
-		for (const courseId of courseIds) {
-			const submissions = await db
-				.select()
-				.from(schema.submission)
-				.where(
-					and(eq(schema.submission.courseId, courseId), eq(schema.submission.type, 'assignment'))
-				);
-			totalActionSubmissions += submissions.length;
-
-			for (const submission of submissions) {
-				const grade = await db
+		if (courseIds.length > 0) {
+			for (const courseId of courseIds) {
+				const students = await db
 					.select()
-					.from(schema.submissionGrade)
-					.where(eq(schema.submissionGrade.submissionId, submission.id))
-					.limit(1);
+					.from(schema.enrollment)
+					.where(and(eq(schema.enrollment.courseId, courseId), eq(schema.enrollment.status, 'active')));
+				totalStudents += students.length;
 
-				if (grade.length === 0) {
-					pendingSubmissions++;
+				// Count tracks
+				for (const s of students) {
+					if (s.track === 'creator') trackCounts.creator++;
+					else if (s.track === 'seller') trackCounts.seller++;
+					else if (s.track === 'affiliate') trackCounts.affiliate++;
+					else trackCounts.unassigned++;
 				}
 			}
 		}
 
-		// Get active cohorts
-		const cohorts = await db
-			.select()
-			.from(schema.cohort)
-			.where(eq(schema.cohort.status, 'active'));
+		// Get pending submissions
+		let pendingSubmissions = 0;
+		let totalActionSubmissions = 0;
+		
+		if (courseIds.length > 0) {
+			for (const courseId of courseIds) {
+				const submissions = await db
+					.select()
+					.from(schema.submission)
+					.where(and(eq(schema.submission.courseId, courseId), eq(schema.submission.type, 'assignment')));
+				
+				totalActionSubmissions += submissions.length;
+
+				for (const submission of submissions) {
+					const grade = await db
+						.select()
+						.from(schema.submissionGrade)
+						.where(eq(schema.submissionGrade.submissionId, submission.id))
+						.limit(1);
+
+					if (grade.length === 0) {
+						pendingSubmissions++;
+					}
+				}
+			}
+		}
+
+		// Get active cohorts filtered by workspace if in org
+		let cohortsQuery = db.select().from(schema.cohort).where(eq(schema.cohort.status, 'active'));
+		
+		const cohorts = await cohortsQuery;
 
 		return {
 			stats: {
@@ -133,37 +181,20 @@ export const load: PageServerLoad = async (event) => {
 				trackCounts: trackCounts,
 				activeCohorts: cohorts.length
 			},
-			user: event.locals.user
-		};
-	} else if (user.role === 'admin') {
-		// Admin statistics
-		const pendingPayments = await db
-			.select()
-			.from(schema.paymentProof)
-			.where(eq(schema.paymentProof.status, 'pending'));
-
-		const pendingApplications = await db
-			.select()
-			.from(schema.mentorApplication)
-			.where(eq(schema.mentorApplication.status, 'pending'));
-
-		return {
-			stats: {
-				pendingPayments: pendingPayments.length,
-				pendingApplications: pendingApplications.length
-			},
-			user: event.locals.user
+			user: user,
+			workspace: { id: activeWorkspaceId, org: activeOrg }
 		};
 	}
 
-	// Default stats
+	// Default empty stats
 	return {
 		stats: {
 			myCourses: 0,
 			progress: 0,
 			certificates: 0,
-			messages: 0
+			pendingPayments: 0
 		},
-		user: event.locals.user
+		user: user,
+		workspace: { id: activeWorkspaceId, org: activeOrg }
 	};
 };

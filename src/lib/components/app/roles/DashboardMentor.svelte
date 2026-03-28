@@ -44,26 +44,28 @@
 
 	<!-- Track Breakdown -->
 	{#if data.stats.trackCounts}
-		<div class="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+		<div class="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
 			<div class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} p-4 text-center`}>
-				<div class="text-2xl mb-1">🎥</div>
+				<div class="mb-1 text-2xl">🎥</div>
 				<div class="text-2xl font-black text-purple-600">{data.stats.trackCounts.creator || 0}</div>
-				<div class="text-xs text-gray-500 font-medium">Creators</div>
+				<div class="text-xs font-medium text-gray-500">Creators</div>
 			</div>
 			<div class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} p-4 text-center`}>
-				<div class="text-2xl mb-1">🛒</div>
+				<div class="mb-1 text-2xl">🛒</div>
 				<div class="text-2xl font-black text-orange-600">{data.stats.trackCounts.seller || 0}</div>
-				<div class="text-xs text-gray-500 font-medium">Sellers</div>
+				<div class="text-xs font-medium text-gray-500">Sellers</div>
 			</div>
 			<div class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} p-4 text-center`}>
-				<div class="text-2xl mb-1">🔗</div>
+				<div class="mb-1 text-2xl">🔗</div>
 				<div class="text-2xl font-black text-blue-600">{data.stats.trackCounts.affiliate || 0}</div>
-				<div class="text-xs text-gray-500 font-medium">Affiliates</div>
+				<div class="text-xs font-medium text-gray-500">Affiliates</div>
 			</div>
 			<div class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} p-4 text-center`}>
-				<div class="text-2xl mb-1">⏳</div>
-				<div class="text-2xl font-black text-gray-600">{data.stats.trackCounts.unassigned || 0}</div>
-				<div class="text-xs text-gray-500 font-medium">Unassigned</div>
+				<div class="mb-1 text-2xl">⏳</div>
+				<div class="text-2xl font-black text-gray-600">
+					{data.stats.trackCounts.unassigned || 0}
+				</div>
+				<div class="text-xs font-medium text-gray-500">Unassigned</div>
 			</div>
 		</div>
 	{/if}

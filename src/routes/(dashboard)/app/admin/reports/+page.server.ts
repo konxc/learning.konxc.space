@@ -42,8 +42,8 @@ export const load: PageServerLoad = async (event) => {
 		.from(schema.enrollment);
 
 	stats.totalStudents = allEnrollments.length;
-	stats.activeStudents = allEnrollments.filter(e => e.status === 'active').length;
-	stats.completedStudents = allEnrollments.filter(e => e.status === 'completed').length;
+	stats.activeStudents = allEnrollments.filter((e) => e.status === 'active').length;
+	stats.completedStudents = allEnrollments.filter((e) => e.status === 'completed').length;
 
 	for (const e of allEnrollments) {
 		if (e.track === 'creator') stats.byTrack.creator++;
@@ -98,8 +98,19 @@ export const actions: Actions = {
 		const enrollments = await query.orderBy(desc(schema.enrollment.enrolledAt));
 
 		if (format === 'csv') {
-			const headers = ['Username', 'Full Name', 'Email', 'Course', 'Cohort', 'Track', 'Status', 'Enrolled At', 'Completed At', 'Partner ID'];
-			const rows = enrollments.map(e => [
+			const headers = [
+				'Username',
+				'Full Name',
+				'Email',
+				'Course',
+				'Cohort',
+				'Track',
+				'Status',
+				'Enrolled At',
+				'Completed At',
+				'Partner ID'
+			];
+			const rows = enrollments.map((e) => [
 				e.username,
 				e.fullName || '',
 				e.email || '',
@@ -112,7 +123,9 @@ export const actions: Actions = {
 				e.partnerId || ''
 			]);
 
-			const csv = [headers.join(','), ...rows.map(r => r.map(v => `"${v}"`).join(','))].join('\n');
+			const csv = [headers.join(','), ...rows.map((r) => r.map((v) => `"${v}"`).join(','))].join(
+				'\n'
+			);
 
 			return {
 				success: true,
@@ -159,13 +172,13 @@ export const actions: Actions = {
 			.where(gte(schema.enrollment.enrolledAt, startDate));
 
 		const newEnrollments = enrollments.length;
-		const activeEnrollments = enrollments.filter(e => e.status === 'active').length;
-		const completedEnrollments = enrollments.filter(e => e.status === 'completed').length;
+		const activeEnrollments = enrollments.filter((e) => e.status === 'active').length;
+		const completedEnrollments = enrollments.filter((e) => e.status === 'completed').length;
 
 		const tracks = {
-			creator: enrollments.filter(e => e.track === 'creator').length,
-			seller: enrollments.filter(e => e.track === 'seller').length,
-			affiliate: enrollments.filter(e => e.track === 'affiliate').length
+			creator: enrollments.filter((e) => e.track === 'creator').length,
+			seller: enrollments.filter((e) => e.track === 'seller').length,
+			affiliate: enrollments.filter((e) => e.track === 'affiliate').length
 		};
 
 		return {

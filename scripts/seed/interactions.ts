@@ -46,7 +46,11 @@ export async function seedCheckpoints(db: LibSQLDatabase<typeof schema>, cohortI
 	return checkpoints;
 }
 
-export async function seedCheckpointSubmissions(db: LibSQLDatabase<typeof schema>, userIds: string[], checkpointIds: string[]) {
+export async function seedCheckpointSubmissions(
+	db: LibSQLDatabase<typeof schema>,
+	userIds: string[],
+	checkpointIds: string[]
+) {
 	logSection('Seeding checkpoint submissions');
 
 	const submissions = [
@@ -54,7 +58,8 @@ export async function seedCheckpointSubmissions(db: LibSQLDatabase<typeof schema
 			id: 'cps-001',
 			checkpointId: checkpointIds[0],
 			userId: userIds[0],
-			notes: 'Jawaban saya:\n1. Python adalah bahasa pemrograman interpret\n2. Variabel di Python tidak perlu deklarasi tipe\n3. List menggunakan tanda []',
+			notes:
+				'Jawaban saya:\n1. Python adalah bahasa pemrograman interpret\n2. Variabel di Python tidak perlu deklarasi tipe\n3. List menggunakan tanda []',
 			completed: true,
 			submittedAt: new Date('2024-02-05'),
 			createdAt: new Date('2024-02-05')
@@ -63,7 +68,8 @@ export async function seedCheckpointSubmissions(db: LibSQLDatabase<typeof schema
 			id: 'cps-002',
 			checkpointId: checkpointIds[0],
 			userId: userIds[1],
-			notes: 'Jawaban:\n1. Bahasa pemrograman tingkat tinggi\n2. Dynamic typing\n3. Tuple, List, Dict',
+			notes:
+				'Jawaban:\n1. Bahasa pemrograman tingkat tinggi\n2. Dynamic typing\n3. Tuple, List, Dict',
 			completed: true,
 			submittedAt: new Date('2024-02-06'),
 			createdAt: new Date('2024-02-06')
@@ -86,7 +92,12 @@ export async function seedCheckpointSubmissions(db: LibSQLDatabase<typeof schema
 	logSuccess(`Seeded ${submissions.length} checkpoint submissions`);
 }
 
-export async function seedDiscussions(db: LibSQLDatabase<typeof schema>, userIds: string[], courseIds: string[], lessonIds: string[]) {
+export async function seedDiscussions(
+	db: LibSQLDatabase<typeof schema>,
+	userIds: string[],
+	courseIds: string[],
+	lessonIds: string[]
+) {
 	logSection('Seeding discussions');
 
 	const discussions = [
@@ -151,7 +162,12 @@ export async function seedDiscussions(db: LibSQLDatabase<typeof schema>, userIds
 	logSuccess(`Seeded ${discussions.length} discussions`);
 }
 
-export async function seedLessonNotes(db: LibSQLDatabase<typeof schema>, userIds: string[], lessonIds: string[], courseIds: string[]) {
+export async function seedLessonNotes(
+	db: LibSQLDatabase<typeof schema>,
+	userIds: string[],
+	lessonIds: string[],
+	courseIds: string[]
+) {
 	logSection('Seeding lesson notes');
 
 	const notes = [
@@ -160,7 +176,8 @@ export async function seedLessonNotes(db: LibSQLDatabase<typeof schema>, userIds
 			userId: userIds[0],
 			courseId: courseIds[0],
 			lessonId: lessonIds[0],
-			content: '# Catatan: Apa itu Python?\n\nPython adalah bahasa pemrograman yang:\n- Interpret\n- Multi-paradigma\n- Easy to learn\n\nDibuat oleh Guido van Rossum tahun 1991.',
+			content:
+				'# Catatan: Apa itu Python?\n\nPython adalah bahasa pemrograman yang:\n- Interpret\n- Multi-paradigma\n- Easy to learn\n\nDibuat oleh Guido van Rossum tahun 1991.',
 			createdAt: new Date('2024-01-25'),
 			updatedAt: new Date('2024-01-25')
 		},
@@ -169,7 +186,8 @@ export async function seedLessonNotes(db: LibSQLDatabase<typeof schema>, userIds
 			userId: userIds[0],
 			courseId: courseIds[0],
 			lessonId: lessonIds[2],
-			content: '# Tipe Data Python\n\n- int: 1, 2, 3\n- float: 1.5, 2.7\n- str: "hello"\n- list: [1, 2, 3]\n- dict: {"key": "value"}',
+			content:
+				'# Tipe Data Python\n\n- int: 1, 2, 3\n- float: 1.5, 2.7\n- str: "hello"\n- list: [1, 2, 3]\n- dict: {"key": "value"}',
 			createdAt: new Date('2024-01-27'),
 			updatedAt: new Date('2024-01-27')
 		},

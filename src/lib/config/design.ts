@@ -48,6 +48,8 @@ export const ELEVATION = {
 		'hover:shadow-[0_8px_24px_0_rgba(0,0,0,0.12)] dark:hover:shadow-[0_8px_24px_0_rgba(0,0,0,0.4)]'
 };
 
+export const SHADOW = ELEVATION;
+
 export const SPACING = {
 	page: 'px-6 md:px-10 lg:px-12 py-6',
 	section: 'space-y-8 md:space-y-10',

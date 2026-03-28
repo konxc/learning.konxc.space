@@ -31,19 +31,25 @@
 	</PageHeader>
 
 	{#if form?.error}
-		<div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700">
+		<div
+			class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700"
+		>
 			⚠️ {form.error}
 		</div>
 	{/if}
 
 	{#if form?.success && form?.message}
-		<div class="mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700 animate-in fade-in">
+		<div
+			class="animate-in fade-in mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700"
+		>
 			✅ {form.message}
 		</div>
 	{/if}
 
 	{#if showCreateForm}
-		<div class={`mb-8 ${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-6 animate-in fade-in slide-in-from-top-4 duration-300`}>
+		<div
+			class={`mb-8 ${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} animate-in fade-in slide-in-from-top-4 p-6 duration-300`}
+		>
 			<h2 class={`${TEXT.h3} ${COLOR.textPrimary} mb-6`}>Tambah Partner Baru</h2>
 			<form
 				method="POST"
@@ -60,7 +66,10 @@
 			>
 				<div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
 					<div>
-						<label for="id" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+						<label
+							for="id"
+							class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+						>
 							Partner ID <span class="text-red-500">*</span>
 						</label>
 						<input
@@ -75,7 +84,10 @@
 					</div>
 
 					<div>
-						<label for="name" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+						<label
+							for="name"
+							class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+						>
 							Nama Partner <span class="text-red-500">*</span>
 						</label>
 						<input
@@ -90,7 +102,10 @@
 				</div>
 
 				<div>
-					<label for="description" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+					<label
+						for="description"
+						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+					>
 						Description
 					</label>
 					<textarea
@@ -98,13 +113,16 @@
 						name="description"
 						rows="2"
 						placeholder="Deskripsi partner..."
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 resize-none`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} resize-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 					></textarea>
 				</div>
 
 				<div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
 					<div>
-						<label for="contactEmail" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+						<label
+							for="contactEmail"
+							class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+						>
 							Email Kontak
 						</label>
 						<input
@@ -117,7 +135,10 @@
 					</div>
 
 					<div>
-						<label for="contactPhone" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+						<label
+							for="contactPhone"
+							class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+						>
 							Telepon
 						</label>
 						<input
@@ -134,7 +155,7 @@
 					<button
 						type="submit"
 						disabled={creating}
-						class={`${RADIUS.button} ${COLOR.accentBg} px-8 py-3 text-sm font-bold text-white ${TRANSITION.all} hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`${RADIUS.button} ${COLOR.accentBg} px-8 py-3 text-sm font-bold text-white ${TRANSITION.all} hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						{creating ? 'Menyimpan...' : 'Simpan Partner'}
 					</button>
@@ -154,12 +175,16 @@
 	{#if data.partners.length > 0}
 		<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
 			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-				<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Total Partners</p>
+				<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
+					Total Partners
+				</p>
 				<p class={`text-3xl font-black ${COLOR.textPrimary} mt-1`}>{data.stats.totalPartners}</p>
 			</div>
 			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-				<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Total Student Enrollments</p>
-				<p class="text-3xl font-black text-blue-600 mt-1">{data.stats.totalEnrollments}</p>
+				<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
+					Total Student Enrollments
+				</p>
+				<p class="mt-1 text-3xl font-black text-blue-600">{data.stats.totalEnrollments}</p>
 			</div>
 		</div>
 	{/if}
@@ -174,27 +199,49 @@
 			</p>
 		</div>
 	{:else}
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} overflow-hidden`}>
+		<div
+			class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} overflow-hidden`}
+		>
 			<div class="overflow-x-auto">
 				<table class="w-full text-left">
 					<thead>
 						<tr class="border-b border-gray-100 bg-gray-50/70">
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Partner</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Kontak</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Students</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Tracks</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Status</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Aksi</th>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Partner</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Kontak</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Students</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Tracks</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Status</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Aksi</th
+							>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-gray-50">
 						{#each data.partners as partner}
-							<tr class="hover:bg-blue-50/20 transition-colors">
+							<tr class="transition-colors hover:bg-blue-50/20">
 								<td class="px-5 py-4">
-									<p class={`font-bold text-sm ${COLOR.textPrimary}`}>{partner.name}</p>
-									<p class="text-[10px] text-gray-400 mt-0.5">#{partner.id}</p>
+									<p class={`text-sm font-bold ${COLOR.textPrimary}`}>{partner.name}</p>
+									<p class="mt-0.5 text-[10px] text-gray-400">#{partner.id}</p>
 									{#if partner.description}
-										<p class={`text-xs ${COLOR.textMuted} mt-1 max-w-[200px] truncate`}>{partner.description}</p>
+										<p class={`text-xs ${COLOR.textMuted} mt-1 max-w-[200px] truncate`}>
+											{partner.description}
+										</p>
 									{/if}
 								</td>
 								<td class="px-5 py-4">
@@ -231,7 +278,9 @@
 									</div>
 								</td>
 								<td class="px-5 py-4">
-									<span class={`inline-block rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${statusColors[partner.status] ?? 'bg-gray-100 text-gray-500'}`}>
+									<span
+										class={`inline-block rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase ${statusColors[partner.status] ?? 'bg-gray-100 text-gray-500'}`}
+									>
 										{partner.status}
 									</span>
 								</td>

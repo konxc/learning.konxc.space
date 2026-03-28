@@ -49,7 +49,12 @@ export const load: PageServerLoad = async (event) => {
 			const completed = completedLessons[0]?.count || 0;
 			const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-			return { ...enrollment, totalLessons: total, completedLessons: completed, progressPercent: percent };
+			return {
+				...enrollment,
+				totalLessons: total,
+				completedLessons: completed,
+				progressPercent: percent
+			};
 		})
 	);
 
@@ -75,16 +80,21 @@ export const load: PageServerLoad = async (event) => {
 
 	// Calculate overall stats
 	const totalCourses = coursesWithProgress.length;
-	const completedCourses = coursesWithProgress.filter(e => e.status === 'completed').length;
-	const inProgressCourses = coursesWithProgress.filter(e => e.status === 'active' && e.progressPercent > 0).length;
+	const completedCourses = coursesWithProgress.filter((e) => e.status === 'completed').length;
+	const inProgressCourses = coursesWithProgress.filter(
+		(e) => e.status === 'active' && e.progressPercent > 0
+	).length;
 	const totalLessonsCompleted = coursesWithProgress.reduce((sum, c) => sum + c.completedLessons, 0);
 
 	// Quiz stats
-	const gradedSubmissions = submissions.filter(s => s.score !== null);
-	const avgScore = gradedSubmissions.length > 0
-		? Math.round(gradedSubmissions.reduce((sum, s) => sum + (s.score || 0), 0) / gradedSubmissions.length)
-		: 0;
-	const passedQuizzes = gradedSubmissions.filter(s => (s.score || 0) >= 70).length;
+	const gradedSubmissions = submissions.filter((s) => s.score !== null);
+	const avgScore =
+		gradedSubmissions.length > 0
+			? Math.round(
+					gradedSubmissions.reduce((sum, s) => sum + (s.score || 0), 0) / gradedSubmissions.length
+				)
+			: 0;
+	const passedQuizzes = gradedSubmissions.filter((s) => (s.score || 0) >= 70).length;
 
 	// Get certificates
 	const certificates = await db

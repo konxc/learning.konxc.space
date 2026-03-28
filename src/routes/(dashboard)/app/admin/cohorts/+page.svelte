@@ -38,20 +38,26 @@
 	</PageHeader>
 
 	{#if form?.error}
-		<div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700">
+		<div
+			class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700"
+		>
 			⚠️ {form.error}
 		</div>
 	{/if}
 
 	{#if form?.success && form?.message}
-		<div class="mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700 animate-in fade-in">
+		<div
+			class="animate-in fade-in mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700"
+		>
 			✅ {form.message}
 		</div>
 	{/if}
 
 	<!-- Create Form -->
 	{#if showCreateForm}
-		<div class={`mb-8 ${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-6 animate-in fade-in slide-in-from-top-4 duration-300`}>
+		<div
+			class={`mb-8 ${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} animate-in fade-in slide-in-from-top-4 p-6 duration-300`}
+		>
 			<h2 class={`${TEXT.h3} ${COLOR.textPrimary} mb-6`}>Buat Batch Baru</h2>
 			<form
 				method="POST"
@@ -67,7 +73,10 @@
 				}}
 			>
 				<div class="sm:col-span-2">
-					<label for="name" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+					<label
+						for="name"
+						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+					>
 						Nama Batch <span class="text-red-500">*</span>
 					</label>
 					<input
@@ -81,14 +90,17 @@
 				</div>
 
 				<div class="sm:col-span-2">
-					<label for="courseId" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+					<label
+						for="courseId"
+						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+					>
 						Kursus <span class="text-red-500">*</span>
 					</label>
 					<select
 						id="courseId"
 						name="courseId"
 						required
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} cursor-pointer focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 					>
 						<option value="">-- Pilih Kursus --</option>
 						{#each data.courses as course}
@@ -98,7 +110,10 @@
 				</div>
 
 				<div>
-					<label for="startDate" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+					<label
+						for="startDate"
+						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+					>
 						Tanggal Mulai <span class="text-red-500">*</span>
 					</label>
 					<input
@@ -111,7 +126,10 @@
 				</div>
 
 				<div>
-					<label for="endDate" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+					<label
+						for="endDate"
+						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+					>
 						Tanggal Selesai <span class="text-gray-400">(Opsional)</span>
 					</label>
 					<input
@@ -126,7 +144,7 @@
 					<button
 						type="submit"
 						disabled={creating}
-						class={`${RADIUS.button} ${COLOR.accentBg} px-8 py-3 text-sm font-bold text-white ${TRANSITION.all} hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`${RADIUS.button} ${COLOR.accentBg} px-8 py-3 text-sm font-bold text-white ${TRANSITION.all} hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						{creating ? 'Menyimpan...' : 'Simpan Batch'}
 					</button>
@@ -146,16 +164,24 @@
 	{#if data.adminStats.totalStudents > 0}
 		<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
 			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-				<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Total Students</p>
-				<p class={`text-3xl font-black ${COLOR.textPrimary} mt-1`}>{data.adminStats.totalStudents}</p>
+				<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
+					Total Students
+				</p>
+				<p class={`text-3xl font-black ${COLOR.textPrimary} mt-1`}>
+					{data.adminStats.totalStudents}
+				</p>
 			</div>
 			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-				<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Active Students</p>
-				<p class="text-3xl font-black text-green-600 mt-1">{data.adminStats.activeStudents}</p>
+				<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
+					Active Students
+				</p>
+				<p class="mt-1 text-3xl font-black text-green-600">{data.adminStats.activeStudents}</p>
 			</div>
 			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-				<p class={`text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>Pending Payments</p>
-				<p class="text-3xl font-black text-amber-600 mt-1">{data.adminStats.pendingPayments}</p>
+				<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
+					Pending Payments
+				</p>
+				<p class="mt-1 text-3xl font-black text-amber-600">{data.adminStats.pendingPayments}</p>
 			</div>
 		</div>
 	{/if}
@@ -170,35 +196,65 @@
 			</p>
 		</div>
 	{:else}
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} overflow-hidden`}>
+		<div
+			class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} overflow-hidden`}
+		>
 			<div class="overflow-x-auto">
 				<table class="w-full text-left">
 					<thead>
 						<tr class="border-b border-gray-100 bg-gray-50/70">
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Nama Batch</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted} hidden md:table-cell`}>Kursus</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted} hidden sm:table-cell`}>Periode</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Peserta</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Status</th>
-							<th class={`px-5 py-4 ${TEXT.small} font-black uppercase tracking-widest ${COLOR.textMuted}`}>Aksi</th>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Nama Batch</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted} hidden md:table-cell`}
+								>Kursus</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted} hidden sm:table-cell`}
+								>Periode</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Peserta</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Status</th
+							>
+							<th
+								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
+								>Aksi</th
+							>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-gray-50">
 						{#each data.cohorts as cohort}
-							<tr class="hover:bg-blue-50/20 transition-colors">
+							<tr class="transition-colors hover:bg-blue-50/20">
 								<td class="px-5 py-4">
-									<p class={`font-bold text-sm ${COLOR.textPrimary}`}>{cohort.name}</p>
-									<p class="text-[10px] text-gray-400 mt-0.5">#{cohort.id.slice(0, 8)}</p>
+									<p class={`text-sm font-bold ${COLOR.textPrimary}`}>{cohort.name}</p>
+									<p class="mt-0.5 text-[10px] text-gray-400">#{cohort.id.slice(0, 8)}</p>
 								</td>
-								<td class="px-5 py-4 hidden md:table-cell">
-									<p class={`text-sm ${COLOR.textSecondary} max-w-[200px] truncate`}>{cohort.courseTitle}</p>
+								<td class="hidden px-5 py-4 md:table-cell">
+									<p class={`text-sm ${COLOR.textSecondary} max-w-[200px] truncate`}>
+										{cohort.courseTitle}
+									</p>
 								</td>
-								<td class="px-5 py-4 hidden sm:table-cell">
+								<td class="hidden px-5 py-4 sm:table-cell">
 									<p class={`text-xs ${COLOR.textMuted}`}>
-										{new Date(cohort.startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+										{new Date(cohort.startDate).toLocaleDateString('id-ID', {
+											day: 'numeric',
+											month: 'short',
+											year: 'numeric'
+										})}
 										{#if cohort.endDate}
 											<span class="mx-1">→</span>
-											{new Date(cohort.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+											{new Date(cohort.endDate).toLocaleDateString('id-ID', {
+												day: 'numeric',
+												month: 'short',
+												year: 'numeric'
+											})}
 										{/if}
 									</p>
 								</td>
@@ -224,7 +280,9 @@
 									</div>
 								</td>
 								<td class="px-5 py-4">
-									<span class={`inline-block rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${statusColors[cohort.status] ?? 'bg-gray-100 text-gray-500'}`}>
+									<span
+										class={`inline-block rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase ${statusColors[cohort.status] ?? 'bg-gray-100 text-gray-500'}`}
+									>
 										{statusLabels[cohort.status] ?? cohort.status}
 									</span>
 								</td>
@@ -241,7 +299,11 @@
 											<input
 												type="hidden"
 												name="status"
-												value={cohort.status === 'active' ? 'completed' : cohort.status === 'upcoming' ? 'active' : 'active'}
+												value={cohort.status === 'active'
+													? 'completed'
+													: cohort.status === 'upcoming'
+														? 'active'
+														: 'active'}
 											/>
 											<button
 												type="submit"
@@ -251,7 +313,11 @@
 														: 'border-green-200 bg-green-50 text-green-600 hover:bg-green-100'
 												}`}
 											>
-												{cohort.status === 'active' ? 'Selesaikan' : cohort.status === 'upcoming' ? 'Aktifkan' : 'Aktifkan Kembali'}
+												{cohort.status === 'active'
+													? 'Selesaikan'
+													: cohort.status === 'upcoming'
+														? 'Aktifkan'
+														: 'Aktifkan Kembali'}
 											</button>
 										</form>
 									</div>

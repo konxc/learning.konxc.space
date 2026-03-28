@@ -117,7 +117,7 @@
 			</button>
 		</div>
 	{:else if material.type === 'video'}
-		<div class="mb-8 overflow-hidden rounded-2xl shadow-2xl relative group">
+		<div class="group relative mb-8 overflow-hidden rounded-2xl shadow-2xl">
 			{#if material.url?.includes('youtube.com') || material.url?.includes('youtu.be')}
 				{@const videoId = material.url?.includes('youtu.be')
 					? material.url.split('/').pop()

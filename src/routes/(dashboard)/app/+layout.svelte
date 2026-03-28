@@ -3,6 +3,7 @@
 	import type { PageData } from './$types';
 	import type { Snippet } from 'svelte';
 	import AddToHomeScreen from '$lib/components/AddToHomeScreen.svelte';
+	import { fly } from 'svelte/transition';
 
 	let { data, children }: { data: PageData; children: Snippet } = $props();
 
@@ -19,4 +20,9 @@
 </script>
 
 <AddToHomeScreen />
-{@render children?.()}
+
+{#key $page.url.pathname}
+	<div in:fly={{ y: 8, duration: 400, delay: 100 }}>
+		{@render children?.()}
+	</div>
+{/key}

@@ -69,15 +69,15 @@ export const load: PageServerLoad = async (event) => {
 
 	// Calculate stats
 	const totalStudents = enrollments.length;
-	const activeStudents = enrollments.filter(e => e.status === 'active').length;
-	const completedStudents = enrollments.filter(e => e.status === 'completed').length;
-	const pendingStudents = enrollments.filter(e => e.status === 'pending').length;
+	const activeStudents = enrollments.filter((e) => e.status === 'active').length;
+	const completedStudents = enrollments.filter((e) => e.status === 'completed').length;
+	const pendingStudents = enrollments.filter((e) => e.status === 'pending').length;
 
 	const tracks = {
-		creator: enrollments.filter(e => e.track === 'creator').length,
-		seller: enrollments.filter(e => e.track === 'seller').length,
-		affiliate: enrollments.filter(e => e.track === 'affiliate').length,
-		unassigned: enrollments.filter(e => !e.track).length
+		creator: enrollments.filter((e) => e.track === 'creator').length,
+		seller: enrollments.filter((e) => e.track === 'seller').length,
+		affiliate: enrollments.filter((e) => e.track === 'affiliate').length,
+		unassigned: enrollments.filter((e) => !e.track).length
 	};
 
 	// Get all facilitators for dropdown
@@ -133,10 +133,7 @@ export const actions: Actions = {
 			return fail(400, { error: 'Invalid status' });
 		}
 
-		await db
-			.update(schema.cohort)
-			.set({ status })
-			.where(eq(schema.cohort.id, cohortId));
+		await db.update(schema.cohort).set({ status }).where(eq(schema.cohort.id, cohortId));
 
 		return { success: true };
 	},
@@ -148,9 +145,7 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const enrollmentId = formData.get('enrollmentId') as string;
 
-		await db
-			.delete(schema.enrollment)
-			.where(eq(schema.enrollment.id, enrollmentId));
+		await db.delete(schema.enrollment).where(eq(schema.enrollment.id, enrollmentId));
 
 		return { success: true, message: 'Student removed from cohort.' };
 	}

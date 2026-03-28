@@ -26,7 +26,7 @@
 <PageWrapper>
 	<PageHeader title="Broadcast Message" description="Send messages to your students" />
 
-	<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+	<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
 		<!-- Send Message Form -->
 		<div>
 			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-6`}>
@@ -57,7 +57,10 @@
 					class="space-y-4"
 				>
 					<div>
-						<label for="title" class={`mb-1.5 block text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>
+						<label
+							for="title"
+							class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
+						>
 							Judul Pesan
 						</label>
 						<input
@@ -71,7 +74,10 @@
 					</div>
 
 					<div>
-						<label for="content" class={`mb-1.5 block text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>
+						<label
+							for="content"
+							class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
+						>
 							Isi Pesan
 						</label>
 						<textarea
@@ -80,12 +86,15 @@
 							required
 							rows="5"
 							placeholder="Tulis pesan Anda di sini..."
-							class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} px-4 py-3 ${TEXT.body} outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 resize-none`}
+							class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} px-4 py-3 ${TEXT.body} resize-none outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 						></textarea>
 					</div>
 
 					<div>
-						<label for="targetType" class={`mb-1.5 block text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>
+						<label
+							for="targetType"
+							class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
+						>
 							Tipe Penerima
 						</label>
 						<select
@@ -99,8 +108,10 @@
 									const courseSelect = form.querySelector('#targetCourseId') as HTMLSelectElement;
 									const roleSelect = form.querySelector('#targetRole') as HTMLSelectElement;
 									const value = (e.target as HTMLSelectElement).value;
-									if (cohortSelect) cohortSelect.style.display = value === 'cohort' ? 'block' : 'none';
-									if (courseSelect) courseSelect.style.display = value === 'course' ? 'block' : 'none';
+									if (cohortSelect)
+										cohortSelect.style.display = value === 'cohort' ? 'block' : 'none';
+									if (courseSelect)
+										courseSelect.style.display = value === 'course' ? 'block' : 'none';
 									if (roleSelect) roleSelect.style.display = value === 'role' ? 'block' : 'none';
 								}
 							}}
@@ -113,7 +124,11 @@
 					</div>
 
 					<div>
-						<label for="targetCohortId" class={`mb-1.5 block text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`} style="display:none">
+						<label
+							for="targetCohortId"
+							class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
+							style="display:none"
+						>
 							Pilih Cohort
 						</label>
 						<select
@@ -130,7 +145,11 @@
 					</div>
 
 					<div>
-						<label for="targetCourseId" class={`mb-1.5 block text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`} style="display:none">
+						<label
+							for="targetCourseId"
+							class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
+							style="display:none"
+						>
 							Pilih Kursus
 						</label>
 						<select
@@ -147,7 +166,10 @@
 					</div>
 
 					<div>
-						<label for="sentVia" class={`mb-1.5 block text-xs font-black uppercase tracking-widest ${COLOR.textMuted}`}>
+						<label
+							for="sentVia"
+							class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
+						>
 							Kirim Via
 						</label>
 						<select
@@ -163,13 +185,13 @@
 					</div>
 
 					{#if successMessage}
-						<div class="rounded-lg bg-green-50 p-3 text-sm text-green-600 border border-green-200">
+						<div class="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-600">
 							{successMessage}
 						</div>
 					{/if}
 
 					{#if errorMessage}
-						<div class="rounded-lg bg-red-50 p-3 text-sm text-red-600 border border-red-200">
+						<div class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
 							{errorMessage}
 						</div>
 					{/if}
@@ -191,20 +213,18 @@
 				<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-6`}>📋 Riwayat Pesan</h3>
 
 				{#if data.broadcasts.length === 0}
-					<p class={`${COLOR.textSecondary} text-center py-8`}>
-						Belum ada pesan yang dikirim.
-					</p>
+					<p class={`${COLOR.textSecondary} py-8 text-center`}>Belum ada pesan yang dikirim.</p>
 				{:else}
-					<div class="space-y-4 max-h-[600px] overflow-y-auto">
+					<div class="max-h-[600px] space-y-4 overflow-y-auto">
 						{#each data.broadcasts as broadcast}
 							<div class="border-b border-gray-100 pb-4 last:border-0">
-								<div class="flex items-start justify-between mb-2">
+								<div class="mb-2 flex items-start justify-between">
 									<h4 class={`font-bold ${COLOR.textPrimary}`}>{broadcast.title}</h4>
 									<span class={`text-xs ${COLOR.textMuted}`}>
 										{broadcast.recipientCount} penerima
 									</span>
 								</div>
-								<p class={`text-sm ${COLOR.textSecondary} line-clamp-2 mb-2`}>
+								<p class={`text-sm ${COLOR.textSecondary} mb-2 line-clamp-2`}>
 									{broadcast.content}
 								</p>
 								<div class="flex items-center gap-3 text-xs">

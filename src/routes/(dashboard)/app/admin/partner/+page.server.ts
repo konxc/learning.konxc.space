@@ -10,10 +10,7 @@ export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
 	if (user.role !== 'admin') throw redirect(303, '/app/overview');
 
-	const partners = await db
-		.select()
-		.from(schema.partner)
-		.orderBy(desc(schema.partner.createdAt));
+	const partners = await db.select().from(schema.partner).orderBy(desc(schema.partner.createdAt));
 
 	const partnerStats = await Promise.all(
 		partners.map(async (partner) => {
@@ -27,13 +24,13 @@ export const load: PageServerLoad = async (event) => {
 				.where(eq(schema.enrollment.partnerId, partner.id));
 
 			const totalStudents = enrollments.length;
-			const activeStudents = enrollments.filter(e => e.status === 'active').length;
-			const completedStudents = enrollments.filter(e => e.status === 'completed').length;
+			const activeStudents = enrollments.filter((e) => e.status === 'active').length;
+			const completedStudents = enrollments.filter((e) => e.status === 'completed').length;
 
 			const tracks = {
-				creator: enrollments.filter(e => e.track === 'creator').length,
-				seller: enrollments.filter(e => e.track === 'seller').length,
-				affiliate: enrollments.filter(e => e.track === 'affiliate').length
+				creator: enrollments.filter((e) => e.track === 'creator').length,
+				seller: enrollments.filter((e) => e.track === 'seller').length,
+				affiliate: enrollments.filter((e) => e.track === 'affiliate').length
 			};
 
 			return {

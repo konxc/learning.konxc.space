@@ -65,10 +65,9 @@ export const POST: RequestHandler = async (event) => {
 			activatedAt: new Date()
 		});
 		if (couponId) await applyCoupon(couponId, user.id, course.id, course.price, discountAmount);
-		return new Response(
-			JSON.stringify({ method: 'free', enrollmentId, redirect_url: '/app' }),
-			{ status: 200 }
-		);
+		return new Response(JSON.stringify({ method: 'free', enrollmentId, redirect_url: '/app' }), {
+			status: 200
+		});
 	}
 
 	// Create/ensure pending enrollment

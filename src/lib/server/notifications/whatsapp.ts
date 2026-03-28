@@ -66,7 +66,7 @@ export async function sendWhatsAppNotification(
 		const response = await fetch(`${WHATSAPP_API_URL}/v17.0/${WHATSAPP_PHONE_NUMBER_ID}/messages`, {
 			method: 'POST',
 			headers: {
-				'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+				Authorization: `Bearer ${WHATSAPP_TOKEN}`,
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
@@ -88,12 +88,23 @@ export async function sendWhatsAppNotification(
 
 		if (!response.ok) {
 			console.error('[WhatsApp] Error sending message:', result);
-			await logWhatsAppMessage(phoneNumber, templateName, 'failed', result.error?.message || 'Unknown error');
+			await logWhatsAppMessage(
+				phoneNumber,
+				templateName,
+				'failed',
+				result.error?.message || 'Unknown error'
+			);
 			return { success: false, error: result.error?.message || 'Failed to send WhatsApp message' };
 		}
 
 		console.log('[WhatsApp] Message sent successfully:', result.messages?.[0]?.id);
-		await logWhatsAppMessage(phoneNumber, templateName, 'sent', undefined, result.messages?.[0]?.id);
+		await logWhatsAppMessage(
+			phoneNumber,
+			templateName,
+			'sent',
+			undefined,
+			result.messages?.[0]?.id
+		);
 		return { success: true, messageId: result.messages?.[0]?.id };
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -111,7 +122,7 @@ async function logWhatsAppMessage(
 	messageId?: string
 ) {
 	const id = encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(10)));
-	
+
 	try {
 		await db.insert(schema.whatsappLog).values({
 			id,
@@ -165,7 +176,11 @@ export async function sendCertificateNotification(userId: string, courseName: st
 	});
 }
 
-export async function sendReminderNotification(userId: string, courseName: string, daysSince: string) {
+export async function sendReminderNotification(
+	userId: string,
+	courseName: string,
+	daysSince: string
+) {
 	const phone = await getUserPhoneNumber(userId);
 	if (!phone) return;
 

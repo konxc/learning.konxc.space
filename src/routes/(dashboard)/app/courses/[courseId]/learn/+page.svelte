@@ -52,7 +52,7 @@
 
 	function handleNoteChange(lessonId: string, content: string) {
 		lessonNotes[lessonId] = content;
-		
+
 		if (debounceTimers[lessonId]) {
 			clearTimeout(debounceTimers[lessonId]);
 		}
@@ -150,10 +150,13 @@
 			percentage: (completedLessons / module.lessons.length) * 100 || 0
 		};
 	}
+
+	const brandColor = $derived(data.course.organization?.brandColor || '#2563eb');
+	const brandContrastColor = '#ffffff'; // Fallback for dark backgrounds
 </script>
 
 <svelte:head>
-	<title>{data.course.title} - Learn - Naik Kelas</title>
+	<title>{data.course.title} - Learn | {data.course.organization?.name || 'Naik Kelas'}</title>
 </svelte:head>
 
 <div class={`${SPACING.page} ${SPACING.section}`}>
@@ -167,8 +170,10 @@
 			<span>{mobileMenuOpen ? '▲' : '▼'}</span>
 		</button>
 	</div>
-	
-	<div class={`grid min-h-[calc(100vh-100px)] grid-cols-1 gap-6 md:grid-cols-[300px_1fr] ${mobileMenuOpen ? 'block' : 'hidden md:block'}`}>
+
+	<div
+		class={`grid min-h-[calc(100vh-100px)] grid-cols-1 gap-6 md:grid-cols-[300px_1fr] ${mobileMenuOpen ? 'block' : 'hidden md:block'}`}
+	>
 		<aside
 			class={`h-fit overflow-y-auto md:sticky md:top-6 md:max-h-[calc(100vh-3rem)] ${RADIUS.card} ${COLOR.card} ${SPACING.cardPadding} ${ELEVATION.base} border border-gray-100 dark:border-neutral-800 ${mobileMenuOpen ? 'block' : 'hidden md:block'}`}
 		>
@@ -195,7 +200,8 @@
 					<div class="flex items-center justify-between">
 						<h2 class={`${TEXT.h2} ${COLOR.textPrimary} line-clamp-2`}>{data.course.title}</h2>
 						<button
-							class={`rounded-lg p-2 ${COLOR.neutralHover} ${TRANSITION.colors} text-blue-600 hover:text-blue-700`}
+							class={`rounded-lg p-2 ${COLOR.neutralHover} ${TRANSITION.colors} hover:opacity-80`}
+							style="color: {brandColor}"
 							onclick={toggleAllModules}
 							title={expandedModules.size === data.modules.length ? 'Collapse All' : 'Expand All'}
 						>
@@ -238,17 +244,31 @@
 						<!-- Track Indicator -->
 						{#if data.enrollment?.track}
 							{@const trackInfo = {
-								creator: { label: '🎥 Content Creator', color: 'bg-purple-100 text-purple-700 border-purple-200' },
-								seller: { label: '🛒 Seller / Dropshipper', color: 'bg-orange-100 text-orange-700 border-orange-200' },
-								affiliate: { label: '🔗 Affiliator', color: 'bg-teal-100 text-teal-700 border-teal-200' }
+								creator: {
+									label: '🎥 Content Creator',
+									color: 'bg-purple-100 text-purple-700 border-purple-200'
+								},
+								seller: {
+									label: '🛒 Seller / Dropshipper',
+									color: 'bg-orange-100 text-orange-700 border-orange-200'
+								},
+								affiliate: {
+									label: '🔗 Affiliator',
+									color: 'bg-teal-100 text-teal-700 border-teal-200'
+								}
 							}[data.enrollment.track]}
-							<div class="mt-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold {trackInfo?.color || 'bg-gray-100 text-gray-700'}">
+							<div
+								class="mt-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold {trackInfo?.color ||
+									'bg-gray-100 text-gray-700'}"
+							>
 								{trackInfo?.label || data.enrollment.track}
 							</div>
 						{/if}
 						<!-- Drip Content Indicator -->
 						{#if data.dripContent?.enabled}
-							<div class="mt-3 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+							<div
+								class="mt-3 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700"
+							>
 								📅 Week {data.dripContent.currentWeek}
 							</div>
 						{/if}
@@ -268,11 +288,8 @@
 							</div>
 							<div class="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
 								<div
-									class="h-full rounded-full transition-all duration-700 {data.progressPercent >=
-									100
-										? 'bg-green-500'
-										: 'bg-linear-to-r from-blue-500 to-indigo-600'}"
-									style="width: {data.progressPercent}%"
+									class="h-full rounded-full transition-all duration-700"
+									style="width: {data.progressPercent}%; background: {brandColor};"
 								></div>
 							</div>
 						</div>
@@ -304,8 +321,8 @@
 											class="h-1 w-16 overflow-hidden rounded-full bg-gray-100 dark:bg-neutral-800"
 										>
 											<div
-												class="h-full bg-blue-500 transition-all duration-500"
-												style="width: {modProgress.percentage}%"
+												class="h-full transition-all duration-500"
+												style="width: {modProgress.percentage}%; background: {brandColor};"
 											></div>
 										</div>
 										<span class="text-[10px] font-medium text-gray-400"
@@ -345,24 +362,25 @@
 								<div class={`flex flex-col p-2 ${COLOR.neutral}`}>
 									{#each module.lessons as lesson (lesson.id)}
 										<button
-											class={`w-full rounded-lg px-3 py-2.5 text-left ${TRANSITION.all} flex items-center justify-between gap-2 ${
-												lesson.id === selectedLessonId
-													? 'bg-linear-to-r from-blue-600 to-purple-600 text-white'
-													: lesson.isLocked 
-														? 'opacity-50 cursor-not-allowed bg-gray-50'
-														: `${COLOR.card} ${COLOR.textPrimary} hover:${COLOR.neutralHover}`
-											} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
+											class={`w-full rounded-lg px-3 py-2.5 text-left ${TRANSITION.all} flex items-center justify-between gap-2`}
+											style={lesson.id === selectedLessonId ? `background: ${brandColor}; color: white; font-weight: bold;` : ''}
+											class:bg-gray-50={lesson.isLocked}
+											class:opacity-50={lesson.isLocked}
+											class:cursor-not-allowed={lesson.isLocked}
+											class:hover:bg-gray-100={!lesson.isLocked && lesson.id !== selectedLessonId}
 											onclick={() => !lesson.isLocked && selectLesson(lesson.id)}
 											type="button"
 											disabled={lesson.isLocked}
 										>
-											<span class={`${TEXT.small} truncate flex items-center gap-2`}>
+											<span class={`${TEXT.small} flex items-center gap-2 truncate`}>
 												{#if lesson.isLocked}
 													🔒
 												{:else if lesson.progress?.completedAt}
 													✅
 												{:else if lesson.weekNumber}
-													<span class="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">W{lesson.weekNumber}</span>
+													<span class="rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-700"
+														>W{lesson.weekNumber}</span
+													>
 												{/if}
 												{lesson.title}
 											</span>
@@ -398,10 +416,10 @@
 			{#if selectedLesson}
 				<div class="mb-8 overflow-hidden rounded-xl bg-gray-100 dark:bg-neutral-800">
 					<div
-						class="h-2 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 transition-all duration-500 ease-out"
+						class="h-2 transition-all duration-500 ease-out"
 						style="width: {(data.progress.filter((p) => p.completedAt).length /
 							data.modules.flatMap((m) => m.lessons).length) *
-							100 || 0}%"
+							100 || 0}%; background: {brandColor};"
 					></div>
 					<div
 						class="flex items-center justify-between px-4 py-2 text-[10px] font-bold tracking-wider text-gray-400 uppercase"
@@ -423,7 +441,8 @@
 						<div class="flex flex-1 items-center gap-2">
 							{#each selectedLesson.materials as mat, i}
 								<div
-									class={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i === selectedMaterialIndex ? 'bg-blue-600 ring-2 ring-blue-600/20' : 'bg-gray-200 dark:bg-neutral-800'}`}
+									class={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i === selectedMaterialIndex ? 'ring-2' : 'bg-gray-200 dark:bg-neutral-800'}`}
+									style={i === selectedMaterialIndex ? `background: ${brandColor}; ring-color: ${brandColor}33;` : ''}
 								></div>
 							{/each}
 						</div>
@@ -437,13 +456,15 @@
 
 				<div class="mb-6 flex gap-4 border-b border-gray-100 dark:border-neutral-800">
 					<button
-						class={`px-4 py-2 text-sm font-semibold transition-all ${activeTab === 'content' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+						class="px-4 py-2 text-sm font-semibold transition-all"
+						style={activeTab === 'content' ? `border-bottom: 2px solid ${brandColor}; color: ${brandColor};` : 'color: #6b7280;'}
 						onclick={() => (activeTab = 'content')}
 					>
 						Isi Materi
 					</button>
 					<button
-						class={`px-4 py-2 text-sm font-semibold transition-all ${activeTab === 'notes' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+						class="px-4 py-2 text-sm font-semibold transition-all"
+						style={activeTab === 'notes' ? `border-bottom: 2px solid ${brandColor}; color: ${brandColor};` : 'color: #6b7280;'}
 						onclick={() => (activeTab = 'notes')}
 					>
 						Catatan Pelajaran
@@ -464,7 +485,7 @@
 							/>
 
 							{#if selectedMaterialIndex === selectedLesson.materials.length - 1}
-								<div class="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+								<div class="animate-in fade-in slide-in-from-bottom-4 mt-12 duration-700">
 									<ActionSubmitter
 										lessonId={selectedLesson.id}
 										courseId={data.course.id}
@@ -504,7 +525,8 @@
 							class={`min-h-[300px] w-full p-6 ${RADIUS.card} ${COLOR.bg} border-2 border-dashed ${COLOR.cardBorder} focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 focus:outline-none ${TEXT.body} ${COLOR.textPrimary} resize-none`}
 							placeholder="Tulis catatan Anda di sini... Catatan akan disimpan otomatis ke cloud."
 							value={lessonNotes[selectedLesson.id] || ''}
-							oninput={(e) => handleNoteChange(selectedLesson.id, (e.target as HTMLTextAreaElement).value)}
+							oninput={(e) =>
+								handleNoteChange(selectedLesson.id, (e.target as HTMLTextAreaElement).value)}
 						></textarea>
 						<p class="mt-4 text-xs text-gray-400 italic">
 							Catatan tersimpan secara otomatis dan dapat diakses dari perangkat lain.
@@ -528,7 +550,8 @@
 					{#if selectedLesson.quiz}
 						<a
 							href="/app/courses/{data.course.id}/learn/quiz/{selectedLesson.quiz.id}"
-							class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-6 py-3 ${TEXT.button} font-semibold whitespace-nowrap text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+							class={`inline-flex items-center ${RADIUS.button} px-6 py-3 ${TEXT.button} font-semibold whitespace-nowrap text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+							style="background: {brandColor}"
 						>
 							📝 Take Quiz
 						</a>
@@ -548,7 +571,8 @@
 				</div>
 
 				<div
-					class={`mt-10 overflow-hidden ${RADIUS.card} ${SPACING.cardPadding} relative bg-linear-to-br from-blue-600 to-indigo-700 text-center text-white shadow-2xl transition-all duration-500 hover:scale-[1.01]`}
+					class={`mt-10 overflow-hidden ${RADIUS.card} ${SPACING.cardPadding} relative text-center text-white shadow-2xl transition-all duration-500 hover:scale-[1.01]`}
+					style="background: {brandColor};"
 				>
 					<!-- Decorative background elements -->
 					<div class="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-white/10 blur-3xl"></div>
@@ -560,16 +584,21 @@
 						<div
 							class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-md"
 						>
-							<span class="text-3xl">🎓</span>
+							{#if data.course.organization?.logoUrl}
+								<img src={data.course.organization.logoUrl} alt="" class="h-10 w-10 object-contain" />
+							{:else}
+								<span class="text-3xl">🎓</span>
+							{/if}
 						</div>
 						<h3 class={`${TEXT.h2} mb-2 text-white`}>Selamat! Anda Hampir Selesai</h3>
-						<p class="mb-8 text-blue-100/90 duration-200 active:scale-95">
-							Selesaikan semua materi untuk membuka sertifikat kelulusan resmi Anda.
+						<p class="mb-8 text-white/90 duration-200 active:scale-95">
+							Selesaikan semua materi untuk membuka sertifikat kelulusan resmi dari {data.course.organization?.name || 'Naik Kelas'}.
 						</p>
 
 						<div class="flex flex-col items-center gap-4">
 							<button
-								class={`group relative inline-flex items-center gap-3 overflow-hidden ${RADIUS.button} bg-white px-10 py-4 ${TEXT.button} text-lg font-bold text-blue-700 ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-1 hover:shadow-2xl active:scale-95`}
+								class={`group relative inline-flex items-center gap-3 overflow-hidden ${RADIUS.button} bg-white px-10 py-4 ${TEXT.button} text-lg font-bold ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-1 hover:shadow-2xl active:scale-95`}
+								style="color: {brandColor}; text-shadow: none;"
 								onclick={async (e) => {
 									const btn = e.currentTarget;
 									btn.classList.add('opacity-80', 'cursor-not-allowed');
@@ -604,8 +633,8 @@
 									></polyline></svg
 								>
 							</button>
-							<span class="text-[10px] font-medium tracking-widest text-blue-200 uppercase"
-								>Verifikasi Instan via Naik Kelas</span
+							<span class="text-[10px] font-medium tracking-widest text-white/60 uppercase"
+								>Verifikasi Instan via {data.course.organization?.name || 'Naik Kelas'}</span
 							>
 						</div>
 					</div>
@@ -618,3 +647,21 @@
 		</main>
 	</div>
 </div>
+
+<style>
+	@media print {
+		/* Hide download button and info section when printing */
+		button,
+		:global(.certificate-info),
+		:global(.certificate-header > h1),
+		:global(.certificate-header > button) {
+			display: none !important;
+		}
+
+		/* Remove background gradient for print */
+		div:has(.certificate-body) {
+			background: white !important;
+			padding: 0 !important;
+		}
+	}
+</style>

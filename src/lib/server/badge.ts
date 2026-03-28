@@ -5,11 +5,23 @@ import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { createNotification } from './email';
 
 interface BadgeCriteria {
-	type: 'lessons_completed' | 'courses_completed' | 'submissions' | 'streak' | 'first_course' | 'perfect_score';
+	type:
+		| 'lessons_completed'
+		| 'courses_completed'
+		| 'submissions'
+		| 'streak'
+		| 'first_course'
+		| 'perfect_score';
 	threshold: number;
 }
 
-const BADGES: { id: string; name: string; description: string; icon: string; criteria: BadgeCriteria }[] = [
+const BADGES: {
+	id: string;
+	name: string;
+	description: string;
+	icon: string;
+	criteria: BadgeCriteria;
+}[] = [
 	{
 		id: 'first-lesson',
 		name: 'First Step',
@@ -105,29 +117,21 @@ export async function checkAndAwardBadges(userId: string) {
 		.from(schema.userBadge)
 		.where(eq(schema.userBadge.userId, userId));
 
-	const existingBadgeIds = new Set(existingBadges.map(b => b.badgeId));
+	const existingBadgeIds = new Set(existingBadges.map((b) => b.badgeId));
 
 	// Count lessons completed
 	const lessonsCompleted = await db
 		.select({ count: count() })
 		.from(schema.lessonProgress)
 		.where(
-			and(
-				eq(schema.lessonProgress.userId, userId),
-				isNotNull(schema.lessonProgress.completedAt)
-			)
+			and(eq(schema.lessonProgress.userId, userId), isNotNull(schema.lessonProgress.completedAt))
 		);
 
 	// Count courses completed
 	const coursesCompleted = await db
 		.select({ count: count() })
 		.from(schema.enrollment)
-		.where(
-			and(
-				eq(schema.enrollment.userId, userId),
-				eq(schema.enrollment.status, 'completed')
-			)
-		);
+		.where(and(eq(schema.enrollment.userId, userId), eq(schema.enrollment.status, 'completed')));
 
 	// Count submissions
 	const submissions = await db
@@ -139,12 +143,7 @@ export async function checkAndAwardBadges(userId: string) {
 	const perfectScores = await db
 		.select({ count: count() })
 		.from(schema.submissionGrade)
-		.where(
-			and(
-				eq(schema.submissionGrade.gradedBy, userId),
-				eq(schema.submissionGrade.score, 100)
-			)
-		);
+		.where(and(eq(schema.submissionGrade.gradedBy, userId), eq(schema.submissionGrade.score, 100)));
 
 	// Get streak days
 	const userXP = await db
