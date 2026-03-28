@@ -64,7 +64,7 @@
 						>
 							<h3 class={`${TEXT.h2} ${COLOR.textPrimary} mb-3`}>{enrollment.course.title}</h3>
 							<p class={`price ${COLOR.textSecondary} mb-4`}>
-								Harga: Rp {enrollment.course.price.toLocaleString('id-ID')}
+								Price: Rp {enrollment.course.price.toLocaleString('id-ID')}
 							</p>
 
 							{#if enrollment.paymentProof}
@@ -72,17 +72,17 @@
 									{#if enrollment.paymentProof.status === 'pending'}
 										<span
 											class={`badge pending px-3 py-1 ${RADIUS.badge} ${TEXT.small} font-semibold ${COLOR.warningBg}`}
-											>Sedang ditinjau</span
+											>Reviewing</span
 										>
 									{:else if enrollment.paymentProof.status === 'approved'}
 										<span
 											class={`badge approved px-3 py-1 ${RADIUS.badge} ${TEXT.small} font-semibold ${COLOR.successBg}`}
-											>Disetujui</span
+											>Approved</span
 										>
 									{:else}
 										<span
 											class={`badge rejected px-3 py-1 ${RADIUS.badge} ${TEXT.small} font-semibold ${COLOR.errorBg}`}
-											>Ditolak</span
+											>Rejected</span
 										>
 									{/if}
 								</div>

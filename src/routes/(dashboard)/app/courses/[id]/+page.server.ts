@@ -56,9 +56,43 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		isEnrolled = enrollments.length > 0;
 	}
 
+	// Get curriculum preview
+	const modules = await db
+		.select()
+		.from(schema.module)
+		.where(eq(schema.module.courseId, courseId))
+		.orderBy(schema.module.order);
+
+	const moduleIds = modules.map((m) => m.id);
+	let allLessons: any[] = [];
+
+	if (moduleIds.length > 0) {
+		// Fetch lessons that belong to any of the modules in this course
+		const lessonsResult = await db
+			.select({
+				id: schema.lesson.id,
+				moduleId: schema.lesson.moduleId,
+				title: schema.lesson.title,
+				order: schema.lesson.order
+			})
+			.from(schema.lesson)
+			.innerJoin(schema.module, eq(schema.lesson.moduleId, schema.module.id))
+			.where(eq(schema.module.courseId, courseId))
+			.orderBy(schema.lesson.order);
+
+		allLessons = lessonsResult;
+	}
+
+	// Group lessons by module
+	const modulesWithLessons = modules.map((m) => ({
+		...m,
+		lessons: allLessons.filter((l) => l.moduleId === m.id)
+	}));
+
 	return {
 		course: courseData.course,
 		mentor: courseData.mentor,
-		isEnrolled
+		isEnrolled,
+		modules: modulesWithLessons
 	};
 };

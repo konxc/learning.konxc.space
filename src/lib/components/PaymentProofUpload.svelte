@@ -1,5 +1,9 @@
 <script lang="ts">
 	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
+	import { browser } from '$app/environment';
+	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import type { SubmitFunction } from '@sveltejs/kit';
 
 	interface Props {
 		courseId: string;
@@ -78,34 +82,28 @@
 		});
 	}
 
-	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
-
-	async function handleSubmit() {
+	const handleSubmit: SubmitFunction = () => {
 		isUploading = true;
 		error = null;
 
-		// Return a function for use:enhance
 		return async ({ result, update }) => {
 			isUploading = false;
 
 			if (result.type === 'success') {
 				await update();
-				// success message logic here if needed
 			} else if (result.type === 'redirect') {
 				await goto(result.location);
 			} else if (result.type === 'failure') {
-				// Fix for [object Object] - ensure we get a string
 				const data = result.data as any;
 				error =
 					typeof data?.message === 'object'
 						? JSON.stringify(data.message)
-						: data?.message || 'Gagal mengupload bukti pembayaran';
+						: data?.message || 'Failed to upload payment proof';
 			} else if (result.type === 'error') {
-				error = 'Terjadi kesalahan sistem. Silakan coba lagi.';
+				error = 'System error occurred. Please try again.';
 			}
 		};
-	}
+	};
 
 	function removePreview() {
 		file = null;
@@ -142,7 +140,7 @@
 
 	async function handleOnlinePayment() {
 		if (!browser || !(window as any).snap) {
-			error = 'Sistem pembayaran online belum siap. Silakan refresh halaman.';
+			error = 'Online payment system is not ready. Please refresh the page.';
 			return;
 		}
 
@@ -150,7 +148,6 @@
 		error = null;
 
 		try {
-			// 1. Create online transaction on server
 			const formData = new FormData();
 			formData.append('courseId', courseId);
 
@@ -163,16 +160,15 @@
 			const data = JSON.parse(result.data);
 
 			if (result.type === 'success' && data.snapToken) {
-				// 2. Open Snap Popup
 				(window as any).snap.pay(data.snapToken, {
-					onSuccess: function (result: any) {
+					onSuccess: function () {
 						goto('/app/my-courses?payment=success');
 					},
-					onPending: function (result: any) {
+					onPending: function () {
 						goto('/app/payments?status=pending');
 					},
-					onError: function (result: any) {
-						error = 'Pembayaran gagal. Silakan coba lagi.';
+					onError: function () {
+						error = 'Payment failed. Please try again.';
 						isProcessingOnline = false;
 					},
 					onClose: function () {
@@ -180,23 +176,22 @@
 					}
 				});
 			} else {
-				// Handle failure from server action
 				const failureMsg = Array.isArray(data)
 					? data[1]
-					: data?.message || 'Gagal membuat transaksi online';
+					: data?.message || 'Failed to create online transaction';
 				throw new Error(failureMsg);
 			}
 		} catch (err) {
 			console.error(err);
-			error = err instanceof Error ? err.message : 'Gagal memproses pembayaran online';
+			error = err instanceof Error ? err.message : 'Failed to process online payment';
 			isProcessingOnline = false;
 		}
 	}
 </script>
 
 <div class={`${RADIUS.card} ${COLOR.card} p-8 ${ELEVATION.base}`}>
-	<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-2`}>Upload Bukti Pembayaran</h3>
-	<p class={`${TEXT.body} ${COLOR.textSecondary} mb-5`}>Kursus: {courseTitle}</p>
+	<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-2`}>Upload Payment Proof</h3>
+	<p class={`${TEXT.body} ${COLOR.textSecondary} mb-5`}>Course: {courseTitle}</p>
 
 	{#if error}
 		<div
@@ -209,21 +204,21 @@
 
 	{#if existingProof}
 		<div class={`mb-4 ${RADIUS.small} ${SPACING.input} ${COLOR.warning}`}>
-			<p>
+			<div class="flex items-center gap-2">
 				{#if existingProof.status === 'pending'}
 					<span
 						class={`inline-block ${RADIUS.badge} px-3 py-1 ${TEXT.small} font-semibold ${COLOR.warningBg}`}
-						>Sedang ditinjau</span
+						>Reviewing</span
 					>
 				{:else if existingProof.status === 'rejected'}
 					<span
 						class={`inline-block ${RADIUS.badge} px-3 py-1 ${TEXT.small} font-semibold ${COLOR.errorBg}`}
-						>Ditolak</span
+						>Rejected</span
 					>
 				{/if}
-			</p>
+			</div>
 			<p class={`${TEXT.body} ${COLOR.textSecondary} mt-2 text-sm`}>
-				Upload ulang untuk mengganti bukti pembayaran
+				Upload again to replace existing proof
 			</p>
 		</div>
 	{/if}
@@ -256,7 +251,7 @@
 				for="proofFile"
 				class={`inline-block cursor-pointer ${RADIUS.button} border-2 border-dashed border-gray-300 bg-gray-100 px-6 py-3 ${TEXT.button} ${COLOR.textPrimary} ${TRANSITION.all} hover:border-blue-600 hover:bg-gray-200 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-blue-500 dark:hover:bg-neutral-700`}
 			>
-				Pilih file gambar
+				Select image file
 			</label>
 		</div>
 
@@ -264,7 +259,7 @@
 			<div class="mb-5 text-center">
 				<img
 					src={previewUrl}
-					alt="Bukti pembayaran"
+					alt="Payment proof preview"
 					class="mx-auto max-h-[400px] max-w-full rounded-lg shadow-md"
 				/>
 				<button
@@ -272,7 +267,7 @@
 					onclick={removePreview}
 					class={`mt-3 block ${RADIUS.small} bg-red-600 px-4 py-2 ${TEXT.small} font-semibold text-white ${TRANSITION.all} hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600/70 focus-visible:ring-offset-1`}
 				>
-					Hapus
+					Remove
 				</button>
 			</div>
 		{/if}
@@ -282,13 +277,13 @@
 			disabled={!file || isUploading || isProcessingOnline}
 			class={`w-full ${RADIUS.button} bg-linear-to-br from-blue-600 to-purple-600 px-6 py-3 ${TEXT.button} font-semibold text-white ${TRANSITION.all} ${ELEVATION.base} hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0`}
 		>
-			{isUploading ? 'Mengupload...' : 'Upload Bukti Pembayaran'}
+			{isUploading ? 'Uploading...' : 'Upload Payment Proof'}
 		</button>
 	</form>
 
 	<div class="my-8 flex items-center gap-4">
 		<div class="h-px flex-1 bg-gray-200 dark:bg-neutral-800"></div>
-		<span class={`${TEXT.xs} font-medium text-gray-400`}>ATAU BAYAR INSTAN</span>
+		<span class={`${TEXT.small} font-medium text-gray-400`}>OR PAY INSTANTLY</span>
 		<div class="h-px flex-1 bg-gray-200 dark:bg-neutral-800"></div>
 	</div>
 
@@ -298,10 +293,10 @@
 		onclick={handleOnlinePayment}
 		class={`w-full ${RADIUS.button} border-2 border-blue-600 bg-white px-6 py-3 ${TEXT.button} font-bold text-blue-600 ${TRANSITION.all} hover:bg-blue-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50`}
 	>
-		{isProcessingOnline ? 'Mempersiapkan...' : '💳 Bayar via GoPay / QRIS / Transfer'}
+		{isProcessingOnline ? 'Preparing...' : '💳 Pay via GoPay / QRIS / Bank Transfer'}
 	</button>
 
 	<p class="mt-4 text-center text-[10px] text-gray-400">
-		Pembayaran melalui Midtrans diproses secara otomatis 24/7.
+		Midtrans payments are processed automatically 24/7.
 	</p>
 </div>

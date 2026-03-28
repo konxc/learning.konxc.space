@@ -49,7 +49,7 @@
 	<PageSection>
 		<div class="mb-4 flex items-center justify-between">
 			<h2 class={`${TEXT.h3} ${COLOR.textPrimary}`}>Recent Transactions</h2>
-			<a href="/app/admin/payments"><Button variant="ghost">Lihat semua</Button></a>
+			<a href="/app/admin/payments"><Button variant="ghost">View all</Button></a>
 		</div>
 		<Table {columns} {rows} />
 	</PageSection>

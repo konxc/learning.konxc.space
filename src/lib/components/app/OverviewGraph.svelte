@@ -18,7 +18,7 @@
 >
 	<div class={`${TEXT.h4} ${COLOR.textPrimary} mb-1`}>{title}</div>
 	{#if description}
-		<div class={`${TEXT.xs} ${COLOR.textSecondary} mb-4`}>{description}</div>
+		<div class={`${TEXT.small} ${COLOR.textSecondary} mb-4`}>{description}</div>
 	{/if}
 	<div class="flex h-48 items-end gap-2 pb-2">
 		{#each Array(12) as _, i}

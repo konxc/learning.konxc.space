@@ -30,7 +30,7 @@
 	<div class="mb-8 flex items-center justify-between gap-4">
 		<div>
 			<h1 class={`${TEXT.h1} ${COLOR.textPrimary} mb-2`}>Welcome, {data.user.username}!</h1>
-			<p class={`${TEXT.body} ${COLOR.textSecondary}`}>Lacak progress pembelajaranmu</p>
+			<p class={`${TEXT.body} ${COLOR.textSecondary}`}>Track your learning progress</p>
 		</div>
 		<div class="w-40"><RoleSwitcher /></div>
 	</div>
@@ -45,7 +45,7 @@
 	<PageSection>
 		<OverviewGraph
 			title="Learning Overview"
-			description="Aktivitas belajarmu dalam 30 hari terakhir"
+			description="Your learning activity in the last 30 days"
 			noCard={true}
 		/>
 	</PageSection>
@@ -53,7 +53,7 @@
 	<PageSection>
 		<div class="mb-4 flex items-center justify-between">
 			<h2 class={`${TEXT.h3} ${COLOR.textPrimary}`}>My Courses</h2>
-			<a href="/app/my-courses"><Button variant="ghost">Lihat semua</Button></a>
+			<a href="/app/my-courses"><Button variant="ghost">View all</Button></a>
 		</div>
 		<Table columns={courseColumns} rows={courseRows} />
 	</PageSection>

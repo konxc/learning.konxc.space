@@ -1,0 +1,207 @@
+<script lang="ts">
+	import type { PageData } from './$types';
+	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
+	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
+	import { COLOR, RADIUS, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
+
+	let { data }: { data: PageData } = $props();
+
+	const { student, courseProgress } = data;
+
+	// Group lesson details by module within each course
+	function groupByModule(lessonDetails: typeof courseProgress[0]['lessonDetails']) {
+		const map = new Map<string, { moduleTitle: string; moduleOrder: number; lessons: typeof lessonDetails }>();
+		for (const item of lessonDetails) {
+			const key = item.module.id;
+			if (!map.has(key)) {
+				map.set(key, { moduleTitle: item.module.title, moduleOrder: item.module.order, lessons: [] });
+			}
+			map.get(key)!.lessons.push(item);
+		}
+		return [...map.values()].sort((a, b) => a.moduleOrder - b.moduleOrder);
+	}
+
+	// Overall stats across all courses
+	const totalCompleted = courseProgress.reduce((s: number, c) => s + c.completedLessons, 0);
+	const totalLessons = courseProgress.reduce((s: number, c) => s + c.totalLessons, 0);
+	const overallPercent = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
+
+	let expandedCourses = $state<Set<string>>(new Set([courseProgress[0]?.enrollment.course.id || '']));
+
+	function toggleCourse(courseId: string) {
+		const s = new Set(expandedCourses);
+		s.has(courseId) ? s.delete(courseId) : s.add(courseId);
+		expandedCourses = s;
+	}
+</script>
+
+<svelte:head>
+	<title>{student.fullName || student.username} — Student Progress</title>
+</svelte:head>
+
+<PageWrapper>
+	<PageHeader title="Student Progress">
+		<a
+			href="/app/mentor/students"
+			class={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-blue-600 no-underline hover:text-blue-700 ${TRANSITION.colors}`}
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+				<line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+			</svg>
+			All Students
+		</a>
+	</PageHeader>
+
+	<!-- Student Profile Card -->
+	<div class={`mb-8 flex flex-col gap-6 sm:flex-row sm:items-center ${RADIUS.card} ${COLOR.card} ${ELEVATION.base} p-6 md:p-8 border ${COLOR.cardBorder}`}>
+		<!-- Avatar -->
+		<div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-700 text-2xl font-black text-white shadow-lg">
+			{(student.fullName || student.username)?.[0]?.toUpperCase() ?? 'S'}
+		</div>
+
+		<!-- Info -->
+		<div class="flex-1">
+			<h2 class={`${TEXT.h2} ${COLOR.textPrimary} font-black`}>
+				{student.fullName || student.username}
+			</h2>
+			{#if student.fullName}
+				<p class={`text-sm ${COLOR.textMuted}`}>@{student.username}</p>
+			{/if}
+			{#if student.email}
+				<p class={`text-sm ${COLOR.textSecondary} mt-0.5`}>{student.email}</p>
+			{/if}
+		</div>
+
+		<!-- Overall Stats -->
+		<div class="flex gap-6 sm:text-right">
+			<div>
+				<p class={`text-[10px] font-black uppercase tracking-widest ${COLOR.textMuted}`}>Courses</p>
+				<p class={`text-3xl font-black ${COLOR.textPrimary}`}>{courseProgress.length}</p>
+			</div>
+			<div>
+				<p class={`text-[10px] font-black uppercase tracking-widest ${COLOR.textMuted}`}>Lessons Done</p>
+				<p class="text-3xl font-black text-blue-600">{totalCompleted}<span class="text-base font-normal text-gray-400">/{totalLessons}</span></p>
+			</div>
+			<div>
+				<p class={`text-[10px] font-black uppercase tracking-widest ${COLOR.textMuted}`}>Overall</p>
+				<p class={`text-3xl font-black ${overallPercent >= 100 ? 'text-green-600' : 'text-blue-600'}`}>{overallPercent}%</p>
+			</div>
+		</div>
+	</div>
+
+	<!-- Overall Progress Bar -->
+	<div class="mb-8">
+		<div class="mb-2 flex items-center justify-between">
+			<span class={`text-xs font-bold uppercase tracking-widest ${COLOR.textMuted}`}>Overall Learning Progress</span>
+			<span class={`text-xs font-black ${overallPercent >= 100 ? 'text-green-600' : 'text-blue-600'}`}>{overallPercent}%</span>
+		</div>
+		<div class="h-3 w-full overflow-hidden rounded-full bg-gray-100">
+			<div
+				class={`h-full rounded-full transition-all duration-700 ${overallPercent >= 100 ? 'bg-green-500' : 'bg-gradient-to-r from-blue-500 to-indigo-600'}`}
+				style="width: {overallPercent}%"
+			></div>
+		</div>
+	</div>
+
+	<!-- Per-Course Progress Accordion -->
+	<div class="space-y-4">
+		{#each courseProgress as cp (cp.enrollment.course.id)}
+			{@const modules = groupByModule(cp.lessonDetails)}
+			{@const isOpen = expandedCourses.has(cp.enrollment.course.id)}
+
+			<div class={`overflow-hidden ${RADIUS.card} border ${COLOR.cardBorder} ${ELEVATION.base} ${TRANSITION.all}`}>
+				<!-- Course Header -->
+				<button
+					class={`flex w-full items-center justify-between gap-4 px-6 py-5 ${COLOR.card} text-left hover:bg-gray-50 ${TRANSITION.colors}`}
+					onclick={() => toggleCourse(cp.enrollment.course.id)}
+				>
+					<div class="flex items-center gap-4">
+						{#if cp.enrollment.course.thumbnailUrl}
+							<img
+								src={cp.enrollment.course.thumbnailUrl}
+								alt=""
+								class="h-12 w-16 rounded-lg object-cover"
+							/>
+						{:else}
+							<div class="flex h-12 w-16 items-center justify-center rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100 text-2xl">
+								📚
+							</div>
+						{/if}
+						<div>
+							<h3 class={`font-bold ${COLOR.textPrimary} leading-snug`}>{cp.enrollment.course.title}</h3>
+							<div class="mt-1 flex items-center gap-3">
+								<span class={`text-xs ${COLOR.textMuted}`}>
+									{cp.completedLessons}/{cp.totalLessons} lessons
+								</span>
+								<span class={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
+									cp.enrollment.status === 'active' ? `${COLOR.successBg}` : `${COLOR.warningBg}`
+								}`}>
+									{cp.enrollment.status}
+								</span>
+							</div>
+						</div>
+					</div>
+
+					<div class="flex shrink-0 items-center gap-4">
+						<!-- Mini progress -->
+						<div class="hidden w-32 sm:block">
+							<div class="mb-1 flex justify-end">
+								<span class={`text-xs font-black ${cp.progressPercent >= 100 ? 'text-green-600' : 'text-blue-600'}`}>
+									{cp.progressPercent}%
+								</span>
+							</div>
+							<div class="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+								<div
+									class={`h-full rounded-full ${cp.progressPercent >= 100 ? 'bg-green-500' : 'bg-gradient-to-r from-blue-500 to-indigo-600'}`}
+									style="width: {cp.progressPercent}%"
+								></div>
+							</div>
+						</div>
+						<svg class={`h-5 w-5 ${COLOR.textMuted} transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+							<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+						</svg>
+					</div>
+				</button>
+
+				<!-- Lesson Progress Detail (Expandable) -->
+				{#if isOpen}
+					<div class="border-t border-gray-100 bg-gray-50/50 p-4 animate-in slide-in-from-top-2 duration-300">
+						{#if modules.length === 0}
+							<p class={`text-center py-4 ${COLOR.textMuted} text-sm`}>No lessons available in this course yet.</p>
+						{:else}
+							<div class="space-y-4">
+								{#each modules as mod}
+									<div>
+										<p class={`mb-2 text-xs font-black uppercase tracking-widest ${COLOR.textMuted} px-2`}>
+											{mod.moduleTitle}
+										</p>
+										<div class="space-y-1">
+											{#each mod.lessons as item}
+												{@const isDone = item.completedAt !== null}
+												<div class={`flex items-center gap-3 rounded-xl px-4 py-3 ${isDone ? 'bg-green-50' : 'bg-white'} border ${isDone ? 'border-green-100' : 'border-gray-100'} shadow-sm`}>
+													<div class={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${isDone ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
+														{isDone ? '✓' : '○'}
+													</div>
+													<span class={`flex-1 text-sm font-medium ${isDone ? COLOR.textPrimary : COLOR.textSecondary}`}>
+														{item.lesson.title}
+													</span>
+													{#if isDone && item.completedAt}
+														<span class={`text-xs ${COLOR.textMuted} hidden sm:block`}>
+															{new Date(item.completedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+														</span>
+													{:else if !isDone && item.lastPositionMs && item.lastPositionMs > 0}
+														<span class="text-xs text-amber-500">In progress</span>
+													{/if}
+												</div>
+											{/each}
+										</div>
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</div>
+				{/if}
+			</div>
+		{/each}
+	</div>
+</PageWrapper>

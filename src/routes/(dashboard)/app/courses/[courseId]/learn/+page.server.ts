@@ -116,6 +116,11 @@ export const load: PageServerLoad = async (event) => {
 	// Get first lesson for redirect if no specific lesson selected
 	const firstLesson = structuredModules[0]?.lessons?.[0] || null;
 
+	// Compute progress summary
+	const totalLessons = structuredModules.reduce((sum, m) => sum + m.lessons.length, 0);
+	const completedLessons = progress.filter((p) => p.completedAt !== null).length;
+	const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+
 	return {
 		course,
 		modules: structuredModules,
@@ -124,6 +129,9 @@ export const load: PageServerLoad = async (event) => {
 			lastPositionMs: p.lastPositionMs,
 			completedAt: p.completedAt
 		})),
-		firstLesson
+		firstLesson,
+		totalLessons,
+		completedLessons,
+		progressPercent
 	};
 };
