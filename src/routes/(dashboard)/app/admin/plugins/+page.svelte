@@ -1,0 +1,113 @@
+<script lang="ts">
+	import type { PageData } from './$types';
+	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
+	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
+	import PageSection from '$lib/components/layouts/PageSection.svelte';
+	import { COLOR, RADIUS, TEXT, ELEVATION, SPACING } from '$lib/config/design';
+
+	let { data }: { data: PageData } = $props();
+
+	// Group plugins by type
+	const pluginsByType = $derived(() => {
+		const groups: Record<string, typeof data.plugins> = {};
+		for (const plugin of data.plugins || []) {
+			const type = plugin.type;
+			if (!groups[type]) groups[type] = [];
+			groups[type].push(plugin);
+		}
+		return groups;
+	});
+</script>
+
+<svelte:head>
+	<title>Plugin Management - Naik Kelas</title>
+</svelte:head>
+
+<PageWrapper>
+	<PageHeader 
+		title="Plugin Management" 
+		description="Manage built-in plugins and their configurations"
+	/>
+
+	<!-- Plugin Stats -->
+	<div class="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-4 text-center`}>
+			<p class="text-3xl font-black text-indigo-600">{data.plugins?.length || 0}</p>
+			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Total Plugins</p>
+		</div>
+		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-4 text-center`}>
+			<p class="text-3xl font-black text-green-600">{data.plugins?.filter(p => p.isActive).length || 0}</p>
+			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Active</p>
+		</div>
+		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-4 text-center`}>
+			<p class="text-3xl font-black text-orange-600">{Object.keys(pluginsByType()).length}</p>
+			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Categories</p>
+		</div>
+		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-4 text-center`}>
+			<p class="text-3xl font-black text-blue-600">8</p>
+			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Built-in</p>
+		</div>
+	</div>
+
+	<!-- Plugin List by Type -->
+	{#each Object.entries(pluginsByType()) as [type, plugins]}
+		<PageSection>
+			<div class="mb-4 flex items-center gap-2">
+				<span class="text-xl">{plugins[0]?.typeInfo?.icon || '📦'}</span>
+				<h2 class={TEXT.h2}>{plugins[0]?.typeInfo?.label || type} Plugins</h2>
+				<span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-600">
+					{plugins.length}
+				</span>
+			</div>
+
+			<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+				{#each plugins as plugin}
+					<div class={`${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} ${ELEVATION.base} p-5 transition-all hover:${ELEVATION.hover}`}>
+						<div class="mb-3 flex items-start justify-between">
+							<div class="flex items-center gap-3">
+								<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-2xl">
+									{plugin.icon}
+								</div>
+								<div>
+									<h3 class="font-bold text-gray-900">{plugin.name}</h3>
+									<p class="text-xs text-gray-500">v{plugin.version}</p>
+								</div>
+							</div>
+							<span class={`rounded-full px-2 py-0.5 text-[10px] font-bold ${plugin.typeInfo?.color || 'bg-gray-100 text-gray-600'}`}>
+								{plugin.typeInfo?.label || type}
+							</span>
+						</div>
+
+						<p class="mb-4 text-sm text-gray-600 leading-relaxed">
+							{plugin.description}
+						</p>
+
+						<div class="flex items-center justify-between border-t border-gray-100 pt-3">
+							<div class="flex items-center gap-2">
+								<span class={`inline-flex h-2 w-2 rounded-full ${plugin.isActive ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+								<span class="text-xs font-medium text-gray-500">
+									{plugin.isActive ? 'Active' : 'Inactive'}
+								</span>
+							</div>
+
+							{#if plugin.dependencies.length > 0}
+								<span class="text-xs text-gray-400">
+									Depends on: {plugin.dependencies.join(', ')}
+								</span>
+							{/if}
+						</div>
+					</div>
+				{/each}
+			</div>
+		</PageSection>
+	{/each}
+
+	{#if !data.plugins || data.plugins.length === 0}
+		<PageSection>
+			<div class="py-12 text-center">
+				<p class="text-4xl mb-4">📦</p>
+				<p class={COLOR.textSecondary}>No plugins found</p>
+			</div>
+		</PageSection>
+	{/if}
+</PageWrapper>

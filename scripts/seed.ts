@@ -24,6 +24,7 @@ import {
 } from './seed/notifications.js';
 import { seedAffiliateLinks, seedAffiliateSales } from './seed/affiliates.js';
 import { seedOrganizations, assignCoursesToOrganizations } from './seed/organizations.js';
+import { seedPlugins } from './seed/plugins.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -123,6 +124,9 @@ async function main() {
 		const adminIds = [userIds[0], userIds[1], userIds[2]]; // admin, bd, mentor
 		await seedOrganizations(db, adminIds);
 		await assignCoursesToOrganizations(db, courseIds);
+
+		// Seed plugins
+		await seedPlugins(db);
 
 		const cohorts = await seedCohorts(db, [mentorId], courseIds);
 		const cohortIds = cohorts.map((c) => c.id);

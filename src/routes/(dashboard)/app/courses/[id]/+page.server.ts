@@ -140,6 +140,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		console.error('Error parsing featuresConfig:', e);
 	}
 
+	// Get plugin tabs for this course
+	const { getCourseTabsForCourse, getEnabledPluginIdsForCourse } = await import('$lib/plugins/course-helpers');
+	const courseTabs = await getCourseTabsForCourse(courseId);
+	const enabledPluginIds = await getEnabledPluginIdsForCourse(courseId);
+
 	return {
 		course: courseData.course,
 		mentor: courseData.mentor,
@@ -147,7 +152,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		modules: modulesWithLessons,
 		reviews,
 		avgRating,
-		features
+		features,
+		courseTabs,
+		enabledPluginIds
 	};
 };
 

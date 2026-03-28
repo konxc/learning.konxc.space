@@ -164,6 +164,12 @@ export function getNavItemsForRole(role: string, context?: WorkspaceContext): Na
 				category: 'admin'
 			},
 			{
+				label: 'Plugin Management',
+				href: '/app/admin/plugins',
+				icon: '🧩',
+				category: 'admin'
+			},
+			{
 				label: 'CRM Waiting List',
 				href: '/app/crm/waiting-list',
 				icon: '⏳',

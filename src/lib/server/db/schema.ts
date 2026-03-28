@@ -441,6 +441,43 @@ export const organizationInvitation = sqliteTable('organization_invitation', {
 		.$defaultFn(() => new Date())
 });
 
+// Plugin Registry
+export const pluginRegistry = sqliteTable('plugin_registry', {
+	id: text('id').primaryKey(),
+	name: text('name').notNull(),
+	version: text('version').notNull().default('1.0.0'),
+	type: text('type').notNull(), // 'social' | 'assessment' | 'gamification' | 'content' | 'analytics' | 'communication'
+	description: text('description'),
+	icon: text('icon').default('📦'),
+	dependencies: text('dependencies').default('[]'), // JSON array of plugin IDs
+	defaultConfig: text('default_config').default('{}'), // JSON object
+	isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const coursePlugin = sqliteTable('course_plugin', {
+	id: text('id').primaryKey(),
+	courseId: text('course_id')
+		.notNull()
+		.references(() => course.id),
+	pluginId: text('plugin_id')
+		.notNull()
+		.references(() => pluginRegistry.id),
+	isEnabled: integer('is_enabled', { mode: 'boolean' }).notNull().default(true),
+	config: text('config').default('{}'), // JSON object for course-specific config
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
 export type Session = typeof session.$inferSelect;
 export type User = typeof user.$inferSelect;
 export type Course = typeof course.$inferSelect;
@@ -480,6 +517,8 @@ export type Checkpoint = typeof checkpoint.$inferSelect;
 export type CheckpointSubmission = typeof checkpointSubmission.$inferSelect;
 export type Discussion = typeof discussion.$inferSelect;
 export type BroadcastMessage = typeof broadcastMessage.$inferSelect;
+export type PluginRegistry = typeof pluginRegistry.$inferSelect;
+export type CoursePlugin = typeof coursePlugin.$inferSelect;
 
 // Notifications
 export const notification = sqliteTable('notification', {
