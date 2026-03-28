@@ -252,7 +252,7 @@
 				<div class="flex items-center gap-3 pt-2">
 					<button
 						type="submit"
-						class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-8 py-3.5 ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+						class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-8 py-3.5 ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
 					>
 						Submit Application
 					</button>

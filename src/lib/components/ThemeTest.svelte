@@ -161,7 +161,7 @@
 				</p>
 			</div>
 			<div
-				class={`${COLOR.card} ${COLOR.cardBorder} ${RADIUS.card} ${SPACING.cardPadding} ${ELEVATION.hover} ${TRANSITION.shadow} cursor-pointer`}
+				class={`${COLOR.card} ${COLOR.cardBorder} ${RADIUS.card} ${SPACING.cardPadding} ${ELEVATION.cardHover} ${TRANSITION.shadow} cursor-pointer`}
 			>
 				<h4 class={`${TEXT.h4} ${COLOR.textPrimary} mb-2`}>Card 2</h4>
 				<p class={`${TEXT.body} ${COLOR.textSecondary}`}>

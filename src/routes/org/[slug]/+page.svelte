@@ -90,7 +90,7 @@
 				{:else}
 					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 						{#each courses as course}
-							<div class={`${COLOR.card} ${RADIUS.card} border ${COLOR.cardBorder} ${ELEVATION.base} ${ELEVATION.hover} ${ELEVATION.transition} flex flex-col overflow-hidden`}>
+							<div class={`${COLOR.card} ${RADIUS.card} border ${COLOR.cardBorder} ${ELEVATION.base} ${ELEVATION.cardHover} ${ELEVATION.transition} flex flex-col overflow-hidden`}>
 								<div class="relative h-48 overflow-hidden">
 									{#if course.thumbnailUrl}
 										<img src={course.thumbnailUrl} alt={course.title} class="h-full w-full object-cover" />

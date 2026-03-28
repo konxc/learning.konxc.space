@@ -1,37 +1,38 @@
 export const COLOR = {
-	bg: 'bg-gray-50 dark:bg-neutral-950',
-	card: 'bg-white dark:bg-neutral-900',
-	cardBorder: 'border border-gray-200/60 dark:border-neutral-800',
-	// WCAG AA compliant: text-gray-900 (#111827) on white has 16.56:1 contrast
-	textPrimary: 'text-gray-900 dark:text-gray-50',
-	// WCAG AA compliant: text-gray-700 (#374151) on white has 7.5:1 contrast (AAA for large text)
-	textSecondary: 'text-gray-700 dark:text-gray-300',
-	// WCAG AA compliant: text-gray-600 (#4b5563) on white has 5.74:1 contrast (AAA for large text)
-	textMuted: 'text-gray-600 dark:text-gray-400',
-	// WCAG AA compliant: blue-600 (#2563eb) on white has 4.81:1 contrast
+	bg: 'bg-zinc-50 dark:bg-zinc-950',
+	card: 'bg-white/80 backdrop-blur-md dark:bg-zinc-900/80',
+	cardBorder: 'border border-zinc-200/50 dark:border-zinc-800/50',
+	// High-contrast neutrals
+	textPrimary: 'text-zinc-900 dark:text-zinc-50',
+	textSecondary: 'text-zinc-600 dark:text-zinc-400',
+	textMuted: 'text-zinc-400 dark:text-zinc-500',
+	// Brand Accents (Vibrant Blue)
 	accent: 'text-blue-600 dark:text-blue-400',
-	// WCAG AA compliant: blue-600 on white with white text has sufficient contrast
 	accentBg: 'bg-blue-600 dark:bg-blue-500',
 	accentHover: 'hover:bg-blue-700 dark:hover:bg-blue-600',
-	neutral: 'bg-gray-50 dark:bg-neutral-900',
-	neutralHover: 'hover:bg-gray-100 dark:hover:bg-neutral-800',
-	surface: 'bg-white dark:bg-neutral-900',
-	surfaceHover: 'hover:bg-gray-50 dark:hover:bg-neutral-800',
-	// Status colors - WCAG AA compliant
-	success: 'bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400',
-	successBg: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-	warning: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400',
-	warningBg: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
-	error: 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400',
-	errorBg: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
-	info: 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400',
-	infoBg: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-	purple: 'bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400',
-	purpleBg: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300'
+	// Neutral Surface
+	neutral: 'bg-zinc-100 dark:bg-zinc-900',
+	neutralHover: 'hover:bg-zinc-200 dark:hover:bg-zinc-800',
+	surface: 'bg-white dark:bg-zinc-900',
+	surfaceHover: 'hover:bg-zinc-50 dark:hover:bg-zinc-800',
+	// Status (Slightly more vibrant for SaaS feel)
+	success: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400',
+	successBg: 'bg-emerald-500 text-white',
+	warning: 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400',
+	warningBg: 'bg-amber-500 text-white',
+	error: 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400',
+	errorBg: 'bg-rose-500 text-white',
+	info: 'bg-sky-50 text-sky-700 dark:bg-sky-950/30 dark:text-sky-400'
+};
+
+export const GRADIENT = {
+	primary: 'bg-gradient-to-br from-blue-600 to-indigo-700',
+	surface: 'bg-gradient-to-b from-white to-zinc-50/50 dark:from-zinc-900 dark:to-zinc-950/50',
+	glow: 'after:absolute after:inset-0 after:z-[-1] after:bg-blue-500/10 after:blur-2xl after:opacity-0 hover:after:opacity-100'
 };
 
 export const RADIUS = {
-	card: 'rounded-2xl',
+	card: 'rounded-[1.25rem]',
 	button: 'rounded-xl',
 	input: 'rounded-xl',
 	badge: 'rounded-full',
@@ -39,44 +40,39 @@ export const RADIUS = {
 };
 
 export const ELEVATION = {
-	base: 'shadow-[0_1px_3px_0_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_3px_0_rgba(0,0,0,0.3)]',
-	hover:
-		'hover:shadow-[0_4px_12px_0_rgba(0,0,0,0.12),0_2px_4px_-1px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_4px_12px_0_rgba(0,0,0,0.4)]',
-	transition: 'transition-shadow duration-300 ease-out',
-	card: 'shadow-[0_2px_8px_0_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_0_rgba(0,0,0,0.3)]',
-	cardHover:
-		'hover:shadow-[0_8px_24px_0_rgba(0,0,0,0.12)] dark:hover:shadow-[0_8px_24px_0_rgba(0,0,0,0.4)]'
+	base: 'shadow-[0_1px_3px_0_rgba(0,0,0,0.02),0_1px_2px_-1px_rgba(0,0,0,0.03)] dark:shadow-none',
+	card: 'shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]',
+	cardHover: 'hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] transition-all duration-500',
+	transition: 'transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1)'
 };
 
 export const SHADOW = ELEVATION;
 
 export const SPACING = {
-	page: 'px-6 md:px-10 lg:px-12 py-6',
-	section: 'space-y-8 md:space-y-10',
-	cardPadding: 'p-6 md:p-8',
-	button: 'px-4 py-2.5',
+	page: 'px-6 md:px-12 lg:px-16 py-8',
+	section: 'space-y-10 md:space-y-16',
+	cardPadding: 'p-8',
+	button: 'px-5 py-2.5',
 	input: 'px-4 py-2.5',
 	tight: 'space-y-4',
-	relaxed: 'space-y-12'
+	relaxed: 'space-y-16'
 };
 
 export const TEXT = {
-	h1: 'text-2xl md:text-3xl font-bold tracking-tight',
-	h2: 'text-xl md:text-2xl font-bold tracking-tight',
-	h3: 'text-lg md:text-xl font-semibold',
-	h4: 'text-base font-semibold',
-	// Updated for better contrast: gray-700 instead of gray-600
-	secondary: 'text-sm text-gray-700 dark:text-gray-300',
-	// Updated for better contrast: gray-600 instead of gray-500
-	muted: 'text-xs text-gray-600 dark:text-gray-400',
-	button: 'text-sm font-medium',
-	body: 'text-sm leading-relaxed',
-	small: 'text-xs'
+	h1: 'text-3xl md:text-4xl font-bold tracking-[-0.03em]',
+	h2: 'text-2xl md:text-3xl font-bold tracking-[-0.02em]',
+	h3: 'text-xl md:text-2xl font-semibold tracking-[-0.01em]',
+	h4: 'text-lg font-semibold',
+	secondary: 'text-[0.9375rem] leading-relaxed text-zinc-600 dark:text-zinc-400',
+	muted: 'text-sm text-zinc-400 dark:text-zinc-500 font-medium',
+	button: 'text-sm font-semibold tracking-tight',
+	body: 'text-[15px] leading-relaxed',
+	small: 'text-[11px] font-bold uppercase tracking-widest'
 };
 
 export const TRANSITION = {
 	colors: 'transition-colors duration-200 ease-out',
-	all: 'transition-all duration-300 ease-out',
+	all: 'transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)',
 	shadow: 'transition-shadow duration-300 ease-out',
-	transform: 'transition-transform duration-200 ease-out'
+	transform: 'transition-transform duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)'
 };

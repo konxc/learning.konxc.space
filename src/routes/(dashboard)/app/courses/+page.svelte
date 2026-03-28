@@ -15,17 +15,41 @@
 
 	// Category configurations for adaptive cards
 	const categoryConfig: Record<string, { icon: string; gradient: string; badge: string }> = {
-		marketing: { icon: '📢', gradient: 'from-orange-500 to-red-500', badge: 'bg-orange-100 text-orange-700' },
-		technical: { icon: '💻', gradient: 'from-blue-500 to-indigo-500', badge: 'bg-blue-100 text-blue-700' },
-		business: { icon: '💼', gradient: 'from-green-500 to-emerald-500', badge: 'bg-green-100 text-green-700' },
-		soft_skills: { icon: '🧠', gradient: 'from-purple-500 to-pink-500', badge: 'bg-purple-100 text-purple-700' },
-		creative: { icon: '🎨', gradient: 'from-pink-500 to-rose-500', badge: 'bg-pink-100 text-pink-700' },
-		general: { icon: '📚', gradient: 'from-blue-600 to-purple-600', badge: 'bg-blue-100 text-blue-700' }
+		marketing: {
+			icon: '📢',
+			gradient: 'from-orange-500 to-red-500',
+			badge: 'bg-orange-100 text-orange-700'
+		},
+		technical: {
+			icon: '💻',
+			gradient: 'from-blue-500 to-indigo-500',
+			badge: 'bg-blue-100 text-blue-700'
+		},
+		business: {
+			icon: '💼',
+			gradient: 'from-green-500 to-emerald-500',
+			badge: 'bg-green-100 text-green-700'
+		},
+		soft_skills: {
+			icon: '🧠',
+			gradient: 'from-purple-500 to-pink-500',
+			badge: 'bg-purple-100 text-purple-700'
+		},
+		creative: {
+			icon: '🎨',
+			gradient: 'from-pink-500 to-rose-500',
+			badge: 'bg-pink-100 text-pink-700'
+		},
+		general: {
+			icon: '📚',
+			gradient: 'from-blue-600 to-purple-600',
+			badge: 'bg-blue-100 text-blue-700'
+		}
 	};
 
 	// Get unique categories from courses
 	const availableCategories = $derived(() => {
-		const cats = new Set(data.courses.map(c => c.category?.toLowerCase() || 'general'));
+		const cats = new Set(data.courses.map((c) => c.category?.toLowerCase() || 'general'));
 		return Array.from(cats);
 	});
 
@@ -140,11 +164,11 @@
 		</button>
 		{#each Object.entries(categoryConfig) as [key, config]}
 			<button
-				class={`px-4 py-2 ${RADIUS.button} text-sm font-bold transition-all flex items-center gap-1.5 ${selectedCategory === key ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+				class={`px-4 py-2 ${RADIUS.button} flex items-center gap-1.5 text-sm font-bold transition-all ${selectedCategory === key ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
 				onclick={() => handleCategory(key)}
 			>
 				<span>{config.icon}</span>
-				{key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+				{key.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
 			</button>
 		{/each}
 	</div>
@@ -233,7 +257,7 @@
 					{@const category = course.category?.toLowerCase() || 'general'}
 					{@const catConfig = categoryConfig[category] || categoryConfig.general}
 					<div
-						class={`flex flex-col overflow-hidden ${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${ELEVATION.base} ${ELEVATION.hover} ${ELEVATION.transition}`}
+						class={`flex flex-col overflow-hidden ${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${ELEVATION.base} ${ELEVATION.cardHover} ${ELEVATION.transition}`}
 					>
 						<!-- Adaptive header based on category -->
 						{#if course.thumbnailUrl}
@@ -247,7 +271,7 @@
 							/>
 						{:else}
 							<div
-								class={`flex h-[200px] w-full items-center justify-center bg-gradient-to-br ${catConfig.gradient}`}
+								class={`flex h-[200px] w-full items-center justify-center bg-linear-to-br ${catConfig.gradient}`}
 							>
 								<span class="text-6xl">{catConfig.icon}</span>
 							</div>
@@ -255,10 +279,12 @@
 
 						<div class="flex flex-1 flex-col p-5">
 							<!-- Category badge -->
-							<span class={`mb-2 inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${catConfig.badge}`}>
-								{category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+							<span
+								class={`mb-2 inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${catConfig.badge}`}
+							>
+								{category.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
 							</span>
-							
+
 							<h3 class={`${TEXT.h2} ${COLOR.textPrimary} mb-2.5`}>{course.title}</h3>
 							<p class={`mb-4 line-clamp-3 min-h-[60px] leading-relaxed ${TEXT.secondary}`}>
 								{course.description}
@@ -283,7 +309,7 @@
 								>
 								<a
 									href="/app/courses/{course.id}/enroll"
-									class={`flex-1 text-center no-underline ${RADIUS.button} ${SPACING.button} ${TEXT.button} ${COLOR.accentBg} text-white ${ELEVATION.base} ${TRANSITION.all} ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+									class={`flex-1 text-center no-underline ${RADIUS.button} ${SPACING.button} ${TEXT.button} ${COLOR.accentBg} text-white ${ELEVATION.base} ${TRANSITION.all} ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
 									>Enroll Now</a
 								>
 							</div>

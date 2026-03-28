@@ -62,7 +62,7 @@
 
 			<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{#each plugins as plugin}
-					<div class={`${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} ${ELEVATION.base} p-5 transition-all hover:${ELEVATION.hover}`}>
+					<div class={`${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} ${ELEVATION.base} p-5 transition-all hover:${ELEVATION.cardHover}`}>
 						<div class="mb-3 flex items-start justify-between">
 							<div class="flex items-center gap-3">
 								<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-2xl">

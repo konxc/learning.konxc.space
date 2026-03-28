@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { COLOR, RADIUS, TRANSITION, TEXT } from '$lib/config/design';
+	import { COLOR, RADIUS, TRANSITION, TEXT, GRADIENT } from '$lib/config/design';
 
 	let { workspaces }: { 
 		workspaces: { 
@@ -12,30 +12,38 @@
 
 	const isOrg = $derived(workspaces.activeId !== 'personal');
 	const activeName = $derived(isOrg ? workspaces.activeOrg?.name : 'Personal Workspace');
-	const activeInital = $derived(isOrg ? (workspaces.activeOrg?.name?.[0] || 'O') : 'P');
+	const activeInitial = $derived(isOrg ? (workspaces.activeOrg?.name?.[0] || 'O') : 'P');
 </script>
 
-<div class={`px-4 py-4 mb-2 border-b border-gray-100 dark:border-neutral-800 transition-all duration-300 ${workspaces.activeId === 'personal' ? 'bg-blue-50/30' : 'bg-indigo-50/30'}`}>
-	<div class="flex items-center gap-3">
-		<div class={`h-10 w-10 shrink-0 ${RADIUS.small} flex items-center justify-center text-sm font-black text-white shadow-sm ${workspaces.activeId === 'personal' ? 'bg-blue-600' : 'bg-indigo-600'}`}>
+<div class={`px-5 py-5 mb-4 border-b border-zinc-200/50 dark:border-zinc-800/50 transition-all duration-500 overflow-hidden relative group ${workspaces.activeId === 'personal' ? 'bg-blue-50/20 dark:bg-blue-900/10' : 'bg-indigo-50/20 dark:bg-indigo-900/10'}`}>
+	<!-- Glassmorphism Background Decoration -->
+	<div class="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-blue-500/5 blur-2xl group-hover:bg-blue-500/10 transition-all duration-700"></div>
+	
+	<div class="flex items-center gap-4 relative z-10">
+		<div class={`h-11 w-11 shrink-0 ${RADIUS.small} flex items-center justify-center text-sm font-black text-white shadow-lg ring-2 ring-white dark:ring-zinc-800 ${workspaces.activeId === 'personal' ? 'bg-blue-600' : 'bg-indigo-600'}`}>
 			{#if isOrg && workspaces.activeOrg?.logoUrl}
 				<img src={workspaces.activeOrg.logoUrl} alt="" class="h-full w-full object-cover rounded-inherit" />
 			{:else}
-				{activeInital}
+				<span class="drop-shadow-md">{activeInitial}</span>
 			{/if}
 		</div>
-		<div class="min-w-0 flex-1">
-			<div class="flex items-center gap-1.5 mb-1.5">
-				<p class={`text-[10px] font-black uppercase tracking-widest leading-none ${workspaces.activeId === 'personal' ? 'text-blue-600' : 'text-indigo-600'}`}>
-					Working in
+		<div class="min-w-0 flex-1 space-y-1.5">
+			<div class="flex items-center gap-2">
+				<p class={`text-[10px] font-black uppercase tracking-[0.15em] leading-none ${workspaces.activeId === 'personal' ? 'text-blue-600' : 'text-indigo-600'}`}>
+					{isOrg ? 'Organization' : 'Account'}
 				</p>
 				{#if isOrg && workspaces.activeOrg?.planType}
-					<span class={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${workspaces.activeOrg.planType === 'pro' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-gray-200 text-gray-600 dark:bg-neutral-800 dark:text-gray-400'}`}>
-						{workspaces.activeOrg.planType}
-					</span>
+					<div class="flex items-center">
+						<span class={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm ${workspaces.activeOrg.planType === 'pro' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' : 'bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'}`}>
+							{#if workspaces.activeOrg.planType === 'pro'}
+								<span class="text-[10px]">✨</span>
+							{/if}
+							{workspaces.activeOrg.planType}
+						</span>
+					</div>
 				{/if}
 			</div>
-			<h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate leading-none">
+			<h3 class="text-[0.875rem] font-black text-zinc-900 dark:text-zinc-100 truncate leading-none tracking-tight">
 				{activeName}
 			</h3>
 		</div>

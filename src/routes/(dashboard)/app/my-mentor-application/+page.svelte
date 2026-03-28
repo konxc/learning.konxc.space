@@ -23,7 +23,7 @@
 				</p>
 				<a
 					href="/app/mentor/courses"
-					class={`inline-flex items-center ${RADIUS.card} ${COLOR.accentBg} px-10 py-4 ${TEXT.button} text-lg font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+					class={`inline-flex items-center ${RADIUS.card} ${COLOR.accentBg} px-10 py-4 ${TEXT.button} text-lg font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
 				>
 					View My Courses
 				</a>
@@ -176,7 +176,7 @@
 			</p>
 			<a
 				href="/app/apply-mentor"
-				class={`inline-flex items-center ${RADIUS.card} ${COLOR.accentBg} px-10 py-4 ${TEXT.button} text-lg font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+				class={`inline-flex items-center ${RADIUS.card} ${COLOR.accentBg} px-10 py-4 ${TEXT.button} text-lg font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
 			>
 				Apply as Mentor
 			</a>

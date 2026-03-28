@@ -12,7 +12,7 @@
 </script>
 
 <div
-	class={`${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding} ${ELEVATION.base} ${ELEVATION.hover} ${ELEVATION.transition}`}
+	class={`${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding} ${ELEVATION.base} ${ELEVATION.cardHover} ${ELEVATION.transition}`}
 >
 	{#if title}
 		<div class={`mb-1 ${TEXT.h2} ${COLOR.textPrimary}`}>{title}</div>
