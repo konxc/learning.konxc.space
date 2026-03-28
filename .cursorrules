@@ -1,107 +1,29 @@
-# Cursor Rules for Naik Kelas Platform
+# Cursor Rules for Naik Kelas 2.0
 
-## Project Context
+> **Primary reference**: See `AGENTS.md` and `CLAUDE.md` at the project root for comprehensive coding guidelines, architecture, and design system documentation.
 
-Building a SvelteKit-based learning platform for "Naik Kelas by Koneksi" educational program.
+## Quick Rules
 
-## Tech Stack
+- **Framework**: SvelteKit 2 + Svelte 5 Runes (`$props()`, `$state()`, `$derived()`)
+- **Styling**: Tailwind CSS 4 — use `bg-linear-to-*` not `bg-gradient-to-*`
+- **Design**: Import tokens from `$lib/config/design` — never hardcode colors or shadows
+- **Props**: Use `$props()` with TypeScript interfaces — never use `export let`
+- **Validation**: Run `pnpm run check` after every change — must pass with 0 errors/warnings
+- **Server**: Never import `$lib/server/*` in client `.svelte` files
+- **HTML**: Always close elements explicitly (Svelte 5 warns on implicit closing)
+- **Responses**: The user prefers responses in Indonesian (Bahasa Indonesia)
 
-- Frontend: SvelteKit 5, Svelte 5 Runes
-- Styling: Tailwind CSS 4
-- Database: Turso (LibSQL) via Drizzle ORM
-- Auth: Lucia v3
-- i18n: Paraglide (inlang)
+## Design Tokens
 
-## Code Style & Patterns
-
-### Component Structure
-
-- Use TypeScript with proper interfaces for props
-- Prefer `$props()` for component props in Svelte 5
-- Place reusable components in `src/lib/components/`
-- Place section components in `src/lib/sections/`
-
-### Naming Conventions
-
-- Components: PascalCase (e.g., `FeatureCard.svelte`)
-- Files: kebab-case for routes, PascalCase for components
-- Variables: camelCase
-- Constants: UPPER_SNAKE_CASE
-
-### Design System
-
-- Follow colors from `docs/DESIGN_REFERENCE.md`
-- Use Tailwind CSS utilities
-- Maintain responsive breakpoint at 768px
-- Use gradient backgrounds for CTA sections
-
-### File Organization
-
-```
-src/
-├── lib/
-│   ├── components/     # Reusable UI components
-│   ├── sections/       # Page sections
-│   ├── server/         # Server-side code
-│   └── assets/         # Static assets
-├── routes/             # SvelteKit routes
-└── app.css             # Global styles
+```ts
+import { COLOR, TEXT, RADIUS, ELEVATION, TRANSITION, SPACING, GRADIENT } from '$lib/config/design';
 ```
 
-## Best Practices
+## Key Files
 
-### When Adding Features
-
-1. Create modular components
-2. Add TypeScript interfaces for props
-3. Follow design system from DESIGN_REFERENCE.md
-4. Write accessible HTML (ARIA labels, semantic tags)
-5. Add responsive styles for mobile
-
-### When Refactoring
-
-1. Maintain existing functionality
-2. Keep visual design consistent
-3. Test responsive layout
-4. Update documentation if needed
-
-### Validation Flow After Refactor
-
-1. Jalankan `pnpm run check` untuk validasi tipe.
-2. Jalankan `pnpm run lint` untuk memastikan konsistensi.
-3. Jalankan `pnpm run test` (jika ada test suite).
-4. Review hasil refactor di panel diff Cursor sebelum commit.
-5. Jika refactor melibatkan file `.svelte`, lakukan visual QA di browser dev.
-
-### Database
-
-- Use Drizzle ORM for database operations
-- Run `pnpm run db:push` after schema changes
-- Never commit sensitive data
-
-## Important Notes
-
-- User prefers responses in Indonesian (memory ID: 3042113)
-- Maintain accessibility (a11y) standards
-- Follow Svelte 5 Runes pattern
-- Use Tailwind CSS for styling
-
-## AI Refactor Behavior
-
-- Prioritize **type safety** and **runtime stability** over minimal code changes.
-- Automatically create missing interfaces in `src/lib/types/` if type inference fails.
-- When uncertain, prefer explicit type annotations instead of relying on inference.
-- Convert legacy Svelte 4 syntax to Svelte 5 Runes pattern:
-  - `$props()` without generics
-  - `$bindable()` for two-way binding
-  - `$derived()` for computed values
-- Use `lang="postcss"` in `<style>` blocks when Tailwind @apply is used.
-- Ensure all Drizzle queries are type-safe using `InferModel`.
-
-## Auto-Fix Scope Rules
-
-- Allowed: refactor imports, types, props, and Tailwind class corrections.
-- Allowed: split large components into smaller reusable parts.
-- Allowed: migrate `$props<T>` to new `$props()` syntax.
-- Disallowed: introduce third-party dependencies without explicit instruction.
-- Disallowed: modify business logic or remove security-related checks.
+- `src/lib/config/design.ts` — All design tokens
+- `src/lib/server/rbac.ts` — Role-based navigation & permissions
+- `src/lib/server/db/schema.ts` — 44 Drizzle tables
+- `src/lib/components/layouts/` — AppShell, Sidebar, DashboardHeader
+- `AGENTS.md` — Full AI agent coding guidelines
+- `CLAUDE.md` — Detailed architecture & patterns reference
