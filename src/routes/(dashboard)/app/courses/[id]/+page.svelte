@@ -175,8 +175,8 @@
                             <form action="?/submitReview" method="POST" class="mb-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
                                 <h3 class="font-bold text-gray-900 mb-4">Tulis Ulasan Anda</h3>
                                 <div class="mb-4">
-                                    <label class="block text-sm font-bold text-gray-700 mb-2">Rating</label>
-                                    <select name="rating" required class="w-full p-3 rounded-lg border border-gray-300 bg-white">
+                                    <label for="rating" class="block text-sm font-bold text-gray-700 mb-2">Rating</label>
+                                    <select id="rating" name="rating" required class="w-full p-3 rounded-lg border border-gray-300 bg-white">
                                         <option value="5">5 Bintang - Sangat Bagus</option>
                                         <option value="4">4 Bintang - Bagus</option>
                                         <option value="3">3 Bintang - Cukup</option>
@@ -185,8 +185,8 @@
                                     </select>
                                 </div>
                                 <div class="mb-4">
-                                    <label class="block text-sm font-bold text-gray-700 mb-2">Ulasan</label>
-                                    <textarea name="comment" rows="3" placeholder="Ceritakan pengalaman Anda..." class="w-full p-3 rounded-lg border border-gray-300 resize-none"></textarea>
+                                    <label for="comment" class="block text-sm font-bold text-gray-700 mb-2">Ulasan</label>
+                                    <textarea id="comment" name="comment" rows="3" placeholder="Ceritakan pengalaman Anda..." class="w-full p-3 rounded-lg border border-gray-300 resize-none"></textarea>
                                 </div>
                                 <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">Kirim Ulasan</button>
                             </form>

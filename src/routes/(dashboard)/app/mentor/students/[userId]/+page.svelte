@@ -252,10 +252,11 @@
 								<input type="hidden" name="submissionId" value={sub.id} />
 								<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 									<div>
-										<label class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+										<label for="score-{sub.id}" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
 											Score (0-100)
 										</label>
 										<input
+											id="score-{sub.id}"
 											type="number"
 											name="score"
 											bind:value={gradingScore}
@@ -281,10 +282,11 @@
 									</div>
 								</div>
 								<div>
-									<label class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
+									<label for="feedback-{sub.id}" class="mb-1.5 block text-xs font-black uppercase tracking-widest text-gray-500">
 										Feedback (Optional)
 									</label>
 									<textarea
+										id="feedback-{sub.id}"
 										name="feedback"
 										bind:value={gradingFeedback}
 										rows="2"
