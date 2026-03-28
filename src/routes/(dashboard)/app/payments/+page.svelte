@@ -21,7 +21,7 @@
 </svelte:head>
 
 <PageWrapper>
-	<PageHeader title="Bukti Pembayaran" />
+	<PageHeader title="Payment Proofs" />
 
 	{#if showSuccess}
 		<PageSection>
@@ -29,7 +29,7 @@
 				class={`success-message ${RADIUS.button} ${SPACING.cardPadding} ${COLOR.success}`}
 				role="alert"
 			>
-				Bukti pembayaran berhasil diupload! Admin akan meninjaunya.
+				Payment proof uploaded successfully! An admin will review it shortly.
 			</div>
 		</PageSection>
 	{/if}
@@ -45,15 +45,15 @@
 		</PageSection>
 	{:else}
 		<PageSection>
-			<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-5`}>Kursus yang Menunggu Pembayaran</h2>
+			<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-5`}>Courses Pending Payment</h2>
 
 			{#if data.enrollments.length === 0}
 				<div class="text-center">
-					<p class={`mb-4 ${COLOR.textSecondary}`}>Tidak ada kursus yang menunggu pembayaran</p>
+					<p class={`mb-4 ${COLOR.textSecondary}`}>No courses pending payment</p>
 					<a
 						href="/app/my-courses"
 						class={`inline-flex items-center ${COLOR.accent} ${TRANSITION.colors} hover:underline`}
-						>Kembali ke My Courses</a
+						>Back to My Courses</a
 					>
 				</div>
 			{:else}
@@ -92,7 +92,7 @@
 								href="/app/payments?courseId={enrollment.course.id}"
 								class={`inline-flex w-full items-center justify-center no-underline ${RADIUS.button} ${COLOR.accentBg} text-white ${SPACING.button} ${TEXT.button} font-semibold ${TRANSITION.all} ${ELEVATION.base} ${ELEVATION.hover}`}
 							>
-								{enrollment.paymentProof ? 'Upload Ulang' : 'Upload Bukti Pembayaran'}
+								{enrollment.paymentProof ? 'Reupload' : 'Upload Payment Proof'}
 							</a>
 						</div>
 					{/each}

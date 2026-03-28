@@ -167,7 +167,7 @@
 <PageWrapper>
 	<PageHeader
 		title="Coupon Management"
-		description="Kelola semua kode promo dan discount yang tersedia di platform"
+		description="Manage all discount codes and promotional offers available on the platform"
 	/>
 
 	<!-- Results Summary with Search and Column Filter -->

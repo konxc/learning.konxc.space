@@ -30,7 +30,7 @@
 	<div class="mb-8 flex items-center justify-between gap-4">
 		<div>
 			<h1 class={`${TEXT.h1} ${COLOR.textPrimary} mb-2`}>Business Overview</h1>
-			<p class={`${TEXT.body} ${COLOR.textSecondary}`}>Ringkasan keuangan dan metrik bisnis</p>
+			<p class={`${TEXT.body} ${COLOR.textSecondary}`}>Financial summary and business metrics</p>
 		</div>
 		<div class="w-40"><RoleSwitcher /></div>
 	</div>
@@ -43,7 +43,7 @@
 	</div>
 
 	<PageSection>
-		<OverviewGraph title="Finance Overview" description="Ringkasan pendapatan" noCard={true} />
+		<OverviewGraph title="Finance Overview" description="Revenue summary" noCard={true} />
 	</PageSection>
 
 	<PageSection>

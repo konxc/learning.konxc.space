@@ -104,7 +104,7 @@
 </PageQuick>
 
 <PageWrapper>
-	<PageHeader title="User Management" description="Kelola semua users yang terdaftar di platform" />
+	<PageHeader title="User Management" description="Manage all users registered on the platform" />
 
 	<!-- Results Summary with Search and Column Filter -->
 	<div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

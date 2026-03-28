@@ -110,7 +110,7 @@
 <PageWrapper>
 	<PageHeader
 		title="Payment Proof Management"
-		description="Verifikasi dan kelola semua bukti pembayaran yang dikirim oleh users"
+		description="Verify and manage all payment proofs submitted by users"
 	/>
 
 	<!-- Results Summary with Search and Column Filter -->

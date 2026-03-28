@@ -128,7 +128,7 @@
 <PageWrapper>
 	<PageHeader
 		title="Waiting List Management"
-		description="Kelola dan pantau semua calon customer yang mendaftar di waiting list"
+		description="Manage and monitor all prospective customers registered in the waiting list"
 	/>
 
 	<!-- Results Summary with Search and Column Filter -->

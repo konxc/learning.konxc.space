@@ -117,7 +117,7 @@
 <PageWrapper>
 	<PageHeader
 		title="Course Management"
-		description="Kelola semua course yang tersedia di platform"
+		description="Manage all courses available on the platform"
 	/>
 
 	<!-- Results Summary with Search and Column Filter -->

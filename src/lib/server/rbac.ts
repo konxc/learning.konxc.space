@@ -39,7 +39,7 @@ export interface NavGroup {
 export function getNavItemsForRole(role: string): NavItem[] {
 	const baseNav: NavItem[] = [
 		{
-			label: 'Ringkasan',
+			label: 'Overview',
 			href: '/app/overview',
 			icon: '📊',
 			category: 'dashboard'
@@ -50,38 +50,38 @@ export function getNavItemsForRole(role: string): NavItem[] {
 		return [
 			...baseNav,
 			{
-				label: 'Kelola Kursus',
+				label: 'Manage Courses',
 				href: '/app/admin/courses',
 				icon: '📚',
 				category: 'admin'
 			},
 			{
-				label: 'Kupon Diskon',
+				label: 'Discount Coupons',
 				href: '/app/admin/coupons',
 				icon: '🎫',
 				category: 'admin'
 			},
 			{
-				label: 'Manajemen Pengguna',
+				label: 'User Management',
 				href: '/app/admin/users',
 				icon: '👥',
 				category: 'admin'
 			},
 			{
-				label: 'Pendaftaran Mentor',
+				label: 'Mentor Applications',
 				href: '/app/admin/mentor-applications',
 				icon: '📝',
 				category: 'admin',
 				badgeColor: 'yellow'
 			},
 			{
-				label: 'Verifikasi Pembayaran',
+				label: 'Payment Verification',
 				href: '/app/admin/payments',
 				icon: '💳',
 				category: 'admin'
 			},
 			{
-				label: 'Daftar Tunggu CRM',
+				label: 'CRM Waiting List',
 				href: '/app/crm/waiting-list',
 				icon: '⏳',
 				category: 'crm'
@@ -93,7 +93,7 @@ export function getNavItemsForRole(role: string): NavItem[] {
 		return [
 			...baseNav,
 			{
-				label: 'Daftar Tunggu CRM',
+				label: 'CRM Waiting List',
 				href: '/app/crm/waiting-list',
 				icon: '⏳',
 				category: 'crm'
@@ -105,25 +105,25 @@ export function getNavItemsForRole(role: string): NavItem[] {
 		return [
 			...baseNav,
 			{
-				label: 'Jelajahi Kursus',
+				label: 'Browse Courses',
 				href: '/app/courses',
 				icon: '🔍',
 				category: 'learning'
 			},
 			{
-				label: 'Kursus Saya',
+				label: 'My Courses',
 				href: '/app/my-courses',
 				icon: '📖',
 				category: 'learning'
 			},
 			{
-				label: 'Manajemen Kursus',
+				label: 'Course Management',
 				href: '/app/mentor/courses',
 				icon: '🎓',
 				category: 'management'
 			},
 			{
-				label: 'Daftar Siswa',
+				label: 'My Students',
 				href: '/app/mentor/students',
 				icon: '👨‍🎓',
 				category: 'management'
@@ -135,25 +135,25 @@ export function getNavItemsForRole(role: string): NavItem[] {
 	return [
 		...baseNav,
 		{
-			label: 'Jelajahi Kursus',
+			label: 'Browse Courses',
 			href: '/app/courses',
 			icon: '🔍',
 			category: 'learning'
 		},
 		{
-			label: 'Kursus Saya',
+			label: 'My Courses',
 			href: '/app/my-courses',
 			icon: '📖',
 			category: 'learning'
 		},
 		{
-			label: 'Daftar Mentor',
+			label: 'Apply as Mentor',
 			href: '/app/apply-mentor',
 			icon: '🚀',
 			category: 'learning'
 		},
 		{
-			label: 'Status Lamaran',
+			label: 'Application Status',
 			href: '/app/my-mentor-application',
 			icon: '📋',
 			category: 'learning'

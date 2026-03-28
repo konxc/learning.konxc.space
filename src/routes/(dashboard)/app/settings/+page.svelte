@@ -109,7 +109,7 @@
 </svelte:head>
 
 <PageWrapper>
-	<PageHeader title="Settings" description="Kelola pengaturan akun dan preferensi Anda" />
+	<PageHeader title="Settings" description="Manage your account settings and preferences" />
 
 	<!-- Tabs Navigation - Keep existing styling -->
 	<div class={`mb-6 flex gap-2 border-b ${COLOR.cardBorder}`}>

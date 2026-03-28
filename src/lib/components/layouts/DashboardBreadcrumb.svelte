@@ -4,11 +4,11 @@
 	import { m } from '$lib/paraglide/messages.js';
 
 	const labelMapping: Record<string, string> = {
-		app: 'Beranda',
-		overview: 'Ringkasan',
-		courses: 'Jelajahi',
-		'my-courses': 'Kursus Saya',
-		learn: 'Belajar',
+		app: 'Home',
+		overview: 'Overview',
+		courses: 'Browse',
+		'my-courses': 'My Courses',
+		learn: 'Learn',
 		admin: 'Admin',
 		mentor: 'Mentor'
 	};
@@ -26,10 +26,7 @@
 	}
 </script>
 
-<nav
-	aria-label="Breadcrumb navigation"
-	class="flex px-0 dark:border-neutral-800/50"
->
+<nav aria-label="Breadcrumb navigation" class="flex px-0 dark:border-neutral-800/50">
 	<ol
 		class="m-0 flex list-none flex-wrap items-baseline justify-start gap-1 p-0"
 		itemscope

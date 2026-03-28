@@ -13,12 +13,12 @@
 		});
 
 		const categoryLabels: Record<string, string> = {
-			dashboard: 'Beranda',
-			learning: 'Belajar',
-			management: 'Kelola',
-			admin: 'Administrator',
-			crm: 'Hubungan Pelanggan',
-			other: 'Lainnya'
+			dashboard: 'Home',
+			learning: 'Learning',
+			management: 'Management',
+			admin: 'Administration',
+			crm: 'CRM',
+			other: 'Other'
 		};
 
 		return Object.entries(groups).map(([category, items]) => ({
@@ -210,7 +210,7 @@
 								<button
 									type="button"
 									onclick={() => toggleGroup(groupKey)}
-									class={`flex w-full items-center justify-between ${RADIUS.small} px-2 py-2 mt-4 ${TEXT.small} font-bold tracking-widest uppercase ${COLOR.textMuted} opacity-70 ${TRANSITION.colors} hover:opacity-100 dark:hover:text-gray-100`}
+									class={`flex w-full items-center justify-between ${RADIUS.small} mt-4 px-2 py-2 ${TEXT.small} font-bold tracking-widest uppercase ${COLOR.textMuted} opacity-70 ${TRANSITION.colors} hover:opacity-100 dark:hover:text-gray-100`}
 								>
 									<span class="flex items-center gap-2">
 										<span class="h-1 w-1 rounded-full bg-blue-600/30"></span>
@@ -232,7 +232,7 @@
 								</button>
 							{:else}
 								<div
-									class={`${TEXT.small} font-bold tracking-widest uppercase ${COLOR.textMuted} px-2 py-2 mt-4 opacity-70 flex items-center gap-2`}
+									class={`${TEXT.small} font-bold tracking-widest uppercase ${COLOR.textMuted} mt-4 flex items-center gap-2 px-2 py-2 opacity-70`}
 								>
 									<span class="h-1 w-1 rounded-full bg-blue-600/30"></span>
 									{group.label}
@@ -250,7 +250,7 @@
 											active
 												? `${COLOR.textPrimary} bg-white font-bold shadow-xs ring-1 ring-gray-200/50 dark:bg-blue-950/20 dark:ring-blue-500/20`
 												: `${COLOR.textSecondary} hover:bg-white/50 hover:text-gray-900 hover:shadow-xs dark:hover:bg-neutral-800/40 dark:hover:text-gray-100`
-										} focus:outline-none focus:ring-2 focus:ring-blue-500/50`}
+										} focus:ring-2 focus:ring-blue-500/50 focus:outline-none`}
 										aria-current={active ? 'page' : undefined}
 										title={isCollapsed ? item.label : undefined}
 									>
