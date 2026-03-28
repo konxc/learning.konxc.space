@@ -15,13 +15,58 @@
 	let activeTab = $state<'content' | 'notes'>('content');
 	let lessonNotes = $state<Record<string, string>>({});
 	let mobileMenuOpen = $state(false);
+	let savingNotes = $state<Record<string, boolean>>({});
+	let notesLoaded = $state(false);
 
-	onMount(() => {
+	async function loadNoteFromServer(lessonId: string) {
+		try {
+			const courseId = data.course.id;
+			const res = await fetch(`/api/notes?lessonId=${lessonId}&courseId=${courseId}`);
+			const result = await res.json();
+			if (result.note) {
+				lessonNotes[lessonId] = result.note.content;
+			}
+		} catch (e) {
+			console.error('Failed to load note from server:', e);
+		}
+	}
+
+	async function saveNoteToServer(lessonId: string, content: string) {
+		savingNotes[lessonId] = true;
+		try {
+			const courseId = data.course.id;
+			await fetch('/api/notes', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ lessonId, courseId, content })
+			});
+			localStorage.setItem('nk-lesson-notes', JSON.stringify(lessonNotes));
+		} catch (e) {
+			console.error('Failed to save note to server:', e);
+		} finally {
+			savingNotes[lessonId] = false;
+		}
+	}
+
+	let debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
+
+	function handleNoteChange(lessonId: string, content: string) {
+		lessonNotes[lessonId] = content;
+		
+		if (debounceTimers[lessonId]) {
+			clearTimeout(debounceTimers[lessonId]);
+		}
+		debounceTimers[lessonId] = setTimeout(() => {
+			saveNoteToServer(lessonId, content);
+		}, 1000);
+	}
+
+	onMount(async () => {
 		if (data.firstLesson) {
 			selectedLessonId = data.firstLesson.id;
 		}
 
-		// Load notes from local storage
+		// Load notes from local storage first (for quick display)
 		const savedNotes = localStorage.getItem('nk-lesson-notes');
 		if (savedNotes) {
 			try {
@@ -30,13 +75,13 @@
 				console.error('Failed to parse notes');
 			}
 		}
-	});
 
-	// Reactively save notes to localStorage
-	$effect(() => {
-		if (lessonNotes && Object.keys(lessonNotes).length > 0) {
-			localStorage.setItem('nk-lesson-notes', JSON.stringify(lessonNotes));
+		// Then sync with server in background
+		const allLessonIds = data.modules.flatMap((m) => m.lessons.map((l) => l.id));
+		for (const lessonId of allLessonIds) {
+			await loadNoteFromServer(lessonId);
 		}
+		notesLoaded = true;
 	});
 
 	function toggleModule(moduleId: string) {
@@ -444,13 +489,25 @@
 					{/if}
 				{:else}
 					<div class="animate-in fade-in slide-in-from-bottom-2 duration-300">
+						<div class="mb-3 flex items-center justify-between">
+							<span class={`text-xs font-medium ${COLOR.textMuted}`}>
+								{#if savingNotes[selectedLesson.id]}
+									<span class="text-amber-600">Menyimpan...</span>
+								{:else if notesLoaded}
+									<span class="text-green-600">✓ Tersimpan</span>
+								{:else}
+									<span class="text-gray-400">Memuat...</span>
+								{/if}
+							</span>
+						</div>
 						<textarea
 							class={`min-h-[300px] w-full p-6 ${RADIUS.card} ${COLOR.bg} border-2 border-dashed ${COLOR.cardBorder} focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 focus:outline-none ${TEXT.body} ${COLOR.textPrimary} resize-none`}
-							placeholder="Tulis catatan Anda di sini... Catatan ini disimpan otomatis ke perangkat Anda."
-							bind:value={lessonNotes[selectedLesson.id]}
+							placeholder="Tulis catatan Anda di sini... Catatan akan disimpan otomatis ke cloud."
+							value={lessonNotes[selectedLesson.id] || ''}
+							oninput={(e) => handleNoteChange(selectedLesson.id, (e.target as HTMLTextAreaElement).value)}
 						></textarea>
 						<p class="mt-4 text-xs text-gray-400 italic">
-							* Catatan bersifat lokal di browser Anda. Segera hadir: sinkronisasi awan.
+							Catatan tersimpan secara otomatis dan dapat diakses dari perangkat lain.
 						</p>
 					</div>
 				{/if}
