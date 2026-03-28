@@ -5,6 +5,7 @@ import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { json, error } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
+import { checkAndAwardBadges } from '$lib/server/badge';
 
 export const POST: RequestHandler = async (event) => {
 	const user = await requireAuth(event);
@@ -47,8 +48,11 @@ export const POST: RequestHandler = async (event) => {
 		)
 		.limit(1);
 
+	let wasCompleted = false;
+
 	if (existingProgress.length > 0) {
 		// Update existing progress
+		wasCompleted = !!existingProgress[0].completedAt;
 		await db
 			.update(schema.lessonProgress)
 			.set({
@@ -68,6 +72,20 @@ export const POST: RequestHandler = async (event) => {
 			lastPositionMs: completed ? 0 : lastPositionMs,
 			completedAt: completed ? new Date() : null
 		});
+		wasCompleted = completed;
+	}
+
+	// Check for badges when lesson is completed
+	if (completed && !wasCompleted) {
+		try {
+			const newBadges = await checkAndAwardBadges(user.id);
+			if (newBadges.length > 0) {
+				return json({ success: true, newBadges });
+			}
+		} catch (e) {
+			// Badge checking is optional, don't fail the request
+			console.error('Badge check failed:', e);
+		}
 	}
 
 	return json({ success: true });

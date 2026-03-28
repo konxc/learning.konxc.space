@@ -1,6 +1,9 @@
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 import { getNavItemsForRole } from '$lib/server/rbac';
+import { db } from '$lib/server/db';
+import { eq, desc, and } from 'drizzle-orm';
+import * as schema from '$lib/server/db/schema';
 
 const ACTIVE_ROLE_COOKIE = 'active-role';
 
@@ -32,9 +35,27 @@ export const load: LayoutServerLoad = async ({ locals, cookies, url }) => {
 	const roleForNav = activeRole === 'siswa' ? 'user' : activeRole;
 	const navItems = getNavItemsForRole(roleForNav);
 
+	// Get unread notifications
+	let notifications: any[] = [];
+	let unreadCount = 0;
+	try {
+		notifications = await db
+			.select()
+			.from(schema.notification)
+			.where(eq(schema.notification.userId, locals.user.id))
+			.orderBy(desc(schema.notification.createdAt))
+			.limit(10);
+		
+		unreadCount = notifications.filter(n => !n.read).length;
+	} catch (e) {
+		// Notification table might not exist yet
+	}
+
 	return {
 		user: locals.user,
 		navItems,
-		activeRole
+		activeRole,
+		notifications,
+		unreadCount
 	};
 };

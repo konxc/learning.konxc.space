@@ -19,6 +19,8 @@
 			email?: string | null;
 			avatarUrl?: string | null;
 			role?: string;
+			notifications?: any[];
+			unreadCount?: number;
 		} | null;
 		navItems: NavItem[];
 		activeRole?: string | null;
@@ -98,6 +100,8 @@
 		{themeAccordionRef}
 		{roleAccordionRef}
 		{sidebarCollapsed}
+		notifications={data.user?.notifications}
+		unreadCount={data.user?.unreadCount}
 	/>
 
 	<div class="flex">
