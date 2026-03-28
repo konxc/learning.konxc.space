@@ -5,6 +5,6 @@
 	let { children }: { children?: Snippet } = $props();
 </script>
 
-<div class={`mx-auto max-w-screen-2xl ${SPACING.page} ${SPACING.section}`}>
+<div class={`${SPACING.page} ${SPACING.section}`}>
 	{@render children?.()}
 </div>

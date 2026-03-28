@@ -13,12 +13,12 @@
 		});
 
 		const categoryLabels: Record<string, string> = {
-			dashboard: 'Dashboard',
-			learning: 'Learning',
-			management: 'Management',
-			admin: 'Administration',
-			crm: 'CRM',
-			other: 'Other'
+			dashboard: 'Beranda',
+			learning: 'Belajar',
+			management: 'Kelola',
+			admin: 'Administrator',
+			crm: 'Hubungan Pelanggan',
+			other: 'Lainnya'
 		};
 
 		return Object.entries(groups).map(([category, items]) => ({
@@ -210,11 +210,14 @@
 								<button
 									type="button"
 									onclick={() => toggleGroup(groupKey)}
-									class={`flex w-full items-center justify-between ${RADIUS.small} px-2 py-1.5 ${TEXT.small} font-semibold tracking-wider uppercase ${COLOR.textMuted} ${TRANSITION.colors} hover:text-gray-900 dark:hover:text-gray-100`}
+									class={`flex w-full items-center justify-between ${RADIUS.small} px-2 py-2 mt-4 ${TEXT.small} font-bold tracking-widest uppercase ${COLOR.textMuted} opacity-70 ${TRANSITION.colors} hover:opacity-100 dark:hover:text-gray-100`}
 								>
-									<span>{group.label}</span>
+									<span class="flex items-center gap-2">
+										<span class="h-1 w-1 rounded-full bg-blue-600/30"></span>
+										{group.label}
+									</span>
 									<svg
-										class={`h-4 w-4 ${TRANSITION.all} ${isGroupCollapsed ? 'rotate-0' : 'rotate-90'}`}
+										class={`h-3 w-3 ${TRANSITION.all} ${isGroupCollapsed ? 'rotate-0 opacity-40' : 'rotate-90 opacity-100'}`}
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -222,15 +225,16 @@
 										<path
 											stroke-linecap="round"
 											stroke-linejoin="round"
-											stroke-width="2"
+											stroke-width="3"
 											d="M9 5l7 7-7 7"
 										/>
 									</svg>
 								</button>
 							{:else}
 								<div
-									class={`${TEXT.small} font-semibold tracking-wider uppercase ${COLOR.textMuted} px-2 py-1.5`}
+									class={`${TEXT.small} font-bold tracking-widest uppercase ${COLOR.textMuted} px-2 py-2 mt-4 opacity-70 flex items-center gap-2`}
 								>
+									<span class="h-1 w-1 rounded-full bg-blue-600/30"></span>
 									{group.label}
 								</div>
 							{/if}
@@ -242,11 +246,11 @@
 									{@const active = isActive(item.href)}
 									<a
 										href={item.href}
-										class={`sidebar-item group relative flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-2.5 px-2.5'} ${RADIUS.small} py-2 ${TEXT.button} ${TRANSITION.all} ${
+										class={`sidebar-item group relative flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-3'} ${RADIUS.small} py-2.5 ${TEXT.button} ${TRANSITION.all} ${
 											active
-												? `${COLOR.textPrimary} bg-blue-50 font-semibold shadow-sm dark:bg-blue-950/30`
-												: `${COLOR.textSecondary} hover:bg-gray-100/80 hover:text-gray-900 dark:hover:bg-neutral-800/60 dark:hover:text-gray-100`
-										} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-1`}
+												? `${COLOR.textPrimary} bg-white font-bold shadow-xs ring-1 ring-gray-200/50 dark:bg-blue-950/20 dark:ring-blue-500/20`
+												: `${COLOR.textSecondary} hover:bg-white/50 hover:text-gray-900 hover:shadow-xs dark:hover:bg-neutral-800/40 dark:hover:text-gray-100`
+										} focus:outline-none focus:ring-2 focus:ring-blue-500/50`}
 										aria-current={active ? 'page' : undefined}
 										title={isCollapsed ? item.label : undefined}
 									>

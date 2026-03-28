@@ -100,7 +100,7 @@
 		{sidebarCollapsed}
 	/>
 
-	<div class={`mx-auto flex max-w-screen-2xl`}>
+	<div class="flex">
 		<!-- Enhanced Sidebar Component -->
 		<Sidebar
 			items={data.navItems}
@@ -126,9 +126,7 @@
 				>Skip to main content</a
 			>
 
-			<div class="mx-auto min-h-[calc(100vh-56px)] w-full max-w-screen-2xl">
-				<DashboardBreadcrumb />
-
+			<div class="min-h-[calc(100vh-56px)] w-full">
 				<!-- Page Content -->
 				<div class="min-h-[calc(100vh-116px)] pb-6 md:pb-8">
 					<div class="w-full">

@@ -1,7 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { TEXT, COLOR, TRANSITION, RADIUS } from '$lib/config/design';
+	import { TEXT, COLOR, TRANSITION, RADIUS, SPACING } from '$lib/config/design';
 	import { m } from '$lib/paraglide/messages.js';
+
+	const labelMapping: Record<string, string> = {
+		dashboard: 'Beranda',
+		overview: 'Ringkasan',
+		courses: 'Jelajahi',
+		'my-courses': 'Kursus Saya',
+		learn: 'Belajar',
+		admin: 'Admin',
+		mentor: 'Mentor'
+	};
 
 	function segments(pathname: string) {
 		const parts = pathname.split('/').filter(Boolean);
@@ -9,7 +19,8 @@
 		let acc = '';
 		for (const part of parts) {
 			acc += '/' + part;
-			items.push({ name: part.charAt(0).toUpperCase() + part.slice(1), href: acc });
+			const name = labelMapping[part.toLowerCase()] || part.charAt(0).toUpperCase() + part.slice(1);
+			items.push({ name, href: acc });
 		}
 		return items;
 	}
@@ -17,10 +28,10 @@
 
 <nav
 	aria-label="Breadcrumb navigation"
-	class="flex border-b border-gray-200/50 px-3 py-1 md:px-4 dark:border-neutral-800/50"
+	class="flex px-0 dark:border-neutral-800/50"
 >
 	<ol
-		class="m-0 flex list-none flex-wrap items-baseline justify-center gap-1 p-0"
+		class="m-0 flex list-none flex-wrap items-baseline justify-start gap-1 p-0"
 		itemscope
 		itemtype="https://schema.org/BreadcrumbList"
 	>
