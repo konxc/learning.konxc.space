@@ -146,7 +146,7 @@
 					<button
 						type="button"
 						onclick={handleApprove}
-						class={`inline-flex items-center justify-center ${RADIUS.button} bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/70 focus-visible:ring-offset-2`}
+						class={`inline-flex items-center justify-center ${RADIUS.button} bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/70 focus-visible:ring-offset-2`}
 					>
 						Approve Payment
 					</button>
@@ -164,7 +164,7 @@
 						<button
 							type="button"
 							onclick={handleReject}
-							class={`inline-flex items-center justify-center ${RADIUS.button} bg-rose-600 hover:bg-rose-700 dark:bg-rose-600 dark:hover:bg-rose-700 ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-600/70 focus-visible:ring-offset-2`}
+							class={`inline-flex items-center justify-center ${RADIUS.button} bg-rose-600 hover:bg-rose-700 dark:bg-rose-600 dark:hover:bg-rose-700 ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-600/70 focus-visible:ring-offset-2`}
 						>
 							Reject Payment
 						</button>

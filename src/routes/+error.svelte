@@ -205,7 +205,7 @@
 				<button
 					type="button"
 					onclick={goBack}
-					class={`group inline-flex items-center gap-2 ${RADIUS.button} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.button} ${TEXT.button} ${COLOR.textPrimary} ${TRANSITION.all} ${ELEVATION.base} hover:${ELEVATION.hover} hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2`}
+					class={`group inline-flex items-center gap-2 ${RADIUS.button} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.button} ${TEXT.button} ${COLOR.textPrimary} ${TRANSITION.all} ${ELEVATION.base} hover:${ELEVATION.cardHover} hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2`}
 				>
 					<span class="transition-transform group-hover:-translate-x-1">←</span>
 					<span>Kembali Sebelumnya</span>

@@ -61,7 +61,7 @@
 		>
 			<!-- Test 1: Blue (light) / Orange (dark) -->
 			<div class="rounded-lg bg-blue-500 p-4 font-semibold text-white dark:bg-orange-500">
-				✅ bg-blue-500 dark:bg-orange-500 - Light biru, Dark orange
+				✅ bg-blue-500 dark:bg-orange-500 - Light blue, Dark orange
 			</div>
 			<!-- Test 2: Blue (light) / Orange (dark) dengan !important -->
 			<div class="rounded-lg bg-blue-500! p-4 font-semibold text-white dark:bg-orange-500!">
@@ -94,13 +94,13 @@
 				<div class={`${TEXT.small} ${COLOR.textSecondary} mb-2`}>Neutral Background</div>
 				<div class={`${RADIUS.small} h-16 ${COLOR.neutral} border-2 ${COLOR.cardBorder}`}></div>
 			</div>
-			<div class={`${COLOR.success} ${RADIUS.small} p-4`}>
+			<div class={`${COLOR.successBg} ${RADIUS.small} p-4 text-white`}>
 				<div class={`${TEXT.small} mb-2`}>Success</div>
-				<div class={`${RADIUS.small} h-16 ${COLOR.success}`}></div>
+				<div class={`${RADIUS.small} h-16 bg-white/20`}></div>
 			</div>
-			<div class={`${COLOR.error} ${RADIUS.small} p-4`}>
+			<div class={`${COLOR.errorBg} ${RADIUS.small} p-4 text-white`}>
 				<div class={`${TEXT.small} mb-2`}>Error</div>
-				<div class={`${RADIUS.small} h-16 ${COLOR.error}`}></div>
+				<div class={`${RADIUS.small} h-16 bg-white/20`}></div>
 			</div>
 		</div>
 	</div>

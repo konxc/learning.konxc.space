@@ -60,7 +60,7 @@
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 			{#each data.enrollments as enrollment}
 				<div
-					class={`group flex flex-col ${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${ELEVATION.base} ${ELEVATION.hover} ${ELEVATION.transition} overflow-hidden`}
+					class={`group flex flex-col ${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${ELEVATION.base} ${ELEVATION.cardHover} ${ELEVATION.transition} overflow-hidden`}
 				>
 					<!-- Thumbnail -->
 					<div class="relative h-44 w-full overflow-hidden bg-gray-100">

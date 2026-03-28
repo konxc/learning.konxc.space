@@ -186,7 +186,7 @@
 									<td class={`border-t border-gray-200 px-4 py-4 dark:border-neutral-800`}>
 										{#if submission.isPending && submission.submission.type === 'assignment'}
 											<button
-												class={`inline-flex items-center ${RADIUS.small} ${COLOR.accentBg} ${SPACING.button} ${TEXT.small} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+												class={`inline-flex items-center ${RADIUS.small} ${COLOR.accentBg} ${SPACING.button} ${TEXT.small} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
 												onclick={() => openGradeModal(submission)}
 												type="button"
 											>
@@ -340,7 +340,7 @@
 								<div class="flex items-center justify-end gap-3 pt-2">
 									<button
 										type="submit"
-										class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:opacity-90 ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+										class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:opacity-90 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
 									>
 										Submit Grade
 									</button>

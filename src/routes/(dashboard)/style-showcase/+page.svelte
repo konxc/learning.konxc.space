@@ -93,7 +93,7 @@
 					>Error</span
 				>
 				<span
-					class={`inline-block ${RADIUS.badge} px-3 py-1 ${TEXT.small} font-semibold ${COLOR.infoBg}`}
+					class={`inline-block ${RADIUS.badge} px-3 py-1 ${TEXT.small} font-semibold ${COLOR.info}`}
 					>Info</span
 				>
 				<span
@@ -284,7 +284,7 @@
 				<button
 					type="button"
 					onclick={() => toast.info('Ini adalah pesan informasi!')}
-					class={`inline-flex items-center ${RADIUS.button} ${COLOR.infoBg} ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:opacity-90 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+					class={`inline-flex items-center ${RADIUS.button} ${COLOR.info} ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:opacity-90 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
 				>
 					ℹ Test Info Toast
 				</button>

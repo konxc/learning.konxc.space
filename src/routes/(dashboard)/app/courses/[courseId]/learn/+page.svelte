@@ -550,7 +550,7 @@
 					{#if selectedLesson.quiz}
 						<a
 							href="/app/courses/{data.course.id}/learn/quiz/{selectedLesson.quiz.id}"
-							class={`inline-flex items-center ${RADIUS.button} px-6 py-3 ${TEXT.button} font-semibold whitespace-nowrap text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+							class={`inline-flex items-center ${RADIUS.button} px-6 py-3 ${TEXT.button} font-semibold whitespace-nowrap text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
 							style="background: {brandColor}"
 						>
 							📝 Take Quiz

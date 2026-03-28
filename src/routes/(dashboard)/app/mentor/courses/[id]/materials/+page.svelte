@@ -44,7 +44,7 @@
 					<h2 class={`${TEXT.h2} ${COLOR.textPrimary}`}>Modules</h2>
 					<button
 						onclick={() => (showModuleForm = true)}
-						class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-5 py-2.5 ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
+						class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-5 py-2.5 ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
 					>
 						+ Add Module
 					</button>
@@ -63,7 +63,7 @@
 							<div class="flex items-center gap-3 pt-2">
 								<button
 									type="submit"
-									class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-5 py-2.5 ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
+									class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-5 py-2.5 ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
 								>
 									Create
 								</button>

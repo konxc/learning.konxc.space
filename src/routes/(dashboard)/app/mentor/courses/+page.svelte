@@ -49,7 +49,7 @@
 	<div class="courses-grid grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 		{#each data.courses.filter((c) => filter === 'all' || c.status === filter) as course}
 			<div
-				class={`course-card ${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${ELEVATION.base} ${ELEVATION.hover} ${ELEVATION.transition} overflow-hidden`}
+				class={`course-card ${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${ELEVATION.base} ${ELEVATION.cardHover} ${ELEVATION.transition} overflow-hidden`}
 			>
 				{#if course.thumbnailUrl}
 					<img

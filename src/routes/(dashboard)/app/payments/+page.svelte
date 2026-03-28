@@ -90,7 +90,7 @@
 
 							<a
 								href="/app/payments?courseId={enrollment.course.id}"
-								class={`inline-flex w-full items-center justify-center no-underline ${RADIUS.button} ${COLOR.accentBg} text-white ${SPACING.button} ${TEXT.button} font-semibold ${TRANSITION.all} ${ELEVATION.base} ${ELEVATION.hover}`}
+								class={`inline-flex w-full items-center justify-center no-underline ${RADIUS.button} ${COLOR.accentBg} text-white ${SPACING.button} ${TEXT.button} font-semibold ${TRANSITION.all} ${ELEVATION.base} ${ELEVATION.cardHover}`}
 							>
 								{enrollment.paymentProof ? 'Reupload' : 'Upload Payment Proof'}
 							</a>
