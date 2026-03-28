@@ -40,6 +40,7 @@
 				courseId={selectedCourse.course.id}
 				courseTitle={selectedCourse.course.title}
 				existingProof={selectedCourse.paymentProof}
+				midtransClientKey={data.midtransClientKey}
 			/>
 		</PageSection>
 	{:else}

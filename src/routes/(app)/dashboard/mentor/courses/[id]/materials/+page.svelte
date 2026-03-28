@@ -8,14 +8,14 @@
 
 	let { data }: { data: PageData } = $props();
 
-    let showModuleForm = $state(false);
-    let showLessonForm = $state(false);
-    let showMaterialForm = $state(false);
-    let selectedModuleId = $state<string | null>(null);
+	let showModuleForm = $state(false);
+	let showLessonForm = $state(false);
+	let showMaterialForm = $state(false);
+	let selectedModuleId = $state<string | null>(null);
 </script>
 
 <svelte:head>
-    <title>Manage Materials - {data.course.title}</title>
+	<title>Manage Materials - {data.course.title}</title>
 </svelte:head>
 
 <PageWrapper>
@@ -23,7 +23,7 @@
 		<div class="mb-6">
 			<a
 				href="/dashboard/mentor/courses"
-				class={`inline-flex items-center mb-3 ${TEXT.small} ${COLOR.accent} font-semibold ${TRANSITION.colors} hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
+				class={`mb-3 inline-flex items-center ${TEXT.small} ${COLOR.accent} font-semibold ${TRANSITION.colors} hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
 			>
 				← Back to Courses
 			</a>
@@ -31,7 +31,7 @@
 				<PageHeader title="Manage Materials: {data.course.title}" />
 				<a
 					href="/dashboard/mentor/courses/{data.course.id}/materials/quiz"
-					class={`inline-flex items-center ${RADIUS.button} ${COLOR.cardBorder} border-2 border-blue-600 px-6 py-3 ${TEXT.button} font-semibold ${COLOR.accent} ${TRANSITION.all} hover:bg-blue-600 hover:text-white hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
+					class={`inline-flex items-center ${RADIUS.button} ${COLOR.cardBorder} border-2 border-blue-600 px-6 py-3 ${TEXT.button} font-semibold ${COLOR.accent} ${TRANSITION.all} hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
 				>
 					Manage Quiz →
 				</a>
@@ -101,5 +101,3 @@
 		</PageSection>
 	</div>
 </PageWrapper>
-
-

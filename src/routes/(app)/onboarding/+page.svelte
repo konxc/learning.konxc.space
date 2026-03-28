@@ -28,21 +28,21 @@
 				body: formData
 			});
 
-		const result = await response.json();
+			const result = await response.json();
 
-		if (result.type === 'failure') {
-			const failure = result.data ?? {};
-			const failureData = failure.data ?? {};
-			couponError = failure.message || failure.error || 'Invalid coupon code';
-			couponValidated = false;
-			finalPrice = failureData.finalPrice ?? selectedCourse.price;
-			discountAmount = failureData.discountAmount ?? 0;
-		} else {
-			const payload = result.data?.data ?? {};
-			couponValidated = payload.isValid ?? true;
-			finalPrice = payload.finalPrice ?? selectedCourse.price;
-			discountAmount = payload.discountAmount ?? 0;
-		}
+			if (result.type === 'failure') {
+				const failure = result.data ?? {};
+				const failureData = failure.data ?? {};
+				couponError = failure.message || failure.error || 'Invalid coupon code';
+				couponValidated = false;
+				finalPrice = failureData.finalPrice ?? selectedCourse.price;
+				discountAmount = failureData.discountAmount ?? 0;
+			} else {
+				const payload = result.data?.data ?? {};
+				couponValidated = payload.isValid ?? true;
+				finalPrice = payload.finalPrice ?? selectedCourse.price;
+				discountAmount = payload.discountAmount ?? 0;
+			}
 		} catch (err) {
 			couponError = 'Failed to validate coupon';
 			couponValidated = false;

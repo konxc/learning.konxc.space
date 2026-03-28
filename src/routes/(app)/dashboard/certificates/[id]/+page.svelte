@@ -60,7 +60,9 @@
 			</button>
 		</div>
 
-		<div class="mb-8 bg-linear-to-br from-blue-50/50 to-purple-50/50 p-10 dark:from-blue-950/20 dark:to-purple-950/20 ${RADIUS.card}">
+		<div
+			class="mb-8 bg-linear-to-br from-blue-50/50 to-purple-50/50 p-10 dark:from-blue-950/20 dark:to-purple-950/20 ${RADIUS.card}"
+		>
 			<div
 				bind:this={certificateElement}
 				class={`${RADIUS.small} ${COLOR.card} ${ELEVATION.card} overflow-hidden border-4 border-blue-600`}
@@ -129,8 +131,9 @@
 		<PageSection>
 			<div class="text-center">
 				<p class={`${TEXT.body} ${COLOR.textMuted} mb-4 leading-relaxed`}>
-					This certificate verifies that you have successfully completed all course requirements including
-					lessons, quizzes, and assessments. Keep this certificate as proof of your achievement.
+					This certificate verifies that you have successfully completed all course requirements
+					including lessons, quizzes, and assessments. Keep this certificate as proof of your
+					achievement.
 				</p>
 				<a
 					href="/dashboard/my-courses"
@@ -160,4 +163,3 @@
 		}
 	}
 </style>
-

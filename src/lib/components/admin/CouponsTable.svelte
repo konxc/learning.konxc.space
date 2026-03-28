@@ -93,13 +93,13 @@
 		{#if key === 'code'}
 			<div class="flex items-center gap-2">
 				<code
-					class={`${RADIUS.small} px-2 py-1 bg-gray-50 font-mono text-sm font-semibold dark:bg-neutral-800 ${COLOR.accent}`}
+					class={`${RADIUS.small} bg-gray-50 px-2 py-1 font-mono text-sm font-semibold dark:bg-neutral-800 ${COLOR.accent}`}
 				>
 					{entry.code}
 				</code>
 				<button
 					type="button"
-					class={`inline-flex items-center ${RADIUS.small} px-2 py-1 text-xs bg-gray-100 dark:bg-neutral-800 ${COLOR.textSecondary} ${TRANSITION.all} hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1 dark:hover:bg-neutral-700 ${
+					class={`inline-flex items-center ${RADIUS.small} bg-gray-100 px-2 py-1 text-xs dark:bg-neutral-800 ${COLOR.textSecondary} ${TRANSITION.all} hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1 dark:hover:bg-neutral-700 ${
 						copiedCode === entry.code
 							? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
 							: ''

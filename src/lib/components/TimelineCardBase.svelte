@@ -59,4 +59,3 @@
 	/* Shared CSS di-import dari timeline-card.css */
 	/* Tidak ada component-specific styles di sini */
 </style>
-

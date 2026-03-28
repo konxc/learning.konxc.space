@@ -145,7 +145,9 @@
 
 	<!-- Mentor Applications Table -->
 	{#if filteredApplications.length === 0 && data.applications.length === 0}
-		<div class="rounded-lg border border-gray-200 bg-white p-12 text-center dark:border-neutral-800 dark:bg-neutral-900">
+		<div
+			class="rounded-lg border border-gray-200 bg-white p-12 text-center dark:border-neutral-800 dark:bg-neutral-900"
+		>
 			<p class={COLOR.textSecondary}>No mentor applications found.</p>
 		</div>
 	{:else}
@@ -158,4 +160,3 @@
 		/>
 	{/if}
 </PageWrapper>
-

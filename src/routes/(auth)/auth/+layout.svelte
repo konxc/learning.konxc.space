@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	
+
 	// Prevent header from showing in auth pages
 	onMount(() => {
 		document.body.style.overflow = 'hidden';
@@ -18,4 +18,3 @@
 		margin: 0;
 	}
 </style>
-

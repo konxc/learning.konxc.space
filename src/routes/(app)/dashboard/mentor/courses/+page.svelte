@@ -17,31 +17,31 @@
 	<PageHeader title="My Assigned Courses" />
 
 	<div class="filters mb-6 flex flex-wrap gap-3">
-			<button
-				type="button"
-				class={`cursor-pointer ${RADIUS.button} ${COLOR.cardBorder} ${SPACING.button} ${TEXT.button} ${TRANSITION.colors} hover:bg-gray-50 ${
-					filter === 'all' ? `${COLOR.accentBg} border-transparent text-white` : ''
-				}`}
-				onclick={() => (filter = 'all')}
-			>
-				All ({data.courses.length})
-			</button>
-			<button
-				type="button"
-				class={`cursor-pointer ${RADIUS.button} ${COLOR.cardBorder} ${SPACING.button} ${TEXT.button} ${TRANSITION.colors} hover:bg-gray-50 ${
-					filter === 'published' ? `${COLOR.accentBg} border-transparent text-white` : ''
-				}`}
-				onclick={() => (filter = 'published')}
-			>
-				Published ({data.courses.filter((c) => c.status === 'published').length})
-			</button>
-			<button
-				type="button"
-				class={`cursor-pointer ${RADIUS.button} ${COLOR.cardBorder} ${SPACING.button} ${TEXT.button} ${TRANSITION.colors} hover:bg-gray-50 ${
-					filter === 'draft' ? `${COLOR.accentBg} border-transparent text-white` : ''
-				}`}
-				onclick={() => (filter = 'draft')}
-			>
+		<button
+			type="button"
+			class={`cursor-pointer ${RADIUS.button} ${COLOR.cardBorder} ${SPACING.button} ${TEXT.button} ${TRANSITION.colors} hover:bg-gray-50 ${
+				filter === 'all' ? `${COLOR.accentBg} border-transparent text-white` : ''
+			}`}
+			onclick={() => (filter = 'all')}
+		>
+			All ({data.courses.length})
+		</button>
+		<button
+			type="button"
+			class={`cursor-pointer ${RADIUS.button} ${COLOR.cardBorder} ${SPACING.button} ${TEXT.button} ${TRANSITION.colors} hover:bg-gray-50 ${
+				filter === 'published' ? `${COLOR.accentBg} border-transparent text-white` : ''
+			}`}
+			onclick={() => (filter = 'published')}
+		>
+			Published ({data.courses.filter((c) => c.status === 'published').length})
+		</button>
+		<button
+			type="button"
+			class={`cursor-pointer ${RADIUS.button} ${COLOR.cardBorder} ${SPACING.button} ${TEXT.button} ${TRANSITION.colors} hover:bg-gray-50 ${
+				filter === 'draft' ? `${COLOR.accentBg} border-transparent text-white` : ''
+			}`}
+			onclick={() => (filter = 'draft')}
+		>
 			Draft ({data.courses.filter((c) => c.status === 'draft').length})
 		</button>
 	</div>
@@ -125,4 +125,3 @@
 		</PageSection>
 	{/if}
 </PageWrapper>
-

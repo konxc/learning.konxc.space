@@ -43,7 +43,11 @@
 	</div>
 
 	<PageSection>
-		<OverviewGraph title="System Overview" description="Kesehatan sistem dan aktivitas" />
+		<OverviewGraph
+			title="System Overview"
+			description="Kesehatan sistem dan aktivitas"
+			noCard={true}
+		/>
 	</PageSection>
 
 	<PageSection>

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { TypingStats } from './utils/stats.js';
-  
-  let { stats }: { stats: TypingStats } = $props();
+	import type { TypingStats } from './utils/stats.js';
+
+	let { stats }: { stats: TypingStats } = $props();
 </script>
 
 <div class="stats-panel">

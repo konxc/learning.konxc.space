@@ -14,11 +14,11 @@
 
 {#if data.isMentor}
 	<PageWrapper>
-		<div class="text-center py-20 px-5">
+		<div class="px-5 py-20 text-center">
 			<PageSection>
-				<span class="block text-7xl mb-6">🎉</span>
+				<span class="mb-6 block text-7xl">🎉</span>
 				<h1 class={`${TEXT.h1} ${COLOR.textPrimary} mb-4`}>You are a Mentor!</h1>
-				<p class={`${TEXT.body} ${COLOR.textSecondary} text-lg mb-8`}>
+				<p class={`${TEXT.body} ${COLOR.textSecondary} mb-8 text-lg`}>
 					Congratulations! You are now a mentor on Naik Kelas.
 				</p>
 				<a
@@ -37,7 +37,7 @@
 		<PageSection>
 			<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-4`}>Application Status</h2>
 			<div
-				class={`inline-block px-6 py-3 ${RADIUS.button} ${TEXT.body} text-xl font-semibold mb-4 ${
+				class={`inline-block px-6 py-3 ${RADIUS.button} ${TEXT.body} mb-4 text-xl font-semibold ${
 					data.application.status === 'pending'
 						? COLOR.warningBg
 						: data.application.status === 'approved'
@@ -61,34 +61,58 @@
 
 			{#if data.application.adminNotes}
 				<div class={`${RADIUS.small} ${COLOR.neutral} ${SPACING.cardPadding} mt-4`}>
-					<strong class={`block ${TEXT.button} ${COLOR.textPrimary} font-semibold mb-2`}>Admin Feedback:</strong>
-					<p class={`${TEXT.body} ${COLOR.textSecondary} leading-relaxed`}>{data.application.adminNotes}</p>
+					<strong class={`block ${TEXT.button} ${COLOR.textPrimary} mb-2 font-semibold`}
+						>Admin Feedback:</strong
+					>
+					<p class={`${TEXT.body} ${COLOR.textSecondary} leading-relaxed`}>
+						{data.application.adminNotes}
+					</p>
 				</div>
 			{/if}
 		</PageSection>
 
 		<PageSection>
 			<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-5`}>Application Details</h2>
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+			<div class="mb-8 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
 				<div class={`${RADIUS.small} ${COLOR.neutral} ${SPACING.cardPadding}`}>
-					<span class={`block ${TEXT.small} ${COLOR.textMuted} mb-2 uppercase tracking-wide`}>Full Name</span>
-					<span class={`block ${TEXT.body} ${COLOR.textPrimary} font-semibold text-lg`}>{data.application.fullName}</span>
+					<span class={`block ${TEXT.small} ${COLOR.textMuted} mb-2 tracking-wide uppercase`}
+						>Full Name</span
+					>
+					<span class={`block ${TEXT.body} ${COLOR.textPrimary} text-lg font-semibold`}
+						>{data.application.fullName}</span
+					>
 				</div>
 				<div class={`${RADIUS.small} ${COLOR.neutral} ${SPACING.cardPadding}`}>
-					<span class={`block ${TEXT.small} ${COLOR.textMuted} mb-2 uppercase tracking-wide`}>Email</span>
-					<span class={`block ${TEXT.body} ${COLOR.textPrimary} font-semibold text-lg`}>{data.application.email}</span>
+					<span class={`block ${TEXT.small} ${COLOR.textMuted} mb-2 tracking-wide uppercase`}
+						>Email</span
+					>
+					<span class={`block ${TEXT.body} ${COLOR.textPrimary} text-lg font-semibold`}
+						>{data.application.email}</span
+					>
 				</div>
 				<div class={`${RADIUS.small} ${COLOR.neutral} ${SPACING.cardPadding}`}>
-					<span class={`block ${TEXT.small} ${COLOR.textMuted} mb-2 uppercase tracking-wide`}>Phone</span>
-					<span class={`block ${TEXT.body} ${COLOR.textPrimary} font-semibold text-lg`}>{data.application.phone}</span>
+					<span class={`block ${TEXT.small} ${COLOR.textMuted} mb-2 tracking-wide uppercase`}
+						>Phone</span
+					>
+					<span class={`block ${TEXT.body} ${COLOR.textPrimary} text-lg font-semibold`}
+						>{data.application.phone}</span
+					>
 				</div>
 				<div class={`${RADIUS.small} ${COLOR.neutral} ${SPACING.cardPadding}`}>
-					<span class={`block ${TEXT.small} ${COLOR.textMuted} mb-2 uppercase tracking-wide`}>Expertise</span>
-					<span class={`block ${TEXT.body} ${COLOR.textPrimary} font-semibold text-lg`}>{data.application.expertise}</span>
+					<span class={`block ${TEXT.small} ${COLOR.textMuted} mb-2 tracking-wide uppercase`}
+						>Expertise</span
+					>
+					<span class={`block ${TEXT.body} ${COLOR.textPrimary} text-lg font-semibold`}
+						>{data.application.expertise}</span
+					>
 				</div>
 				<div class={`${RADIUS.small} ${COLOR.neutral} ${SPACING.cardPadding}`}>
-					<span class={`block ${TEXT.small} ${COLOR.textMuted} mb-2 uppercase tracking-wide`}>Years of Experience</span>
-					<span class={`block ${TEXT.body} ${COLOR.textPrimary} font-semibold text-lg`}>{data.application.yearsExperience} years</span>
+					<span class={`block ${TEXT.small} ${COLOR.textMuted} mb-2 tracking-wide uppercase`}
+						>Years of Experience</span
+					>
+					<span class={`block ${TEXT.body} ${COLOR.textPrimary} text-lg font-semibold`}
+						>{data.application.yearsExperience} years</span
+					>
 				</div>
 			</div>
 
@@ -99,7 +123,9 @@
 
 			<div class="mb-6">
 				<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-3`}>Motivation</h3>
-				<p class={`${TEXT.body} ${COLOR.textSecondary} leading-relaxed`}>{data.application.motivation}</p>
+				<p class={`${TEXT.body} ${COLOR.textSecondary} leading-relaxed`}>
+					{data.application.motivation}
+				</p>
 			</div>
 
 			{#if data.application.githubUrl || data.application.linkedinUrl || data.application.portfolioUrl}
@@ -143,9 +169,9 @@
 	</PageWrapper>
 {:else}
 	<PageWrapper>
-		<div class="text-center py-20 px-5">
+		<div class="px-5 py-20 text-center">
 			<h1 class={`${TEXT.h1} ${COLOR.textPrimary} mb-4`}>Become a Mentor</h1>
-			<p class={`${TEXT.body} ${COLOR.textSecondary} text-lg mb-8`}>
+			<p class={`${TEXT.body} ${COLOR.textSecondary} mb-8 text-lg`}>
 				Share your expertise and help others grow their programming skills
 			</p>
 			<a
@@ -157,4 +183,3 @@
 		</div>
 	</PageWrapper>
 {/if}
-

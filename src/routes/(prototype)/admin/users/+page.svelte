@@ -7,7 +7,10 @@
 	let role = $state('');
 	let loading = $state(true);
 	const filtered = $derived(
-		users.filter((u) => (!q || u.fullName.toLowerCase().includes(q.toLowerCase())) && (!role || u.role === role))
+		users.filter(
+			(u) =>
+				(!q || u.fullName.toLowerCase().includes(q.toLowerCase())) && (!role || u.role === role)
+		)
 	);
 	$effect(() => {
 		const t = setTimeout(() => (loading = false), 300);

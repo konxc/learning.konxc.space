@@ -26,7 +26,10 @@
 
 		{#if form?.error}
 			<PageSection>
-				<div class={`${RADIUS.button} ${SPACING.cardPadding} ${COLOR.error} ${ELEVATION.base}`} role="alert">
+				<div
+					class={`${RADIUS.button} ${SPACING.cardPadding} ${COLOR.error} ${ELEVATION.base}`}
+					role="alert"
+				>
 					{form.error}
 				</div>
 			</PageSection>
@@ -35,7 +38,7 @@
 		<PageSection>
 			<form method="POST" class="flex flex-col gap-6">
 				<div class="flex flex-col gap-2">
-					<label for="title" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+					<label for="title" class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}>
 						Course Title *
 					</label>
 					<input
@@ -50,7 +53,10 @@
 				</div>
 
 				<div class="flex flex-col gap-2">
-					<label for="description" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+					<label
+						for="description"
+						class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+					>
 						Description *
 					</label>
 					<textarea
@@ -59,13 +65,14 @@
 						required
 						rows="5"
 						placeholder="Enter course description"
-						class={`${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} resize-y min-h-[100px] focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
-					>{data.course.description}</textarea>
+						class={`${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} min-h-[100px] resize-y focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
+						>{data.course.description}</textarea
+					>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 					<div class="flex flex-col gap-2">
-						<label for="price" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+						<label for="price" class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}>
 							Price (Rp) *
 						</label>
 						<input
@@ -80,7 +87,10 @@
 					</div>
 
 					<div class="flex flex-col gap-2">
-						<label for="duration" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+						<label
+							for="duration"
+							class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+						>
 							Duration (weeks)
 						</label>
 						<input
@@ -96,7 +106,7 @@
 				</div>
 
 				<div class="flex flex-col gap-2">
-					<label for="status" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+					<label for="status" class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}>
 						Status *
 					</label>
 					<select
@@ -112,7 +122,10 @@
 				</div>
 
 				<div class="flex flex-col gap-2">
-					<label for="thumbnailUrl" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+					<label
+						for="thumbnailUrl"
+						class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+					>
 						Thumbnail URL
 					</label>
 					<input
@@ -126,7 +139,7 @@
 				</div>
 
 				<div class="flex flex-col gap-2">
-					<label for="mentorId" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+					<label for="mentorId" class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}>
 						Assign Mentor
 					</label>
 					<select
@@ -161,4 +174,3 @@
 		</PageSection>
 	</div>
 </PageWrapper>
-

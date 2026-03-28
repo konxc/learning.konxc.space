@@ -224,19 +224,19 @@
 				onclick={closeGradeModal}
 				role="presentation"
 			>
-			<div
-				class={`relative max-h-[90vh] w-full max-w-2xl overflow-y-auto ${RADIUS.card} ${COLOR.card} ${SPACING.cardPadding} ${ELEVATION.card}`}
-				onclick={(e) => e.stopPropagation()}
-				onkeydown={(e) => {
-					if (e.key === 'Escape') {
-						closeGradeModal();
-					}
-				}}
-				role="dialog"
-				aria-modal="true"
-				aria-labelledby="modal-title"
-				tabindex="-1"
-			>
+				<div
+					class={`relative max-h-[90vh] w-full max-w-2xl overflow-y-auto ${RADIUS.card} ${COLOR.card} ${SPACING.cardPadding} ${ELEVATION.card}`}
+					onclick={(e) => e.stopPropagation()}
+					onkeydown={(e) => {
+						if (e.key === 'Escape') {
+							closeGradeModal();
+						}
+					}}
+					role="dialog"
+					aria-modal="true"
+					aria-labelledby="modal-title"
+					tabindex="-1"
+				>
 					<button
 						class={`absolute top-4 right-4 ${RADIUS.badge} p-1.5 ${COLOR.textMuted} ${TRANSITION.all} hover:${COLOR.textPrimary} hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1 dark:hover:bg-neutral-800`}
 						onclick={closeGradeModal}

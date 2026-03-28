@@ -8,7 +8,10 @@
 	let { messages = [] }: ToasterProps = $props();
 </script>
 
-<div aria-live="polite" class="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col gap-2 md:bottom-6 md:right-6">
+<div
+	aria-live="polite"
+	class="pointer-events-none fixed right-4 bottom-4 z-50 flex flex-col gap-2 md:right-6 md:bottom-6"
+>
 	{#each messages as m (m.id)}
 		<div
 			class="pointer-events-auto w-full max-w-md rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-900"

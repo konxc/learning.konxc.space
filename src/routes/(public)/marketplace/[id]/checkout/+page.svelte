@@ -12,7 +12,12 @@
 	$effect(() => {
 		const transaction = form?.data;
 
-		if (form?.success && transaction?.snapToken && typeof window !== 'undefined' && (window as any).snap) {
+		if (
+			form?.success &&
+			transaction?.snapToken &&
+			typeof window !== 'undefined' &&
+			(window as any).snap
+		) {
 			(window as any).snap.pay(transaction.snapToken, {
 				onSuccess: function () {
 					location.href = '/dashboard';

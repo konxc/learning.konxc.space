@@ -87,20 +87,24 @@
 				<div>
 					<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-2`}>{proof.course.title}</h3>
 					<p class={TEXT.secondary}>
-						<strong>User:</strong> {proof.user.fullName || proof.user.username} ({proof.user.email})
+						<strong>User:</strong>
+						{proof.user.fullName || proof.user.username} ({proof.user.email})
 					</p>
 					<p class={TEXT.secondary}>
-						<strong>Harga:</strong> {formatPrice(proof.course.price)}
+						<strong>Harga:</strong>
+						{formatPrice(proof.course.price)}
 					</p>
 					<p class={TEXT.secondary}>
 						<strong>Status:</strong> <span class="font-semibold">{proof.status}</span>
 					</p>
 					<p class={TEXT.secondary}>
-						<strong>Upload:</strong> {formatDateTime(proof.createdAt)}
+						<strong>Upload:</strong>
+						{formatDateTime(proof.createdAt)}
 					</p>
 					{#if proof.notes}
 						<p class={TEXT.secondary}>
-							<strong>Catatan:</strong> {proof.notes}
+							<strong>Catatan:</strong>
+							{proof.notes}
 						</p>
 					{/if}
 				</div>
@@ -127,7 +131,7 @@
 							<img
 								src={imageUrl}
 								alt="Bukti pembayaran"
-								class="w-full h-auto"
+								class="h-auto w-full"
 								loading="lazy"
 								decoding="async"
 							/>
@@ -180,4 +184,3 @@
 		</div>
 	</PageSection>
 </PageWrapper>
-

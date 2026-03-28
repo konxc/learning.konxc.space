@@ -46,6 +46,7 @@
 		<OverviewGraph
 			title="Learning Overview"
 			description="Aktivitas belajarmu dalam 30 hari terakhir"
+			noCard={true}
 		/>
 	</PageSection>
 

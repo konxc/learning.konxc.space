@@ -104,10 +104,7 @@
 </PageQuick>
 
 <PageWrapper>
-	<PageHeader
-		title="User Management"
-		description="Kelola semua users yang terdaftar di platform"
-	/>
+	<PageHeader title="User Management" description="Kelola semua users yang terdaftar di platform" />
 
 	<!-- Results Summary with Search and Column Filter -->
 	<div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -127,7 +124,9 @@
 
 	<!-- Users Table -->
 	{#if filteredUsers.length === 0 && data.users.length === 0}
-		<div class="rounded-lg border border-gray-200 bg-white p-12 text-center dark:border-neutral-800 dark:bg-neutral-900">
+		<div
+			class="rounded-lg border border-gray-200 bg-white p-12 text-center dark:border-neutral-800 dark:bg-neutral-900"
+		>
 			<p class={COLOR.textSecondary}>No users found.</p>
 		</div>
 	{:else}
@@ -141,4 +140,3 @@
 		/>
 	{/if}
 </PageWrapper>
-

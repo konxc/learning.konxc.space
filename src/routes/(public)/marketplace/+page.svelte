@@ -58,28 +58,28 @@
 			);
 		}
 
-	// Price filter
-	const maxPriceFilter = maxPrice;
-	if (maxPriceFilter !== null) {
-		courses = courses.filter((course) => course.price <= maxPriceFilter);
+		// Price filter
+		const maxPriceFilter = maxPrice;
+		if (maxPriceFilter !== null) {
+			courses = courses.filter((course) => course.price <= maxPriceFilter);
 		}
 
 		// Duration filter
-	const minDurationFilter = minDuration;
-	const maxDurationFilter = maxDuration;
-	if (minDurationFilter !== null || maxDurationFilter !== null) {
+		const minDurationFilter = minDuration;
+		const maxDurationFilter = maxDuration;
+		if (minDurationFilter !== null || maxDurationFilter !== null) {
 			courses = courses.filter((course) => {
 				// If course has no duration, exclude it only if filters are active
 				if (!course.duration) {
 					// If only one filter is set (not both), allow courses without duration
-				if (minDurationFilter !== null && maxDurationFilter !== null) return false;
+					if (minDurationFilter !== null && maxDurationFilter !== null) return false;
 					// If only minDuration is set, courses without duration are excluded
-				if (minDurationFilter !== null) return false;
+					if (minDurationFilter !== null) return false;
 					// If only maxDuration is set, allow courses without duration
 					return true;
 				}
-			if (minDurationFilter !== null && course.duration < minDurationFilter) return false;
-			if (maxDurationFilter !== null && course.duration > maxDurationFilter) return false;
+				if (minDurationFilter !== null && course.duration < minDurationFilter) return false;
+				if (maxDurationFilter !== null && course.duration > maxDurationFilter) return false;
 				return true;
 			});
 		}

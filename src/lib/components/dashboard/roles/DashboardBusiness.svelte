@@ -43,7 +43,7 @@
 	</div>
 
 	<PageSection>
-		<OverviewGraph title="Finance Overview" description="Ringkasan pendapatan" />
+		<OverviewGraph title="Finance Overview" description="Ringkasan pendapatan" noCard={true} />
 	</PageSection>
 
 	<PageSection>

@@ -65,7 +65,10 @@
 
 		{#if form?.error}
 			<PageSection>
-				<div class={`${RADIUS.button} ${SPACING.cardPadding} ${COLOR.error} ${ELEVATION.base}`} role="alert">
+				<div
+					class={`${RADIUS.button} ${SPACING.cardPadding} ${COLOR.error} ${ELEVATION.base}`}
+					role="alert"
+				>
 					{form.error}
 				</div>
 			</PageSection>
@@ -75,13 +78,13 @@
 			<form method="POST" class="flex flex-col gap-6">
 				<div class="flex flex-col gap-2">
 					<div class="flex items-center justify-between gap-3">
-						<label for="code" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+						<label for="code" class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}>
 							Coupon Code *
 						</label>
 						<button
 							type="button"
 							onclick={generateCode}
-							class={`inline-flex items-center ${RADIUS.button} bg-linear-to-r from-blue-600 to-purple-600 px-4 py-2 ${TEXT.small} font-semibold text-white whitespace-nowrap ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
+							class={`inline-flex items-center ${RADIUS.button} bg-linear-to-r from-blue-600 to-purple-600 px-4 py-2 ${TEXT.small} font-semibold whitespace-nowrap text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.hover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
 						>
 							🎲 Generate Code
 						</button>
@@ -99,7 +102,7 @@
 				</div>
 
 				<div class="flex flex-col gap-2">
-					<label for="type" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+					<label for="type" class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}>
 						Coupon Type *
 					</label>
 					<select
@@ -115,9 +118,12 @@
 				</div>
 
 				{#if couponType === 'discount'}
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 						<div class="flex flex-col gap-2">
-							<label for="discountType" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+							<label
+								for="discountType"
+								class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+							>
 								Discount Type *
 							</label>
 							<select
@@ -127,13 +133,18 @@
 								required
 								class={`${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
 							>
-								<option value="percentage" selected={discountType === 'percentage'}>Percentage (%)</option>
+								<option value="percentage" selected={discountType === 'percentage'}
+									>Percentage (%)</option
+								>
 								<option value="fixed" selected={discountType === 'fixed'}>Fixed Amount (Rp)</option>
 							</select>
 						</div>
 
 						<div class="flex flex-col gap-2">
-							<label for="discountValue" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+							<label
+								for="discountValue"
+								class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+							>
 								Discount Value *
 							</label>
 							{#if discountType === 'percentage'}
@@ -165,7 +176,10 @@
 				{/if}
 
 				<div class="flex flex-col gap-2">
-					<label for="description" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+					<label
+						for="description"
+						class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+					>
 						Description
 					</label>
 					<textarea
@@ -173,13 +187,17 @@
 						name="description"
 						rows="3"
 						placeholder="Enter coupon description"
-						class={`${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} resize-y min-h-[80px] focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
-					>{data.coupon.description || ''}</textarea>
+						class={`${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} min-h-[80px] resize-y focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
+						>{data.coupon.description || ''}</textarea
+					>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 					<div class="flex flex-col gap-2">
-						<label for="maxUses" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+						<label
+							for="maxUses"
+							class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+						>
 							Max Uses (optional)
 						</label>
 						<input
@@ -196,7 +214,7 @@
 					<div class="flex flex-col gap-2">
 						<label
 							for="minPurchaseAmount"
-							class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}
+							class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
 						>
 							Minimum Purchase (optional)
 						</label>
@@ -212,9 +230,12 @@
 					</div>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 					<div class="flex flex-col gap-2">
-						<label for="validFrom" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+						<label
+							for="validFrom"
+							class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+						>
 							Valid From *
 						</label>
 						<input
@@ -228,7 +249,10 @@
 					</div>
 
 					<div class="flex flex-col gap-2">
-						<label for="validUntil" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+						<label
+							for="validUntil"
+							class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+						>
 							Valid Until (optional)
 						</label>
 						<input
@@ -245,7 +269,7 @@
 
 				<div class="flex flex-col gap-2">
 					<fieldset class={`${RADIUS.small} ${COLOR.cardBorder} border p-4`}>
-						<legend class={`${TEXT.button} ${COLOR.textPrimary} font-semibold px-2`}>
+						<legend class={`${TEXT.button} ${COLOR.textPrimary} px-2 font-semibold`}>
 							Applicable Courses (optional)
 						</legend>
 						<p class={`${TEXT.small} ${COLOR.textMuted} mb-3`}>
@@ -292,4 +316,3 @@
 		</PageSection>
 	</div>
 </PageWrapper>
-

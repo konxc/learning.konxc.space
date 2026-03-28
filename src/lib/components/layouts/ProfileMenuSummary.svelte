@@ -2,12 +2,12 @@
 	import { RADIUS, TEXT, COLOR, TRANSITION } from '$lib/config/design';
 	import { m } from '$lib/paraglide/messages.js';
 
-interface User {
-	fullName?: string | null;
-	username?: string | null;
-	avatarUrl?: string | null;
-	role?: string | null;
-}
+	interface User {
+		fullName?: string | null;
+		username?: string | null;
+		avatarUrl?: string | null;
+		role?: string | null;
+	}
 
 	function getRoleLabel(role: string | null | undefined): string {
 		if (!role) return '';
@@ -38,29 +38,29 @@ interface User {
 			<img
 				src={user.avatarUrl}
 				alt="avatar"
-				class={`h-7 w-7 shrink-0 ${RADIUS.badge} object-cover ring-1 ring-gray-200/50 dark:ring-neutral-700/50 ${isEmulating
-					? 'ring-2 ring-amber-400/60 dark:ring-amber-500/60'
-					: ''}`}
+				class={`h-7 w-7 shrink-0 ${RADIUS.badge} object-cover ring-1 ring-gray-200/50 dark:ring-neutral-700/50 ${
+					isEmulating ? 'ring-2 ring-amber-400/60 dark:ring-amber-500/60' : ''
+				}`}
 				loading="lazy"
 				decoding="async"
 				fetchpriority="low"
 			/>
 		{:else}
 			<div
-				class={`grid h-7 w-7 shrink-0 place-items-center ${RADIUS.badge} bg-linear-to-br from-blue-500 to-purple-600 text-xs font-semibold text-white shadow-sm ${isEmulating
-					? 'ring-2 ring-amber-400/60 dark:ring-amber-500/60'
-					: ''}`}
+				class={`grid h-7 w-7 shrink-0 place-items-center ${RADIUS.badge} bg-linear-to-br from-blue-500 to-purple-600 text-xs font-semibold text-white shadow-sm ${
+					isEmulating ? 'ring-2 ring-amber-400/60 dark:ring-amber-500/60' : ''
+				}`}
 			>
 				{(user?.fullName ?? user?.username ?? 'U').slice(0, 1).toUpperCase()}
 			</div>
 		{/if}
 		<div class="hidden min-w-0 flex-1 flex-col md:flex">
-			<span class="max-w-[120px] truncate ${COLOR.textPrimary} font-medium text-xs leading-tight">
+			<span class="max-w-[120px] truncate ${COLOR.textPrimary} text-xs leading-tight font-medium">
 				{user?.fullName ?? user?.username ?? m.profile()}
 			</span>
 			{#if isEmulating}
 				<span
-					class={`inline-flex items-center gap-1 max-w-fit ${RADIUS.badge} px-1.5 py-0.5 mt-0.5 ${TEXT.small} font-semibold bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400`}
+					class={`inline-flex max-w-fit items-center gap-1 ${RADIUS.badge} mt-0.5 px-1.5 py-0.5 ${TEXT.small} bg-amber-100 font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-400`}
 					title="Mode Emulasi: {emulatedRoleLabel}"
 				>
 					<span class="text-[10px]" aria-hidden="true">🔍</span>

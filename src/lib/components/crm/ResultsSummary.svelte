@@ -14,4 +14,3 @@
 	Menampilkan <strong class={COLOR.textPrimary}>{filteredCount}</strong> dari
 	<strong class={COLOR.textPrimary}>{totalCount}</strong> entries
 </div>
-

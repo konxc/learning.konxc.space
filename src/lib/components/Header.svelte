@@ -20,7 +20,9 @@
 <header
 	class="sticky top-0 z-40 overflow-hidden border-b bg-white/70 backdrop-blur dark:bg-neutral-900/70"
 	style="
-		--header-glow: {$brandMode === 'hardcore' ? 'rgba(251, 146, 60, 0.05)' : 'rgba(20, 184, 166, 0.05)'};
+		--header-glow: {$brandMode === 'hardcore'
+		? 'rgba(251, 146, 60, 0.05)'
+		: 'rgba(20, 184, 166, 0.05)'};
 	"
 >
 	<div class="flex h-14 items-center gap-2 px-4 md:px-6">

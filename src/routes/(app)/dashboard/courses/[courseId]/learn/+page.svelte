@@ -54,11 +54,29 @@
 <div class="mx-auto max-w-screen-2xl px-4 py-4 md:px-6 md:py-6 lg:px-12">
 	<div class="grid min-h-[calc(100vh-100px)] grid-cols-1 gap-6 md:grid-cols-[300px_1fr]">
 		<aside
-			class={`h-fit overflow-y-auto md:sticky md:top-6 md:max-h-[calc(100vh-3rem)] ${RADIUS.card} ${COLOR.card} ${SPACING.cardPadding} ${ELEVATION.base}`}
+			class={`h-fit overflow-y-auto md:sticky md:top-6 md:max-h-[calc(100vh-3rem)] ${RADIUS.card} ${COLOR.card} ${SPACING.cardPadding} ${ELEVATION.base} border border-gray-100 dark:border-neutral-800`}
 		>
-			<div class="mb-5">
-				<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-2`}>{data.course.title}</h2>
-				<p class={`${TEXT.body} ${COLOR.textMuted} text-sm leading-relaxed`}>
+			<div class="mb-8">
+				<a
+					href="/dashboard/my-courses"
+					class="mb-6 flex items-center gap-2 text-xs font-bold tracking-widest text-blue-600 uppercase no-underline hover:text-blue-700"
+				>
+					<svg
+						width="16"
+						height="16"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2.5"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"
+						></polyline></svg
+					>
+					Daftar Kursus
+				</a>
+				<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-2 line-clamp-2`}>{data.course.title}</h2>
+				<p class={`${TEXT.small} ${COLOR.textMuted} leading-relaxed`}>
 					{data.course.description}
 				</p>
 			</div>
@@ -136,10 +154,38 @@
 
 		<main class={`${RADIUS.card} ${COLOR.card} ${SPACING.cardPadding} ${ELEVATION.base}`}>
 			{#if selectedLesson}
-				<div class="mb-6 border-b border-gray-200 pb-4 dark:border-neutral-800">
+				<div class="mb-8 overflow-hidden rounded-xl bg-gray-100 dark:bg-neutral-800">
+					<div
+						class="h-2 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 transition-all duration-500 ease-out"
+						style="width: {(data.progress.filter((p) => p.completedAt).length /
+							data.modules.flatMap((m) => m.lessons).length) *
+							100 || 0}%"
+					></div>
+					<div
+						class="flex items-center justify-between px-4 py-2 text-[10px] font-bold tracking-wider text-gray-400 uppercase"
+					>
+						<span>Progress Belajar</span>
+						<span
+							>{Math.round(
+								(data.progress.filter((p) => p.completedAt).length /
+									data.modules.flatMap((m) => m.lessons).length) *
+									100 || 0
+							)}% Complete</span
+						>
+					</div>
+				</div>
+
+				<div class="mb-6 border-b border-gray-100 pb-4 dark:border-neutral-800">
 					<h1 class={`${TEXT.h1} ${COLOR.textPrimary} mb-2`}>{selectedLesson.title}</h1>
-					<div class={`${TEXT.small} ${COLOR.textMuted}`}>
-						<span>Material {selectedMaterialIndex + 1} of {selectedLesson.materials.length}</span>
+					<div class="flex items-center gap-2">
+						{#each selectedLesson.materials as mat, i}
+							<div
+								class={`h-1.5 flex-1 rounded-full transition-all ${i === selectedMaterialIndex ? 'w-8 bg-blue-600' : 'bg-gray-200 dark:bg-neutral-800'}`}
+							></div>
+						{/each}
+						<span class={`${TEXT.small} ${COLOR.textMuted} ml-2 font-medium`}>
+							Materi {selectedMaterialIndex + 1} dari {selectedLesson.materials.length}
+						</span>
 					</div>
 				</div>
 

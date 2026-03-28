@@ -1,11 +1,11 @@
 <script lang="ts">
-import type { PageData, ActionData } from './$types';
-import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
-import PageHeader from '$lib/components/layouts/PageHeader.svelte';
-import PageSection from '$lib/components/layouts/PageSection.svelte';
-import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
+	import type { PageData, ActionData } from './$types';
+	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
+	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
+	import PageSection from '$lib/components/layouts/PageSection.svelte';
+	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
 
-let { data, form }: { data: PageData; form?: ActionData | null } = $props();
+	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
 	let portfolioUrl = $state('');
 	let githubUrl = $state('');
@@ -22,7 +22,7 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 		<PageSection>
 			<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-4`}>Your Application Status</h2>
 			<div
-				class={`inline-block px-6 py-3 ${RADIUS.button} ${TEXT.body} text-xl font-semibold mb-4 ${
+				class={`inline-block px-6 py-3 ${RADIUS.button} ${TEXT.body} mb-4 text-xl font-semibold ${
 					data.existingApplication.status === 'pending'
 						? COLOR.warningBg
 						: data.existingApplication.status === 'approved'
@@ -39,8 +39,12 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 			</p>
 			{#if data.existingApplication.adminNotes}
 				<div class={`${RADIUS.small} ${COLOR.neutral} ${SPACING.cardPadding} mt-4`}>
-					<strong class={`block ${TEXT.button} ${COLOR.textPrimary} font-semibold mb-2`}>Admin Notes:</strong>
-					<p class={`${TEXT.body} ${COLOR.textSecondary} leading-relaxed`}>{data.existingApplication.adminNotes}</p>
+					<strong class={`block ${TEXT.button} ${COLOR.textPrimary} mb-2 font-semibold`}
+						>Admin Notes:</strong
+					>
+					<p class={`${TEXT.body} ${COLOR.textSecondary} leading-relaxed`}>
+						{data.existingApplication.adminNotes}
+					</p>
 				</div>
 			{/if}
 		</PageSection>
@@ -62,7 +66,10 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
 		{#if form?.message}
 			<PageSection>
-				<div class={`${RADIUS.button} ${SPACING.cardPadding} ${COLOR.error} ${ELEVATION.base}`} role="alert">
+				<div
+					class={`${RADIUS.button} ${SPACING.cardPadding} ${COLOR.error} ${ELEVATION.base}`}
+					role="alert"
+				>
 					{form.message}
 				</div>
 			</PageSection>
@@ -70,9 +77,12 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
 		<PageSection>
 			<form method="POST" class="flex flex-col gap-6">
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 					<div class="flex flex-col gap-2">
-						<label for="fullName" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+						<label
+							for="fullName"
+							class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+						>
 							Full Name *
 						</label>
 						<input
@@ -87,7 +97,7 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 					</div>
 
 					<div class="flex flex-col gap-2">
-						<label for="email" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+						<label for="email" class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}>
 							Email *
 						</label>
 						<input
@@ -103,7 +113,7 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 				</div>
 
 				<div class="flex flex-col gap-2">
-					<label for="phone" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+					<label for="phone" class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}>
 						Phone Number *
 					</label>
 					<input
@@ -118,7 +128,7 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 				</div>
 
 				<div class="flex flex-col gap-2">
-					<label for="bio" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+					<label for="bio" class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}>
 						Bio *
 					</label>
 					<textarea
@@ -127,12 +137,15 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 						required
 						rows="4"
 						placeholder="Tell us about yourself, your background and experience..."
-						class={`${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 resize-y`}
+						class={`${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} resize-y focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
 					></textarea>
 				</div>
 
 				<div class="flex flex-col gap-2">
-					<label for="expertise" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+					<label
+						for="expertise"
+						class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+					>
 						Area of Expertise *
 					</label>
 					<input
@@ -143,11 +156,16 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 						placeholder="e.g. Web Development, Data Science, AI/ML"
 						class={`${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
 					/>
-					<small class={`${TEXT.small} ${COLOR.textMuted}`}>What topics are you comfortable teaching?</small>
+					<small class={`${TEXT.small} ${COLOR.textMuted}`}
+						>What topics are you comfortable teaching?</small
+					>
 				</div>
 
 				<div class="flex flex-col gap-2">
-					<label for="yearsExperience" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+					<label
+						for="yearsExperience"
+						class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+					>
 						Years of Experience *
 					</label>
 					<input
@@ -162,7 +180,10 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 				</div>
 
 				<div class="flex flex-col gap-2">
-					<label for="portfolioUrl" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+					<label
+						for="portfolioUrl"
+						class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+					>
 						Portfolio URL
 					</label>
 					<input
@@ -175,9 +196,12 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 					/>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 					<div class="flex flex-col gap-2">
-						<label for="githubUrl" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+						<label
+							for="githubUrl"
+							class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+						>
 							GitHub URL
 						</label>
 						<input
@@ -191,7 +215,10 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 					</div>
 
 					<div class="flex flex-col gap-2">
-						<label for="linkedinUrl" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+						<label
+							for="linkedinUrl"
+							class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+						>
 							LinkedIn URL
 						</label>
 						<input
@@ -206,7 +233,10 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 				</div>
 
 				<div class="flex flex-col gap-2">
-					<label for="motivation" class={`${TEXT.button} ${COLOR.textPrimary} font-semibold text-sm`}>
+					<label
+						for="motivation"
+						class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+					>
 						Why do you want to be a mentor? *
 					</label>
 					<textarea
@@ -215,7 +245,7 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 						required
 						rows="5"
 						placeholder="Share your motivation for becoming a mentor..."
-						class={`${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 resize-y`}
+						class={`${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} resize-y focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
 					></textarea>
 				</div>
 
@@ -237,4 +267,3 @@ let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 		</PageSection>
 	</PageWrapper>
 {/if}
-

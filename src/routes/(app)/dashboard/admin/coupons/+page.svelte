@@ -79,8 +79,8 @@
 
 	// Count coupons by filter (need to count based on search too for accurate counts)
 	const filterCounts = $derived.by(() => {
-		const searchFiltered = data.coupons.filter((c) =>
-			searchQuery === '' || c.code.toLowerCase().includes(searchQuery.toLowerCase())
+		const searchFiltered = data.coupons.filter(
+			(c) => searchQuery === '' || c.code.toLowerCase().includes(searchQuery.toLowerCase())
 		);
 		return countCouponsByFilter(searchFiltered);
 	});
@@ -152,7 +152,7 @@
 	<div class="flex flex-col items-stretch gap-4 md:flex-row md:items-center md:justify-between">
 		<CouponFilters
 			bind:filter
-			filterCounts={filterCounts}
+			{filterCounts}
 			onFilterChange={(value) => updateFilter(value as CouponFilterType)}
 		/>
 		<a
@@ -188,7 +188,9 @@
 
 	<!-- Coupons Table -->
 	{#if filteredCoupons.length === 0 && data.coupons.length === 0}
-		<div class="rounded-lg border border-gray-200 bg-white p-12 text-center dark:border-neutral-800 dark:bg-neutral-900">
+		<div
+			class="rounded-lg border border-gray-200 bg-white p-12 text-center dark:border-neutral-800 dark:bg-neutral-900"
+		>
 			<p class={`mb-4 ${COLOR.textSecondary}`}>No coupons found. Create your first coupon!</p>
 			<a
 				href="/dashboard/admin/coupons/create"

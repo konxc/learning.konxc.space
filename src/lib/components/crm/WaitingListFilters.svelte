@@ -10,8 +10,8 @@
 	let {
 		statusFilter = $bindable(''),
 		statusCounts,
-	onStatusFilterChange
-}: WaitingListFiltersProps = $props();
+		onStatusFilterChange
+	}: WaitingListFiltersProps = $props();
 
 	// Status filter options for buttons
 	const statusFilterOptions: Array<{

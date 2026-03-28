@@ -14,7 +14,7 @@
 	id="role-select"
 	class="mt-1 w-full rounded-md border px-2 py-1 text-sm"
 	onchange={onChange}
-	bind:value={$activeRole}
+	value={$activeRole}
 >
 	{#each ROLES as r}
 		<option value={r}>{r}</option>

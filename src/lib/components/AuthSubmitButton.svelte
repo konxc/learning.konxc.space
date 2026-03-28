@@ -9,7 +9,7 @@
 	let { text, disabled = false, loading = false, type = 'submit' }: Props = $props();
 </script>
 
-<button type={type} class="submit-btn" {disabled}>
+<button {type} class="submit-btn" {disabled}>
 	{#if loading}
 		Loading...
 	{:else}
@@ -47,4 +47,3 @@
 		cursor: not-allowed;
 	}
 </style>
-

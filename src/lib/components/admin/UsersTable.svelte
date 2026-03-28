@@ -10,7 +10,7 @@
 		fullName?: string | null;
 		email?: string | null;
 		role: string;
-	onboardingCompleted: boolean | null;
+		onboardingCompleted: boolean | null;
 		createdAt: Date | string;
 	}
 
@@ -105,4 +105,3 @@
 		{/if}
 	{/snippet}
 </DataTable>
-

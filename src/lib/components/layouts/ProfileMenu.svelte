@@ -1,19 +1,19 @@
 <script lang="ts">
-import { RADIUS, TEXT, COLOR, TRANSITION, ELEVATION } from '$lib/config/design';
-import { m } from '$lib/paraglide/messages.js';
-import ProfileMenuSummary from './ProfileMenuSummary.svelte';
-import ProfileUserInfo from './ProfileUserInfo.svelte';
-import ThemeAccordion from './ThemeAccordion.svelte';
-import RoleSwitcherAccordion from './RoleSwitcherAccordion.svelte';
-import type { Theme } from '$lib/stores/theme';
-import { onMount } from 'svelte';
-import { enhance } from '$app/forms';
-import { toast } from '$lib/stores/toast';
-import type { User as DbUser } from '$lib/server/db/schema';
+	import { RADIUS, TEXT, COLOR, TRANSITION, ELEVATION } from '$lib/config/design';
+	import { m } from '$lib/paraglide/messages.js';
+	import ProfileMenuSummary from './ProfileMenuSummary.svelte';
+	import ProfileUserInfo from './ProfileUserInfo.svelte';
+	import ThemeAccordion from './ThemeAccordion.svelte';
+	import RoleSwitcherAccordion from './RoleSwitcherAccordion.svelte';
+	import type { Theme } from '$lib/stores/theme';
+	import { onMount } from 'svelte';
+	import { enhance } from '$app/forms';
+	import { toast } from '$lib/stores/toast';
+	import type { User as DbUser } from '$lib/server/db/schema';
 
-type ProfileMenuUser = Partial<DbUser> & {
-	avatarUrl?: string | null;
-};
+	type ProfileMenuUser = Partial<DbUser> & {
+		avatarUrl?: string | null;
+	};
 
 	let {
 		user,
@@ -24,7 +24,7 @@ type ProfileMenuUser = Partial<DbUser> & {
 		onAccordionToggle,
 		profileDetailsRef,
 		themeAccordionRef,
-	roleAccordionRef
+		roleAccordionRef
 	}: {
 		user: ProfileMenuUser | null;
 		theme: Theme;

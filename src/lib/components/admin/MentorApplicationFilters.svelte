@@ -12,8 +12,8 @@
 	let {
 		statusFilter = $bindable('all'),
 		statusCounts,
-	onStatusFilterChange
-}: MentorApplicationFiltersProps = $props();
+		onStatusFilterChange
+	}: MentorApplicationFiltersProps = $props();
 
 	// Status filter options for buttons
 	const statusFilterOptions: Array<{
@@ -58,4 +58,3 @@
 		</button>
 	{/each}
 </div>
-

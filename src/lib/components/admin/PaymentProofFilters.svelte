@@ -11,8 +11,8 @@
 	let {
 		statusFilter = $bindable('all'),
 		statusCounts,
-	onStatusFilterChange
-}: PaymentProofFiltersProps = $props();
+		onStatusFilterChange
+	}: PaymentProofFiltersProps = $props();
 
 	// Status filter options for buttons
 	const statusFilterOptions: Array<{
@@ -45,4 +45,3 @@
 		</button>
 	{/each}
 </div>
-
