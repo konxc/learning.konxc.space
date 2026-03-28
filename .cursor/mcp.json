@@ -11,6 +11,22 @@
 		"tailwindcss-server": {
 			"command": "npx",
 			"args": ["-y", "tailwindcss-mcp-server"]
+		},
+		"filesystem": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-filesystem"]
+		},
+		"ripgrep": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-ripgrep"]
+		},
+		"process": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-process"]
+		},
+		"eslint": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-eslint"]
 		}
 	}
 }
