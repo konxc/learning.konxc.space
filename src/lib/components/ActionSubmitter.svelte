@@ -15,6 +15,7 @@
 	let url = $state(existingSubmission?.payload?.url || '');
 	let note = $state(existingSubmission?.payload?.note || '');
 	let showSuccess = $state(false);
+	let errorMessage = $state('');
 
 	const trackLabels: Record<string, string> = {
 		creator: 'Video/Konten URL',
@@ -54,11 +55,15 @@
 			action="?/submitAction"
 			use:enhance={() => {
 				submitting = true;
+				errorMessage = '';
 				return async ({ result }) => {
 					submitting = false;
 					if (result.type === 'success') {
 						showSuccess = true;
 						if (onSuccess) onSuccess();
+					} else if (result.type === 'failure') {
+						const data = result.data as { error?: string } | undefined;
+						errorMessage = data?.error || 'An error occurred. Please try again.';
 					}
 				};
 			}}
@@ -95,6 +100,12 @@
 					class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 resize-none`}
 				></textarea>
 			</div>
+
+			{#if errorMessage}
+				<div class="rounded-lg bg-red-50 p-3 text-sm text-red-600 border border-red-200">
+					{errorMessage}
+				</div>
+			{/if}
 
 			<button
 				type="submit"
