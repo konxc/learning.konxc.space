@@ -4,7 +4,7 @@
 	import { m } from '$lib/paraglide/messages.js';
 
 	const labelMapping: Record<string, string> = {
-		dashboard: 'Beranda',
+		app: 'Beranda',
 		overview: 'Ringkasan',
 		courses: 'Jelajahi',
 		'my-courses': 'Kursus Saya',
