@@ -2,6 +2,10 @@ import * as schema from '../../src/lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
 
+function generateId() {
+	return 'ws-' + Math.random().toString(36).substring(2, 11);
+}
+
 export async function seedOrganizations(db: LibSQLDatabase<typeof schema>, adminIds: string[]) {
 	console.log('🏢 Seeding organizations...');
 
@@ -127,4 +131,77 @@ export async function assignCoursesToOrganizations(db: LibSQLDatabase<typeof sch
 	}
 
 	console.log(`✅ Assigned ${assignments.length} courses to organizations`);
+}
+
+export async function seedWorkspaces(db: LibSQLDatabase<typeof schema>, userIds: string[]) {
+	console.log('🏢 Seeding workspaces...');
+
+	const workspaces = [
+		// Workspaces for Yayasan ASIB
+		{
+			id: 'ws-asib-001',
+			orgId: 'org-yayasan-asib',
+			name: 'Tim Administrasi',
+			description: 'Tim administrasi dan operasional Yayasan ASIB',
+			createdAt: new Date('2024-01-02'),
+			updatedAt: new Date('2024-01-02')
+		},
+		{
+			id: 'ws-asib-002',
+			orgId: 'org-yayasan-asib',
+			name: 'Tim Pengajar',
+			description: 'Tim mentor dan pengajar program Naik Kelas',
+			createdAt: new Date('2024-01-02'),
+			updatedAt: new Date('2024-01-02')
+		},
+		// Workspaces for Koneksi Digital
+		{
+			id: 'ws-koneksi-001',
+			orgId: 'org-koneksi',
+			name: 'Course Development',
+			description: 'Tim pengembangan konten course',
+			createdAt: new Date('2024-01-16'),
+			updatedAt: new Date('2024-01-16')
+		},
+		{
+			id: 'ws-koneksi-002',
+			orgId: 'org-koneksi',
+			name: 'Marketing Team',
+			description: 'Tim marketing dan growth',
+			createdAt: new Date('2024-01-16'),
+			updatedAt: new Date('2024-01-16')
+		}
+	];
+
+	for (const ws of workspaces) {
+		await db.insert(schema.workspace).values(ws).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${workspaces.length} workspaces`);
+
+	// Seed workspace members
+	console.log('👥 Seeding workspace members...');
+
+	const workspaceMembers = [
+		// ASIB Admin workspace
+		{ id: generateId(), workspaceId: 'ws-asib-001', userId: userIds[0], role: 'admin' },
+		{ id: generateId(), workspaceId: 'ws-asib-001', userId: userIds[1], role: 'member' },
+		// ASIB Teacher workspace
+		{ id: generateId(), workspaceId: 'ws-asib-002', userId: userIds[2], role: 'admin' },
+		{ id: generateId(), workspaceId: 'ws-asib-002', userId: userIds[0], role: 'admin' },
+		// Koneksi Course Development
+		{ id: generateId(), workspaceId: 'ws-koneksi-001', userId: userIds[0], role: 'admin' },
+		{ id: generateId(), workspaceId: 'ws-koneksi-001', userId: userIds[2], role: 'member' },
+		// Koneksi Marketing
+		{ id: generateId(), workspaceId: 'ws-koneksi-002', userId: userIds[0], role: 'admin' },
+		{ id: generateId(), workspaceId: 'ws-koneksi-002', userId: userIds[1], role: 'member' }
+	];
+
+	for (const member of workspaceMembers) {
+		await db.insert(schema.workspaceMember).values(member).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${workspaceMembers.length} workspace members`);
+
+	return workspaces;
 }

@@ -23,7 +23,7 @@ import {
 	seedCourseReviews
 } from './seed/notifications.js';
 import { seedAffiliateLinks, seedAffiliateSales } from './seed/affiliates.js';
-import { seedOrganizations, assignCoursesToOrganizations } from './seed/organizations.js';
+import { seedOrganizations, assignCoursesToOrganizations, seedWorkspaces } from './seed/organizations.js';
 import { seedPlugins } from './seed/plugins.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -124,6 +124,9 @@ async function main() {
 		const adminIds = [userIds[0], userIds[1], userIds[2]]; // admin, bd, mentor
 		await seedOrganizations(db, adminIds);
 		await assignCoursesToOrganizations(db, courseIds);
+
+		// Seed workspaces (sub-divisions within organizations)
+		await seedWorkspaces(db, adminIds);
 
 		// Seed plugins
 		await seedPlugins(db);

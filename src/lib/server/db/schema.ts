@@ -441,6 +441,41 @@ export const organizationInvitation = sqliteTable('organization_invitation', {
 		.$defaultFn(() => new Date())
 });
 
+// Workspace (sub-division within organization)
+export const workspace = sqliteTable('workspace', {
+	id: text('id').primaryKey(),
+	orgId: text('org_id')
+		.notNull()
+		.references(() => organization.id),
+	name: text('name').notNull(),
+	description: text('description'),
+	logoUrl: text('logo_url'),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Workspace Member (users in workspace with roles)
+export const workspaceMember = sqliteTable('workspace_member', {
+	id: text('id').primaryKey(),
+	workspaceId: text('workspace_id')
+		.notNull()
+		.references(() => workspace.id),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	role: text('role').notNull().default('member'), // 'admin' | 'member' | 'viewer'
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
 // Plugin Registry
 export const pluginRegistry = sqliteTable('plugin_registry', {
 	id: text('id').primaryKey(),
@@ -504,6 +539,8 @@ export type Partner = typeof partner.$inferSelect;
 export type Organization = typeof organization.$inferSelect;
 export type OrganizationMember = typeof organizationMember.$inferSelect;
 export type OrganizationInvitation = typeof organizationInvitation.$inferSelect;
+export type Workspace = typeof workspace.$inferSelect;
+export type WorkspaceMember = typeof workspaceMember.$inferSelect;
 export type Notification = typeof notification.$inferSelect;
 export type EmailLog = typeof emailLog.$inferSelect;
 export type WhatsAppLog = typeof whatsappLog.$inferSelect;
