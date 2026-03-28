@@ -54,6 +54,36 @@ export function getNavItemsForRole(role: string): NavItem[] {
 		return [
 			...baseNav,
 			{
+				label: 'Browse Courses',
+				href: '/app/courses',
+				icon: '🔍',
+				category: 'learning'
+			},
+			{
+				label: 'My Courses',
+				href: '/app/my-courses',
+				icon: '📖',
+				category: 'learning'
+			},
+			{
+				label: 'My Progress',
+				href: '/app/my-progress',
+				icon: '📈',
+				category: 'learning'
+			},
+			{
+				label: 'Weekly Checkpoints',
+				href: '/app/checkpoints',
+				icon: '✅',
+				category: 'learning'
+			},
+			{
+				label: 'Leaderboard',
+				href: '/app/leaderboard',
+				icon: '🏆',
+				category: 'learning'
+			},
+			{
 				label: 'Manage Courses',
 				href: '/app/admin/courses',
 				icon: '📚',
@@ -102,14 +132,20 @@ export function getNavItemsForRole(role: string): NavItem[] {
 				icon: '📊',
 				category: 'admin'
 			},
-			{
-				label: 'Course Reviews',
-				href: '/app/admin/reviews',
-				icon: '⭐',
-				category: 'admin'
-			},
-			{
-				label: 'CRM Waiting List',
+		{
+			label: 'Course Reviews',
+			href: '/app/admin/reviews',
+			icon: '⭐',
+			category: 'admin'
+		},
+		{
+			label: 'Broadcast Message',
+			href: '/app/mentor/broadcast',
+			icon: '📢',
+			category: 'admin'
+		},
+		{
+			label: 'CRM Waiting List',
 				href: '/app/crm/waiting-list',
 				icon: '⏳',
 				category: 'crm'
@@ -151,18 +187,30 @@ export function getNavItemsForRole(role: string): NavItem[] {
 			category: 'learning'
 		},
 		{
+			label: 'Weekly Checkpoints',
+			href: '/app/checkpoints',
+			icon: '✅',
+			category: 'learning'
+		},
+		{
 			label: 'Course Management',
 				href: '/app/mentor/courses',
 				icon: '🎓',
 				category: 'management'
 			},
-			{
-				label: 'My Students',
-				href: '/app/mentor/students',
-				icon: '👨‍🎓',
-				category: 'management'
-			}
-		];
+		{
+			label: 'My Students',
+			href: '/app/mentor/students',
+			icon: '👨‍🎓',
+			category: 'management'
+		},
+		{
+			label: 'Broadcast Message',
+			href: '/app/mentor/broadcast',
+			icon: '📢',
+			category: 'management'
+		}
+	];
 	}
 
 	// Facilitator role - supports cohorts but can't edit course content
@@ -181,14 +229,20 @@ export function getNavItemsForRole(role: string): NavItem[] {
 				icon: '📖',
 				category: 'learning'
 			},
-			{
-				label: 'My Progress',
-				href: '/app/my-progress',
-				icon: '📈',
-				category: 'learning'
-			},
-			{
-				label: 'My Batches',
+	{
+			label: 'My Progress',
+			href: '/app/my-progress',
+			icon: '📈',
+			category: 'learning'
+		},
+		{
+			label: 'Weekly Checkpoints',
+			href: '/app/checkpoints',
+			icon: '✅',
+			category: 'learning'
+		},
+		{
+			label: 'My Batches',
 				href: '/app/facilitator/cohorts',
 				icon: '📅',
 				category: 'management'
@@ -218,9 +272,21 @@ export function getNavItemsForRole(role: string): NavItem[] {
 			category: 'learning'
 		},
 		{
+			label: 'Weekly Checkpoints',
+			href: '/app/checkpoints',
+			icon: '✅',
+			category: 'learning'
+		},
+		{
 			label: 'Leaderboard',
 			href: '/app/leaderboard',
 			icon: '🏆',
+			category: 'learning'
+		},
+		{
+			label: 'Affiliate Dashboard',
+			href: '/app/affiliate',
+			icon: '💰',
 			category: 'learning'
 		},
 		{
