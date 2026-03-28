@@ -58,7 +58,10 @@
 				<div class={`flex items-center justify-center shrink-0 rounded-lg bg-blue-600 text-white font-black shadow-md ${isCollapsed ? 'h-8 w-8 text-xs' : 'h-8 w-8 text-sm'}`}>P</div>
 				{#if !isCollapsed}
 					<div class="flex-1 text-left min-w-0">
-						<p class="text-[10px] font-black uppercase tracking-widest text-blue-600 leading-none mb-1">Personal</p>
+						<div class="flex items-center gap-1.5 mb-1">
+							<p class="text-[10px] font-black uppercase tracking-widest text-blue-600 leading-none">Personal</p>
+							<span class="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">Free</span>
+						</div>
 						<p class="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">Account</p>
 					</div>
 				{/if}
@@ -74,7 +77,10 @@
 				</div>
 				{#if !isCollapsed}
 					<div class="flex-1 text-left min-w-0">
-						<p class="text-[10px] font-black uppercase tracking-widest text-indigo-600 leading-none mb-1">Organization</p>
+						<div class="flex items-center gap-1.5 mb-1">
+							<p class="text-[10px] font-black uppercase tracking-widest text-indigo-600 leading-none">Organization</p>
+							<span class={`rounded-full px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest ${workspaces.activeOrg?.planType === 'pro' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : workspaces.activeOrg?.planType === 'enterprise' ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'}`}>{workspaces.activeOrg?.planType || 'Free'}</span>
+						</div>
 						<p class="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">{workspaces.activeOrg?.name}</p>
 					</div>
 				{/if}
