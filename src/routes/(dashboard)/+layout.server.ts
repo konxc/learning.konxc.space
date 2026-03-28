@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
-import { getNavItemsForRole } from '$lib/server/rbac';
+import { getNavItemsForRole, type WorkspaceContext } from '$lib/server/rbac';
 import { db } from '$lib/server/db';
 import { eq, desc, and } from 'drizzle-orm';
 import * as schema from '$lib/server/db/schema';
@@ -67,8 +67,14 @@ export const load: LayoutServerLoad = async ({ locals, cookies, url }) => {
 		}
 	}
 
-	// Get role-based navigation based on effectiveRole
-	const navItems = getNavItemsForRole(effectiveRole);
+	// Get role-based navigation based on effectiveRole and workspace context
+	const workspaceContext: WorkspaceContext = {
+		isPersonal: activeWorkspaceId === 'personal',
+		orgId: activeOrg?.id,
+		orgName: activeOrg?.name,
+		orgRole: activeOrg?.role
+	};
+	const navItems = getNavItemsForRole(effectiveRole, workspaceContext);
 
 	// Get unread notifications
 	let notifications: any[] = [];
