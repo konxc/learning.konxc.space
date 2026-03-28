@@ -74,9 +74,9 @@ export const load: PageServerLoad = async (event) => {
 		.limit(10);
 
 	// Calculate overall stats
-	const totalCourses = enrollments.length;
-	const completedCourses = enrollments.filter(e => e.status === 'completed').length;
-	const inProgressCourses = enrollments.filter(e => e.status === 'active' && e.progressPercent > 0).length;
+	const totalCourses = coursesWithProgress.length;
+	const completedCourses = coursesWithProgress.filter(e => e.status === 'completed').length;
+	const inProgressCourses = coursesWithProgress.filter(e => e.status === 'active' && e.progressPercent > 0).length;
 	const totalLessonsCompleted = coursesWithProgress.reduce((sum, c) => sum + c.completedLessons, 0);
 
 	// Quiz stats

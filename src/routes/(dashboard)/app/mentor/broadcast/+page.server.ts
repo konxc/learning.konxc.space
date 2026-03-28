@@ -61,7 +61,7 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-	send: async ({ request, locals }) => {
+	send: async ({ request, locals, url }) => {
 		const user = await requireAuth(locals);
 
 		if (user.role !== 'admin' && user.role !== 'mentor') {
@@ -81,7 +81,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			const response = await fetch(`${event.url.origin}/api/broadcast`, {
+			const response = await fetch(`${url.origin}/api/broadcast`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

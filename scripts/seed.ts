@@ -628,12 +628,12 @@ async function seedCourseContent(courseIds: string[]) {
 	}
 
 	const lessons = [
-		{ id: 'lesson-001', moduleId: 'module-001', title: 'What is Python?', order: 1 },
-		{ id: 'lesson-002', moduleId: 'module-001', title: 'Setting up Environment', order: 2 },
-		{ id: 'lesson-003', moduleId: 'module-002', title: 'Numbers and Strings', order: 1 },
-		{ id: 'lesson-004', moduleId: 'module-002', title: 'Lists and Dictionaries', order: 2 },
-		{ id: 'lesson-005', moduleId: 'module-003', title: 'If-Else Statement', order: 1 },
-		{ id: 'lesson-006', moduleId: 'module-003', title: 'Loops (For & While)', order: 2 }
+		{ id: 'lesson-001', moduleId: 'module-001', title: 'What is Python?', order: 1, weekNumber: 1, isFree: true },
+		{ id: 'lesson-002', moduleId: 'module-001', title: 'Setting up Environment', order: 2, weekNumber: 1, isFree: false },
+		{ id: 'lesson-003', moduleId: 'module-002', title: 'Numbers and Strings', order: 1, weekNumber: 2, isFree: false },
+		{ id: 'lesson-004', moduleId: 'module-002', title: 'Lists and Dictionaries', order: 2, weekNumber: 2, isFree: false },
+		{ id: 'lesson-005', moduleId: 'module-003', title: 'If-Else Statement', order: 1, weekNumber: 3, isFree: false },
+		{ id: 'lesson-006', moduleId: 'module-003', title: 'Loops (For & While)', order: 2, weekNumber: 3, isFree: false }
 	];
 
 	for (const l of lessons) {
@@ -646,7 +646,8 @@ async function seedCourseContent(courseIds: string[]) {
 			lessonId: 'lesson-001',
 			type: 'video',
 			url: 'https://vimeo.com/83614660',
-			order: 1
+			order: 1,
+			durationMs: 600000
 		},
 		{
 			id: 'mat-002',
@@ -681,6 +682,851 @@ async function seedCourseContent(courseIds: string[]) {
 	console.log(`✅ Seeded course content`);
 }
 
+async function seedCohorts(adminId: string, mentorIds: string[], courseIds: string[]) {
+	console.log('🏫 Seeding cohorts...');
+
+	const cohorts = [
+		{
+			id: 'cohort-001',
+			name: 'Naik Kelas Batch 1 - Python',
+			courseId: courseIds[0],
+			facilitatorId: mentorIds[0],
+			startDate: new Date('2024-02-01'),
+			endDate: new Date('2024-04-30'),
+			status: 'completed',
+			createdAt: new Date('2024-01-15')
+		},
+		{
+			id: 'cohort-002',
+			name: 'Naik Kelas Batch 2 - Full Stack',
+			courseId: courseIds[1],
+			facilitatorId: mentorIds[0],
+			startDate: new Date('2024-03-01'),
+			endDate: new Date('2024-05-31'),
+			status: 'active',
+			createdAt: new Date('2024-02-15')
+		},
+		{
+			id: 'cohort-003',
+			name: 'Naik Kelas Batch 3 - React',
+			courseId: courseIds[2],
+			facilitatorId: mentorIds[0],
+			startDate: new Date('2024-04-01'),
+			endDate: new Date('2024-06-30'),
+			status: 'active',
+			createdAt: new Date('2024-03-15')
+		}
+	];
+
+	for (const cohort of cohorts) {
+		await db.insert(schema.cohort).values(cohort).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${cohorts.length} cohorts`);
+	return cohorts;
+}
+
+async function seedPartners() {
+	console.log('🤝 Seeding partners...');
+
+	const partners = [
+		{
+			id: 'partner-001',
+			name: 'Yayasan ASIB',
+			type: 'nonprofit',
+			email: 'info@asib.org',
+			phone: '021-1234567',
+			address: 'Jakarta Selatan',
+			website: 'https://asib.org',
+			status: 'active',
+			createdAt: new Date('2024-01-01')
+		},
+		{
+			id: 'partner-002',
+			name: 'Koneksi Digital',
+			type: 'corporate',
+			email: 'hello@koneksi.id',
+			phone: '021-7654321',
+			address: 'Jakarta Pusat',
+			website: 'https://koneksi.id',
+			status: 'active',
+			createdAt: new Date('2024-01-01')
+		}
+	];
+
+	for (const partner of partners) {
+		await db.insert(schema.partner).values(partner).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${partners.length} partners`);
+}
+
+async function seedBadges() {
+	console.log('🏆 Seeding badges...');
+
+	const badges = [
+		{
+			id: 'badge-001',
+			name: 'First Steps',
+			description: 'Menelesaikan lesson pertama',
+			icon: '🎯',
+			criteria: JSON.stringify({ type: 'complete_lesson', count: 1 })
+		},
+		{
+			id: 'badge-002',
+			name: 'Dedicated Learner',
+			description: 'Login 7 hari berturut-turut',
+			icon: '🔥',
+			criteria: JSON.stringify({ type: 'streak', days: 7 })
+		},
+		{
+			id: 'badge-003',
+			name: 'Course Master',
+			description: 'Menelesaikan satu course lengkap',
+			icon: '🎓',
+			criteria: JSON.stringify({ type: 'complete_course', count: 1 })
+		},
+		{
+			id: 'badge-004',
+			name: 'Quiz Ace',
+			description: 'Mendapat nilai 100 di kuis',
+			icon: '⭐',
+			criteria: JSON.stringify({ type: 'perfect_quiz', score: 100 })
+		},
+		{
+			id: 'badge-005',
+			name: 'Helping Hand',
+			description: 'Membantu pebbles lain di forum',
+			icon: '🤝',
+			criteria: JSON.stringify({ type: 'forum_helpful', count: 1 })
+		},
+		{
+			id: 'badge-006',
+			name: 'Weekend Warrior',
+			description: 'Menyelesaikan checkpoint mingguan',
+			icon: '💪',
+			criteria: JSON.stringify({ type: 'checkpoint_completed', count: 1 })
+		},
+		{
+			id: 'badge-007',
+			name: 'Content Creator',
+			description: 'Mengupload 5 karya',
+			icon: '📸',
+			criteria: JSON.stringify({ type: 'upload_work', count: 5 })
+		},
+		{
+			id: 'badge-008',
+			name: 'Affiliate Pro',
+			description: 'Mendapat 10 penjualan affiliate',
+			icon: '💰',
+			criteria: JSON.stringify({ type: 'affiliate_sales', count: 10 })
+		}
+	];
+
+	for (const badge of badges) {
+		await db.insert(schema.badge).values(badge).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${badges.length} badges`);
+}
+
+async function seedUserXP(userIds: string[]) {
+	console.log('✨ Seeding user XP...');
+
+	const xpData = [
+		{ userId: userIds[3], points: 1250, level: 5, streakDays: 7, lastActiveAt: new Date() },
+		{ userId: userIds[4], points: 2100, level: 7, streakDays: 14, lastActiveAt: new Date() },
+		{ userId: userIds[5], points: 450, level: 2, streakDays: 3, lastActiveAt: new Date() }
+	];
+
+	for (const xp of xpData) {
+		await db.insert(schema.userXP).values(xp).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded user XP for ${xpData.length} users`);
+}
+
+async function seedUserBadges(userIds: string[]) {
+	console.log('🏅 Seeding user badges...');
+
+	const userBadges = [
+		{ id: 'ub-001', userId: userIds[3], badgeId: 'badge-001', earnedAt: new Date('2024-01-25') },
+		{ id: 'ub-002', userId: userIds[3], badgeId: 'badge-002', earnedAt: new Date('2024-02-01') },
+		{ id: 'ub-003', userId: userIds[3], badgeId: 'badge-004', earnedAt: new Date('2024-02-10') },
+		{ id: 'ub-004', userId: userIds[4], badgeId: 'badge-001', earnedAt: new Date('2024-01-22') },
+		{ id: 'ub-005', userId: userIds[4], badgeId: 'badge-002', earnedAt: new Date('2024-01-29') },
+		{ id: 'ub-006', userId: userIds[4], badgeId: 'badge-003', earnedAt: new Date('2024-02-15') },
+		{ id: 'ub-007', userId: userIds[4], badgeId: 'badge-004', earnedAt: new Date('2024-02-08') },
+		{ id: 'ub-008', userId: userIds[5], badgeId: 'badge-001', earnedAt: new Date('2024-01-28') }
+	];
+
+	for (const ub of userBadges) {
+		await db.insert(schema.userBadge).values(ub).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${userBadges.length} user badges`);
+}
+
+async function seedCheckpoints(courseIds: string[], mentorIds: string[], cohortIds: string[]) {
+	console.log('📋 Seeding checkpoints...');
+
+	const checkpoints = [
+		{
+			id: 'checkpoint-001',
+			cohortId: cohortIds[0],
+			weekNumber: 1,
+			title: 'Checkpoint Minggu 1: Python Basics',
+			description: 'Tes pemahaman dasar Python',
+			dueDate: new Date('2024-02-07'),
+			isActive: true,
+			createdAt: new Date('2024-01-20')
+		},
+		{
+			id: 'checkpoint-002',
+			cohortId: cohortIds[0],
+			weekNumber: 2,
+			title: 'Checkpoint Minggu 2: Data Types',
+			description: 'Tes pemahaman tipe data dan variabel',
+			dueDate: new Date('2024-02-14'),
+			isActive: true,
+			createdAt: new Date('2024-01-27')
+		},
+		{
+			id: 'checkpoint-003',
+			cohortId: cohortIds[1],
+			weekNumber: 1,
+			title: 'Checkpoint Minggu 1: HTML & CSS',
+			description: 'Tes pemahaman dasar HTML dan CSS',
+			dueDate: new Date('2024-03-07'),
+			isActive: true,
+			createdAt: new Date('2024-02-20')
+		}
+	];
+
+	for (const cp of checkpoints) {
+		await db.insert(schema.checkpoint).values(cp).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${checkpoints.length} checkpoints`);
+	return checkpoints;
+}
+
+async function seedCheckpointSubmissions(userIds: string[], checkpointIds: string[]) {
+	console.log('📝 Seeding checkpoint submissions...');
+
+	const submissions = [
+		{
+			id: 'cps-001',
+			checkpointId: checkpointIds[0],
+			userId: userIds[0],
+			notes: 'Jawaban saya:\n1. Python adalah bahasa pemrograman interpret\n2. Variabel di Python tidak perlu deklarasi tipe\n3. List menggunakan tanda []',
+			completed: true,
+			submittedAt: new Date('2024-02-05'),
+			createdAt: new Date('2024-02-05')
+		},
+		{
+			id: 'cps-002',
+			checkpointId: checkpointIds[0],
+			userId: userIds[1],
+			notes: 'Jawaban:\n1. Bahasa pemrograman tingkat tinggi\n2. Dynamic typing\n3. Tuple, List, Dict',
+			completed: true,
+			submittedAt: new Date('2024-02-06'),
+			createdAt: new Date('2024-02-06')
+		},
+		{
+			id: 'cps-003',
+			checkpointId: checkpointIds[1],
+			userId: userIds[0],
+			notes: 'Sedang dikerjakann...',
+			completed: false,
+			submittedAt: null,
+			createdAt: new Date('2024-02-10')
+		}
+	];
+
+	for (const sub of submissions) {
+		await db.insert(schema.checkpointSubmission).values(sub).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${submissions.length} checkpoint submissions`);
+}
+
+async function seedDiscussions(userIds: string[], courseIds: string[], lessonIds: string[]) {
+	console.log('💬 Seeding discussions...');
+
+	const discussions = [
+		{
+			id: 'disc-001',
+			userId: userIds[3],
+			courseId: courseIds[0],
+			lessonId: lessonIds[0],
+			parentId: null,
+			title: 'Pertanyaan tentang Python',
+			content: 'Apakah Python sulit untuk dipelajari bagi pemula?',
+			upvotes: 5,
+			isPinned: true,
+			createdAt: new Date('2024-01-25'),
+			updatedAt: new Date('2024-01-25')
+		},
+		{
+			id: 'disc-002',
+			userId: userIds[4],
+			courseId: courseIds[0],
+			lessonId: lessonIds[0],
+			parentId: 'disc-001',
+			title: null,
+			content: 'Tidak sulit! Python punya syntax yang bersih dan mudah dibaca.',
+			upvotes: 3,
+			isPinned: false,
+			createdAt: new Date('2024-01-26'),
+			updatedAt: new Date('2024-01-26')
+		},
+		{
+			id: 'disc-003',
+			userId: userIds[5],
+			courseId: courseIds[0],
+			lessonId: lessonIds[2],
+			parentId: null,
+			title: 'Bingung dengan tipe data',
+			content: 'Apa perbedaan antara list dan tuple?',
+			upvotes: 2,
+			isPinned: false,
+			createdAt: new Date('2024-01-28'),
+			updatedAt: new Date('2024-01-28')
+		},
+		{
+			id: 'disc-004',
+			userId: userIds[3],
+			courseId: courseIds[1],
+			lessonId: null,
+			parentId: null,
+			title: 'Tips belajar HTML',
+			content: 'Saya rekomendasi gunakan CodePen untuk latihan HTML dasar.',
+			upvotes: 4,
+			isPinned: false,
+			createdAt: new Date('2024-02-01'),
+			updatedAt: new Date('2024-02-01')
+		}
+	];
+
+	for (const disc of discussions) {
+		await db.insert(schema.discussion).values(disc).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${discussions.length} discussions`);
+}
+
+async function seedLessonNotes(userIds: string[], lessonIds: string[], courseIds: string[]) {
+	console.log('📝 Seeding lesson notes...');
+
+	const notes = [
+		{
+			id: 'note-001',
+			userId: userIds[0],
+			courseId: courseIds[0],
+			lessonId: lessonIds[0],
+			content: '# Catatan: Apa itu Python?\n\nPython adalah bahasa pemrograman yang:\n- Interpret\n- Multi-paradigma\n- Easy to learn\n\nDibuat oleh Guido van Rossum tahun 1991.',
+			createdAt: new Date('2024-01-25'),
+			updatedAt: new Date('2024-01-25')
+		},
+		{
+			id: 'note-002',
+			userId: userIds[0],
+			courseId: courseIds[0],
+			lessonId: lessonIds[2],
+			content: '# Tipe Data Python\n\n- int: 1, 2, 3\n- float: 1.5, 2.7\n- str: "hello"\n- list: [1, 2, 3]\n- dict: {"key": "value"}',
+			createdAt: new Date('2024-01-27'),
+			updatedAt: new Date('2024-01-27')
+		},
+		{
+			id: 'note-003',
+			userId: userIds[1],
+			courseId: courseIds[0],
+			lessonId: lessonIds[0],
+			content: 'Python basics: bahasa pemrograman serbaguna.',
+			createdAt: new Date('2024-01-26'),
+			updatedAt: new Date('2024-01-26')
+		}
+	];
+
+	for (const note of notes) {
+		await db.insert(schema.lessonNote).values(note).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${notes.length} lesson notes`);
+}
+
+async function seedNotifications(userIds: string[]) {
+	console.log('🔔 Seeding notifications...');
+
+	const notifications = [
+		{
+			id: generateId(),
+			userId: userIds[3],
+			type: 'welcome',
+			title: 'Selamat datang di Naik Kelas!',
+			message: 'Halo Ahmad Rizki, selamat datang di platform pembelajaran digital marketing dari Koneksi dan Yayasan ASIB.',
+			link: '/app/onboarding',
+			read: true,
+			createdAt: new Date('2024-01-20')
+		},
+		{
+			id: generateId(),
+			userId: userIds[3],
+			type: 'enrollment',
+			title: 'Anda berhasil enroll ke Python Programming',
+			message: 'Selamat! Anda telah terdaftar di course Python Programming Fundamentals.',
+			link: '/app/courses/course-001',
+			read: true,
+			createdAt: new Date('2024-01-20')
+		},
+		{
+			id: generateId(),
+			userId: userIds[3],
+			type: 'reminder',
+			title: 'Checkpoint deadline minggu ini',
+			message: 'Jangan lupa menyelesaikan checkpoint minggu pertama sebelum tanggal 7 Feb 2024!',
+			link: '/app/checkpoints',
+			read: false,
+			createdAt: new Date('2024-02-05')
+		},
+		{
+			id: generateId(),
+			userId: userIds[4],
+			type: 'welcome',
+			title: 'Selamat datang di Naik Kelas!',
+			message: 'Halo Sari Dewi, selamat datang di platform pembelajaran digital marketing dari Koneksi dan Yayasan ASIB.',
+			link: '/app/onboarding',
+			read: true,
+			createdAt: new Date('2024-01-21')
+		},
+		{
+			id: generateId(),
+			userId: userIds[4],
+			type: 'certificate',
+			title: 'Selamat! Anda menyelesaikan course',
+			message: 'Felicidades! Anda telah menyelesaikan course React.js Advanced dengan nilai memuaskan.',
+			link: '/app/certificates',
+			read: true,
+			createdAt: new Date('2024-01-28')
+		},
+		{
+			id: generateId(),
+			userId: userIds[5],
+			type: 'action_required',
+			title: 'Lengkapi onboarding Anda',
+			message: 'Silakan lengkapi profil dan preferensi belajar Anda untuk memulai perjalanan belajar.',
+			link: '/app/onboarding',
+			read: false,
+			createdAt: new Date('2024-01-27')
+		}
+	];
+
+	for (const notif of notifications) {
+		await db.insert(schema.notification).values(notif).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${notifications.length} notifications`);
+}
+
+async function seedBroadcastMessages(adminId: string, mentorId: string) {
+	console.log('📢 Seeding broadcast messages...');
+
+	const broadcasts = [
+		{
+			id: generateId(),
+			senderId: adminId,
+			title: '📢 Pengumuman: Platform Naik Kelas Resmi Launch!',
+			content: 'Halo pebbles! Dengan penuh kebahagiaan kami mengumumkan bahwa platform Naik Kelas by Koneksi resmi launch hari ini. Mari bersama-sama belajar dan berkembang!',
+			targetRole: 'user',
+			targetCohortId: null,
+			targetCourseId: null,
+			sentVia: 'all',
+			status: 'sent',
+			recipientCount: 45,
+			createdAt: new Date('2024-01-15')
+		},
+		{
+			id: generateId(),
+			senderId: mentorId,
+			title: '📚 Tips Belajar Minggu Ini',
+			content: 'Hai pebbles! Jangan lupa untuk selalu praktik langsung setelah menonton video lesson. Karena belajar coding itu perlu latihan, bukan hanya teori!',
+			targetRole: 'user',
+			targetCohortId: null,
+			targetCourseId: null,
+			sentVia: 'notification',
+			status: 'sent',
+			recipientCount: 45,
+			createdAt: new Date('2024-01-25')
+		},
+		{
+			id: generateId(),
+			senderId: adminId,
+			title: '🎯 Reminder: Checkpoint Deadline',
+			content: 'Pebbles Batch 1 dan Batch 2, besok adalah deadline checkpoint minggu pertama. Pastikan semua tugas sudah dikumpulkan ya!',
+			targetRole: null,
+			targetCohortId: 'cohort-001',
+			targetCourseId: null,
+			sentVia: 'whatsapp',
+			status: 'sent',
+			recipientCount: 28,
+			createdAt: new Date('2024-02-06')
+		}
+	];
+
+	for (const bcast of broadcasts) {
+		await db.insert(schema.broadcastMessage).values(bcast).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${broadcasts.length} broadcast messages`);
+}
+
+async function seedAffiliateLinks(userIds: string[]) {
+	console.log('🔗 Seeding affiliate links...');
+
+	const links = [
+		{
+			id: 'afflink-001',
+			userId: userIds[3],
+			name: 'Kursus Python Premium',
+			platform: 'udemy',
+			url: 'https://udemy.com/course/python-master',
+			productPrice: 1500000,
+			commissionRate: 30,
+			status: 'active',
+			createdAt: new Date('2024-02-01')
+		},
+		{
+			id: 'afflink-002',
+			userId: userIds[3],
+			name: ' Ebook Digital Marketing',
+			platform: 'digim认真地',
+			url: 'https://digistore24.com/product/12345',
+			productPrice: 99000,
+			commissionRate: 50,
+			status: 'active',
+			createdAt: new Date('2024-02-05')
+		},
+		{
+			id: 'afflink-003',
+			userId: userIds[4],
+			name: 'Tools Desain Grafis',
+			platform: 'creative_market',
+			url: 'https://creativemarket.com/toolsdesign',
+			productPrice: 250000,
+			commissionRate: 25,
+			status: 'active',
+			createdAt: new Date('2024-02-10')
+		},
+		{
+			id: 'afflink-004',
+			userId: userIds[5],
+			name: 'Hosting Unlimited',
+			platform: 'hostinger',
+			url: 'https://hostinger.com/affiliate/xyz',
+			productPrice: 360000,
+			commissionRate: 20,
+			status: 'active',
+			createdAt: new Date('2024-02-15')
+		}
+	];
+
+	for (const link of links) {
+		await db.insert(schema.affiliateLink).values(link).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${links.length} affiliate links`);
+	return links;
+}
+
+async function seedAffiliateSales(userIds: string[], linkIds: string[]) {
+	console.log('💰 Seeding affiliate sales...');
+
+	const sales = [
+		{
+			affiliateLinkId: linkIds[0],
+			userId: userIds[3],
+			buyerEmail: 'buyer1@email.com',
+			buyerName: 'Rina Wijaya',
+			platform: 'udemy',
+			saleAmount: 1500000,
+			commissionAmount: 450000,
+			transactionId: 'TRX-2024-001',
+			status: 'paid',
+			createdAt: new Date('2024-02-10')
+		},
+		{
+			affiliateLinkId: linkIds[0],
+			userId: userIds[3],
+			buyerEmail: 'buyer2@email.com',
+			buyerName: 'Andi Pratama',
+			platform: 'udemy',
+			saleAmount: 1500000,
+			commissionAmount: 450000,
+			transactionId: 'TRX-2024-002',
+			status: 'paid',
+			createdAt: new Date('2024-02-15')
+		},
+		{
+			affiliateLinkId: linkIds[1],
+			userId: userIds[3],
+			buyerEmail: 'buyer3@email.com',
+			buyerName: 'Maya Sari',
+			platform: 'digistore24',
+			saleAmount: 99000,
+			commissionAmount: 49500,
+			transactionId: 'TRX-2024-003',
+			status: 'paid',
+			createdAt: new Date('2024-02-18')
+		},
+		{
+			affiliateLinkId: linkIds[1],
+			userId: userIds[3],
+			buyerEmail: 'buyer4@email.com',
+			buyerName: 'Budi Hartono',
+			platform: 'digistore24',
+			saleAmount: 99000,
+			commissionAmount: 49500,
+			transactionId: 'TRX-2024-004',
+			status: 'pending',
+			createdAt: new Date('2024-02-20')
+		},
+		{
+			affiliateLinkId: linkIds[2],
+			userId: userIds[4],
+			buyerEmail: 'buyer5@email.com',
+			buyerName: 'Dewi Lestari',
+			platform: 'creative_market',
+			saleAmount: 250000,
+			commissionAmount: 62500,
+			transactionId: 'TRX-2024-005',
+			status: 'paid',
+			createdAt: new Date('2024-02-12')
+		},
+		{
+			affiliateLinkId: linkIds[3],
+			userId: userIds[5],
+			buyerEmail: 'buyer6@email.com',
+			buyerName: 'Fajar Nugroho',
+			platform: 'hostinger',
+			saleAmount: 360000,
+			commissionAmount: 72000,
+			transactionId: 'TRX-2024-006',
+			status: 'paid',
+			createdAt: new Date('2024-02-16')
+		}
+	];
+
+	for (const sale of sales) {
+		await db.insert(schema.affiliateSale).values(sale).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${sales.length} affiliate sales`);
+}
+
+async function seedCourseReviews(userIds: string[], courseIds: string[]) {
+	console.log('⭐ Seeding course reviews...');
+
+	const reviews = [
+		{
+			id: generateId(),
+			userId: userIds[4],
+			courseId: courseIds[2],
+			rating: 5,
+			comment: 'Course yang sangat bagus! Penjelasannya jelas dan mudah dipahami. Mentor juga sangat helpful.',
+			moderationStatus: 'approved',
+			createdAt: new Date('2024-01-28')
+		},
+		{
+			id: generateId(),
+			userId: userIds[3],
+			courseId: courseIds[0],
+			rating: 4,
+			comment: 'Bagus untuk pemula. Beberapa bagian mungkin perlu contoh lebih banyak.',
+			moderationStatus: 'approved',
+			createdAt: new Date('2024-01-25')
+		}
+	];
+
+	for (const review of reviews) {
+		await db.insert(schema.courseReview).values(review).onConflictDoNothing();
+	}
+
+	console.log(`✅ Seeded ${reviews.length} course reviews`);
+}
+
+async function seedMoreStudents(adminId: string) {
+	console.log('👨‍🎓 Seeding more students...');
+
+	const students = [
+		{
+			id: 'user-010',
+			username: 'rina_wijaya',
+			passwordHash: await hashPassword('student123'),
+			role: 'user',
+			fullName: 'Rina Wijaya',
+			email: 'rina.wijaya@example.com',
+			phone: '081234567901',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-01-18')
+		},
+		{
+			id: 'user-011',
+			username: 'andi_pratama',
+			passwordHash: await hashPassword('student123'),
+			role: 'user',
+			fullName: 'Andi Pratama',
+			email: 'andi.pratama@example.com',
+			phone: '081234567902',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-01-19')
+		},
+		{
+			id: 'user-012',
+			username: 'maya_sari',
+			passwordHash: await hashPassword('student123'),
+			role: 'user',
+			fullName: 'Maya Sari',
+			email: 'maya.sari@example.com',
+			phone: '081234567903',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-01-20')
+		},
+		{
+			id: 'user-013',
+			username: 'budi_utama',
+			passwordHash: await hashPassword('student123'),
+			role: 'user',
+			fullName: 'Budi Utama',
+			email: 'budi.utama@example.com',
+			phone: '081234567904',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-01-21')
+		},
+		{
+			id: 'user-014',
+			username: 'dewi_lestari',
+			passwordHash: await hashPassword('student123'),
+			role: 'user',
+			fullName: 'Dewi Lestari',
+			email: 'dewi.lestari@example.com',
+			phone: '081234567905',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-01-22')
+		},
+		{
+			id: 'user-015',
+			username: 'fajar_nugroho',
+			passwordHash: await hashPassword('student123'),
+			role: 'user',
+			fullName: 'Fajar Nugroho',
+			email: 'fajar.nugroho@example.com',
+			phone: '081234567906',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-01-23')
+		},
+		{
+			id: 'user-016',
+			username: 'gita_permata',
+			passwordHash: await hashPassword('student123'),
+			role: 'user',
+			fullName: 'Gita Permata',
+			email: 'gita.permata@example.com',
+			phone: '081234567907',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-01-24')
+		},
+		{
+			id: 'user-017',
+			username: 'hendra_kurnia',
+			passwordHash: await hashPassword('student123'),
+			role: 'user',
+			fullName: 'Hendra Kurniawan',
+			email: 'hendra.kurnia@example.com',
+			phone: '081234567908',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-01-25')
+		},
+		{
+			id: 'user-018',
+			username: 'indah_sari',
+			passwordHash: await hashPassword('student123'),
+			role: 'user',
+			fullName: 'Indah Sari',
+			email: 'indah.sari@example.com',
+			phone: '081234567909',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-01-26')
+		},
+		{
+			id: 'user-019',
+			username: 'joko_widodo',
+			passwordHash: await hashPassword('student123'),
+			role: 'user',
+			fullName: 'Joko Widodo',
+			email: 'joko.widodo@example.com',
+			phone: '081234567910',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-01-27')
+		},
+		{
+			id: 'user-020',
+			username: 'kartu_dewi',
+			passwordHash: await hashPassword('student123'),
+			role: 'user',
+			fullName: 'Kartika Dewi',
+			email: 'kartu.dewi@example.com',
+			phone: '081234567911',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-01-28')
+		},
+		{
+			id: 'user-021',
+			username: 'lukman_hakim',
+			passwordHash: await hashPassword('student123'),
+			role: 'user',
+			fullName: 'Lukman Hakim',
+			email: 'lukman.hakim@example.com',
+			phone: '081234567912',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-01-29')
+		},
+		{
+			id: 'user-022',
+			username: 'mentor_02',
+			passwordHash: await hashPassword('mentor123'),
+			role: 'mentor',
+			fullName: 'Diana Putri',
+			email: 'diana@naikkelas.id',
+			phone: '081234567913',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-02-01')
+		},
+		{
+			id: 'user-023',
+			username: 'mentor_03',
+			passwordHash: await hashPassword('mentor123'),
+			role: 'mentor',
+			fullName: 'Ahmad Fauzi',
+			email: 'fauzi@naikkelas.id',
+			phone: '081234567914',
+			onboardingCompleted: true,
+			createdAt: new Date('2024-02-05')
+		}
+	];
+
+	for (const student of students) {
+		try {
+			await db.insert(schema.user).values(student).onConflictDoNothing();
+		} catch (err) {
+			console.log(`User ${student.username} already exists, skipping...`);
+		}
+	}
+
+	console.log(`✅ Seeded ${students.length} additional users`);
+	return students;
+}
+
 async function resetTables() {
 	console.log('🗑️  Resetting tables...');
 
@@ -711,6 +1557,7 @@ async function main() {
 		const users = await seedUsers();
 		const userIds = users.map((u) => u.id);
 		const adminId = userIds[0]; // admin
+		const bdId = userIds[1];
 		const mentorId = userIds[2]; // mentor1
 
 		const courses = await seedCourses(adminId, mentorId);
@@ -724,6 +1571,41 @@ async function main() {
 		await seedWaitingList();
 		await seedCourseContent(courseIds);
 
+		// New seeding functions
+		await seedPartners();
+		const cohorts = await seedCohorts(adminId, [mentorId], courseIds);
+		const cohortIds = cohorts.map((c) => c.id);
+		
+		const allMentors = [mentorId];
+		await seedCheckpoints(courseIds, allMentors, cohortIds);
+		
+		const moreUsers = await seedMoreStudents(adminId);
+		const allUserIds = [...userIds, ...moreUsers.map(u => u.id)];
+		
+		await seedBadges();
+		await seedUserXP(allUserIds.slice(3)); // Only students
+		await seedUserBadges(allUserIds.slice(3));
+		
+		// Get checkpoint IDs
+		const checkpoints = await db.select().from(schema.checkpoint);
+		const checkpointIds = checkpoints.map(c => c.id);
+		
+		await seedCheckpointSubmissions(allUserIds.slice(3, 6), checkpointIds.slice(0, 2));
+		
+		await seedDiscussions(allUserIds.slice(3), courseIds, ['lesson-001', 'lesson-002', 'lesson-003']);
+		await seedLessonNotes(allUserIds.slice(3), ['lesson-001', 'lesson-002', 'lesson-003'], courseIds);
+		await seedNotifications(allUserIds.slice(3));
+		await seedBroadcastMessages(adminId, mentorId);
+		
+		const links = await db.select().from(schema.affiliateLink);
+		const linkIds = links.map(l => l.id);
+		
+		if (linkIds.length > 0) {
+			await seedAffiliateSales(allUserIds.slice(3), linkIds);
+		}
+		
+		await seedCourseReviews(allUserIds.slice(3), courseIds);
+
 		console.log('\n✨ Seeding completed successfully!');
 		console.log(`\n📊 Seeded to: ${isLocal ? 'LOCAL database' : 'REMOTE Turso database'}`);
 		console.log('\n📋 Test Credentials:');
@@ -731,6 +1613,10 @@ async function main() {
 		console.log('BD: username=bd_user, password=bd123');
 		console.log('Mentor: username=mentor1, password=mentor123');
 		console.log('Students: username=student1/2/3, password=student123');
+		console.log('\n🏆 Tracks Available:');
+		console.log('- Creator Track');
+		console.log('- Seller Track');
+		console.log('- Affiliator Track');
 
 		if (isLocal) {
 			console.log('\n💡 Note: This was seeded to LOCAL database.');

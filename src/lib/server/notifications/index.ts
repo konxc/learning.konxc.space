@@ -8,11 +8,11 @@ import {
 	getUserPhoneNumber
 } from '$lib/server/notifications/whatsapp';
 
-export type NotificationChannel = 'email' | 'whatsapp' | 'both';
+export type NotificationChannel = 'email' | 'whatsapp' | 'both' | 'notification';
 
 interface SendNotificationOptions {
 	userId: string;
-	type: 'welcome' | 'enrollment' | 'grade' | 'certificate' | 'reminder' | 'action_required';
+	type: 'welcome' | 'enrollment' | 'grade' | 'certificate' | 'reminder' | 'action_required' | 'broadcast';
 	title: string;
 	message: string;
 	link?: string;

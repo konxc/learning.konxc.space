@@ -626,22 +626,20 @@ export const checkpointSubmission = sqliteTable('checkpoint_submission', {
 });
 
 // Discussion/Forum
-export const discussion = sqliteTable('discussion', {
-	id: text('id').primaryKey(),
-	userId: text('user_id')
-		.notNull()
-		.references(() => user.id),
-	courseId: text('course_id').references(() => course.id),
-	lessonId: text('lesson_id').references(() => lesson.id),
-	parentId: text('parent_id').references(() => discussion.id),
-	title: text('title'),
-	content: text('content').notNull(),
-	upvotes: integer('upvotes').notNull().default(0),
-	isPinned: integer('is_pinned', { mode: 'boolean' }).notNull().default(false),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+export const discussion = sqliteTable('discussion', (t) => ({
+	id: t.text('id').primaryKey(),
+	userId: t.text('user_id').notNull().references(() => user.id),
+	courseId: t.text('course_id').references(() => course.id),
+	lessonId: t.text('lesson_id').references(() => lesson.id),
+	parentId: t.text('parent_id').references((): any => discussion.id),
+	title: t.text('title'),
+	content: t.text('content').notNull(),
+	upvotes: t.integer('upvotes').notNull().default(0),
+	isPinned: t.integer('is_pinned', { mode: 'boolean' }).notNull().default(false),
+	createdAt: t.integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: t.integer('updated_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date())
-});
+}));

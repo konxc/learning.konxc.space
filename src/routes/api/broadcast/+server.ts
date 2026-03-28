@@ -23,7 +23,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	// Build query to get recipients
-	let recipients: { id: string; email: string; phone: string | null }[] = [];
+	let recipients: { id: string; email: string | null; phone: string | null }[] = [];
 
 	if (targetCohortId) {
 		// Get students in this cohort
@@ -96,13 +96,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	for (const recipient of uniqueRecipients) {
 		try {
-			if (sentVia === 'all' || sentVia === 'notification') {
+			if (sentVia === 'all' || sentVia === 'notification' || sentVia === 'whatsapp') {
+				const channel = sentVia === 'whatsapp' ? 'whatsapp' : sentVia === 'all' ? 'both' : 'notification';
 				await sendNotification({
 					userId: recipient.id,
 					type: 'broadcast',
 					title,
 					message: content,
-					channel: sentVia === 'whatsapp' ? 'whatsapp' : 'notification'
+					channel
 				});
 			}
 			successCount++;

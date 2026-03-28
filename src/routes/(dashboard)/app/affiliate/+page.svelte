@@ -32,11 +32,11 @@
 	<!-- Stats Cards -->
 	<div class="mb-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
 		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 text-center`}>
-			<p class="text-3xl font-black text-green-600">{formatCurrency(data.stats.totalSales)}</p>
+			<p class="text-3xl font-black text-green-600">{formatCurrency(Number(data.stats.totalSales))}</p>
 			<p class={`text-xs font-bold uppercase tracking-widest ${COLOR.textMuted}`}>Total Penjualan</p>
 		</div>
 		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 text-center`}>
-			<p class="text-3xl font-black text-blue-600">{formatCurrency(data.stats.totalCommission)}</p>
+			<p class="text-3xl font-black text-blue-600">{formatCurrency(Number(data.stats.totalCommission))}</p>
 			<p class={`text-xs font-bold uppercase tracking-widest ${COLOR.textMuted}`}>Total Komisi</p>
 		</div>
 		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 text-center`}>
