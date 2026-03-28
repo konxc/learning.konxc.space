@@ -84,7 +84,7 @@
 			{formatDateTime(entry.createdAt)}
 		{:else if key === 'actions'}
 			<a
-				href="/dashboard/admin/payments/view/{entry.id}"
+				href="/app/admin/payments/view/{entry.id}"
 				class={`inline-flex items-center ${RADIUS.button} ${COLOR.cardBorder} ${SPACING.button} ${TEXT.button} ${TRANSITION.colors} ${COLOR.neutralHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2`}
 			>
 				Lihat Detail

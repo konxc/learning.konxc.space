@@ -81,7 +81,7 @@
 			{formatDateTime(entry.createdAt)}
 		{:else if key === 'actions'}
 			<a
-				href={`/dashboard/admin/mentor-applications/review/${entry.id}`}
+				href={`/app/admin/mentor-applications/review/${entry.id}`}
 				class={`inline-flex items-center gap-1.5 ${RADIUS.button} ${COLOR.accentBg} px-3 py-1.5 ${TEXT.button} font-medium text-white ${TRANSITION.all} hover:opacity-90 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1 dark:focus-visible:ring-blue-500/70`}
 			>
 				👁️ Review

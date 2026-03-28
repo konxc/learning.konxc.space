@@ -166,10 +166,10 @@
 				// 2. Open Snap Popup
 				(window as any).snap.pay(data.snapToken, {
 					onSuccess: function (result: any) {
-						goto('/dashboard/my-courses?payment=success');
+						goto('/app/my-courses?payment=success');
 					},
 					onPending: function (result: any) {
-						goto('/dashboard/payments?status=pending');
+						goto('/app/payments?status=pending');
 					},
 					onError: function (result: any) {
 						error = 'Pembayaran gagal. Silakan coba lagi.';

@@ -1,6 +1,6 @@
 // Route utama yang digunakan di aplikasi (bisa dibaca oleh navbar/sidebar)
 export const MAIN_ROUTES = {
-	dashboard: '/dashboard',
+	dashboard: '/app',
 	classes: '/classes',
 	finance: '/finance',
 	profile: '/settings'

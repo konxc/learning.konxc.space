@@ -16,7 +16,7 @@ export const load: PageServerLoad = async (event) => {
 
 	// Hanya admin yang boleh mengganti activeRole
 	if (user.role !== 'admin') {
-		throw redirect(303, '/dashboard');
+		throw redirect(303, '/app');
 	}
 
 	if (requestedRole && ['admin', 'mentor', 'siswa'].includes(requestedRole)) {
@@ -28,6 +28,6 @@ export const load: PageServerLoad = async (event) => {
 		await logAudit(event, 'switch_role', { userId: user.id, to: requestedRole });
 	}
 
-	const back = event.request.headers.get('referer') ?? '/dashboard';
+	const back = event.request.headers.get('referer') ?? '/app';
 	throw redirect(303, back);
 };

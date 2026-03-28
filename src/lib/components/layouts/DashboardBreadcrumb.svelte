@@ -37,7 +37,7 @@
 	>
 		<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
 			<a
-				href="/dashboard"
+				href="/app"
 				itemprop="item"
 				class={`inline-flex items-center no-underline ${TEXT.small} ${COLOR.textSecondary} ${TRANSITION.colors} hover:text-gray-900 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1 dark:hover:text-gray-100 ${RADIUS.small}`}
 			>

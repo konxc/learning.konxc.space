@@ -60,7 +60,7 @@ export const actions: Actions = {
 			throw redirect(302, '/onboarding');
 		}
 
-		throw redirect(302, '/dashboard');
+		throw redirect(302, '/app');
 	},
 	register: async (event) => {
 		const formData = await event.request.formData();
@@ -92,7 +92,7 @@ export const actions: Actions = {
 		} catch {
 			return actionFailure(500, 'An error has occurred');
 		}
-		return redirect(302, '/dashboard');
+		return redirect(302, '/app');
 	}
 };
 

@@ -56,22 +56,22 @@
 	}
 
 	const mockItems: NavItem[] = [
-		{ label: 'Dashboard', href: '/dashboard', icon: '📊', category: 'dashboard' },
-		{ label: 'My Courses', href: '/dashboard/my-courses', icon: '📚', category: 'learning' },
-		{ label: 'Certificates', href: '/dashboard/certificates', icon: '🎓', category: 'learning' },
-		{ label: 'Manage Courses', href: '/dashboard/admin/courses', icon: '📖', category: 'admin' },
-		{ label: 'Users', href: '/dashboard/admin/users', icon: '👥', category: 'admin' },
+		{ label: 'Dashboard', href: '/app', icon: '📊', category: 'dashboard' },
+		{ label: 'My Courses', href: '/app/my-courses', icon: '📚', category: 'learning' },
+		{ label: 'Certificates', href: '/app/certificates', icon: '🎓', category: 'learning' },
+		{ label: 'Manage Courses', href: '/app/admin/courses', icon: '📖', category: 'admin' },
+		{ label: 'Users', href: '/app/admin/users', icon: '👥', category: 'admin' },
 		{
 			label: 'Mentor Applications',
-			href: '/dashboard/admin/mentor-applications',
+			href: '/app/admin/mentor-applications',
 			icon: '📝',
 			category: 'admin',
 			badge: '2',
 			badgeColor: 'yellow'
 		},
-		{ label: 'Coupons', href: '/dashboard/admin/coupons', icon: '🎫', category: 'admin' },
-		{ label: 'Payment Proofs', href: '/dashboard/admin/payments', icon: '💳', category: 'admin' },
-		{ label: 'CRM: Waiting List', href: '/dashboard/crm/waiting-list', icon: '⏳', category: 'crm' }
+		{ label: 'Coupons', href: '/app/admin/coupons', icon: '🎫', category: 'admin' },
+		{ label: 'Payment Proofs', href: '/app/admin/payments', icon: '💳', category: 'admin' },
+		{ label: 'CRM: Waiting List', href: '/app/crm/waiting-list', icon: '⏳', category: 'crm' }
 	];
 
 	const allItems = items.length > 0 ? items : mockItems;
@@ -109,7 +109,7 @@
 	function isActive(href: string): boolean {
 		if (!$page.url) return false;
 		const pathname = $page.url.pathname;
-		if (href === '/dashboard') return pathname === '/dashboard';
+		if (href === '/app') return pathname === '/app';
 		return pathname === href || pathname.startsWith(href + '/');
 	}
 

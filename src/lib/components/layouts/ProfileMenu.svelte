@@ -85,7 +85,7 @@
 
 			<!-- Menu Items -->
 			<a
-				href="/dashboard/settings"
+				href="/app/settings"
 				class={`block no-underline ${RADIUS.small} px-3 py-2 ${TEXT.button} ${COLOR.textSecondary} ${TRANSITION.colors} hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1 dark:hover:bg-neutral-800 dark:hover:text-gray-100`}
 			>
 				<span class="mr-2" aria-hidden="true">⚙️</span>

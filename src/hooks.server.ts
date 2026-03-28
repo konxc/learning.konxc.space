@@ -63,7 +63,7 @@ const handleOnboarding: Handle = async ({ event, resolve }) => {
 	}
 
 	// Skip dashboard routes to prevent infinite redirect
-	if (event.url.pathname.startsWith('/dashboard')) {
+	if (event.url.pathname.startsWith('/app')) {
 		return resolve(event);
 	}
 

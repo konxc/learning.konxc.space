@@ -11,7 +11,7 @@ import { actionFailure } from '$lib/server/actions';
 
 export const load: PageServerLoad = async (event) => {
 	if (event.locals.user) {
-		return redirect(302, '/dashboard');
+		return redirect(302, '/app');
 	}
 	return {};
 };
@@ -53,7 +53,7 @@ export const actions: Actions = {
 
 		// Skip onboarding check for admin and bd roles
 		if (existingUser.role === 'admin' || existingUser.role === 'bd') {
-			throw redirect(302, '/dashboard');
+			throw redirect(302, '/app');
 		}
 
 		// Check if user has any enrollments, redirect to onboarding if not
@@ -65,7 +65,7 @@ export const actions: Actions = {
 			throw redirect(302, '/onboarding');
 		}
 
-		throw redirect(302, '/dashboard');
+		throw redirect(302, '/app');
 	},
 	register: async (event) => {
 		const formData = await event.request.formData();
@@ -97,7 +97,7 @@ export const actions: Actions = {
 		} catch {
 			return actionFailure(500, 'An error has occurred');
 		}
-		return redirect(302, '/dashboard');
+		return redirect(302, '/app');
 	}
 };
 

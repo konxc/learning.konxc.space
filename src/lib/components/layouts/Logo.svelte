@@ -38,7 +38,7 @@
 
 <a
 	bind:this={logoLinkRef}
-	href="/dashboard"
+	href="/app"
 	class={`logo-link inline-flex items-center gap-2 no-underline ${TRANSITION.all} hover:scale-105 active:scale-95`}
 	aria-label="Naik Kelas - Home"
 	onmousemove={handleMouseMove}

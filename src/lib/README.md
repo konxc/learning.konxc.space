@@ -201,6 +201,6 @@ Direktori penting yang baru ditambahkan:
 - `lib/types/`: definisi TypeScript (user, class, finance)
 - `lib/components/ui/`: komponen UI dasar (Button, Card, Input, Table)
 - `lib/components/layout/`: komponen layout generik (Navbar, Sidebar, Footer)
-- `lib/components/dashboard/`: komponen spesifik dashboard (RoleSwitcher, StatCard, OverviewGraph)
+- `lib/components/app/`: komponen spesifik dashboard (RoleSwitcher, StatCard, OverviewGraph)
 
 Semua penambahan ini tidak mengubah route/logika yang ada.

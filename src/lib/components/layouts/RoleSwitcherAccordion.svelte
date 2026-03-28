@@ -33,7 +33,7 @@
 
 		// 2. Sync dengan server untuk audit log (background, non-blocking)
 		try {
-			await fetch(`/dashboard/switch-role?role=${role}`, {
+			await fetch(`/app/switch-role?role=${role}`, {
 				method: 'GET',
 				credentials: 'include'
 			});

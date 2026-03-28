@@ -10,7 +10,7 @@ import { actionFailure } from '$lib/server/actions';
 
 export const load: PageServerLoad = async (event) => {
 	if (event.locals.user) {
-		throw redirect(302, '/dashboard');
+		throw redirect(302, '/app');
 	}
 	return {};
 };

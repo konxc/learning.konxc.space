@@ -20,10 +20,10 @@
 		) {
 			(window as any).snap.pay(transaction.snapToken, {
 				onSuccess: function () {
-					location.href = '/dashboard';
+					location.href = '/app';
 				},
 				onPending: function () {
-					location.href = '/dashboard';
+					location.href = '/app';
 				},
 				onError: function () {
 					alert('Transaksi gagal. Silakan coba lagi.');

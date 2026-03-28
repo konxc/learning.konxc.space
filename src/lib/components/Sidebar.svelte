@@ -10,7 +10,7 @@
 	const isAdmin = data.activeRole === 'admin';
 
 	function isActive(href: string, path: string) {
-		return path === href || (href !== '/dashboard' && path.startsWith(href));
+		return path === href || (href !== '/app' && path.startsWith(href));
 	}
 </script>
 
@@ -20,10 +20,10 @@
 			{#key $page.url.pathname}
 				{@const path = $page.url.pathname}
 				<a
-					href="/dashboard"
-					aria-current={isActive('/dashboard', path)}
+					href="/app"
+					aria-current={isActive('/app', path)}
 					class="block rounded px-3 py-2 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 {isActive(
-						'/dashboard',
+						'/app',
 						path
 					)
 						? 'bg-neutral-100 font-medium dark:bg-neutral-800'

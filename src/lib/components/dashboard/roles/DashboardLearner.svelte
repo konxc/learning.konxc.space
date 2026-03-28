@@ -1,7 +1,7 @@
 <script lang="ts">
 	import KpiCard from '$lib/components/KpiCard.svelte';
-	import OverviewGraph from '$lib/components/dashboard/OverviewGraph.svelte';
-	import RoleSwitcher from '$lib/components/dashboard/RoleSwitcher.svelte';
+	import OverviewGraph from '$lib/components/app/OverviewGraph.svelte';
+	import RoleSwitcher from '$lib/components/app/RoleSwitcher.svelte';
 	import Table from '$lib/components/ui/Table.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
@@ -53,7 +53,7 @@
 	<PageSection>
 		<div class="mb-4 flex items-center justify-between">
 			<h2 class={`${TEXT.h3} ${COLOR.textPrimary}`}>My Courses</h2>
-			<a href="/dashboard/my-courses"><Button variant="ghost">Lihat semua</Button></a>
+			<a href="/app/my-courses"><Button variant="ghost">Lihat semua</Button></a>
 		</div>
 		<Table columns={courseColumns} rows={courseRows} />
 	</PageSection>

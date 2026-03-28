@@ -18,11 +18,11 @@ export async function requireRole(
 	const user = await requireAuth(eventOrLocals);
 
 	if (role === 'admin' && user.role !== 'admin') {
-		throw redirect(303, '/dashboard');
+		throw redirect(303, '/app');
 	}
 
 	if (role === 'mentor' && !['mentor', 'admin'].includes(user.role)) {
-		throw redirect(303, '/dashboard');
+		throw redirect(303, '/app');
 	}
 
 	return user;

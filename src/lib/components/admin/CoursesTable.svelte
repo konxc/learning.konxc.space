@@ -42,12 +42,12 @@
 			}
 		} else {
 			// Fallback to default delete action
-			const response = await fetch(`/dashboard/admin/courses/delete/${courseId}`, {
+			const response = await fetch(`/app/admin/courses/delete/${courseId}`, {
 				method: 'POST'
 			});
 			if (response.ok) {
 				toast.success('Course deleted');
-				await goto('/dashboard/admin/courses', { invalidateAll: true });
+				await goto('/app/admin/courses', { invalidateAll: true });
 			} else {
 				toast.error('Failed to delete course');
 			}
@@ -74,7 +74,7 @@
 	{#snippet cell(key, entry: CourseEntry, index)}
 		{#if key === 'title'}
 			<a
-				href="/dashboard/admin/courses/edit/{entry.id}"
+				href="/app/admin/courses/edit/{entry.id}"
 				class="font-medium hover:text-blue-600 dark:hover:text-blue-400 ${TRANSITION.colors}"
 			>
 				{entry.title}
@@ -98,7 +98,7 @@
 		{:else if key === 'actions'}
 			<div class="flex items-center gap-2">
 				<a
-					href="/dashboard/admin/courses/edit/{entry.id}"
+					href="/app/admin/courses/edit/{entry.id}"
 					class={`inline-flex items-center gap-1.5 ${RADIUS.button} border border-gray-300 bg-white px-3 py-1.5 ${TEXT.button} ${COLOR.textPrimary} ${TRANSITION.all} hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 dark:border-neutral-600 dark:bg-neutral-800 dark:text-gray-200 dark:hover:border-blue-500 dark:hover:bg-blue-900/30 dark:hover:text-blue-300`}
 				>
 					✏️ Edit

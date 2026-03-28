@@ -34,7 +34,7 @@ export const load: LayoutServerLoad = async (event) => {
 
 	// Proteksi rute admin
 	if (event.url.pathname.startsWith('/admin') && activeRole !== 'admin') {
-		throw redirect(303, '/dashboard');
+		throw redirect(303, '/app');
 	}
 
 	return {

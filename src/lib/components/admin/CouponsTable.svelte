@@ -63,7 +63,7 @@
 		try {
 			await onDuplicate(couponId);
 			toast.success('Coupon duplicated successfully');
-			await goto('/dashboard/admin/coupons', { invalidateAll: true });
+			await goto('/app/admin/coupons', { invalidateAll: true });
 		} catch (error) {
 			console.error('Failed to duplicate:', error);
 			toast.error('Failed to duplicate coupon');
@@ -74,7 +74,7 @@
 		try {
 			await onToggleStatus(couponId, currentStatus);
 			toast.success(`Coupon ${currentStatus ? 'deactivated' : 'activated'}`);
-			await goto('/dashboard/admin/coupons', { invalidateAll: true });
+			await goto('/app/admin/coupons', { invalidateAll: true });
 		} catch (error) {
 			console.error('Failed to toggle:', error);
 			toast.error('Failed to update coupon status');
@@ -145,7 +145,7 @@
 		{:else if key === 'actions'}
 			<div class="flex flex-wrap items-center gap-2">
 				<a
-					href="/dashboard/admin/coupons/edit/{entry.id}"
+					href="/app/admin/coupons/edit/{entry.id}"
 					class={`inline-flex items-center ${RADIUS.small} px-3 py-1.5 text-xs ${COLOR.accentBg} text-white ${TRANSITION.all} hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
 				>
 					Edit
