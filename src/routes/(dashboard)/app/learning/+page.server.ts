@@ -181,15 +181,29 @@ async function loadProgress(event: Parameters<PageServerLoad>[0], { userId }: { 
 			track: schema.enrollment.track,
 			enrolledAt: schema.enrollment.enrolledAt,
 			completedAt: schema.enrollment.completedAt,
+			cohortId: schema.enrollment.cohortId,
 			course: {
 				id: schema.course.id,
 				title: schema.course.title,
-				thumbnailUrl: schema.course.thumbnailUrl
+				description: schema.course.description,
+				thumbnailUrl: schema.course.thumbnailUrl,
+				duration: schema.course.duration
 			}
 		})
 		.from(schema.enrollment)
 		.innerJoin(schema.course, eq(schema.enrollment.courseId, schema.course.id))
 		.where(whereClause);
+
+	const cohortIds = [...new Set(enrollments.map((e) => e.cohortId).filter(Boolean))] as string[];
+	const cohortMap = new Map<string, string>();
+	for (const cohortId of cohortIds) {
+		const cohort = await db
+			.select({ id: schema.cohort.id, name: schema.cohort.name })
+			.from(schema.cohort)
+			.where(eq(schema.cohort.id, cohortId))
+			.limit(1);
+		if (cohort.length > 0) cohortMap.set(cohortId, cohort[0].name);
+	}
 
 	const coursesWithProgress = await Promise.all(
 		enrollments.map(async (enrollment) => {
@@ -216,6 +230,7 @@ async function loadProgress(event: Parameters<PageServerLoad>[0], { userId }: { 
 
 			return {
 				...enrollment,
+				cohortName: enrollment.cohortId ? (cohortMap.get(enrollment.cohortId) ?? null) : null,
 				totalLessons: total,
 				completedLessons: completed,
 				progressPercent: percent
