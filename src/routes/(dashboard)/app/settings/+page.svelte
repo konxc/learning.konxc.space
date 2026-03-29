@@ -19,7 +19,6 @@
 	import { toast } from '$lib/stores/toast';
 	import { initTheme, setTheme, getStoredTheme, type Theme } from '$lib/stores/theme';
 	import { setLocale, getLocale } from '$lib/paraglide/runtime.js';
-	import { brandMode, toggleBrandMode } from '$lib/stores/brandMode';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 
@@ -44,7 +43,6 @@
 	// Preferences state
 	let theme = $state<Theme>('system');
 	let currentLocale = $state('id');
-	let brandModeValue = $state<'chill' | 'hardcore'>('chill');
 
 	// Payment Gateway state (placeholder/partial implementation)
 	let midtransEnvironment = $state<'sandbox' | 'production'>('sandbox');
@@ -68,7 +66,6 @@
 		} catch {
 			currentLocale = 'id';
 		}
-		brandModeValue = $brandMode;
 	});
 
 	$effect(() => {
@@ -91,14 +88,6 @@
 			toast.success('Bahasa berhasil diubah!');
 		}
 	}
-
-	function handleBrandModeChange() {
-		toggleBrandMode();
-		brandModeValue = $brandMode;
-		toast.success('Mode kampanye berhasil diubah!');
-	}
-
-	// (tabs removed)
 </script>
 
 <svelte:head>
@@ -269,7 +258,7 @@
 
 			<!-- Security Tab -->
 			{#if activeTab === 'security'}
-				<div class="animate-in fade-in slide-in-from-bottom-5 max-w-2xl duration-700">
+				<div class="animate-in fade-in slide-in-from-bottom-5 duration-700">
 					<div
 						class={`overflow-hidden ${RADIUS.card} border ${COLOR.cardBorder} bg-white shadow-sm dark:bg-zinc-900`}
 					>
@@ -385,7 +374,125 @@
 											>
 												Batal
 											</button>
-											<div class="flex-2">
+			<!-- Security Tab -->
+			{#if activeTab === 'security'}
+				<div class="animate-in fade-in slide-in-from-bottom-5 w-full duration-700">
+					<div
+						class={`overflow-hidden ${RADIUS.card} border ${COLOR.cardBorder} bg-white shadow-sm dark:bg-zinc-900`}
+					>
+						<div
+							class="flex items-center gap-3 border-b border-zinc-100 px-6 py-4 dark:border-zinc-800"
+						>
+							<span class="text-xl">🛡️</span>
+							<h2 class={`${TEXT.h3} ${COLOR.textPrimary} font-black`}>Keamanan Akun</h2>
+						</div>
+
+						<div class="p-6">
+							<form
+								method="POST"
+								action="?/changePassword"
+								use:enhance={() => {
+									isProcessing = true;
+									return async ({ result, update }) => {
+										if (result.type === 'success') {
+											toast.success('Password berhasil diubah!');
+											currentPassword = '';
+											newPassword = '';
+											confirmPassword = '';
+											showPasswordChange = false;
+											await update();
+										} else if (result.type === 'failure') {
+											toast.error(String(result.data?.error) || 'Gagal mengubah password');
+										}
+										isProcessing = false;
+									};
+								}}
+								class="space-y-6"
+							>
+								{#if !showPasswordChange}
+									<div
+										class="flex flex-col items-center justify-between gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 sm:flex-row dark:border-zinc-700 dark:bg-zinc-800/50"
+									>
+										<div class="flex items-center gap-4">
+											<div
+												class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+											>
+												<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+													/>
+												</svg>
+											</div>
+											<div>
+												<p class={`${TEXT.body} font-bold ${COLOR.textPrimary}`}>Kata Sandi</p>
+												<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
+													Rutin ubah password untuk menjaga keamanan.
+												</p>
+											</div>
+										</div>
+										<button
+											type="button"
+											onclick={() => (showPasswordChange = true)}
+											class={`px-4 py-2 ${RADIUS.button} border ${COLOR.cardBorder} bg-white dark:bg-zinc-800 ${TEXT.button} font-bold shadow-sm ${TRANSITION.all} hover:bg-zinc-50 active:scale-95 dark:hover:bg-zinc-700`}
+										>
+											Ubah Password
+										</button>
+									</div>
+								{:else}
+									<div class="animate-in fade-in space-y-5 duration-300">
+										<AuthFormField
+											label="Password Saat Ini"
+											type="password"
+											name="currentPassword"
+											bind:value={currentPassword}
+											placeholder="••••••••"
+											required={true}
+										/>
+
+										<div class="space-y-2">
+											<AuthFormField
+												label="Password Baru"
+												type="password"
+												name="newPassword"
+												bind:value={newPassword}
+												placeholder="••••••••"
+												required={true}
+												minlength={8}
+											/>
+											<p class={`${TEXT.small} ${COLOR.textMuted}`}>
+												Minimum 8 karakter kombinasi.
+											</p>
+										</div>
+
+										<AuthFormField
+											label="Konfirmasi Password Baru"
+											type="password"
+											name="confirmPassword"
+											bind:value={confirmPassword}
+											placeholder="••••••••"
+											required={true}
+										/>
+
+										{#if confirmPassword && newPassword !== confirmPassword}
+											<p class="animate-bounce px-1 text-xs font-bold text-red-500 italic">
+												⚠️ Password tidak cocok!
+											</p>
+										{/if}
+
+										<div
+											class="flex items-center gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800"
+										>
+											<button
+												type="button"
+												onclick={() => (showPasswordChange = false)}
+												class={`flex-1 px-4 py-3 ${RADIUS.button} border ${COLOR.cardBorder} bg-white dark:bg-zinc-800 ${TEXT.button} font-bold ${TRANSITION.all} hover:bg-zinc-50 dark:hover:bg-zinc-700`}
+											>
+												Batal
+											</button>
+											<div class="flex-1">
 												<AuthSubmitButton
 													text="Update Password"
 													loading={isProcessing}
@@ -423,129 +530,87 @@
 
 			<!-- Preferences Tab -->
 			{#if activeTab === 'preferences'}
-				<PageSection>
-					<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-6`}>Preferensi</h2>
-					<div class="space-y-6">
-						<!-- Preferences Tab -->
-						{#if activeTab === 'preferences'}
-							<div
-								class="animate-in fade-in slide-in-from-bottom-5 grid grid-cols-1 gap-6 duration-700 md:grid-cols-2"
+				<div class="animate-in fade-in slide-in-from-bottom-5 grid grid-cols-1 gap-6 duration-700 md:grid-cols-2">
+					<!-- Theme Selection -->
+					<div
+						class={`${RADIUS.card} border ${COLOR.cardBorder} overflow-hidden bg-white shadow-sm dark:bg-zinc-900`}
+					>
+						<div class="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
+							<h3
+								class={`${TEXT.body} font-black ${COLOR.textPrimary} tracking-widest uppercase`}
 							>
-								<!-- Theme Selection -->
-								<div
-									class={`${RADIUS.card} border ${COLOR.cardBorder} overflow-hidden bg-white shadow-sm dark:bg-zinc-900`}
-								>
-									<div class="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
-										<h3
-											class={`${TEXT.body} font-black ${COLOR.textPrimary} tracking-widest uppercase`}
-										>
-											Tema Visual
-										</h3>
-									</div>
-									<div class="space-y-4 p-6">
-										<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
-											Pilih suasana yang paling nyaman untuk matamu selama belajar.
-										</p>
-										<div class="flex flex-col gap-2">
-											{#each [{ id: 'light', label: 'Terang', icon: '☀️' }, { id: 'dark', label: 'Gelap', icon: '🌙' }, { id: 'system', label: 'Sistem', icon: '💻' }] as t}
-												<button
-													type="button"
-													onclick={() => handleThemeChange(t.id as Theme)}
-													class={`flex items-center justify-between px-4 py-3 ${RADIUS.button} border ${TRANSITION.all}
-										${
-											theme === t.id
-												? 'border-blue-600 bg-blue-50 font-bold text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-												: `border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800 ${COLOR.textPrimary}`
-										}`}
-												>
-													<div class="flex items-center gap-3">
-														<span>{t.icon}</span>
-														{t.label}
-													</div>
-													{#if theme === t.id}
-														<div class="h-2 w-2 rounded-full bg-blue-600"></div>
-													{/if}
-												</button>
-											{/each}
+								Tema Visual
+							</h3>
+						</div>
+						<div class="space-y-4 p-6">
+							<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
+								Pilih suasana yang paling nyaman untuk matamu selama belajar.
+							</p>
+							<div class="flex flex-col gap-2">
+								{#each [{ id: 'light', label: 'Terang', icon: '☀️' }, { id: 'dark', label: 'Gelap', icon: '🌙' }, { id: 'system', label: 'Sistem', icon: '💻' }] as t}
+									<button
+										type="button"
+										onclick={() => handleThemeChange(t.id as Theme)}
+										class={`flex items-center justify-between px-4 py-3 ${RADIUS.button} border ${TRANSITION.all}
+							${
+								theme === t.id
+									? 'border-blue-600 bg-blue-50 font-bold text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+									: `border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800 ${COLOR.textPrimary}`
+							}`}
+									>
+										<div class="flex items-center gap-3">
+											<span>{t.icon}</span>
+											{t.label}
 										</div>
-									</div>
-								</div>
-
-								<!-- Language Selection -->
-								<div
-									class={`${RADIUS.card} border ${COLOR.cardBorder} overflow-hidden bg-white shadow-sm dark:bg-zinc-900`}
-								>
-									<div class="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
-										<h3
-											class={`${TEXT.body} font-black ${COLOR.textPrimary} tracking-widest uppercase`}
-										>
-											Bahasa Antarmuka
-										</h3>
-									</div>
-									<div class="space-y-4 p-6">
-										<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
-											Gunakan bahasa yang paling kamu kuasai untuk efisiensi belajar.
-										</p>
-										<div class="flex flex-col gap-2">
-											{#each [{ id: 'id', label: 'Indonesia', flag: '🇮🇩' }, { id: 'en', label: 'English', flag: '🇬🇧' }, { id: 'jp', label: '日本語', flag: '🇯🇵' }] as l}
-												<button
-													type="button"
-													onclick={() => handleLocaleChange(l.id)}
-													class={`flex items-center justify-between px-4 py-3 ${RADIUS.button} border ${TRANSITION.all}
-										${
-											currentLocale === l.id
-												? 'border-blue-600 bg-blue-50 font-bold text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-												: `border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800 ${COLOR.textPrimary}`
-										}`}
-												>
-													<div class="flex items-center gap-3">
-														<span>{l.flag}</span>
-														{l.label}
-													</div>
-													{#if currentLocale === l.id}
-														<div class="h-2 w-2 rounded-full bg-blue-600"></div>
-													{/if}
-												</button>
-											{/each}
-										</div>
-									</div>
-								</div>
-
-								<!-- Brand Mode Card -->
-								<div
-									class={`md:col-span-2 ${RADIUS.card} border ${COLOR.cardBorder} bg-white p-6 shadow-sm dark:bg-zinc-900`}
-								>
-									<div class="flex flex-col items-center justify-between gap-6 sm:flex-row">
-										<div class="space-y-1 text-center sm:text-left">
-											<h3
-												class={`${TEXT.body} font-black ${COLOR.textPrimary} tracking-widest uppercase`}
-											>
-												Mode Kampanye
-											</h3>
-											<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
-												{brandModeValue === 'hardcore'
-													? '🔥 Mode Hardcore: Visual penuh energi untuk meningkatkan motivasi.'
-													: '😎 Mode Chill: Tampilan tenang dan minimalis untuk fokus mendalam.'}
-											</p>
-										</div>
-										<button
-											type="button"
-											onclick={handleBrandModeChange}
-											class={`px-8 py-4 ${RADIUS.button} font-black tracking-widest uppercase ${TRANSITION.all} shadow-lg active:scale-95
-								${
-									brandModeValue === 'hardcore'
-										? 'bg-linear-to-r from-orange-600 to-red-600 text-white hover:shadow-orange-500/20'
-										: 'bg-linear-to-r from-zinc-100 to-zinc-200 text-zinc-900 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-100'
-								}`}
-										>
-											{brandModeValue === 'hardcore' ? 'Switch to Chill' : 'Switch to Hardcore'}
-										</button>
-									</div>
-								</div>
+										{#if theme === t.id}
+											<div class="h-2 w-2 rounded-full bg-blue-600"></div>
+										{/if}
+									</button>
+								{/each}
 							</div>
-						{/if}
+						</div>
 					</div>
-				</PageSection>
+
+					<!-- Language Selection -->
+					<div
+						class={`${RADIUS.card} border ${COLOR.cardBorder} overflow-hidden bg-white shadow-sm dark:bg-zinc-900`}
+					>
+						<div class="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
+							<h3
+								class={`${TEXT.body} font-black ${COLOR.textPrimary} tracking-widest uppercase`}
+							>
+								Bahasa Antarmuka
+							</h3>
+						</div>
+						<div class="space-y-4 p-6">
+							<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
+								Gunakan bahasa yang paling kamu kuasai untuk efisiensi belajar.
+							</p>
+							<div class="flex flex-col gap-2">
+								{#each [{ id: 'id', label: 'Indonesia', flag: '🇮🇩' }, { id: 'en', label: 'English', flag: '🇬🇧' }, { id: 'jp', label: '日本語', flag: '🇯🇵' }] as l}
+									<button
+										type="button"
+										onclick={() => handleLocaleChange(l.id)}
+										class={`flex items-center justify-between px-4 py-3 ${RADIUS.button} border ${TRANSITION.all}
+							${
+								currentLocale === l.id
+									? 'border-blue-600 bg-blue-50 font-bold text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+									: `border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800 ${COLOR.textPrimary}`
+							}`}
+									>
+										<div class="flex items-center gap-3">
+											<span>{l.flag}</span>
+											{l.label}
+										</div>
+										{#if currentLocale === l.id}
+											<div class="h-2 w-2 rounded-full bg-blue-600"></div>
+										{/if}
+									</button>
+								{/each}
+							</div>
+						</div>
+					</div>
+				</div>
 			{/if}
 
 			<!-- Payment Gateway Tab -->

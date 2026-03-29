@@ -11,9 +11,9 @@ export async function seedOrganizations(db: LibSQLDatabase<typeof schema>, admin
 
 	const organizations = [
 		{
-			id: 'org-yayasan-asib',
-			slug: 'yayasan-asib',
-			name: 'Yayasan ASIB',
+			id: 'org-pondokit',
+			slug: 'pondokit-academy',
+			name: 'Pondok IT Academy',
 			logoUrl: null,
 			brandColor: '#22c55e',
 			planType: 'enterprise',
@@ -31,14 +31,24 @@ export async function seedOrganizations(db: LibSQLDatabase<typeof schema>, admin
 			updatedAt: new Date('2024-01-15')
 		},
 		{
-			id: 'org-marketing-lab',
-			slug: 'marketing-lab',
+			id: 'org-marketinglab',
+			slug: 'marketing-lab-id',
 			name: 'Marketing Lab Indonesia',
 			logoUrl: null,
 			brandColor: '#f59e0b',
 			planType: 'free',
 			createdAt: new Date('2024-02-01'),
 			updatedAt: new Date('2024-02-01')
+		},
+		{
+			id: 'org-creatorhub',
+			slug: 'creator-hub-id',
+			name: 'Creator Hub Indonesia',
+			logoUrl: null,
+			brandColor: '#ec4899',
+			planType: 'pro',
+			createdAt: new Date('2024-02-15'),
+			updatedAt: new Date('2024-02-15')
 		}
 	];
 
@@ -52,27 +62,27 @@ export async function seedOrganizations(db: LibSQLDatabase<typeof schema>, admin
 	console.log('👥 Seeding organization members...');
 
 	const members = [
-		// Yayasan ASIB - Admin is owner
+		// Pondok IT Academy - Admin is owner
 		{
-			id: 'mem-asib-001',
-			orgId: 'org-yayasan-asib',
-			userId: adminIds[0], // admin
+			id: 'mem-pondokit-001',
+			orgId: 'org-pondokit',
+			userId: adminIds[0],
 			role: 'owner',
 			createdAt: new Date('2024-01-01'),
 			updatedAt: new Date('2024-01-01')
 		},
 		{
-			id: 'mem-asib-002',
-			orgId: 'org-yayasan-asib',
-			userId: adminIds[1], // bd_user
+			id: 'mem-pondokit-002',
+			orgId: 'org-pondokit',
+			userId: adminIds[1],
 			role: 'admin',
 			createdAt: new Date('2024-01-02'),
 			updatedAt: new Date('2024-01-02')
 		},
 		{
-			id: 'mem-asib-003',
-			orgId: 'org-yayasan-asib',
-			userId: adminIds[2], // mentor1
+			id: 'mem-pondokit-003',
+			orgId: 'org-pondokit',
+			userId: adminIds[2],
 			role: 'facilitator',
 			createdAt: new Date('2024-01-03'),
 			updatedAt: new Date('2024-01-03')
@@ -81,7 +91,7 @@ export async function seedOrganizations(db: LibSQLDatabase<typeof schema>, admin
 		{
 			id: 'mem-koneksi-001',
 			orgId: 'org-koneksi',
-			userId: adminIds[0], // admin
+			userId: adminIds[0],
 			role: 'owner',
 			createdAt: new Date('2024-01-15'),
 			updatedAt: new Date('2024-01-15')
@@ -89,19 +99,28 @@ export async function seedOrganizations(db: LibSQLDatabase<typeof schema>, admin
 		{
 			id: 'mem-koneksi-002',
 			orgId: 'org-koneksi',
-			userId: adminIds[2], // mentor1
+			userId: adminIds[2],
 			role: 'creator',
 			createdAt: new Date('2024-01-16'),
 			updatedAt: new Date('2024-01-16')
 		},
 		// Marketing Lab - Admin is owner
 		{
-			id: 'mem-marketing-001',
-			orgId: 'org-marketing-lab',
-			userId: adminIds[0], // admin
+			id: 'mem-marketinglab-001',
+			orgId: 'org-marketinglab',
+			userId: adminIds[0],
 			role: 'owner',
 			createdAt: new Date('2024-02-01'),
 			updatedAt: new Date('2024-02-01')
+		},
+		// Creator Hub - Admin is owner
+		{
+			id: 'mem-creatorhub-001',
+			orgId: 'org-creatorhub',
+			userId: adminIds[0],
+			role: 'owner',
+			createdAt: new Date('2024-02-15'),
+			updatedAt: new Date('2024-02-15')
 		}
 	];
 
@@ -117,11 +136,17 @@ export async function seedOrganizations(db: LibSQLDatabase<typeof schema>, admin
 export async function assignCoursesToOrganizations(db: LibSQLDatabase<typeof schema>, courseIds: string[]) {
 	console.log('📚 Assigning courses to organizations...');
 
-	// Assign some courses to organizations
+	// Assign courses to organizations based on category and relevance
 	const assignments = [
-		{ courseId: courseIds[0], orgId: 'org-koneksi' }, // Python -> Koneksi
-		{ courseId: courseIds[1], orgId: 'org-koneksi' }, // Full Stack -> Koneksi
-		{ courseId: courseIds[2], orgId: 'org-marketing-lab' }, // React -> Marketing Lab
+		{ courseId: courseIds[0], orgId: 'org-koneksi' }, // Akselerasi Bisnis Digital -> Koneksi
+		{ courseId: courseIds[1], orgId: 'org-creatorhub' }, // Content Creator -> Creator Hub
+		{ courseId: courseIds[2], orgId: 'org-koneksi' }, // E-Commerce -> Koneksi
+		{ courseId: courseIds[3], orgId: 'org-koneksi' }, // Affiliate -> Koneksi
+		{ courseId: courseIds[4], orgId: 'org-pondokit' }, // Python -> Pondok IT
+		{ courseId: courseIds[5], orgId: 'org-pondokit' }, // Full Stack -> Pondok IT
+		{ courseId: courseIds[6], orgId: 'org-pondokit' }, // Mobile App -> Pondok IT
+		{ courseId: courseIds[7], orgId: 'org-marketinglab' }, // Digital Marketing -> Marketing Lab
+		{ courseId: courseIds[8], orgId: 'org-marketinglab' }, // Brand Building -> Marketing Lab
 	];
 
 	for (const assignment of assignments) {
@@ -137,20 +162,20 @@ export async function seedWorkspaces(db: LibSQLDatabase<typeof schema>, userIds:
 	console.log('🏢 Seeding workspaces...');
 
 	const workspaces = [
-		// Workspaces for Yayasan ASIB
+		// Workspaces for Pondok IT Academy
 		{
-			id: 'ws-asib-001',
-			orgId: 'org-yayasan-asib',
-			name: 'Tim Administrasi',
-			description: 'Tim administrasi dan operasional Yayasan ASIB',
+			id: 'ws-pondokit-001',
+			orgId: 'org-pondokit',
+			name: 'Tim Pengajar Teknis',
+			description: 'Tim mentor dan instruktur kursus teknis',
 			createdAt: new Date('2024-01-02'),
 			updatedAt: new Date('2024-01-02')
 		},
 		{
-			id: 'ws-asib-002',
-			orgId: 'org-yayasan-asib',
-			name: 'Tim Pengajar',
-			description: 'Tim mentor dan pengajar program Naik Kelas',
+			id: 'ws-pondokit-002',
+			orgId: 'org-pondokit',
+			name: 'Tim Konten',
+			description: 'Tim pengembangan materi dan konten pembelajaran',
 			createdAt: new Date('2024-01-02'),
 			updatedAt: new Date('2024-01-02')
 		},
@@ -158,18 +183,27 @@ export async function seedWorkspaces(db: LibSQLDatabase<typeof schema>, userIds:
 		{
 			id: 'ws-koneksi-001',
 			orgId: 'org-koneksi',
-			name: 'Course Development',
-			description: 'Tim pengembangan konten course',
+			name: 'Tim Bisnis Digital',
+			description: 'Tim pengembangan program akselerasi bisnis',
 			createdAt: new Date('2024-01-16'),
 			updatedAt: new Date('2024-01-16')
 		},
 		{
 			id: 'ws-koneksi-002',
 			orgId: 'org-koneksi',
-			name: 'Marketing Team',
-			description: 'Tim marketing dan growth',
+			name: 'Tim Marketing',
+			description: 'Tim marketing dan pertumbuhan komunitas',
 			createdAt: new Date('2024-01-16'),
 			updatedAt: new Date('2024-01-16')
+		},
+		// Workspaces for Creator Hub
+		{
+			id: 'ws-creatorhub-001',
+			orgId: 'org-creatorhub',
+			name: 'Tim Creator',
+			description: 'Tim creator dan content developer',
+			createdAt: new Date('2024-02-16'),
+			updatedAt: new Date('2024-02-16')
 		}
 	];
 
@@ -183,18 +217,21 @@ export async function seedWorkspaces(db: LibSQLDatabase<typeof schema>, userIds:
 	console.log('👥 Seeding workspace members...');
 
 	const workspaceMembers = [
-		// ASIB Admin workspace
-		{ id: generateId(), workspaceId: 'ws-asib-001', userId: userIds[0], role: 'admin' },
-		{ id: generateId(), workspaceId: 'ws-asib-001', userId: userIds[1], role: 'member' },
-		// ASIB Teacher workspace
-		{ id: generateId(), workspaceId: 'ws-asib-002', userId: userIds[2], role: 'admin' },
-		{ id: generateId(), workspaceId: 'ws-asib-002', userId: userIds[0], role: 'admin' },
-		// Koneksi Course Development
+		// Pondok IT - Tim Pengajar
+		{ id: generateId(), workspaceId: 'ws-pondokit-001', userId: userIds[0], role: 'admin' },
+		{ id: generateId(), workspaceId: 'ws-pondokit-001', userId: userIds[2], role: 'member' },
+		// Pondok IT - Tim Konten
+		{ id: generateId(), workspaceId: 'ws-pondokit-002', userId: userIds[0], role: 'admin' },
+		{ id: generateId(), workspaceId: 'ws-pondokit-002', userId: userIds[1], role: 'member' },
+		// Koneksi - Tim Bisnis
 		{ id: generateId(), workspaceId: 'ws-koneksi-001', userId: userIds[0], role: 'admin' },
 		{ id: generateId(), workspaceId: 'ws-koneksi-001', userId: userIds[2], role: 'member' },
-		// Koneksi Marketing
+		// Koneksi - Tim Marketing
 		{ id: generateId(), workspaceId: 'ws-koneksi-002', userId: userIds[0], role: 'admin' },
-		{ id: generateId(), workspaceId: 'ws-koneksi-002', userId: userIds[1], role: 'member' }
+		{ id: generateId(), workspaceId: 'ws-koneksi-002', userId: userIds[1], role: 'member' },
+		// Creator Hub
+		{ id: generateId(), workspaceId: 'ws-creatorhub-001', userId: userIds[0], role: 'admin' },
+		{ id: generateId(), workspaceId: 'ws-creatorhub-001', userId: userIds[2], role: 'member' }
 	];
 
 	for (const member of workspaceMembers) {

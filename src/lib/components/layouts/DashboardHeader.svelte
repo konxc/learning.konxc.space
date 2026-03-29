@@ -119,7 +119,7 @@
 			</div>
 
 			<!-- Center Content: Navigation Tabs (driven by $page.data) -->
-			<div class="flex flex-1 justify-center min-w-0 px-4">
+			<div class="flex flex-1 justify-start min-w-0 px-4 ml-4">
 				{#if $page.data.headerTabs}
 					<nav
 						class="flex items-center gap-8 overflow-x-auto overflow-y-hidden scrollbar-hide py-1"
