@@ -45,6 +45,49 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 	}
 };
 
+/**
+ * Parse onboarding metadata from JSON string
+ * Returns structured onboarding state for each role
+ */
+function parseOnboardingMetadata(metadata: string | null): {
+	student?: { completed: boolean; track?: string };
+	mentor?: { completed: boolean; profileComplete?: boolean };
+	facilitator?: { completed: boolean; orgId?: string };
+} {
+	if (!metadata) return {};
+	try {
+		return JSON.parse(metadata);
+	} catch {
+		return {};
+	}
+}
+
+/**
+ * Check if user has completed onboarding for a specific role context
+ */
+function hasRoleOnboardingCompleted(
+	userRole: string,
+	onboardingCompleted: boolean,
+	metadata: string | null
+): boolean {
+	// Legacy single flag check
+	if (onboardingCompleted) return true;
+
+	// Check metadata-based multi-role onboarding
+	const meta = parseOnboardingMetadata(metadata);
+
+	switch (userRole) {
+		case 'user':
+			return meta.student?.completed ?? false;
+		case 'mentor':
+			return meta.mentor?.completed ?? false;
+		case 'facilitator':
+			return meta.facilitator?.completed ?? false;
+		default:
+			return false;
+	}
+}
+
 const handleOnboarding: Handle = async ({ event, resolve }) => {
 	// Skip onboarding check for public routes
 	if (
@@ -52,7 +95,9 @@ const handleOnboarding: Handle = async ({ event, resolve }) => {
 		event.url.pathname.startsWith('/prototype') ||
 		event.url.pathname.startsWith('/onboarding') ||
 		event.url.pathname.startsWith('/marketplace') ||
-		event.url.pathname === '/'
+		event.url.pathname.startsWith('/public') ||
+		event.url.pathname === '/' ||
+		event.url.pathname === '/health'
 	) {
 		return resolve(event);
 	}
@@ -71,31 +116,46 @@ const handleOnboarding: Handle = async ({ event, resolve }) => {
 	const user = event.locals.user;
 	if (!user) return resolve(event);
 
-	// Whitelist Platform Governance roles
+	// Whitelist Platform Governance roles (admin/bd can access without onboarding)
 	if (user.role === 'admin' || user.role === 'bd') {
 		return resolve(event);
 	}
 
-	// Specialized Check for Onboarding Completion
-	if (!user.onboardingCompleted) {
-		// Legacy Handshake for Students (Role: 'user')
-		// If they have enrollments, they have completed onboarding in the past
-		if (user.role === 'user') {
-			const enrollment = await db.query.enrollment.findFirst({
-				where: eq(schema.enrollment.userId, user.id)
-			});
+	// Legacy check for old users - sync enrollment status
+	if (user.role === 'user' && !user.onboardingCompleted) {
+		const enrollment = await db.query.enrollment.findFirst({
+			where: eq(schema.enrollment.userId, user.id)
+		});
 
-			if (enrollment) {
-				// Persistent synchronization for legacy students
-				await db
-					.update(schema.user)
-					.set({ onboardingCompleted: true })
-					.where(eq(schema.user.id, user.id));
-				return resolve(event);
+		if (enrollment) {
+			// Legacy student has enrollments - mark as completed
+			await db
+				.update(schema.user)
+				.set({
+					onboardingCompleted: true,
+					onboardingMetadata: JSON.stringify({
+						student: { completed: true, track: enrollment.track || null }
+					})
+				})
+				.where(eq(schema.user.id, user.id));
+
+			// Update locals for this request
+			if (event.locals.user) {
+				event.locals.user.onboardingCompleted = true;
 			}
+			return resolve(event);
 		}
+	}
 
-		// Specialized Onboarding Pathfinder Redirection
+	// Multi-role onboarding check
+	const hasCompleted = hasRoleOnboardingCompleted(
+		user.role,
+		user.onboardingCompleted ?? false,
+		user.onboardingMetadata
+	);
+
+	if (!hasCompleted) {
+		// Redirect to onboarding page
 		throw redirect(303, '/onboarding');
 	}
 
