@@ -1,5 +1,18 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { 
+		COLOR, 
+		TEXT, 
+		RADIUS, 
+		ELEVATION, 
+		TRANSITION, 
+		GRADIENT, 
+		SPACING 
+	} from '$lib/config/design';
+	import Icon from '$lib/components/ui/Icon.svelte';
+	import PageSection from '$lib/components/layouts/PageSection.svelte';
+	import { fly, fade } from 'svelte/transition';
+
 	let { data }: { data: PageData } = $props();
 
 	let searchQuery = $state('');
@@ -42,7 +55,7 @@
 	}
 
 	// Get unique price points and durations for filters
-	let maxPriceValue = $derived(Math.max(...data.courses.map((c) => c.price), 0) || 10000000);
+	let maxPriceValue = $derived(Math.max(...data.courses.map((c: any) => c.price), 0) || 10000000);
 
 	let filteredCourses = $derived.by(() => {
 		let courses = data.courses;
@@ -50,7 +63,7 @@
 		// Search filter
 		if (searchQuery) {
 			courses = courses.filter(
-				(course) =>
+				(course: any) =>
 					course.title.toLowerCase().includes(searchQuery) ||
 					course.description.toLowerCase().includes(searchQuery) ||
 					course.mentor?.fullName?.toLowerCase().includes(searchQuery) ||
@@ -61,21 +74,17 @@
 		// Price filter
 		const maxPriceFilter = maxPrice;
 		if (maxPriceFilter !== null) {
-			courses = courses.filter((course) => course.price <= maxPriceFilter);
+			courses = courses.filter((course: any) => course.price <= maxPriceFilter);
 		}
 
 		// Duration filter
 		const minDurationFilter = minDuration;
 		const maxDurationFilter = maxDuration;
 		if (minDurationFilter !== null || maxDurationFilter !== null) {
-			courses = courses.filter((course) => {
-				// If course has no duration, exclude it only if filters are active
+			courses = courses.filter((course: any) => {
 				if (!course.duration) {
-					// If only one filter is set (not both), allow courses without duration
 					if (minDurationFilter !== null && maxDurationFilter !== null) return false;
-					// If only minDuration is set, courses without duration are excluded
 					if (minDurationFilter !== null) return false;
-					// If only maxDuration is set, allow courses without duration
 					return true;
 				}
 				if (minDurationFilter !== null && course.duration < minDurationFilter) return false;
@@ -85,7 +94,7 @@
 		}
 
 		// Sort
-		courses = [...courses].sort((a, b) => {
+		courses = [...courses].sort((a: any, b: any) => {
 			switch (sortBy) {
 				case 'price-low':
 					return a.price - b.price;
@@ -113,10 +122,10 @@
 </script>
 
 <svelte:head>
-	<title>Course Marketplace - Naik Kelas by Koneksi</title>
+	<title>Course Marketplace - Naik Kelas</title>
 	<meta
 		name="description"
-		content="Temukan berbagai kursus programming, AI tools, dan web development dari mentor berpengalaman. Bangun portfolio dan tingkatkan karier tech kamu!"
+		content="Pelajari programming, AI tools, dan bangun project nyata bersama mentor berpengalaman. Bangun portfolio dan tingkatkan karier tech kamu!"
 	/>
 	<meta
 		name="keywords"
@@ -127,591 +136,280 @@
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://learning.konxc.space/marketplace" />
-	<meta property="og:title" content="Course Marketplace - Naik Kelas by Koneksi" />
+	<meta property="og:title" content="Course Marketplace - Naik Kelas" />
 	<meta
 		property="og:description"
 		content="Temukan berbagai kursus programming, AI tools, dan web development dari mentor berpengalaman."
 	/>
-	<meta property="og:image" content="https://learning.konxc.space/apple-icon-180x180.png" />
+	<meta property="og:image" content="https://learning.konxc.space/og-image.png" />
 
 	<!-- Twitter -->
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:url" content="https://learning.konxc.space/marketplace" />
-	<meta name="twitter:title" content="Course Marketplace - Naik Kelas by Koneksi" />
+	<meta name="twitter:title" content="Course Marketplace - Naik Kelas" />
 	<meta
 		name="twitter:description"
 		content="Temukan berbagai kursus programming, AI tools, dan web development dari mentor berpengalaman."
 	/>
-	<meta name="twitter:image" content="https://learning.konxc.space/apple-icon-180x180.png" />
+	<meta name="twitter:image" content="https://learning.konxc.space/og-image.png" />
 </svelte:head>
 
-<div class="marketplace-page">
-	<div class="hero-section">
-		<h1>🎓 Course Marketplace</h1>
-		<p>Pelajari programming, AI tools, dan bangun project nyata bersama mentor berpengalaman</p>
-		<div class="stats">
-			<span class="stat-item">
-				<strong>{filteredCourses.length}</strong> Courses Available
-				{#if activeFilterCount > 0}
-					<span class="filter-note">(filtered)</span>
-				{/if}
-			</span>
-		</div>
-	</div>
+<div class={`min-h-screen ${COLOR.bg} selection:bg-blue-500/20 animate-in fade-in duration-1000 uppercase-badges`}>
+	<!-- Immersive Knowledge Hero -->
+	<div class="relative overflow-hidden pt-32 pb-24 md:pt-48 md:pb-32">
+		<!-- Ultra-Layered Background -->
+		<div class="absolute inset-0 -z-20 bg-linear-to-b from-blue-50/50 to-white dark:from-zinc-950 dark:to-zinc-950"></div>
+		<div class="absolute top-0 left-1/2 -z-10 h-[800px] w-[140%] -translate-x-1/2 rounded-[100%] bg-linear-to-b from-blue-400/5 via-transparent to-transparent blur-3xl dark:from-blue-600/5"></div>
+		<div class="absolute -top-40 -right-40 -z-10 h-[500px] w-[500px] rounded-full bg-indigo-500/10 blur-[120px] dark:bg-indigo-600/5 animate-pulse"></div>
+		<div class="absolute top-1/4 -left-40 -z-10 h-[400px] w-[400px] rounded-full bg-purple-500/10 blur-[100px] dark:bg-purple-600/5"></div>
 
-	<div class="filters-container">
-		<div class="search-bar">
-			<div class="search-icon">🔍</div>
-			<input
-				type="text"
-				placeholder="Cari kursus, mentor, atau topik..."
-				value={searchQuery}
-				oninput={handleSearch}
-				class="search-input"
-			/>
-		</div>
+		<div class="mx-auto max-w-7xl px-6 lg:px-8">
+			<div class="flex flex-col items-center text-center space-y-10" in:fade={{ duration: 1000 }}>
+				<div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-blue-100 bg-white/50 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/50 shadow-sm">
+					<div class="h-2 w-2 rounded-full bg-blue-600 animate-pulse"></div>
+					<span class="text-[10px] font-black tracking-[0.2em] text-blue-600 uppercase">Knowledge Marketplace</span>
+				</div>
+				
+				<div class="space-y-6">
+					<h1 class="mx-auto max-w-5xl text-6xl font-black tracking-tighter text-zinc-900 md:text-8xl dark:text-white leading-[0.85]">
+						Elevate Your Career with <span class="bg-linear-to-r from-blue-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent italic px-2">Expert-Led Tracks</span>
+					</h1>
+					<p class="mx-auto max-w-2xl text-lg font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed">
+						Discover industry-standard tech, AI fundamentals, and digital marketing strategies from 
+						professional practitioners. Outcome-driven learning starts here.
+					</p>
+				</div>
 
-		<div class="filter-row">
-			<div class="filter-group">
-				<label for="sort">Sort By</label>
-				<select id="sort" value={sortBy} onchange={handleSort} class="sort-select">
-					<option value="newest">Terbaru</option>
-					<option value="price-low">Harga: Rendah ke Tinggi</option>
-					<option value="price-high">Harga: Tinggi ke Rendah</option>
-					<option value="duration">Durasi: Pendek ke Panjang</option>
-				</select>
-			</div>
-
-			<div class="filter-group">
-				<label for="max-price">Maks Harga</label>
-				<input
-					id="max-price"
-					type="number"
-					placeholder="Tidak terbatas"
-					value={maxPrice || ''}
-					oninput={handleMaxPrice}
-					class="filter-input"
-					min="0"
-					max={maxPriceValue}
-				/>
-			</div>
-
-			<div class="filter-group">
-				<label for="min-duration">Durasi Min (minggu)</label>
-				<select
-					id="min-duration"
-					value={minDuration || ''}
-					onchange={handleMinDuration}
-					class="filter-select"
-				>
-					<option value="">Tidak terbatas</option>
-					<option value="1">1 minggu</option>
-					<option value="4">4 minggu</option>
-					<option value="8">8 minggu</option>
-					<option value="12">12 minggu</option>
-				</select>
-			</div>
-
-			<div class="filter-group">
-				<label for="max-duration">Durasi Max (minggu)</label>
-				<select
-					id="max-duration"
-					value={maxDuration || ''}
-					onchange={handleMaxDuration}
-					class="filter-select"
-				>
-					<option value="">Tidak terbatas</option>
-					<option value="4">4 minggu</option>
-					<option value="8">8 minggu</option>
-					<option value="12">12 minggu</option>
-					<option value="16">16 minggu</option>
-				</select>
-			</div>
-		</div>
-
-		{#if activeFilterCount > 0}
-			<div class="active-filters">
-				<span>{activeFilterCount} filter aktif</span>
-				<button onclick={clearFilters} class="clear-btn">✕ Clear All</button>
-			</div>
-		{/if}
-	</div>
-
-	<div class="courses-grid">
-		{#each filteredCourses as course}
-			<a href="/marketplace/{course.id}" class="course-card">
-				{#if course.thumbnailUrl}
-					<img src={course.thumbnailUrl} alt={course.title} class="thumbnail" loading="lazy" />
-				{:else}
-					<div class="thumbnail-placeholder">
-						<span class="emoji">📚</span>
-					</div>
-				{/if}
-
-				{#if course.mentor}
-					<div class="mentor-badge">
-						<span class="mentor-icon">👨‍🏫</span>
-						<span class="mentor-name">{course.mentor.fullName || course.mentor.username}</span>
-					</div>
-				{/if}
-
-				<div class="course-info">
-					<h3>{course.title}</h3>
-					<p class="description">{course.description}</p>
-
-					<div class="course-meta">
-						<div class="meta-left">
-							<span class="price">Rp {course.price.toLocaleString('id-ID')}</span>
-							{#if course.duration}
-								<span class="duration">{course.duration} minggu</span>
-							{/if}
+				<!-- Command Palette Search -->
+				<div class="w-full max-w-3xl" in:fly={{ y: 30, duration: 800, delay: 300 }}>
+					<div class="group relative overflow-hidden rounded-[2.5rem] border border-blue-100 bg-white p-2 shadow-2xl transition-all hover:border-blue-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700">
+						<div class="flex items-center px-6 py-4">
+							<div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
+								<Icon name="search" size={20} />
+							</div>
+							<input
+								type="text"
+								placeholder="Explore tracks by skill, tool, or mentor..."
+								value={searchQuery}
+								oninput={handleSearch}
+								class="flex-1 border-none bg-transparent px-6 text-xl font-black tracking-tight text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-0 dark:text-white"
+							/>
+							<div class="hidden items-center gap-3 md:flex">
+								<div class="h-8 w-px bg-zinc-100 dark:bg-zinc-800"></div>
+								<span class="px-4 py-1.5 rounded-xl border border-zinc-100 bg-zinc-50 text-[10px] font-black text-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 uppercase tracking-widest whitespace-nowrap">
+									{filteredCourses.length} TRACKS FOUND
+								</span>
+							</div>
 						</div>
 					</div>
 				</div>
-			</a>
-		{/each}
+			</div>
+		</div>
 	</div>
 
-	{#if filteredCourses.length === 0}
-		<div class="empty-state">
-			<div class="empty-icon">🔍</div>
-			<h3>Tidak ada kursus ditemukan</h3>
-			<p>
-				{#if data.courses.length === 0}
-					Belum ada kursus yang tersedia saat ini.
+	<!-- Strategic Catalog Interface -->
+	<div class="mx-auto max-w-7xl px-6 pb-40 lg:px-8">
+		<div class="grid grid-cols-1 gap-16 lg:grid-cols-12">
+			
+			<!-- Professional Filter Board -->
+			<aside class="lg:col-span-3">
+				<div class="sticky top-32 space-y-12">
+					<div class="space-y-8">
+						<div class="flex items-center justify-between border-b border-zinc-100 pb-5 dark:border-zinc-800">
+							<h3 class="text-xs font-black tracking-[0.2em] text-zinc-900 uppercase dark:text-white">Refine Discovery</h3>
+							{#if activeFilterCount > 0}
+								<button 
+									onclick={clearFilters}
+									class="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest hover:underline"
+								>
+									RESET ALL
+								</button>
+							{/if}
+						</div>
+
+						<!-- Filter Groups Modernized -->
+						<div class="space-y-6">
+							<div class="space-y-3">
+								<label for="sort" class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Sequence Order</label>
+								<div class="relative group">
+									<select 
+										id="sort" 
+										value={sortBy} 
+										onchange={handleSort} 
+										class={`w-full h-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 ${RADIUS.button} px-4 text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer`}
+									>
+										<option value="newest">Latest Releases</option>
+										<option value="price-low">Value: Low to High</option>
+										<option value="price-high">Value: High to Low</option>
+										<option value="duration">Fastest Completion</option>
+									</select>
+								</div>
+							</div>
+
+							<div class="space-y-3">
+								<label for="max-price" class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Capital Threshold</label>
+								<div class="relative h-12">
+									<span class="absolute inset-y-0 left-4 flex items-center text-xs font-black text-zinc-400">RP</span>
+									<input
+										id="max-price"
+										type="number"
+										placeholder="Unlimited"
+										value={maxPrice || ''}
+										oninput={handleMaxPrice}
+										class={`w-full h-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 pl-12 pr-4 ${RADIUS.button} text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 transition-all`}
+										min="0"
+										max={maxPriceValue}
+									/>
+								</div>
+							</div>
+
+							<div class="grid grid-cols-2 gap-4 lg:grid-cols-1">
+								<div class="space-y-3">
+									<label for="min-duration" class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Minimum Commitment</label>
+									<select id="min-duration" value={minDuration || ''} onchange={handleMinDuration} class={`w-full h-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 ${RADIUS.button} px-4 text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 transition-all`}>
+										<option value="">No Minimum</option>
+										<option value="1">1 Week</option>
+										<option value="4">4 Weeks</option>
+										<option value="8">8 Weeks</option>
+									</select>
+								</div>
+								<div class="space-y-3">
+									<label for="max-duration" class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Maximum Window</label>
+									<select id="max-duration" value={maxDuration || ''} onchange={handleMaxDuration} class={`w-full h-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 ${RADIUS.button} px-4 text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 transition-all`}>
+										<option value="">Unlimited</option>
+										<option value="4">4 Weeks</option>
+										<option value="8">8 Weeks</option>
+										<option value="12">12 Weeks</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Premium Sidebar Utility -->
+					<div class="group relative overflow-hidden rounded-[2rem] bg-linear-to-br from-zinc-900 to-zinc-950 p-8 shadow-xl dark:border dark:border-zinc-800">
+						<div class="relative z-10 space-y-6">
+							<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30">
+								<span class="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+								<span class="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em]">Priority Access</span>
+							</div>
+							<p class="text-sm font-black italic tracking-tighter text-white leading-tight">Join the Protocol Waiting List</p>
+							<p class="text-[10px] font-medium text-zinc-500 leading-relaxed uppercase tracking-widest">Early access to exclusive industry tracks and career placement reports.</p>
+							<a href="/waiting-list" class="flex items-center justify-between w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-[0.2em] px-6 rounded-2xl transition-all active:scale-95">
+								JOIN NOW
+								<Icon name="arrow-right" size={14} />
+							</a>
+							<div
+								class="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-linear-to-tr from-blue-600/10 to-transparent blur-2xl transition-transform duration-1000 group-hover:scale-150"
+							></div>
+						</div>
+						<div class="absolute -right-4 -bottom-4 text-8xl opacity-10 rotate-12 transition-transform group-hover:scale-110 duration-700 pointer-events-none italic">NK</div>
+					</div>
+				</div>
+			</aside>
+
+			<!-- Knowledge Catalog Feed -->
+			<div class="lg:col-span-9 space-y-10">
+				{#if filteredCourses.length === 0}
+					<div class="flex min-h-[500px] flex-col items-center justify-center rounded-[3rem] border border-zinc-200 bg-white/50 backdrop-blur-md p-16 text-center dark:border-zinc-800 dark:bg-zinc-900/30">
+						<div class="relative mb-10 h-24 w-24">
+							<div class="absolute inset-0 rounded-full bg-blue-500/10 animate-ping"></div>
+							<div class="relative flex h-full w-full items-center justify-center rounded-full bg-white text-5xl shadow-2xl dark:bg-zinc-800">🕵️</div>
+						</div>
+						<h3 class="text-3xl font-black tracking-tighter text-zinc-900 dark:text-white mb-4 italic">No Signal Detected</h3>
+						<p class="mx-auto max-w-sm text-sm font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-widest leading-relaxed">
+							The current protocol combination yielded zero results. Reset filters to broaden your search.
+						</p>
+						<button 
+							onclick={clearFilters}
+							class="mt-12 h-14 bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-950 font-black text-[10px] uppercase tracking-[0.3em] px-10 rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-xl"
+						>
+							CLEAR FILTERS
+						</button>
+					</div>
 				{:else}
-					Coba ubah filter atau kata kunci pencarianmu.
+					<div class="flex items-center justify-between px-2">
+						<div class="flex items-center gap-3">
+							<span class="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Showing Results</span>
+							<div class="h-1 w-12 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+								<div class="h-full bg-blue-600" style="width: {(filteredCourses.length / data.courses.length) * 100}%"></div>
+							</div>
+							<span class="text-[10px] font-black text-zinc-900 dark:text-white uppercase tracking-widest">{filteredCourses.length} / {data.courses.length}</span>
+						</div>
+					</div>
+
+					<div class="grid grid-cols-1 gap-12 sm:grid-cols-2">
+						{#each filteredCourses as course, i}
+							<a 
+								href="/marketplace/{course.id}" 
+								class={`group relative flex flex-col overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 ${RADIUS.card} ${ELEVATION.card} ${TRANSITION.all} hover:-translate-y-2 hover:shadow-2xl hover:border-blue-500/20`}
+								in:fly={{ y: 30, duration: 800, delay: i * 50 }}
+							>
+								<!-- Course Visual Hub -->
+								<div class="relative h-64 w-full overflow-hidden">
+									{#if course.thumbnailUrl}
+										<img src={course.thumbnailUrl} alt={course.title} class="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110" loading="lazy" />
+									{:else}
+										<div class={`flex h-full w-full items-center justify-center bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-800 dark:to-zinc-900`}>
+											<span class="text-6xl grayscale opacity-20 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700">💎</span>
+										</div>
+									{/if}
+									
+									<div class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+									
+									<!-- Floating Information -->
+									{#if course.mentor}
+										<div class="absolute top-6 left-6 flex items-center gap-3 p-1.5 pr-4 rounded-full bg-white/90 backdrop-blur-md dark:bg-zinc-900/90 shadow-xl border border-white/20">
+											<div class="h-7 w-7 rounded-full bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-[10px] text-white font-black overflow-hidden shadow-sm">
+												{course.mentor.fullName?.[0] || 'M'}
+											</div>
+											<span class="text-[9px] font-black text-zinc-900 dark:text-white uppercase tracking-widest truncate max-w-[100px]">{course.mentor.fullName || course.mentor.username}</span>
+										</div>
+									{/if}
+
+									<div class="absolute bottom-6 left-6 right-6 flex items-center justify-between translate-y-10 group-hover:translate-y-0 transition-transform duration-500 pb-2">
+										<div class="flex items-center gap-2">
+											<span class="px-2 py-0.5 rounded-md bg-white border border-zinc-100 text-[8px] font-black text-blue-600 uppercase tracking-widest shadow-sm">Verified Track</span>
+										</div>
+									</div>
+								</div>
+
+								<!-- Content & Protocol Details -->
+								<div class="flex flex-1 flex-col p-10">
+									<div class="mb-6 flex items-center gap-4">
+										<span class="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] leading-none">Module Protocol</span>
+										<div class="h-px flex-1 bg-zinc-100 dark:bg-zinc-800 opacity-50"></div>
+										{#if course.duration}
+											<span class="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest leading-none">{course.duration} Cycles</span>
+										{/if}
+									</div>
+
+									<h3 class="mb-5 text-2xl font-black tracking-tighter text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors leading-tight italic">
+										{course.title}
+									</h3>
+									
+									<p class="mb-10 line-clamp-2 text-sm font-medium leading-relaxed text-zinc-500 dark:text-zinc-400 italic">
+										{course.description}
+									</p>
+
+									<div class="mt-auto flex items-center justify-between border-t border-zinc-100 pt-8 dark:border-zinc-800">
+										<div class="flex flex-col gap-1">
+											<span class="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none">Admission Fee</span>
+											<span class="text-3xl font-black tracking-tighter text-zinc-950 dark:text-white italic">
+												RP {course.price.toLocaleString('id-ID')}
+											</span>
+										</div>
+										<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 transition-all group-hover:bg-blue-600 group-hover:text-white shadow-xl active:scale-95">
+											<Icon name="arrow-right" size={20} />
+										</div>
+									</div>
+								</div>
+							</a>
+						{/each}
+					</div>
 				{/if}
-			</p>
-			{#if data.courses.length > 0 && activeFilterCount > 0}
-				<button onclick={clearFilters} class="clear-filters-btn">Reset Filter</button>
-			{/if}
+			</div>
 		</div>
-	{:else if data.courses.length > 0}
-		<div class="results-count">
-			Menampilkan <strong>{filteredCourses.length}</strong> dari
-			<strong>{data.courses.length}</strong> kursus
-		</div>
-	{/if}
+	</div>
 </div>
 
-<style>
-	.marketplace-page {
-		max-width: 1400px;
-		margin: 0 auto;
-		padding: 100px 20px 40px;
-	}
-
-	.hero-section {
-		text-align: center;
-		margin-bottom: 48px;
-		padding: 40px 20px;
-		background: linear-gradient(135deg, var(--color-bg-hero) 0%, var(--color-bg-hero-end) 100%);
-		border-radius: 20px;
-	}
-
-	.hero-section h1 {
-		font-size: 3em;
-		color: var(--color-primary-dark);
-		margin-bottom: 16px;
-		font-weight: 700;
-	}
-
-	.hero-section p {
-		font-size: 1.2em;
-		color: var(--color-primary-medium);
-		margin-bottom: 24px;
-	}
-
-	.stats {
-		display: flex;
-		justify-content: center;
-		gap: 32px;
-		flex-wrap: wrap;
-	}
-
-	.stat-item {
-		padding: 12px 24px;
-		background: white;
-		border-radius: 12px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		color: var(--color-primary-dark);
-	}
-
-	.stat-item strong {
-		color: var(--color-gradient-purple-start);
-		font-size: 1.5em;
-	}
-
-	.filter-note {
-		font-size: 0.7em;
-		color: var(--color-primary-medium);
-		margin-left: 8px;
-		font-weight: normal;
-	}
-
-	.filters-container {
-		background: white;
-		border-radius: 16px;
-		padding: 32px;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-		margin-bottom: 32px;
-	}
-
-	.search-bar {
-		position: relative;
-		margin-bottom: 24px;
-	}
-
-	.search-icon {
-		position: absolute;
-		left: 20px;
-		top: 50%;
-		transform: translateY(-50%);
-		font-size: 1.2em;
-	}
-
-	.search-input {
-		width: 100%;
-		padding: 16px 20px 16px 60px;
-		border: 2px solid #e5e7eb;
-		border-radius: 12px;
-		font-size: 1em;
-		transition: all 0.2s ease;
-	}
-
-	.search-input:focus {
-		outline: none;
-		border-color: var(--color-gradient-purple-start);
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-	}
-
-	.filter-row {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-		gap: 20px;
-	}
-
-	.filter-group {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-
-	.filter-group label {
-		font-size: 0.9em;
-		font-weight: 600;
-		color: var(--color-primary-dark);
-	}
-
-	.sort-select,
-	.filter-select,
-	.filter-input {
-		padding: 12px 16px;
-		border: 2px solid #e5e7eb;
-		border-radius: 10px;
-		font-size: 0.95em;
-		transition: all 0.2s ease;
-		background: white;
-	}
-
-	.filter-input {
-		padding: 12px 16px;
-	}
-
-	.sort-select:focus,
-	.filter-select:focus,
-	.filter-input:focus {
-		outline: none;
-		border-color: var(--color-gradient-purple-start);
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-	}
-
-	.active-filters {
-		margin-top: 20px;
-		padding: 16px;
-		background: var(--color-bg-hero);
-		border-radius: 12px;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-
-	.active-filters span {
-		color: var(--color-primary-medium);
-		font-size: 0.9em;
-	}
-
-	.clear-btn {
-		background: var(--color-gradient-purple-start);
-		color: white;
-		border: none;
-		padding: 8px 16px;
-		border-radius: 8px;
-		cursor: pointer;
-		font-weight: 600;
-		transition: all 0.2s ease;
-	}
-
-	.clear-btn:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-	}
-
-	.courses-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-		gap: 32px;
-		margin-bottom: 48px;
-	}
-
-	.course-card {
-		background: white;
-		border-radius: 20px;
-		overflow: hidden;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-		text-decoration: none;
-		color: inherit;
-		transition: all 0.3s ease;
-		display: block;
-		position: relative;
-	}
-
-	.course-card:hover {
-		transform: translateY(-8px);
-		box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-	}
-
-	.thumbnail,
-	.thumbnail-placeholder {
-		width: 100%;
-		height: 220px;
-		object-fit: cover;
-		background: linear-gradient(135deg, var(--color-bg-hero) 0%, var(--color-bg-hero-end) 100%);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.thumbnail-placeholder .emoji {
-		font-size: 5em;
-		opacity: 0.3;
-	}
-
-	.mentor-badge {
-		position: absolute;
-		top: 16px;
-		right: 16px;
-		background: rgba(255, 255, 255, 0.95);
-		backdrop-filter: blur(10px);
-		padding: 8px 14px;
-		border-radius: 20px;
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font-size: 0.85em;
-		font-weight: 600;
-		color: var(--color-primary-dark);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	}
-
-	.mentor-icon {
-		font-size: 1.2em;
-	}
-
-	.mentor-name {
-		max-width: 120px;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.course-info {
-		padding: 24px;
-	}
-
-	.course-info h3 {
-		font-size: 1.4em;
-		color: var(--color-primary-dark);
-		margin-bottom: 12px;
-		font-weight: 600;
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		line-clamp: 2;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-		min-height: 3.5em;
-	}
-
-	.description {
-		color: var(--color-primary-medium);
-		line-height: 1.6;
-		margin-bottom: 20px;
-		min-height: 60px;
-		display: -webkit-box;
-		-webkit-line-clamp: 3;
-		line-clamp: 3;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
-
-	.course-meta {
-		padding-top: 16px;
-		border-top: 1px solid #e5e7eb;
-	}
-
-	.meta-left {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-
-	.price {
-		font-size: 1.5em;
-		font-weight: 700;
-		color: var(--color-gradient-purple-start);
-	}
-
-	.duration {
-		color: var(--color-primary-medium);
-		font-size: 0.9em;
-		background: var(--color-bg-hero);
-		padding: 6px 12px;
-		border-radius: 8px;
-		display: inline-block;
-		width: fit-content;
-	}
-
-	.empty-state {
-		text-align: center;
-		padding: 80px 20px;
-		background: white;
-		border-radius: 20px;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-	}
-
-	.empty-icon {
-		font-size: 5em;
-		margin-bottom: 24px;
-		opacity: 0.3;
-	}
-
-	.empty-state h3 {
-		font-size: 1.8em;
-		color: var(--color-primary-dark);
-		margin-bottom: 12px;
-	}
-
-	.empty-state p {
-		font-size: 1.1em;
-		color: var(--color-primary-medium);
-		margin-bottom: 24px;
-	}
-
-	.clear-filters-btn {
-		background: linear-gradient(
-			135deg,
-			var(--color-gradient-purple-start) 0%,
-			var(--color-gradient-purple-mid) 100%
-		);
-		color: white;
-		border: none;
-		padding: 14px 32px;
-		border-radius: 12px;
-		cursor: pointer;
-		font-weight: 600;
-		font-size: 1em;
-		transition: all 0.3s ease;
-	}
-
-	.clear-filters-btn:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
-	}
-
-	.results-count {
-		text-align: center;
-		padding: 20px;
-		color: var(--color-primary-medium);
-		font-size: 1em;
-	}
-
-	.results-count strong {
-		color: var(--color-primary-dark);
-		font-weight: 600;
-	}
-
-	/* Responsive: Tablet */
-	@media (max-width: 1024px) {
-		.hero-section h1 {
-			font-size: 2.5em;
-		}
-
-		.filter-row {
-			grid-template-columns: repeat(2, 1fr);
-		}
-	}
-
-	/* Responsive: Mobile */
-	@media (max-width: 768px) {
-		.marketplace-page {
-			padding: 90px 16px 20px;
-		}
-
-		.hero-section {
-			padding: 32px 20px;
-		}
-
-		.hero-section h1 {
-			font-size: 2em;
-		}
-
-		.hero-section p {
-			font-size: 1em;
-		}
-
-		.filters-container {
-			padding: 24px;
-		}
-
-		.filter-row {
-			grid-template-columns: 1fr;
-		}
-
-		.courses-grid {
-			grid-template-columns: 1fr;
-			gap: 24px;
-		}
-
-		.course-card {
-			border-radius: 16px;
-		}
-
-		.mentor-badge {
-			top: 12px;
-			right: 12px;
-			padding: 6px 12px;
-			font-size: 0.75em;
-		}
-
-		.results-count {
-			font-size: 0.9em;
-		}
-	}
-
-	/* Responsive: Small mobile */
-	@media (max-width: 480px) {
-		.hero-section h1 {
-			font-size: 1.6em;
-		}
-
-		.stat-item {
-			padding: 10px 16px;
-			font-size: 0.9em;
-		}
-
-		.mentor-name {
-			max-width: 80px;
-		}
-	}
-</style>

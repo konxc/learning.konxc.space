@@ -1,5 +1,18 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { 
+		COLOR, 
+		TEXT, 
+		RADIUS, 
+		ELEVATION, 
+		TRANSITION, 
+		GRADIENT, 
+		SPACING 
+	} from '$lib/config/design';
+	import Icon from '$lib/components/ui/Icon.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import { fly, fade } from 'svelte/transition';
+
 	let { data }: { data: PageData } = $props();
 
 	function getEnrollUrl() {
@@ -9,350 +22,243 @@
 
 <svelte:head>
 	<title>{data.course?.title || 'Course Details'} - Naik Kelas</title>
+	<meta name="description" content={data.course?.description || 'Learn expert-led tracks at Naik Kelas.'} />
 </svelte:head>
 
 {#if !data.course}
-	<div class="error-page">
-		<h1>Course Not Found</h1>
-		<p>The course you're looking for doesn't exist or is not available.</p>
-		<a href="/marketplace" class="back-btn">← Back to Marketplace</a>
+	<div class="flex min-h-[60vh] flex-col items-center justify-center text-center p-8">
+		<div class="mb-6 text-6xl opacity-20">🔍</div>
+		<h1 class={`${TEXT.h1} mb-4`}>Course Not Found</h1>
+		<p class={`${TEXT.secondary} mb-8`}>The course you're looking for doesn't exist or is not available.</p>
+		<a href="/marketplace">
+			<Button variant="outline">← Back to Marketplace</Button>
+		</a>
 	</div>
 {:else}
-	<div class="course-detail-page">
-		<div class="course-hero">
-			{#if data.course.thumbnailUrl}
-				<img src={data.course.thumbnailUrl} alt={data.course.title} class="hero-image" />
-			{:else}
-				<div class="hero-placeholder">
-					<span class="emoji">📚</span>
-				</div>
-			{/if}
-			<div class="hero-overlay">
-				<div class="hero-content">
-					<h1>{data.course.title}</h1>
-					<p class="hero-description">{data.course.description}</p>
+	<div class={`min-h-screen ${COLOR.bg} selection:bg-blue-500/20`}>
+		<!-- Course Overview Hero -->
+		<div class="relative overflow-hidden pt-32 pb-16 md:pt-40 md:pb-24">
+			<!-- Background Glows -->
+			<div class="absolute inset-0 -z-10 bg-zinc-950">
+				{#if data.course.thumbnailUrl}
+					<img src={data.course.thumbnailUrl} alt="" class="h-full w-full object-cover opacity-30 blur-2xl" />
+				{:else}
+					<div class={`h-full w-full ${GRADIENT.primary} opacity-20`}></div>
+				{/if}
+				<div class="absolute inset-0 bg-linear-to-b from-transparent via-zinc-950/80 to-zinc-950"></div>
+			</div>
+
+			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+				<div class="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center">
+					<!-- Hero Text -->
+					<div class="lg:col-span-8" in:fade={{ duration: 800 }}>
+						<nav class="mb-8 flex items-center gap-2 overflow-hidden text-[10px] font-black tracking-widest text-zinc-400 uppercase">
+							<a href="/marketplace" class="hover:text-blue-400 transition-colors">Marketplace</a>
+							<span>/</span>
+							<span class="text-zinc-600 truncate">{data.course.title}</span>
+						</nav>
+						
+						<div class="mb-6 flex items-center gap-4">
+							<span class="rounded-full bg-blue-500/20 border border-blue-500/30 px-4 py-1.5 text-[10px] font-black tracking-widest text-blue-400 uppercase">
+								{data.course.duration || 'Flexible'} WEEKS
+							</span>
+							<div class="flex items-center gap-2 text-zinc-400">
+								<Icon name="star" size={12} class="text-amber-400" />
+								<span class="text-[10px] font-black">4.9 RATING</span>
+							</div>
+						</div>
+
+						<h1 class="mb-8 text-4xl font-black tracking-tight text-white md:text-6xl lg:text-7xl">
+							{data.course.title}
+						</h1>
+
+						<p class="mb-10 max-w-2xl text-lg font-medium leading-relaxed text-zinc-300 md:text-xl">
+							{data.course.description}
+						</p>
+
+						{#if data.mentor}
+							<div class="flex items-center gap-4 border-t border-white/10 pt-8">
+								<div class="h-12 w-12 rounded-2xl bg-blue-600 flex items-center justify-center text-xl font-black text-white shadow-xl">
+									{data.mentor.fullName?.[0] || 'M'}
+								</div>
+								<div>
+									<p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Lead Instructor</p>
+									<p class="text-lg font-bold text-white leading-none">
+										{data.mentor.fullName || data.mentor.username}
+									</p>
+								</div>
+							</div>
+						{/if}
+					</div>
+
+					<!-- Thumbnail Hero Card -->
+					<div class="lg:col-span-4" in:fly={{ x: 40, duration: 800, delay: 200 }}>
+						<div class={`overflow-hidden ${RADIUS.card} border-4 border-white/10 shadow-3xl bg-zinc-900 group`}>
+							{#if data.course.thumbnailUrl}
+								<img src={data.course.thumbnailUrl} alt={data.course.title} class="aspect-video h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+							{:else}
+								<div class={`aspect-video flex h-full w-full items-center justify-center ${GRADIENT.surface}`}>
+									<span class="text-6xl">📚</span>
+								</div>
+							{/if}
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
 
-		<div class="course-container">
-			<main class="course-main">
-				<div class="course-section">
-					<h2>About This Course</h2>
-					<p class="course-description">{data.course.description}</p>
-				</div>
-
-				<div class="course-section">
-					<h2>Course Information</h2>
-					<div class="info-grid">
-						<div class="info-item">
-							<span class="info-label">Duration</span>
-							<span class="info-value">{data.course.duration || 'N/A'} weeks</span>
-						</div>
-						<div class="info-item">
-							<span class="info-label">Created</span>
-							<span class="info-value">
-								{new Date(data.course.createdAt).toLocaleDateString('id-ID')}
+		<!-- Course Details Navigation (Sticky Sub-header) -->
+		<div class="sticky top-0 z-40 border-y border-zinc-200 bg-white/80 py-4 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80">
+			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+				<div class="flex items-center justify-between">
+					<div class="hidden items-center gap-8 md:flex">
+						{#each ['Overview', 'Curriculum', 'Instructor', 'Reviews'] as tab}
+							<button class="text-[11px] font-black tracking-widest text-zinc-400 uppercase hover:text-blue-600 transition-colors">{tab}</button>
+						{/each}
+					</div>
+					<div class="flex items-center gap-6">
+						<div class="flex flex-col items-end">
+							<span class="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Investment</span>
+							<span class="text-xl font-black tracking-tighter text-zinc-900 dark:text-white">
+								Rp {data.course.price.toLocaleString('id-ID')}
 							</span>
 						</div>
-						{#if data.mentor}
-							<div class="info-item">
-								<span class="info-label">Instructor</span>
-								<span class="info-value">{data.mentor.fullName || data.mentor.username}</span>
+						<a href={getEnrollUrl()}>
+							<Button class="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 rounded-xl px-8">Quick Enroll</Button>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Main Layout Grid -->
+		<div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+			<div class="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+				<!-- Informational Content -->
+				<main class="lg:col-span-8 space-y-20">
+					<!-- About Section -->
+					<section class="space-y-8">
+						<div class="flex items-center gap-3">
+							<div class="h-8 w-1 bg-blue-600 rounded-full"></div>
+							<h2 class="font-black uppercase text-[15px] tracking-[0.2em] text-blue-600">Course Architecture</h2>
+						</div>
+						<div class={`${TEXT.body} max-w-3xl prose prose-zinc dark:prose-invert font-medium text-lg leading-relaxed text-zinc-600 dark:text-zinc-400`}>
+							{data.course.description}
+						</div>
+					</section>
+
+					<!-- Core Stats Section -->
+					<section class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+						<div class={`${COLOR.card} ${COLOR.cardBorder} ${RADIUS.card} p-8 flex flex-col gap-6`}>
+							<div class="h-12 w-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-xl dark:bg-zinc-800">⏱️</div>
+							<div>
+								<p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Duration</p>
+								<p class="text-xl font-black text-zinc-900 dark:text-white leading-none">
+									{data.course.duration || 'Self-paced'} Weeks
+								</p>
 							</div>
-						{/if}
-					</div>
-				</div>
-			</main>
+						</div>
+						<div class={`${COLOR.card} ${COLOR.cardBorder} ${RADIUS.card} p-8 flex flex-col gap-6`}>
+							<div class="h-12 w-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-xl dark:bg-zinc-800">📅</div>
+							<div>
+								<p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Last Update</p>
+								<p class="text-xl font-black text-zinc-900 dark:text-white leading-none">
+									{new Date(data.course.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+								</p>
+							</div>
+						</div>
+						<div class={`${COLOR.card} ${COLOR.cardBorder} ${RADIUS.card} p-8 flex flex-col gap-6`}>
+							<div class="h-12 w-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-xl dark:bg-zinc-800">🛡️</div>
+							<div>
+								<p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Access Level</p>
+								<p class="text-xl font-black text-zinc-900 dark:text-white leading-none">Lifetime</p>
+							</div>
+						</div>
+					</section>
 
-			<aside class="course-sidebar">
-				<div class="enrollment-card">
-					<div class="price-section">
-						<span class="price-label">Price</span>
-						<span class="price-amount">Rp {data.course.price.toLocaleString('id-ID')}</span>
-					</div>
+					<!-- Mock Curriculum Section -->
+					<section class="space-y-8">
+						<div class="flex items-center justify-between">
+							<h3 class="text-xl font-black tracking-tight text-zinc-900 dark:text-white">What You'll Learn</h3>
+							<span class="text-xs font-bold text-zinc-400">08 Modules • 45 Lessons</span>
+						</div>
+						<div class="overflow-hidden border border-zinc-200 rounded-[2rem] dark:border-zinc-800">
+							{#each [1, 2, 3] as module}
+								<div class="group flex items-center justify-between border-b border-zinc-100 bg-white p-7 last:border-0 hover:bg-zinc-50 transition-all dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:bg-zinc-800/60">
+									<div class="flex items-center gap-6">
+										<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-zinc-50 text-sm font-black text-zinc-400 dark:bg-zinc-800">
+											0{module}
+										</div>
+										<div>
+											<h4 class="font-black text-zinc-900 dark:text-white leading-tight">Professional Track Concept {module}</h4>
+											<p class="text-xs font-medium text-zinc-400 mt-1">Foundations of modern industry strategy</p>
+										</div>
+									</div>
+									<Icon name="chevron-right" size={16} class="text-zinc-300 group-hover:text-blue-500 transition-colors" />
+								</div>
+							{/each}
+						</div>
+					</section>
+				</main>
 
-					<a href={getEnrollUrl()} class="enroll-cta-btn">Enroll Now</a>
+				<!-- Enrollment Sidebar -->
+				<aside class="lg:col-span-4">
+					<div class="sticky top-28">
+						<div class={`overflow-hidden ${RADIUS.card} border-2 border-blue-600/10 bg-white p-10 ${ELEVATION.card} shadow-3xl dark:bg-zinc-900 shadow-[0_32px_64px_-12px_rgba(37,99,235,0.1)]`}>
+							<div class="mb-10 text-center">
+								<p class="mb-3 text-[10px] font-black tracking-[0.25em] text-blue-600 uppercase">One-Time Enrollment</p>
+								<p class="text-5xl font-black tracking-tighter text-zinc-900 dark:text-white">
+									Rp {data.course.price.toLocaleString('id-ID')}
+								</p>
+							</div>
 
-					<div class="login-prompt">
-						<p>
-							<strong>Not registered yet?</strong>
-							<br />
-							<a href="/auth/signup">Sign up</a> or <a href="/auth/signin">login</a> to enroll in this
-							course
-						</p>
+							<div class="mb-10 space-y-5">
+								{#each ['Career Mentorship', 'Lifetime Access', 'Verified Certification', 'Premium Community'] as feature}
+									<div class="flex items-center gap-4">
+										<div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
+											<Icon name="check" size={12} strokeWidth={3} />
+										</div>
+										<span class="text-sm font-bold text-zinc-600 dark:text-zinc-300">{feature}</span>
+									</div>
+								{/each}
+							</div>
+
+							<a href={getEnrollUrl()} class="block">
+								<Button class="w-full py-7 bg-blue-600 hover:bg-blue-700 text-white rounded-[1.25rem] text-sm font-black tracking-widest uppercase shadow-xl shadow-blue-600/20 active:scale-95 transition-all">
+									Start Learning Now
+								</Button>
+							</a>
+
+							<div class="mt-10 border-t border-zinc-100 pt-10 text-center dark:border-zinc-800">
+								<p class="text-[11px] font-bold text-zinc-400 leading-relaxed">
+									Already have an account? <br />
+									<a href="/auth/signin" class="text-blue-600 hover:underline">Log in to your profile</a>
+								</p>
+							</div>
+						</div>
+
+						<!-- Social Proof Card -->
+						<div class={`mt-8 ${RADIUS.card} ${COLOR.neutral} p-8 dark:bg-zinc-800/30 text-center`}>
+							<div class="flex justify-center -space-x-4 mb-4">
+								{#each [1, 2, 3, 4] as i}
+									<div class="h-10 w-10 rounded-full border-4 border-white dark:border-zinc-900 bg-zinc-200 overflow-hidden">
+										<img src={`https://i.pravatar.cc/150?u=${i}`} alt="" />
+									</div>
+								{/each}
+								<div class="h-10 w-10 rounded-full border-4 border-white dark:border-zinc-900 bg-blue-600 flex items-center justify-center text-[10px] font-black text-white">+50</div>
+							</div>
+							<p class="text-xs font-bold text-zinc-500">Join over <span class="text-zinc-900 dark:text-white">2,000+ graduates</span> from this track.</p>
+						</div>
 					</div>
-				</div>
-			</aside>
+				</aside>
+			</div>
 		</div>
 	</div>
 {/if}
 
 <style>
-	.course-detail-page {
-		max-width: 1400px;
-		margin: 0 auto;
-		padding: 0 20px;
-	}
-
-	.error-page {
-		text-align: center;
-		padding: 80px 20px;
-	}
-
-	.error-page h1 {
-		font-size: 2em;
-		color: var(--color-primary-dark);
-		margin-bottom: 16px;
-	}
-
-	.error-page p {
-		color: var(--color-primary-medium);
-		margin-bottom: 32px;
-	}
-
-	.back-btn {
-		display: inline-block;
-		padding: 12px 24px;
-		background: linear-gradient(
-			135deg,
-			var(--color-gradient-purple-start) 0%,
-			var(--color-gradient-purple-mid) 100%
-		);
-		color: white;
-		text-decoration: none;
-		border-radius: 8px;
-		font-weight: 600;
-		transition: all 0.3s ease;
-	}
-
-	.back-btn:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-	}
-
-	.course-hero {
-		position: relative;
-		width: 100%;
-		height: 450px;
-		border-radius: 16px;
-		overflow: hidden;
-		margin: 40px 0;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-	}
-
-	.hero-image,
-	.hero-placeholder {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	.hero-placeholder {
-		background: linear-gradient(135deg, var(--color-bg-hero) 0%, var(--color-bg-hero-end) 100%);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.hero-placeholder .emoji {
-		font-size: 8em;
-	}
-
-	.hero-overlay {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-		padding: 60px;
-	}
-
-	.hero-content h1 {
-		font-size: 3em;
-		color: white;
-		margin-bottom: 16px;
-	}
-
-	.hero-description {
-		font-size: 1.3em;
-		color: rgba(255, 255, 255, 0.95);
-		line-height: 1.6;
-	}
-
-	.course-container {
-		display: flex;
-		gap: 40px;
-		margin: 48px 0;
-	}
-
-	.course-main {
-		flex: 1;
-		background: white;
-		border-radius: 16px;
-		padding: 40px;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-	}
-
-	.course-section {
-		margin-bottom: 40px;
-	}
-
-	.course-section h2 {
-		font-size: 1.8em;
-		color: var(--color-primary-dark);
-		margin-bottom: 20px;
-		font-weight: 600;
-	}
-
-	.course-description {
-		color: var(--color-primary-medium);
-		line-height: 1.8;
-		font-size: 1.1em;
-	}
-
-	.info-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-		gap: 24px;
-	}
-
-	.info-item {
-		padding: 20px;
-		background: var(--color-bg-hero);
-		border-radius: 12px;
-	}
-
-	.info-label {
-		display: block;
-		font-size: 0.9em;
-		color: var(--color-primary-medium);
-		margin-bottom: 10px;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-		font-weight: 600;
-	}
-
-	.info-value {
-		display: block;
-		font-size: 1.2em;
-		color: var(--color-primary-dark);
-		font-weight: 600;
-	}
-
-	.course-sidebar {
-		width: 400px;
-	}
-
-	.enrollment-card {
-		background: white;
-		border-radius: 16px;
-		padding: 32px;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-		position: sticky;
-		top: 20px;
-	}
-
-	.price-section {
-		margin-bottom: 32px;
-		padding-bottom: 32px;
-		border-bottom: 2px solid var(--color-bg-hero-end);
-	}
-
-	.price-label {
-		display: block;
-		font-size: 1em;
-		color: var(--color-primary-medium);
-		margin-bottom: 12px;
-	}
-
-	.price-amount {
-		display: block;
-		font-size: 2.5em;
-		font-weight: 700;
-		color: var(--color-gradient-purple-start);
-	}
-
-	.enroll-cta-btn {
-		display: block;
-		width: 100%;
-		padding: 18px 32px;
-		background: linear-gradient(
-			135deg,
-			var(--color-gradient-purple-start) 0%,
-			var(--color-gradient-purple-mid) 100%
-		);
-		color: white;
-		text-decoration: none;
-		border-radius: 12px;
-		text-align: center;
-		font-weight: 600;
-		font-size: 1.1em;
-		transition: all 0.3s ease;
-		margin-bottom: 24px;
-	}
-
-	.enroll-cta-btn:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
-	}
-
-	.login-prompt {
-		text-align: center;
-		padding: 20px;
-		background: var(--color-bg-hero);
-		border-radius: 12px;
-	}
-
-	.login-prompt p {
-		font-size: 0.95em;
-		color: var(--color-primary-medium);
-		line-height: 1.6;
-	}
-
-	.login-prompt a {
-		color: var(--color-gradient-purple-start);
-		text-decoration: none;
-		font-weight: 600;
-	}
-
-	.login-prompt a:hover {
-		text-decoration: underline;
-	}
-
-	@media (max-width: 1024px) {
-		.course-container {
-			flex-direction: column;
-		}
-
-		.course-sidebar {
-			width: 100%;
-		}
-
-		.hero-content h1 {
-			font-size: 2.5em;
-		}
-
-		.hero-description {
-			font-size: 1.1em;
-		}
-	}
-
-	@media (max-width: 768px) {
-		.course-hero {
-			height: 350px;
-		}
-
-		.hero-overlay {
-			padding: 30px;
-		}
-
-		.hero-content h1 {
-			font-size: 1.8em;
-		}
-
-		.course-main {
-			padding: 24px;
-		}
+	/* Custom animations or layout tweaks that are complex for Tailwind 4 */
+	section {
+		scroll-margin-top: 100px;
 	}
 </style>

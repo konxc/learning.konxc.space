@@ -3,6 +3,9 @@ import type { Actions, PageServerLoad } from './$types';
 import { env as privateEnv } from '$env/dynamic/private';
 import { env as publicEnv } from '$env/dynamic/public';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
+import { db } from '$lib/server/db';
+import * as schema from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const courseId = params.id;
@@ -11,9 +14,26 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		throw redirect(302, `/auth/signin?redirect=/marketplace/${courseId}/checkout`);
 	}
 
-	// Provide client key to client for Snap.js
+	// Fetch course details for order summary
+	const courses = await db
+		.select({
+			id: schema.course.id,
+			title: schema.course.title,
+			description: schema.course.description,
+			thumbnailUrl: schema.course.thumbnailUrl,
+			price: schema.course.price,
+			orgId: schema.course.orgId
+		})
+		.from(schema.course)
+		.where(eq(schema.course.id, courseId))
+		.limit(1);
+
+	if (courses.length === 0) {
+		throw redirect(302, '/marketplace');
+	}
+
 	return {
-		courseId,
+		course: courses[0],
 		clientKey: privateEnv.MIDTRANS_CLIENT_KEY || publicEnv.PUBLIC_MIDTRANS_CLIENT_KEY || ''
 	};
 };
