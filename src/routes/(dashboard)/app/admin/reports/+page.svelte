@@ -2,6 +2,7 @@
 	import type { PageData, ActionData } from './$types';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
+	import StatCard from '$lib/components/ui/StatCard.svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
 
@@ -44,24 +45,10 @@
 
 	<!-- Overview Stats -->
 	<div class="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-			<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
-				Total Students
-			</p>
-			<p class={`text-3xl font-black ${COLOR.textPrimary} mt-1`}>{data.stats.totalStudents}</p>
-		</div>
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-			<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>Active</p>
-			<p class="mt-1 text-3xl font-black text-green-600">{data.stats.activeStudents}</p>
-		</div>
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-			<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>Completed</p>
-			<p class="mt-1 text-3xl font-black text-blue-600">{data.stats.completedStudents}</p>
-		</div>
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-			<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>Courses</p>
-			<p class="mt-1 text-3xl font-black text-purple-600">{data.stats.totalCourses}</p>
-		</div>
+		<StatCard value={data.stats.totalStudents} label="Total Students" variant="default" />
+		<StatCard value={data.stats.activeStudents} label="Active" variant="success" />
+		<StatCard value={data.stats.completedStudents} label="Completed" variant="accent" />
+		<StatCard value={data.stats.totalCourses} label="Courses" variant="accent" />
 	</div>
 
 	<!-- Track Distribution -->

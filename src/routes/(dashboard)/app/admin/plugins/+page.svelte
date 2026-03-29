@@ -3,6 +3,7 @@
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
+	import StatCard from '$lib/components/ui/StatCard.svelte';
 	import { COLOR, RADIUS, TEXT, ELEVATION, SPACING } from '$lib/config/design';
 
 	let { data }: { data: PageData } = $props();
@@ -31,22 +32,10 @@
 
 	<!-- Plugin Stats -->
 	<div class="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-4 text-center`}>
-			<p class="text-3xl font-black text-indigo-600">{data.plugins?.length || 0}</p>
-			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Total Plugins</p>
-		</div>
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-4 text-center`}>
-			<p class="text-3xl font-black text-green-600">{data.plugins?.filter(p => p.isActive).length || 0}</p>
-			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Active</p>
-		</div>
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-4 text-center`}>
-			<p class="text-3xl font-black text-orange-600">{Object.keys(pluginsByType()).length}</p>
-			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Categories</p>
-		</div>
-		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-4 text-center`}>
-			<p class="text-3xl font-black text-blue-600">8</p>
-			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Built-in</p>
-		</div>
+		<StatCard value={data.plugins?.length || 0} label="Total Plugins" variant="accent" />
+		<StatCard value={data.plugins?.filter(p => p.isActive).length || 0} label="Active" variant="success" />
+		<StatCard value={Object.keys(pluginsByType()).length} label="Categories" variant="warning" />
+		<StatCard value={8} label="Built-in" variant="accent" />
 	</div>
 
 	<!-- Plugin List by Type -->

@@ -13,6 +13,6 @@ export const actions = {
 		}
 
 		// If logged in, redirect to dashboard enroll (which handles the actual enrollment)
-		throw redirect(302, `/app/courses/${courseId}/enroll`);
+		throw redirect(302, `/app/explore/${courseId}/enroll`);
 	}
 } satisfies Actions;

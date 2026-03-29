@@ -1,6 +1,6 @@
 export const COLOR = {
 	bg: 'bg-zinc-50 dark:bg-zinc-950',
-	card: 'bg-white/60 backdrop-blur-xl dark:bg-zinc-900/60',
+	card: 'bg-white/70 backdrop-blur-xl dark:bg-zinc-900/70',
 	cardBorder: 'border border-zinc-200/50 dark:border-zinc-800/50',
 	// High-contrast neutrals
 	textPrimary: 'text-zinc-900 dark:text-zinc-50',
@@ -49,7 +49,7 @@ export const ELEVATION = {
 export const SHADOW = ELEVATION;
 
 export const SPACING = {
-	page: 'px-6 md:px-12 lg:px-16 py-8',
+	page: 'w-full', // Padding is consistently handled by AppShell.svelte
 	section: 'space-y-10 md:space-y-16',
 	cardPadding: 'p-8',
 	button: 'px-5 py-2.5',

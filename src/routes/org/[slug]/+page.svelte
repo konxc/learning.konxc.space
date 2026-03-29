@@ -110,7 +110,7 @@
 										<div class="font-black" style="color: {brandColor}">
 											{course.price === 0 ? 'FREE' : `Rp ${course.price.toLocaleString('id-ID')}`}
 										</div>
-										<a href={`/app/courses/${course.id}`} class={`px-4 py-2 ${RADIUS.button} bg-gray-900 text-white text-xs font-bold hover:bg-black transition-all`}>
+										<a href={`/app/explore/${course.id}`} class={`px-4 py-2 ${RADIUS.button} bg-gray-900 text-white text-xs font-bold hover:bg-black transition-all`}>
 											Lihat Detail
 										</a>
 									</div>

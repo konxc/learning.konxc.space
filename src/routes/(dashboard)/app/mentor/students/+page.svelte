@@ -3,6 +3,7 @@
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
+	import Icon from '$lib/components/ui/Icon.svelte';
 	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -43,83 +44,108 @@
 </svelte:head>
 
 <PageWrapper>
-	<PageHeader title="My Students">
-		<div class="flex flex-wrap items-center gap-3">
-			{#if data.courses.length > 0}
-				<select
-					value={data.selectedCourse || 'all'}
-					onchange={(e) => updateFilters({ course: (e.target as HTMLSelectElement).value })}
-					class={`cursor-pointer ${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.button} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
-				>
-					<option value="all">All Courses</option>
-					{#each data.courses as course}
-						<option value={course.id}>{course.title}</option>
-					{/each}
-				</select>
-			{/if}
+	<div class={`${SPACING.page} pb-12`}>
+		<PageHeader title="My Students" />
 
-			{#if data.cohorts.length > 0}
-				<select
-					value={data.selectedCohort || 'all'}
-					onchange={(e) => updateFilters({ cohort: (e.target as HTMLSelectElement).value })}
-					class={`cursor-pointer ${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.button} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
-				>
-					<option value="all">All Batches</option>
-					{#each data.cohorts as cohort}
-						<option value={cohort.id}>{cohort.name}</option>
-					{/each}
-				</select>
-			{/if}
-
-			<select
-				value={data.selectedTrack || 'all'}
-				onchange={(e) => updateFilters({ track: (e.target as HTMLSelectElement).value })}
-				class={`cursor-pointer ${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.button} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
-			>
-				<option value="all">All Tracks</option>
-				<option value="creator">🎥 Creator</option>
-				<option value="seller">🛒 Seller</option>
-				<option value="affiliate">🔗 Affiliate</option>
-			</select>
-		</div>
-	</PageHeader>
-
-	{#if data.students.length === 0}
-		<PageSection>
-			<div class="flex flex-col items-center justify-center py-16 text-center">
-				<div class="mb-4 text-5xl">👨‍🎓</div>
+		{#if data.students.length === 0}
+			<div class="flex flex-col items-center justify-center py-24 text-center animate-in fade-in slide-in-from-bottom-8 duration-1000">
+				<div class="mb-6 rounded-3xl bg-zinc-50 p-8 dark:bg-white/2 text-8xl">👨‍🎓</div>
 				<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-2`}>No Students Found</h3>
-				<p class={`${COLOR.textSecondary} max-w-sm text-sm`}>
+				<p class={`${COLOR.textSecondary} max-w-sm text-sm opacity-70`}>
 					Try adjusting your filters or wait for students to enroll in your courses.
 				</p>
 			</div>
-		</PageSection>
-	{:else}
-		<!-- Summary Stats -->
-		<div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
-			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-				<p class={`text-[10px] font-black tracking-widest uppercase ${COLOR.textMuted} mb-1`}>
-					Filtered Students
-				</p>
-				<p class={`text-3xl font-black ${COLOR.textPrimary}`}>{uniqueStudentIds.size}</p>
+		{:else}
+			<!-- Summary Stats -->
+			<div class="mb-10 grid grid-cols-2 gap-6 sm:grid-cols-3">
+				<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-6 shadow-xl shadow-zinc-500/5`}>
+					<p class={`text-[10px] font-black tracking-widest uppercase ${COLOR.textMuted} mb-2`}>
+						Filtered Students
+					</p>
+					<div class="flex items-baseline gap-1.5">
+						<span class={`text-4xl font-black ${COLOR.textPrimary}`}>{uniqueStudentIds.size}</span>
+						<span class="text-sm font-bold text-gray-400">Total</span>
+					</div>
+				</div>
+				<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-6 shadow-xl shadow-zinc-500/5`}>
+					<p class={`text-[10px] font-black tracking-widest uppercase ${COLOR.textMuted} mb-2`}>
+						Total Enrollments
+					</p>
+					<div class="flex items-baseline gap-1.5">
+						<span class="text-4xl font-black text-blue-600">{data.students.length}</span>
+						<span class="text-sm font-bold text-gray-400">Records</span>
+					</div>
+				</div>
+				<div
+					class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} col-span-2 p-6 sm:col-span-1 shadow-xl shadow-zinc-500/5`}
+				>
+					<p class={`text-[10px] font-black tracking-widest uppercase ${COLOR.textMuted} mb-2`}>
+						Active Programs
+					</p>
+					<div class="flex items-baseline gap-1.5">
+						<span class="text-4xl font-black text-green-600">
+							{data.students.filter((s) => s.status === 'active').length}
+						</span>
+						<span class="text-sm font-bold text-gray-400">Active</span>
+					</div>
+				</div>
 			</div>
-			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-				<p class={`text-[10px] font-black tracking-widest uppercase ${COLOR.textMuted} mb-1`}>
-					Total Enrollments
-				</p>
-				<p class="text-3xl font-black text-blue-600">{data.students.length}</p>
+
+			<!-- Filters Bar (Above Table) -->
+			<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+				<h4 class={`${TEXT.h4} ${COLOR.textPrimary} hidden md:block`}>All Students</h4>
+				
+				<div class="flex flex-wrap items-center gap-4">
+					{#if data.courses.length > 0}
+						<div class="relative group">
+							<select
+								value={data.selectedCourse || 'all'}
+								onchange={(e) => updateFilters({ course: (e.target as HTMLSelectElement).value })}
+								class={`appearance-none cursor-pointer ${RADIUS.input} ${COLOR.cardBorder} border bg-white/50 pl-10 pr-10 py-2.5 text-xs font-black tracking-widest uppercase outline-none ${TRANSITION.all} focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:bg-zinc-900/50`}
+							>
+								<option value="all">All Courses</option>
+								{#each data.courses as course}
+									<option value={course.id}>{course.title}</option>
+								{/each}
+							</select>
+							<span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs opacity-40">📖</span>
+							<span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] opacity-40">▼</span>
+						</div>
+					{/if}
+
+					{#if data.cohorts.length > 0}
+						<div class="relative group">
+							<select
+								value={data.selectedCohort || 'all'}
+								onchange={(e) => updateFilters({ cohort: (e.target as HTMLSelectElement).value })}
+								class={`appearance-none cursor-pointer ${RADIUS.input} ${COLOR.cardBorder} border bg-white/50 pl-10 pr-10 py-2.5 text-xs font-black tracking-widest uppercase outline-none ${TRANSITION.all} focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:bg-zinc-900/50`}
+							>
+								<option value="all">All Batches</option>
+								{#each data.cohorts as cohort}
+									<option value={cohort.id}>{cohort.name}</option>
+								{/each}
+							</select>
+							<span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs opacity-40">👥</span>
+							<span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] opacity-40">▼</span>
+						</div>
+					{/if}
+
+					<div class="relative group">
+						<select
+							value={data.selectedTrack || 'all'}
+							onchange={(e) => updateFilters({ track: (e.target as HTMLSelectElement).value })}
+							class={`appearance-none cursor-pointer ${RADIUS.input} ${COLOR.cardBorder} border bg-white/50 pl-10 pr-10 py-2.5 text-xs font-black tracking-widest uppercase outline-none ${TRANSITION.all} focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:bg-zinc-900/50`}
+						>
+							<option value="all">All Tracks</option>
+							<option value="creator">🎥 Creator</option>
+							<option value="seller">🛒 Seller</option>
+							<option value="affiliate">🔗 Affiliate</option>
+						</select>
+						<span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs opacity-40">🎯</span>
+						<span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] opacity-40">▼</span>
+					</div>
+				</div>
 			</div>
-			<div
-				class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} col-span-2 p-5 sm:col-span-1`}
-			>
-				<p class={`text-[10px] font-black tracking-widest uppercase ${COLOR.textMuted} mb-1`}>
-					Active Programs
-				</p>
-				<p class="text-3xl font-black text-green-600">
-					{data.students.filter((s) => s.status === 'active').length}
-				</p>
-			</div>
-		</div>
 
 		<!-- Student Table -->
 		<div
@@ -248,4 +274,5 @@
 			</div>
 		</div>
 	{/if}
+	</div>
 </PageWrapper>

@@ -2,6 +2,7 @@
 	import type { PageData, ActionData } from './$types';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
+	import StatCard from '$lib/components/ui/StatCard.svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
@@ -141,22 +142,10 @@
 		<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-6`}>
 			<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-4`}>📊 Statistics</h3>
 			<div class="grid grid-cols-2 gap-4">
-				<div class="rounded-xl bg-blue-50 p-4 text-center">
-					<p class="text-3xl font-black text-blue-600">{data.stats.totalStudents}</p>
-					<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Total</p>
-				</div>
-				<div class="rounded-xl bg-green-50 p-4 text-center">
-					<p class="text-3xl font-black text-green-600">{data.stats.activeStudents}</p>
-					<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Active</p>
-				</div>
-				<div class="rounded-xl bg-amber-50 p-4 text-center">
-					<p class="text-3xl font-black text-amber-600">{data.stats.pendingStudents}</p>
-					<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Pending</p>
-				</div>
-				<div class="rounded-xl bg-purple-50 p-4 text-center">
-					<p class="text-3xl font-black text-purple-600">{data.stats.completedStudents}</p>
-					<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Completed</p>
-				</div>
+				<StatCard value={data.stats.totalStudents} label="Total" variant="accent" />
+				<StatCard value={data.stats.activeStudents} label="Active" variant="success" />
+				<StatCard value={data.stats.pendingStudents} label="Pending" variant="warning" />
+				<StatCard value={data.stats.completedStudents} label="Completed" variant="purple" />
 			</div>
 
 			<!-- Track Distribution -->

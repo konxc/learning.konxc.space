@@ -2,6 +2,7 @@
 	import type { PageData, ActionData } from './$types';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
+	import StatCard from '$lib/components/ui/StatCard.svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
 
@@ -174,18 +175,8 @@
 	<!-- Stats Summary -->
 	{#if data.partners.length > 0}
 		<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-				<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
-					Total Partners
-				</p>
-				<p class={`text-3xl font-black ${COLOR.textPrimary} mt-1`}>{data.stats.totalPartners}</p>
-			</div>
-			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
-				<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
-					Total Student Enrollments
-				</p>
-				<p class="mt-1 text-3xl font-black text-blue-600">{data.stats.totalEnrollments}</p>
-			</div>
+			<StatCard value={data.stats.totalPartners} label="Total Partners" variant="default" />
+			<StatCard value={data.stats.totalEnrollments} label="Total Student Enrollments" variant="accent" />
 		</div>
 	{/if}
 

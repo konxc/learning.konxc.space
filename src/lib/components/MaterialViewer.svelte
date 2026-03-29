@@ -39,7 +39,7 @@
 
 	async function saveProgress(position: number, completed: boolean = false) {
 		try {
-			const response = await fetch(`/app/courses/${courseId}/learn/progress`, {
+			const response = await fetch(`/app/explore/${courseId}/learn/progress`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({

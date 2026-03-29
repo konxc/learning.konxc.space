@@ -14,6 +14,7 @@
 	import { goto } from '$app/navigation';
 	import { updateQueryParam } from '$lib/utils/url-params';
 
+
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	const validTabs = ['profile', 'security', 'preferences', 'payments'] as const;
@@ -77,11 +78,7 @@
 		}
 	});
 
-	// Function to update URL query parameter when tab changes
-	async function updateTab(newTab: TabType) {
-		activeTab = newTab;
-		await updateQueryParam($page.url, 'tab', newTab === 'profile' ? null : newTab, goto);
-	}
+
 
 	function handleThemeChange(newTheme: Theme) {
 		theme = newTheme;
@@ -109,55 +106,6 @@
 </svelte:head>
 
 <PageWrapper>
-	<PageHeader title="Settings" description="Manage your account settings and preferences" />
-
-	<!-- Tabs Navigation - Keep existing styling -->
-	<div class={`mb-6 flex gap-2 border-b ${COLOR.cardBorder}`}>
-		<button
-			type="button"
-			onclick={() => updateTab('profile')}
-			class={`px-4 py-2 ${TEXT.button} font-medium ${TRANSITION.colors} border-b-2 ${
-				activeTab === 'profile'
-					? `${COLOR.textPrimary} border-blue-600`
-					: `${COLOR.textSecondary} border-transparent hover:text-gray-900 dark:hover:text-gray-100`
-			}`}
-		>
-			Profil
-		</button>
-		<button
-			type="button"
-			onclick={() => updateTab('security')}
-			class={`px-4 py-2 ${TEXT.button} font-medium ${TRANSITION.colors} border-b-2 ${
-				activeTab === 'security'
-					? `${COLOR.textPrimary} border-blue-600`
-					: `${COLOR.textSecondary} border-transparent hover:text-gray-900 dark:hover:text-gray-100`
-			}`}
-		>
-			Keamanan
-		</button>
-		<button
-			type="button"
-			onclick={() => updateTab('preferences')}
-			class={`px-4 py-2 ${TEXT.button} font-medium ${TRANSITION.colors} border-b-2 ${
-				activeTab === 'preferences'
-					? `${COLOR.textPrimary} border-blue-600`
-					: `${COLOR.textSecondary} border-transparent hover:text-gray-900 dark:hover:text-gray-100`
-			}`}
-		>
-			Preferensi
-		</button>
-		<button
-			type="button"
-			onclick={() => updateTab('payments')}
-			class={`px-4 py-2 ${TEXT.button} font-medium ${TRANSITION.colors} border-b-2 ${
-				activeTab === 'payments'
-					? `${COLOR.textPrimary} border-blue-600`
-					: `${COLOR.textSecondary} border-transparent hover:text-gray-900 dark:hover:text-gray-100`
-			}`}
-		>
-			Payment Gateway
-		</button>
-	</div>
 
 	<!-- Form Messages - Consistent with other pages -->
 	{#if form?.error}

@@ -30,7 +30,7 @@ export interface NavItem {
 	label: string;
 	href: string;
 	icon?: string;
-	category?: 'dashboard' | 'learning' | 'management' | 'admin' | 'crm';
+	category?: 'dashboard' | 'workspace' | 'learning' | 'management' | 'admin' | 'platform' | 'crm';
 	badge?: number | string;
 	badgeColor?: 'blue' | 'red' | 'green' | 'yellow';
 }
@@ -53,507 +53,107 @@ export function getNavItemsForRole(role: string, context?: WorkspaceContext): Na
 		return getOrgNavItems(context.orgRole, context);
 	}
 
-	// Personal context - base navigation
 	const baseNav: NavItem[] = [
-		{
-			label: 'Overview',
-			href: '/app/overview',
-			icon: '📊',
-			category: 'dashboard'
-		},
-		{
-			label: 'Settings',
-			href: '/app/settings/organization',
-			icon: '⚙️',
-			category: 'management'
-		}
+		{ label: 'Overview', href: '/app/overview', icon: 'dashboard', category: 'dashboard' }
+	];
+
+	const workspaceNav: NavItem[] = [
+		{ label: 'Explore', href: '/app/explore', icon: 'search', category: 'workspace' },
+		{ label: 'My Learning', href: '/app/learning/courses', icon: 'book-open', category: 'workspace' },
+		{ label: 'Leaderboard', href: '/app/leaderboard', icon: 'trophy', category: 'workspace' }
 	];
 
 	if (role === 'admin') {
 		return [
-			...baseNav,
-			{
-				label: 'Browse Courses',
-				href: '/app/courses',
-				icon: '🔍',
-				category: 'learning'
-			},
-			{
-				label: 'My Courses',
-				href: '/app/my-courses',
-				icon: '📖',
-				category: 'learning'
-			},
-			{
-				label: 'My Progress',
-				href: '/app/my-progress',
-				icon: '📈',
-				category: 'learning'
-			},
-			{
-				label: 'Weekly Checkpoints',
-				href: '/app/checkpoints',
-				icon: '✅',
-				category: 'learning'
-			},
-			{
-				label: 'Leaderboard',
-				href: '/app/leaderboard',
-				icon: '🏆',
-				category: 'learning'
-			},
-			{
-				label: 'Manage Courses',
-				href: '/app/admin/courses',
-				icon: '📚',
-				category: 'admin'
-			},
-			{
-				label: 'Discount Coupons',
-				href: '/app/admin/coupons',
-				icon: '🎫',
-				category: 'admin'
-			},
-			{
-				label: 'User Management',
-				href: '/app/admin/users',
-				icon: '👥',
-				category: 'admin'
-			},
-			{
-				label: 'Mentor Applications',
-				href: '/app/admin/mentor-applications',
-				icon: '📝',
-				category: 'admin',
-				badgeColor: 'yellow'
-			},
-			{
-				label: 'Payment Verification',
-				href: '/app/admin/payments',
-				icon: '💳',
-				category: 'admin'
-			},
-			{
-				label: 'Manage Batches',
-				href: '/app/admin/cohorts',
-				icon: '📅',
-				category: 'admin'
-			},
-			{
-				label: 'Partners',
-				href: '/app/admin/partner',
-				icon: '🏢',
-				category: 'admin'
-			},
-			{
-				label: 'Reports',
-				href: '/app/admin/reports',
-				icon: '📊',
-				category: 'admin'
-			},
-			{
-				label: 'Course Reviews',
-				href: '/app/admin/reviews',
-				icon: '⭐',
-				category: 'admin'
-			},
-			{
-				label: 'Broadcast Message',
-				href: '/app/mentor/broadcast',
-				icon: '📢',
-				category: 'admin'
-			},
-			{
-				label: 'Plugin Management',
-				href: '/app/admin/plugins',
-				icon: '🧩',
-				category: 'admin'
-			},
-			{
-				label: 'CRM Waiting List',
-				href: '/app/crm/waiting-list',
-				icon: '⏳',
-				category: 'crm'
-			}
+			...baseNav, ...workspaceNav,
+			{ label: 'Course Builder', href: '/app/admin/courses', icon: 'hammer', category: 'platform' },
+			{ label: 'Cohorts', href: '/app/admin/cohorts', icon: 'calendar', category: 'platform' },
+			{ label: 'Users & Roles', href: '/app/admin/users', icon: 'users', category: 'platform' },
+			{ label: 'Coupons', href: '/app/admin/coupons', icon: 'coupon', category: 'platform' },
+			{ label: 'Mentor Apps', href: '/app/admin/mentor-applications', icon: 'file-text', badgeColor: 'yellow', category: 'platform' },
+			{ label: 'Payments', href: '/app/admin/payments', icon: 'credit-card', category: 'platform' },
+			{ label: 'Partners', href: '/app/admin/partner', icon: 'building', category: 'platform' },
+			{ label: 'Reports', href: '/app/admin/reports', icon: 'chart', category: 'platform' },
+			{ label: 'Reviews', href: '/app/admin/reviews', icon: 'star', category: 'platform' },
+			{ label: 'Broadcast', href: '/app/mentor/broadcast', icon: 'megaphone', category: 'platform' },
+			{ label: 'Plugins', href: '/app/admin/plugins', icon: 'puzzle', category: 'platform' },
+			{ label: 'Waiting List', href: '/app/crm/waiting-list', icon: 'clock', category: 'crm' }
 		];
 	}
 
 	if (role === 'bd') {
-		return [
-			...baseNav,
-			{
-				label: 'CRM Waiting List',
-				href: '/app/crm/waiting-list',
-				icon: '⏳',
-				category: 'crm'
-			}
-		];
+		return [...baseNav, { label: 'Waiting List', href: '/app/crm/waiting-list', icon: 'clock', category: 'crm' }];
 	}
 
 	if (role === 'mentor') {
 		return [
-			...baseNav,
-			{
-				label: 'Browse Courses',
-				href: '/app/courses',
-				icon: '🔍',
-				category: 'learning'
-			},
-			{
-				label: 'My Courses',
-				href: '/app/my-courses',
-				icon: '📖',
-				category: 'learning'
-			},
-			{
-				label: 'My Progress',
-				href: '/app/my-progress',
-				icon: '📈',
-				category: 'learning'
-			},
-			{
-				label: 'Weekly Checkpoints',
-				href: '/app/checkpoints',
-				icon: '✅',
-				category: 'learning'
-			},
-			{
-				label: 'Course Management',
-				href: '/app/mentor/courses',
-				icon: '🎓',
-				category: 'management'
-			},
-			{
-				label: 'My Students',
-				href: '/app/mentor/students',
-				icon: '👨‍🎓',
-				category: 'management'
-			},
-			{
-				label: 'Broadcast Message',
-				href: '/app/mentor/broadcast',
-				icon: '📢',
-				category: 'management'
-			}
+			...baseNav, ...workspaceNav,
+			{ label: 'My Courses', href: '/app/mentor/courses', icon: 'graduation', category: 'management' },
+			{ label: 'Students', href: '/app/mentor/students', icon: 'users', category: 'management' },
+			{ label: 'Broadcast', href: '/app/mentor/broadcast', icon: 'megaphone', category: 'management' }
 		];
 	}
 
 	if (role === 'facilitator') {
 		return [
-			...baseNav,
-			{
-				label: 'Browse Courses',
-				href: '/app/courses',
-				icon: '🔍',
-				category: 'learning'
-			},
-			{
-				label: 'My Courses',
-				href: '/app/my-courses',
-				icon: '📖',
-				category: 'learning'
-			},
-			{
-				label: 'My Progress',
-				href: '/app/my-progress',
-				icon: '📈',
-				category: 'learning'
-			},
-			{
-				label: 'Weekly Checkpoints',
-				href: '/app/checkpoints',
-				icon: '✅',
-				category: 'learning'
-			},
-			{
-				label: 'My Batches',
-				href: '/app/facilitator/cohorts',
-				icon: '📅',
-				category: 'management'
-			}
+			...baseNav, ...workspaceNav,
+			{ label: 'My Batches', href: '/app/facilitator/cohorts', icon: 'calendar', category: 'management' }
 		];
 	}
 
 	return [
-		...baseNav,
-		{
-			label: 'Browse Courses',
-			href: '/app/courses',
-			icon: '🔍',
-			category: 'learning'
-		},
-		{
-			label: 'My Courses',
-			href: '/app/my-courses',
-			icon: '📖',
-			category: 'learning'
-		},
-		{
-			label: 'My Progress',
-			href: '/app/my-progress',
-			icon: '📈',
-			category: 'learning'
-		},
-		{
-			label: 'Weekly Checkpoints',
-			href: '/app/checkpoints',
-			icon: '✅',
-			category: 'learning'
-		},
-		{
-			label: 'Leaderboard',
-			href: '/app/leaderboard',
-			icon: '🏆',
-			category: 'learning'
-		},
-		{
-			label: 'Affiliate Dashboard',
-			href: '/app/affiliate',
-			icon: '💰',
-			category: 'learning'
-		},
-		{
-			label: 'Apply as Mentor',
-			href: '/app/apply-mentor',
-			icon: '🚀',
-			category: 'learning'
-		},
-		{
-			label: 'Application Status',
-			href: '/app/my-mentor-application',
-			icon: '📋',
-			category: 'learning'
-		}
+		...baseNav, ...workspaceNav,
+		{ label: 'Affiliate', href: '/app/affiliate', icon: 'wallet', category: 'workspace' }
 	];
 }
 
 // Organization-specific navigation based on org role
 function getOrgNavItems(orgRole: string, context: WorkspaceContext): NavItem[] {
-	// Base org navigation - shared by all org members
 	const baseOrgNav: NavItem[] = [
-		{
-			label: 'Org Dashboard',
-			href: '/app/overview',
-			icon: '📊',
-			category: 'dashboard'
-		}
+		{ label: 'Org Overview', href: '/app/overview', icon: 'building', category: 'dashboard' }
 	];
 
-	// Learning items (for all members)
 	const learningNav: NavItem[] = [
-		{
-			label: 'Browse Courses',
-			href: '/app/courses',
-			icon: '🔍',
-			category: 'learning'
-		},
-		{
-			label: 'My Courses',
-			href: '/app/my-courses',
-			icon: '📖',
-			category: 'learning'
-		},
-		{
-			label: 'My Progress',
-			href: '/app/my-progress',
-			icon: '📈',
-			category: 'learning'
-		},
-		{
-			label: 'Weekly Checkpoints',
-			href: '/app/checkpoints',
-			icon: '✅',
-			category: 'learning'
-		}
+		{ label: 'Explore', href: '/app/explore', icon: 'search', category: 'workspace' },
+		{ label: 'My Learning', href: '/app/learning/courses', icon: 'book-open', category: 'workspace' }
 	];
 
-	// Org Owner navigation
-	if (orgRole === 'owner') {
+	if (orgRole === 'owner' || orgRole === 'admin') {
 		return [
-			...baseOrgNav,
-			...learningNav,
-			// Organization Management
-			{
-				label: 'Organization Settings',
-				href: '/app/settings/organization',
-				icon: '⚙️',
-				category: 'management'
-			},
-			{
-				label: 'Member Management',
-				href: '/app/settings/organization',
-				icon: '👥',
-				category: 'management'
-			},
-			{
-				label: 'Billing & Plans',
-				href: '/app/settings/billing',
-				icon: '💳',
-				category: 'management'
-			},
-			// Course Management
-			{
-				label: 'Course Builder',
-				href: '/app/mentor/courses',
-				icon: '🎓',
-				category: 'admin'
-			},
-			{
-				label: 'Course Reviews',
-				href: '/app/admin/reviews',
-				icon: '⭐',
-				category: 'admin'
-			},
-			// Cohort Management
-			{
-				label: 'Manage Cohorts',
-				href: '/app/admin/cohorts',
-				icon: '📅',
-				category: 'admin'
-			},
-			// Analytics
-			{
-				label: 'Analytics & Reports',
-				href: '/app/admin/reports',
-				icon: '📊',
-				category: 'admin'
-			},
-			// Broadcast
-			{
-				label: 'Broadcast Message',
-				href: '/app/mentor/broadcast',
-				icon: '📢',
-				category: 'admin'
-			}
+			...baseOrgNav, ...learningNav,
+			{ label: 'Settings', href: '/app/settings/organization', icon: 'settings', category: 'management' },
+			{ label: 'Members', href: '/app/settings/organization', icon: 'users', category: 'management' },
+			{ label: 'Billing', href: '/app/settings/billing', icon: 'credit-card', category: 'management' },
+			{ label: 'Course Builder', href: '/app/mentor/courses', icon: 'hammer', category: 'platform' },
+			{ label: 'Reviews', href: '/app/admin/reviews', icon: 'star', category: 'platform' },
+			{ label: 'Cohorts', href: '/app/admin/cohorts', icon: 'calendar', category: 'platform' },
+			{ label: 'Reports', href: '/app/admin/reports', icon: 'chart', category: 'platform' },
+			{ label: 'Broadcast', href: '/app/mentor/broadcast', icon: 'megaphone', category: 'platform' }
 		];
 	}
 
-	// Org Admin navigation
-	if (orgRole === 'admin') {
-		return [
-			...baseOrgNav,
-			...learningNav,
-			// Organization Management
-			{
-				label: 'Organization Settings',
-				href: '/app/settings/organization',
-				icon: '⚙️',
-				category: 'management'
-			},
-			{
-				label: 'Member Management',
-				href: '/app/settings/organization',
-				icon: '👥',
-				category: 'management'
-			},
-			// Course Management
-			{
-				label: 'Course Builder',
-				href: '/app/mentor/courses',
-				icon: '🎓',
-				category: 'admin'
-			},
-			{
-				label: 'Course Reviews',
-				href: '/app/admin/reviews',
-				icon: '⭐',
-				category: 'admin'
-			},
-			// Cohort Management
-			{
-				label: 'Manage Cohorts',
-				href: '/app/admin/cohorts',
-				icon: '📅',
-				category: 'admin'
-			},
-			// Analytics
-			{
-				label: 'Analytics & Reports',
-				href: '/app/admin/reports',
-				icon: '📊',
-				category: 'admin'
-			},
-			// Broadcast
-			{
-				label: 'Broadcast Message',
-				href: '/app/mentor/broadcast',
-				icon: '📢',
-				category: 'admin'
-			}
-		];
-	}
-
-	// Creator navigation (Course creators)
 	if (orgRole === 'creator') {
 		return [
-			...baseOrgNav,
-			...learningNav,
-			// Course Management
-			{
-				label: 'Course Builder',
-				href: '/app/mentor/courses',
-				icon: '🎓',
-				category: 'management'
-			},
-			{
-				label: 'My Students',
-				href: '/app/mentor/students',
-				icon: '👨‍🎓',
-				category: 'management'
-			},
-			{
-				label: 'Broadcast Message',
-				href: '/app/mentor/broadcast',
-				icon: '📢',
-				category: 'management'
-			},
-			// Analytics
-			{
-				label: 'Course Analytics',
-				href: '/app/admin/reports',
-				icon: '📊',
-				category: 'admin'
-			}
+			...baseOrgNav, ...learningNav,
+			{ label: 'Course Builder', href: '/app/mentor/courses', icon: 'hammer', category: 'management' },
+			{ label: 'Students', href: '/app/mentor/students', icon: 'users', category: 'management' },
+			{ label: 'Broadcast', href: '/app/mentor/broadcast', icon: 'megaphone', category: 'management' },
+			{ label: 'Analytics', href: '/app/admin/reports', icon: 'chart', category: 'platform' }
 		];
 	}
 
-	// Facilitator navigation
 	if (orgRole === 'facilitator') {
 		return [
-			...baseOrgNav,
-			...learningNav,
-			// Cohort Management
-			{
-				label: 'My Cohorts',
-				href: '/app/admin/cohorts',
-				icon: '📅',
-				category: 'management'
-			},
-			{
-				label: 'Student Progress',
-				href: '/app/mentor/students',
-				icon: '👨‍🎓',
-				category: 'management'
-			},
-			{
-				label: 'Broadcast Message',
-				href: '/app/mentor/broadcast',
-				icon: '📢',
-				category: 'management'
-			}
+			...baseOrgNav, ...learningNav,
+			{ label: 'My Batches', href: '/app/admin/cohorts', icon: 'calendar', category: 'management' },
+			{ label: 'Students', href: '/app/mentor/students', icon: 'users', category: 'management' },
+			{ label: 'Broadcast', href: '/app/mentor/broadcast', icon: 'megaphone', category: 'management' }
 		];
 	}
 
-	// Regular member navigation (basic access)
 	return [
-		...baseOrgNav,
-		...learningNav,
-		{
-			label: 'Leaderboard',
-			href: '/app/leaderboard',
-			icon: '🏆',
-			category: 'learning'
-		}
+		...baseOrgNav, ...learningNav,
+		{ label: 'Leaderboard', href: '/app/leaderboard', icon: 'trophy', category: 'workspace' }
 	];
 }
 
@@ -570,10 +170,12 @@ export function groupNavItems(items: NavItem[]): NavGroup[] {
 
 	const categoryLabels: Record<string, string> = {
 		dashboard: '',
+		workspace: 'Workspace Tasks',
 		learning: 'Learning',
-		management: 'Organization Control',
+		management: 'Organization Settings',
 		admin: 'Administration',
-		crm: 'CRM',
+		platform: 'Platform Management',
+		crm: 'Customer Relations',
 		other: 'Other'
 	};
 

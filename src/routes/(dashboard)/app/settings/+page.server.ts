@@ -16,7 +16,7 @@ function validatePassword(password: unknown): password is string {
 	return password.length >= 8 && password.length <= 255;
 }
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.user) {
 		throw redirect(302, '/auth/signin');
 	}
@@ -29,6 +29,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		throw error(404, 'User not found');
 	}
 
+	const tabParam = url.searchParams.get('tab') || 'profile';
+
 	return {
 		user: {
 			id: currentUser.id,
@@ -38,6 +40,15 @@ export const load: PageServerLoad = async ({ locals }) => {
 			phone: currentUser.phone,
 			role: currentUser.role,
 			createdAt: currentUser.createdAt
+		},
+		headerTabs: {
+			tabs: [
+				{ label: 'Profil', id: 'profile' },
+				{ label: 'Keamanan', id: 'security' },
+				{ label: 'Preferensi', id: 'preferences' },
+				{ label: 'Payment Gateway', id: 'payments' }
+			],
+			activeTab: tabParam
 		}
 	};
 };

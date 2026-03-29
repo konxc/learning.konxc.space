@@ -7,48 +7,70 @@ import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
+	const tab = event.url.searchParams.get('tab') || 'links';
 
-	const links = await db
-		.select()
-		.from(schema.affiliateLink)
-		.where(eq(schema.affiliateLink.userId, user.id))
-		.orderBy(desc(schema.affiliateLink.createdAt));
+	const [statsData, platformStats] = await Promise.all([
+		db
+			.select({
+				totalSales: sum(schema.affiliateSale.saleAmount),
+				totalCommission: sum(schema.affiliateSale.commissionAmount)
+			})
+			.from(schema.affiliateSale)
+			.where(eq(schema.affiliateSale.userId, user.id)),
+		db
+			.select({
+				platform: schema.affiliateSale.platform,
+				count: schema.affiliateSale.id,
+				total: sum(schema.affiliateSale.saleAmount)
+			})
+			.from(schema.affiliateSale)
+			.where(eq(schema.affiliateSale.userId, user.id))
+			.groupBy(schema.affiliateSale.platform)
+	]);
 
-	const sales = await db
-		.select()
-		.from(schema.affiliateSale)
-		.where(eq(schema.affiliateSale.userId, user.id))
-		.orderBy(desc(schema.affiliateSale.createdAt))
-		.limit(20);
+	const [allLinks, allSales] = await Promise.all([
+		db
+			.select()
+			.from(schema.affiliateLink)
+			.where(eq(schema.affiliateLink.userId, user.id)),
+		db
+			.select()
+			.from(schema.affiliateSale)
+			.where(eq(schema.affiliateSale.userId, user.id))
+	]);
 
-	const stats = await db
-		.select({
-			totalSales: sum(schema.affiliateSale.saleAmount),
-			totalCommission: sum(schema.affiliateSale.commissionAmount)
-		})
-		.from(schema.affiliateSale)
-		.where(eq(schema.affiliateSale.userId, user.id));
-
-	const platformStats = await db
-		.select({
-			platform: schema.affiliateSale.platform,
-			count: schema.affiliateSale.id,
-			total: sum(schema.affiliateSale.saleAmount)
-		})
-		.from(schema.affiliateSale)
-		.where(eq(schema.affiliateSale.userId, user.id))
-		.groupBy(schema.affiliateSale.platform);
+	const [links, sales] = tab === 'links'
+		? [
+				await db
+					.select()
+					.from(schema.affiliateLink)
+					.where(eq(schema.affiliateLink.userId, user.id))
+					.orderBy(desc(schema.affiliateLink.createdAt)),
+				[]
+			]
+		: tab === 'sales'
+			? [
+				[],
+				await db
+					.select()
+					.from(schema.affiliateSale)
+					.where(eq(schema.affiliateSale.userId, user.id))
+					.orderBy(desc(schema.affiliateSale.createdAt))
+					.limit(20)
+			]
+			: [[], []];
 
 	return {
 		links,
 		sales,
 		stats: {
-			totalSales: stats[0]?.totalSales || 0,
-			totalCommission: stats[0]?.totalCommission || 0,
-			linkCount: links.length,
-			saleCount: sales.length
+			totalSales: statsData[0]?.totalSales || 0,
+			totalCommission: statsData[0]?.totalCommission || 0,
+			linkCount: allLinks.length,
+			saleCount: allSales.length
 		},
-		platformStats
+		platformStats,
+		tab
 	};
 };
 

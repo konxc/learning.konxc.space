@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { RADIUS, COLOR, SPACING, TEXT, TRANSITION } from '$lib/config/design';
+	import FilterButtonGroup from '$lib/components/ui/FilterButtonGroup.svelte';
 	import type { MentorApplicationFilterType } from '$lib/constants/mentor-applications';
 	import { MENTOR_APPLICATION_STATUS_LABELS } from '$lib/constants/mentor-applications';
 
-	export interface MentorApplicationFiltersProps {
+	interface MentorApplicationFiltersProps {
 		statusFilter?: MentorApplicationFilterType;
 		statusCounts: Record<string, number>;
 		onStatusFilterChange?: (value: MentorApplicationFilterType) => void;
@@ -15,46 +15,16 @@
 		onStatusFilterChange
 	}: MentorApplicationFiltersProps = $props();
 
-	// Status filter options for buttons
-	const statusFilterOptions: Array<{
-		value: MentorApplicationFilterType;
-		label: string;
-		countKey: string;
-	}> = [
-		{ value: 'all', label: MENTOR_APPLICATION_STATUS_LABELS.all, countKey: 'all' },
-		{
-			value: 'pending',
-			label: MENTOR_APPLICATION_STATUS_LABELS.pending,
-			countKey: 'pending'
-		},
-		{
-			value: 'approved',
-			label: MENTOR_APPLICATION_STATUS_LABELS.approved,
-			countKey: 'approved'
-		},
-		{
-			value: 'rejected',
-			label: MENTOR_APPLICATION_STATUS_LABELS.rejected,
-			countKey: 'rejected'
-		}
+	const filters = [
+		{ value: 'all', label: MENTOR_APPLICATION_STATUS_LABELS.all, count: statusCounts.all ?? 0 },
+		{ value: 'pending', label: MENTOR_APPLICATION_STATUS_LABELS.pending, count: statusCounts.pending ?? 0 },
+		{ value: 'approved', label: MENTOR_APPLICATION_STATUS_LABELS.approved, count: statusCounts.approved ?? 0 },
+		{ value: 'rejected', label: MENTOR_APPLICATION_STATUS_LABELS.rejected, count: statusCounts.rejected ?? 0 }
 	];
+
+	function handleChange(value: string) {
+		onStatusFilterChange?.(value as MentorApplicationFilterType);
+	}
 </script>
 
-<div class="flex flex-wrap items-center gap-2">
-	{#each statusFilterOptions as option}
-		<button
-			type="button"
-			class={`cursor-pointer ${RADIUS.button} ${SPACING.button} ${TEXT.button} ${TRANSITION.all} ${
-				statusFilter === option.value
-					? `${COLOR.accentBg} border-transparent text-white shadow-sm hover:opacity-90`
-					: `border border-gray-300 dark:border-neutral-600 ${COLOR.textPrimary} bg-white hover:border-gray-400 hover:bg-gray-50 dark:bg-neutral-800 dark:hover:border-neutral-500 dark:hover:bg-neutral-700`
-			} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1 dark:focus-visible:ring-blue-500/70`}
-			onclick={() => {
-				statusFilter = option.value;
-				onStatusFilterChange?.(option.value);
-			}}
-		>
-			{option.label} ({statusCounts[option.countKey] ?? 0})
-		</button>
-	{/each}
-</div>
+<FilterButtonGroup {filters} bind:active={statusFilter} onChange={handleChange} />

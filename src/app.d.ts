@@ -7,7 +7,15 @@ declare global {
 			session: import('$lib/server/auth').SessionValidationResult['session'];
 		}
 		// interface Error {}
+		interface HeaderTab {
+			label: string;
+			id: string;
+		}
 		interface PageData {
+			headerTabs?: {
+				tabs: HeaderTab[];
+				activeTab: string;
+			};
 			workspaces?: {
 				organizations: Array<{
 					id: string;

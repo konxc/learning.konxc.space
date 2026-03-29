@@ -2,6 +2,7 @@
 	import type { PageData, ActionData } from './$types';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
+	import Icon from '$lib/components/ui/Icon.svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
 
@@ -11,15 +12,9 @@
 	let creating = $state(false);
 
 	const statusColors: Record<string, string> = {
-		upcoming: 'bg-amber-100 text-amber-700',
-		active: 'bg-green-100 text-green-700',
-		completed: 'bg-gray-100 text-gray-600'
-	};
-
-	const statusLabels: Record<string, string> = {
-		upcoming: '⏳ Akan Datang',
-		active: '✅ Aktif',
-		completed: '🏁 Selesai'
+		upcoming: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+		active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+		completed: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
 	};
 </script>
 
@@ -33,23 +28,26 @@
 			onclick={() => (showCreateForm = !showCreateForm)}
 			class={`inline-flex items-center gap-2 ${RADIUS.button} ${COLOR.accentBg} px-5 py-2.5 text-sm font-bold text-white ${TRANSITION.all} hover:-translate-y-0.5 hover:shadow-lg`}
 		>
-			{showCreateForm ? '✕ Tutup' : '+ Tambah Batch'}
+			<Icon name={showCreateForm ? 'x' : 'plus'} size={18} />
+			{showCreateForm ? 'Tutup' : 'Tambah Batch'}
 		</button>
 	</PageHeader>
 
 	{#if form?.error}
 		<div
-			class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700"
+			class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700 dark:border-red-800/50 dark:bg-red-900/30 dark:text-red-400"
 		>
-			⚠️ {form.error}
+			<Icon name="alert-circle" size={18} class="inline mr-2" />
+			{form.error}
 		</div>
 	{/if}
 
 	{#if form?.success && form?.message}
 		<div
-			class="animate-in fade-in mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700"
+			class="animate-in fade-in mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700 dark:border-green-800/50 dark:bg-green-900/30 dark:text-green-400"
 		>
-			✅ {form.message}
+			<Icon name="check-circle" size={18} class="inline mr-2" />
+			{form.message}
 		</div>
 	{/if}
 
@@ -267,13 +265,13 @@
 										{#if cohort.stats && cohort.enrollmentCount > 0}
 											<div class="flex gap-2 text-[10px]">
 												{#if cohort.stats.tracks.creator > 0}
-													<span class="text-purple-600">🎥 {cohort.stats.tracks.creator}</span>
+													<span class="text-purple-600 dark:text-purple-400">{cohort.stats.tracks.creator}</span>
 												{/if}
 												{#if cohort.stats.tracks.seller > 0}
-													<span class="text-orange-600">🛒 {cohort.stats.tracks.seller}</span>
+													<span class="text-orange-600 dark:text-orange-400">{cohort.stats.tracks.seller}</span>
 												{/if}
 												{#if cohort.stats.tracks.affiliate > 0}
-													<span class="text-teal-600">🔗 {cohort.stats.tracks.affiliate}</span>
+													<span class="text-teal-600 dark:text-teal-400">{cohort.stats.tracks.affiliate}</span>
 												{/if}
 											</div>
 										{/if}
@@ -281,9 +279,16 @@
 								</td>
 								<td class="px-5 py-4">
 									<span
-										class={`inline-block rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase ${statusColors[cohort.status] ?? 'bg-gray-100 text-gray-500'}`}
+										class={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase ${statusColors[cohort.status] ?? 'bg-gray-100 text-gray-500'}`}
 									>
-										{statusLabels[cohort.status] ?? cohort.status}
+										{#if cohort.status === 'upcoming'}
+											<Icon name="clock" size={12} />
+										{:else if cohort.status === 'active'}
+											<Icon name="check" size={12} />
+										{:else}
+											<Icon name="flag" size={12} />
+										{/if}
+										{cohort.status}
 									</span>
 								</td>
 								<td class="px-5 py-4">

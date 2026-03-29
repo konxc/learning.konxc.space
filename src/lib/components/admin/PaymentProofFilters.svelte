@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { RADIUS, COLOR, SPACING, TEXT, TRANSITION } from '$lib/config/design';
+	import FilterButtonGroup from '$lib/components/ui/FilterButtonGroup.svelte';
 	import type { PaymentProofStatus } from '$lib/constants/payment-proofs';
 
-	export interface PaymentProofFiltersProps {
+	interface PaymentProofFiltersProps {
 		statusFilter?: 'all' | PaymentProofStatus;
 		statusCounts: Record<string, number>;
 		onStatusFilterChange?: (value: 'all' | PaymentProofStatus) => void;
@@ -14,34 +14,16 @@
 		onStatusFilterChange
 	}: PaymentProofFiltersProps = $props();
 
-	// Status filter options for buttons
-	const statusFilterOptions: Array<{
-		value: 'all' | PaymentProofStatus;
-		label: string;
-		countKey: string;
-	}> = [
-		{ value: 'all', label: 'All', countKey: 'all' },
-		{ value: 'pending', label: 'Pending', countKey: 'pending' },
-		{ value: 'approved', label: 'Approved', countKey: 'approved' },
-		{ value: 'rejected', label: 'Rejected', countKey: 'rejected' }
+	const filters = [
+		{ value: 'all', label: 'All', count: statusCounts.all ?? 0 },
+		{ value: 'pending', label: 'Pending', count: statusCounts.pending ?? 0 },
+		{ value: 'approved', label: 'Approved', count: statusCounts.approved ?? 0 },
+		{ value: 'rejected', label: 'Rejected', count: statusCounts.rejected ?? 0 }
 	];
+
+	function handleChange(value: string) {
+		onStatusFilterChange?.(value as 'all' | PaymentProofStatus);
+	}
 </script>
 
-<div class="flex flex-wrap items-center gap-2">
-	{#each statusFilterOptions as option}
-		<button
-			type="button"
-			class={`cursor-pointer ${RADIUS.button} ${SPACING.button} ${TEXT.button} ${TRANSITION.all} ${
-				statusFilter === option.value
-					? `${COLOR.accentBg} border-transparent text-white shadow-sm hover:opacity-90`
-					: `border border-gray-300 dark:border-neutral-600 ${COLOR.textPrimary} bg-white hover:border-gray-400 hover:bg-gray-50 dark:bg-neutral-800 dark:hover:border-neutral-500 dark:hover:bg-neutral-700`
-			} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1 dark:focus-visible:ring-blue-500/70`}
-			onclick={() => {
-				statusFilter = option.value;
-				onStatusFilterChange?.(option.value);
-			}}
-		>
-			{option.label} ({statusCounts[option.countKey] ?? 0})
-		</button>
-	{/each}
-</div>
+<FilterButtonGroup {filters} bind:active={statusFilter} onChange={handleChange} />

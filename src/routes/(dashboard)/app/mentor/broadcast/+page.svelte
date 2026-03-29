@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
-	import { COLOR, RADIUS, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
+	import { COLOR, RADIUS, TEXT, ELEVATION, TRANSITION, SPACING } from '$lib/config/design';
 	import { enhance } from '$app/forms';
 
 	let { data }: { data: PageData } = $props();
@@ -10,6 +10,7 @@
 	let sending = $state(false);
 	let successMessage = $state('');
 	let errorMessage = $state('');
+	let targetType = $state<'all' | 'cohort' | 'course' | 'role'>('all');
 
 	function getTargetLabel(row: any): string {
 		if (row.targetCohortId) return 'Cohort';
@@ -24,9 +25,10 @@
 </svelte:head>
 
 <PageWrapper>
-	<PageHeader title="Broadcast Message" description="Send messages to your students" />
+	<div class={`${SPACING.page} pb-12`}>
+		<PageHeader title="Broadcast Message" description="Send messages to your students" />
 
-	<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+		<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
 		<!-- Send Message Form -->
 		<div>
 			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-6`}>
@@ -100,21 +102,8 @@
 						<select
 							id="targetType"
 							name="targetType"
+							bind:value={targetType}
 							class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} px-4 py-3 ${TEXT.body} outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
-							onchange={(e) => {
-								const form = (e.target as HTMLSelectElement).form;
-								if (form) {
-									const cohortSelect = form.querySelector('#targetCohortId') as HTMLSelectElement;
-									const courseSelect = form.querySelector('#targetCourseId') as HTMLSelectElement;
-									const roleSelect = form.querySelector('#targetRole') as HTMLSelectElement;
-									const value = (e.target as HTMLSelectElement).value;
-									if (cohortSelect)
-										cohortSelect.style.display = value === 'cohort' ? 'block' : 'none';
-									if (courseSelect)
-										courseSelect.style.display = value === 'course' ? 'block' : 'none';
-									if (roleSelect) roleSelect.style.display = value === 'role' ? 'block' : 'none';
-								}
-							}}
 						>
 							<option value="all">Semua Peserta</option>
 							<option value="cohort">Cohort/Batch Tertentu</option>
@@ -123,18 +112,17 @@
 						</select>
 					</div>
 
+					{#if targetType === 'cohort'}
 					<div>
 						<label
 							for="targetCohortId"
 							class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
-							style="display:none"
 						>
 							Pilih Cohort
 						</label>
 						<select
 							id="targetCohortId"
 							name="targetCohortId"
-							style="display:none"
 							class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} px-4 py-3 ${TEXT.body} outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 						>
 							<option value="">Pilih Cohort</option>
@@ -143,19 +131,19 @@
 							{/each}
 						</select>
 					</div>
+					{/if}
 
+					{#if targetType === 'course'}
 					<div>
 						<label
 							for="targetCourseId"
 							class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
-							style="display:none"
 						>
 							Pilih Kursus
 						</label>
 						<select
 							id="targetCourseId"
 							name="targetCourseId"
-							style="display:none"
 							class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} px-4 py-3 ${TEXT.body} outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
 						>
 							<option value="">Pilih Kursus</option>
@@ -164,6 +152,7 @@
 							{/each}
 						</select>
 					</div>
+					{/if}
 
 					<div>
 						<label
@@ -247,5 +236,6 @@
 				{/if}
 			</div>
 		</div>
+	</div>
 	</div>
 </PageWrapper>

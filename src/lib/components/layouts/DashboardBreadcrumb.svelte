@@ -5,10 +5,12 @@
 
 	const labelMapping: Record<string, string> = {
 		app: 'Home',
-		overview: 'Overview',
-		courses: 'Browse',
-		'my-courses': 'My Courses',
-		learn: 'Learn',
+		explore: 'Explore Catalog',
+		learning: 'Learning Hub',
+		courses: 'Courses',
+		progress: 'Progress',
+		checkpoints: 'Checkpoints',
+		certificates: 'Certificates',
 		admin: 'Admin',
 		mentor: 'Mentor'
 	};

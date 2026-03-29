@@ -47,34 +47,40 @@ export const load: LayoutServerLoad = async ({ locals, cookies, url }) => {
 	// 3. Get role-based context across workspace
 	// If in personal workspace, use standard role
 	// If in organization, use the member's role in that organization
-	const effectiveRole =
-		activeWorkspaceId === 'personal' ? user.role : activeOrg?.role || user.role;
-
-	// Get active role from cookie (for admin role emulation)
-	// Only admin users can have an activeRole different from their actual role
-	const cookieRole = cookies.get(ACTIVE_ROLE_COOKIE);
 	const baseRole = user.role || 'user';
-	let activeRole: string = baseRole;
+	const effectiveRole = activeWorkspaceId === 'personal' ? baseRole : activeOrg?.role || baseRole;
 
-	// Only allow role switching if user is admin
-	if (user.role === 'admin' && cookieRole) {
-		// Validate that cookieRole is a valid role for emulation
-		// Allowed roles: admin, mentor, siswa (mapped to 'user'), user
-		if (['admin', 'mentor', 'siswa', 'user'].includes(cookieRole)) {
-			// Keep cookie value as-is for display purposes
-			// Map to 'user' only when calling getNavItemsForRole
+	// 4. Determine available roles for the switcher
+	let availableRoles: string[] = ['learner'];
+	if (baseRole === 'admin') {
+		availableRoles = ['admin', 'mentor', 'learner'];
+	} else if (baseRole === 'mentor') {
+		availableRoles = ['mentor', 'learner'];
+	}
+
+	// 5. Get active role from cookie
+	const cookieRole = cookies.get(ACTIVE_ROLE_COOKIE);
+	let activeRole: string = availableRoles.includes(baseRole) ? baseRole : availableRoles[0];
+
+	// Allow role switching if user has multiple roles
+	if (availableRoles.length > 1 && cookieRole) {
+		if (availableRoles.includes(cookieRole)) {
 			activeRole = cookieRole;
 		}
 	}
 
-	// Get role-based navigation based on effectiveRole and workspace context
+	// Internal mapping for navigation logic
+	// 'learner' should be treated as 'user' for getNavItemsForRole
+	const rbacRole = activeRole === 'learner' ? 'user' : activeRole;
+
+	// Get role-based navigation based on rbacRole and workspace context
 	const workspaceContext: WorkspaceContext = {
 		isPersonal: activeWorkspaceId === 'personal',
 		orgId: activeOrg?.id,
 		orgName: activeOrg?.name,
 		orgRole: activeOrg?.role
 	};
-	const navItems = getNavItemsForRole(effectiveRole, workspaceContext);
+	const navItems = getNavItemsForRole(rbacRole, workspaceContext);
 
 	// Get unread notifications
 	let notifications: any[] = [];
@@ -96,6 +102,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies, url }) => {
 		user: user,
 		navItems,
 		activeRole,
+		availableRoles,
 		effectiveRole,
 		notifications,
 		unreadCount,

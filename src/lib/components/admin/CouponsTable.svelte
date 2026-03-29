@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DataTable from '$lib/components/ui/DataTable.svelte';
+	import Icon from '$lib/components/ui/Icon.svelte';
 	import type { TableColumn } from '$lib/types/table';
 	import { COLOR, RADIUS, TEXT, TRANSITION } from '$lib/config/design';
 	import { formatDateTime } from '$lib/utils/format';
@@ -99,7 +100,7 @@
 				</code>
 				<button
 					type="button"
-					class={`inline-flex items-center ${RADIUS.small} bg-gray-100 px-2 py-1 text-xs dark:bg-neutral-800 ${COLOR.textSecondary} ${TRANSITION.all} hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1 dark:hover:bg-neutral-700 ${
+					class={`inline-flex items-center justify-center ${RADIUS.small} bg-gray-100 p-1.5 text-xs dark:bg-neutral-800 ${COLOR.textSecondary} ${TRANSITION.all} hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1 dark:hover:bg-neutral-700 ${
 						copiedCode === entry.code
 							? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
 							: ''
@@ -107,7 +108,11 @@
 					title="Copy code"
 					onclick={() => onCopyCode(entry.code)}
 				>
-					{copiedCode === entry.code ? '✓' : '📋'}
+					{#if copiedCode === entry.code}
+						<Icon name="check" size={14} />
+					{:else}
+						<Icon name="copy" size={14} />
+					{/if}
 				</button>
 			</div>
 		{:else if key === 'type'}
@@ -146,27 +151,30 @@
 			<div class="flex flex-wrap items-center gap-2">
 				<a
 					href="/app/admin/coupons/edit/{entry.id}"
-					class={`inline-flex items-center ${RADIUS.small} px-3 py-1.5 text-xs ${COLOR.accentBg} text-white ${TRANSITION.all} hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
+					class={`inline-flex items-center gap-1.5 ${RADIUS.small} border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-semibold ${COLOR.textSecondary} ${TRANSITION.all} hover:border-blue-500/50 hover:bg-blue-50/50 hover:text-blue-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-blue-500/50 dark:hover:bg-blue-900/30 dark:hover:text-blue-400`}
 				>
+					<Icon name="edit" size={14} />
 					Edit
 				</a>
 				<button
 					type="button"
-					class={`inline-flex items-center ${RADIUS.small} px-3 py-1.5 text-xs ${COLOR.accentBg} text-white ${TRANSITION.all} hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1`}
+					class={`inline-flex items-center gap-1.5 ${RADIUS.small} border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-semibold ${COLOR.textSecondary} ${TRANSITION.all} hover:border-purple-500/50 hover:bg-purple-50/50 hover:text-purple-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-purple-500/50 dark:hover:bg-purple-900/30 dark:hover:text-purple-400`}
 					title="Duplicate coupon"
 					onclick={() => handleDuplicate(entry.id)}
 				>
-					📋 Copy
+					<Icon name="copy" size={14} />
+					Copy
 				</button>
 				<button
 					type="button"
-					class={`inline-flex items-center ${RADIUS.small} px-3 py-1.5 text-xs font-semibold ${TRANSITION.all} focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${
+					class={`inline-flex items-center gap-1.5 ${RADIUS.small} px-2.5 py-1.5 text-xs font-semibold ${TRANSITION.all} focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${
 						!entry.isActive
-							? 'bg-green-100 text-green-800 hover:opacity-90 focus-visible:ring-green-600/70 dark:bg-green-900/50 dark:text-green-300'
-							: 'bg-red-100 text-red-800 hover:opacity-90 focus-visible:ring-red-600/70 dark:bg-red-900/50 dark:text-red-300'
+							? 'border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 focus-visible:ring-green-600/70 dark:border-green-800/50 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
+							: 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus-visible:ring-red-600/70 dark:border-red-800/50 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50'
 					}`}
 					onclick={() => handleToggleStatus(entry.id, entry.isActive)}
 				>
+					<Icon name={entry.isActive ? 'x' : 'check'} size={14} />
 					{entry.isActive ? 'Deactivate' : 'Activate'}
 				</button>
 			</div>

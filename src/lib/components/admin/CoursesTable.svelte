@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DataTable from '$lib/components/ui/DataTable.svelte';
+	import Icon from '$lib/components/ui/Icon.svelte';
 	import type { TableColumn } from '$lib/types/table';
 	import { COLOR, RADIUS, TEXT, TRANSITION } from '$lib/config/design';
 	import { formatDateTime } from '$lib/utils/format';
@@ -99,16 +100,18 @@
 			<div class="flex items-center gap-2">
 				<a
 					href="/app/admin/courses/edit/{entry.id}"
-					class={`inline-flex items-center gap-1.5 ${RADIUS.button} border border-gray-300 bg-white px-3 py-1.5 ${TEXT.button} ${COLOR.textPrimary} ${TRANSITION.all} hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 dark:border-neutral-600 dark:bg-neutral-800 dark:text-gray-200 dark:hover:border-blue-500 dark:hover:bg-blue-900/30 dark:hover:text-blue-300`}
+					class={`inline-flex items-center gap-1.5 ${RADIUS.small} border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-semibold ${COLOR.textSecondary} ${TRANSITION.all} hover:border-blue-500/50 hover:bg-blue-50/50 hover:text-blue-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-blue-500/50 dark:hover:bg-blue-900/30 dark:hover:text-blue-400`}
 				>
-					✏️ Edit
+					<Icon name="edit" size={14} />
+					Edit
 				</a>
 				<button
 					type="button"
-					class={`inline-flex items-center gap-1.5 ${RADIUS.button} border border-red-300 bg-white px-3 py-1.5 ${TEXT.button} text-red-700 ${TRANSITION.all} hover:border-red-500 hover:bg-red-50 dark:border-red-600 dark:bg-neutral-800 dark:text-red-400 dark:hover:border-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-300`}
+					class={`inline-flex items-center gap-1.5 ${RADIUS.small} border border-red-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-red-600 ${TRANSITION.all} hover:border-red-500/50 hover:bg-red-50/50 hover:text-red-700 dark:border-red-800/50 dark:bg-red-950/30 dark:text-red-400 dark:hover:border-red-500/50 dark:hover:bg-red-900/30 dark:hover:text-red-300`}
 					onclick={() => handleDelete(entry.id, entry.title)}
 				>
-					🗑️ Delete
+					<Icon name="delete" size={14} />
+					Delete
 				</button>
 			</div>
 		{/if}

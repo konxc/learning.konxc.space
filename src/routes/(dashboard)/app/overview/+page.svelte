@@ -10,9 +10,9 @@
 	let RoleComponent = $state<any>(null);
 	onMount(async () => {
 		if (!data.user) return;
-		const role = (data.user.role || 'user').toLowerCase();
+		const role = (data.activeRole || data.user.role || 'user').toLowerCase();
 		try {
-			if (role === 'user' || role === 'learner') {
+			if (role === 'user' || role === 'learner' || role === 'siswa') {
 				RoleComponent = (await import('$lib/components/app/roles/DashboardLearner.svelte')).default;
 			} else if (role === 'mentor') {
 				RoleComponent = (await import('$lib/components/app/roles/DashboardMentor.svelte')).default;

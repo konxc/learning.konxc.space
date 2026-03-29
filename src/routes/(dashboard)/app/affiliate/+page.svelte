@@ -3,13 +3,18 @@
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import PlanLimiter from '$lib/components/app/PlanLimiter.svelte';
+	import Tabs from '$lib/components/ui/Tabs.svelte';
+	import StatCard from '$lib/components/ui/StatCard.svelte';
 	import { COLOR, RADIUS, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
 
 	let { data }: { data: PageData } = $props();
 	const currentPlan = data.workspaces?.activeOrg?.planType || 'free';
 
-	let activeTab = $state<'links' | 'sales'>('links');
+	const tabs = [
+		{ label: '🔗 Affiliate Links', value: 'links' },
+		{ label: '💰 Sales & Commission', value: 'sales' }
+	];
 
 	const platformIcons: Record<string, string> = {
 		shopee: '🛒',
@@ -34,59 +39,32 @@
 	<PlanLimiter requiredPlan="pro" currentPlan={currentPlan} featureName="Affiliate Dashboard">
 	<!-- Stats Cards -->
 	<div class="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-		<div
-			class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 text-center`}
-		>
-			<p class="text-3xl font-black text-green-600">
-				{formatCurrency(Number(data.stats.totalSales))}
-			</p>
-			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>
-				Total Penjualan
-			</p>
-		</div>
-		<div
-			class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 text-center`}
-		>
-			<p class="text-3xl font-black text-blue-600">
-				{formatCurrency(Number(data.stats.totalCommission))}
-			</p>
-			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>Total Komisi</p>
-		</div>
-		<div
-			class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 text-center`}
-		>
-			<p class="text-3xl font-black text-purple-600">{data.stats.linkCount}</p>
-			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>
-				Affiliate Links
-			</p>
-		</div>
-		<div
-			class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5 text-center`}
-		>
-			<p class="text-3xl font-black text-amber-500">{data.stats.saleCount}</p>
-			<p class={`text-xs font-bold tracking-widest uppercase ${COLOR.textMuted}`}>
-				Total Transaksi
-			</p>
-		</div>
+		<StatCard 
+			value={formatCurrency(Number(data.stats.totalSales))} 
+			label="Total Penjualan" 
+			variant="success"
+		/>
+		<StatCard 
+			value={formatCurrency(Number(data.stats.totalCommission))} 
+			label="Total Komisi" 
+			variant="accent"
+		/>
+		<StatCard 
+			value={data.stats.linkCount} 
+			label="Affiliate Links" 
+			variant="default"
+		/>
+		<StatCard 
+			value={data.stats.saleCount} 
+			label="Total Transaksi" 
+			variant="warning"
+		/>
 	</div>
 
 	<!-- Tabs -->
-	<div class="mb-6 flex gap-4 border-b border-gray-200">
-		<button
-			class={`px-4 py-2 font-bold transition-all ${activeTab === 'links' ? 'border-b-2 border-blue-600 text-blue-600' : COLOR.textSecondary}`}
-			onclick={() => (activeTab = 'links')}
-		>
-			🔗 Affiliate Links
-		</button>
-		<button
-			class={`px-4 py-2 font-bold transition-all ${activeTab === 'sales' ? 'border-b-2 border-blue-600 text-blue-600' : COLOR.textSecondary}`}
-			onclick={() => (activeTab = 'sales')}
-		>
-			💰 Sales & Commission
-		</button>
-	</div>
+	<Tabs {tabs} queryParam="tab" />
 
-	{#if activeTab === 'links'}
+	{#if data.tab === 'links'}
 		<!-- Add Link Form -->
 		<div
 			class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} mb-6 p-6`}

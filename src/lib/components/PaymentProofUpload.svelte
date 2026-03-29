@@ -162,7 +162,7 @@
 			if (result.type === 'success' && data.snapToken) {
 				(window as any).snap.pay(data.snapToken, {
 					onSuccess: function () {
-						goto('/app/my-courses?payment=success');
+						goto('/app/learning/courses?payment=success');
 					},
 					onPending: function () {
 						goto('/app/payments?status=pending');

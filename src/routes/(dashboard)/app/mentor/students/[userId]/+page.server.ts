@@ -272,7 +272,7 @@ export const actions: Actions = {
 				lessonName: lessonTitle,
 				score: score.toString(),
 				feedback: feedback || '',
-				viewUrl: `${event.url.origin}/app/courses/${course[0].id}/learn`
+				viewUrl: `${event.url.origin}/app/explore/${course[0].id}/learn`
 			}).catch(console.error);
 		}
 
@@ -281,7 +281,7 @@ export const actions: Actions = {
 			'grade',
 			'Submission Graded 📝',
 			`Your submission for ${lessonTitle} has been graded with a score of ${score}/100.`,
-			`/app/courses/${course[0].id}/learn`
+			`/app/explore/${course[0].id}/learn`
 		).catch(console.error);
 
 		return { success: true };

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import KpiCard from '$lib/components/KpiCard.svelte';
 	import OverviewGraph from '$lib/components/app/OverviewGraph.svelte';
-	import RoleSwitcher from '$lib/components/app/RoleSwitcher.svelte';
 	import {
 		COLOR,
 		TEXT,
@@ -28,254 +27,298 @@
 	];
 </script>
 
-<div class={SPACING.relaxed}>
-	<!-- Premium Header: Sophisticated High-Density Layout -->
+<div class="flex flex-col gap-12 lg:gap-14">
+	<!-- Unified Header Strategy -->
 	<header
-		class="flex flex-col items-start justify-between gap-8 md:flex-row md:items-end"
+		class="flex flex-col items-start justify-between gap-10 md:flex-row md:items-end"
 		in:fade={{ duration: 800 }}
 	>
-		<div class="space-y-3">
-			<div class="flex items-center gap-2">
-				<div class="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></div>
-				<span class={`${TEXT.small} ${COLOR.textMuted} tracking-[0.2em]`}
+		<div class="space-y-4">
+			<div class="flex items-center gap-2.5">
+				<div
+					class="h-2 w-2 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]"
+				></div>
+				<span class={`${TEXT.small} ${COLOR.textMuted} tracking-[0.25em]`}
 					>LEARNER DASHBOARD • {new Date().toLocaleDateString('en-US', {
 						month: 'long',
 						year: 'numeric'
 					})}</span
 				>
 			</div>
-			<h1 class={`${TEXT.h1} leading-tight`}>
+			<h1
+				class="text-4xl leading-none font-black tracking-tighter text-zinc-900 md:text-5xl dark:text-white"
+			>
 				Ready to excel, <span
-					class="bg-linear-to-r from-blue-600 to-indigo-500 bg-clip-text font-black text-transparent"
+					class="bg-linear-to-r from-blue-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent"
 					>{data.user.fullName || data.user.username}?</span
 				>
 			</h1>
-			<p class={`${TEXT.secondary} max-w-xl`}>
+			<p class={`${TEXT.secondary} max-w-xl leading-relaxed font-medium`}>
 				Track your professional growth, manage certifications, and continue your specialized
 				learning tracks in one unified space.
 			</p>
 		</div>
-
-		<div
-			class="flex items-center gap-4 rounded-2xl border border-zinc-200/50 bg-zinc-100 p-1 dark:border-zinc-800/50 dark:bg-zinc-900"
-		>
-			<RoleSwitcher />
-			<div
-				class="h-10 w-10 overflow-hidden rounded-xl shadow-2xl ring-2 ring-white dark:ring-zinc-800"
-			>
-				<div
-					class={`${GRADIENT.primary} flex h-full w-full items-center justify-center text-sm font-black text-white`}
-				>
-					{data.user.username[0].toUpperCase()}
-				</div>
-			</div>
-		</div>
 	</header>
 
-	<!-- Bento Grid 2.0: Higher Variety & Immersive Visuals -->
-	<div class="grid auto-rows-[180px] grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-12">
-		<!-- Hero Card: Progress Visualization -->
+	<!-- Proportional Bento Grid (Grid 2.1 with Independent Heights) -->
+	<div class="grid grid-cols-1 gap-8 md:grid-cols-4 lg:grid-cols-12">
+		<!-- Hero Progress Card (The Anchor) -->
 		<div
-			class={`row-span-2 md:col-span-4 lg:col-span-8 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} group relative flex flex-col justify-between overflow-hidden p-10 ${ELEVATION.card} ${ELEVATION.cardHover} transition-all duration-700 hover:-translate-y-1 hover:shadow-blue-500/10`}
+			class={`md:col-span-4 lg:col-span-8 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} group relative flex flex-col justify-between overflow-hidden p-8 lg:p-10 ${ELEVATION.card} ${ELEVATION.cardHover} transition-all duration-700 hover:-translate-y-1`}
 			in:fly={{ y: 40, duration: 800, delay: 100 }}
 		>
 			<div
-				class="absolute -top-20 -right-20 h-80 w-80 rounded-full bg-blue-500/5 blur-[100px] transition-all duration-1000 group-hover:bg-blue-500/10"
-			></div>
-			<div
-				class="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-indigo-500/5 blur-[80px]"
+				class="absolute -top-32 -right-32 h-80 w-80 rounded-full bg-blue-500/5 blur-[80px] transition-all duration-1000 group-hover:bg-blue-500/10"
 			></div>
 
-			<div class="relative z-10 flex items-start justify-between">
-				<div class="space-y-1">
-					<h3
-						class={`${TEXT.h3} font-black tracking-tighter text-zinc-900 uppercase dark:text-white`}
-					>
+			<div class="relative z-10 mb-8 flex items-start justify-between">
+				<div class="space-y-4">
+					<h3 class="text-xs font-black tracking-[0.3em] text-zinc-400 uppercase">
 						Overall Mastery
 					</h3>
-					<div class="flex items-center gap-2">
+					<div class="flex items-end gap-3 leading-none">
 						<span
-							class="text-6xl font-black tracking-tighter text-zinc-900 md:text-8xl dark:text-white"
-							>{data.stats.progress || 0}<span class="text-4xl text-blue-500">%</span></span
+							class="text-7xl font-black tracking-tighter text-zinc-900 md:text-8xl dark:text-white"
+							>{data.stats.progress || 0}<span class="text-3xl text-blue-500">%</span></span
 						>
 						<div
-							class="rounded-full bg-emerald-500/10 px-3 py-1 text-[10px] font-black tracking-widest text-emerald-600 uppercase"
+							class="mb-3 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-1.5 text-[10px] font-black tracking-widest text-emerald-600 uppercase"
 						>
-							Excellent
+							Excel
 						</div>
 					</div>
 				</div>
 				<div
-					class="flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-200/50 bg-zinc-50 text-2xl shadow-inner dark:border-zinc-700/50 dark:bg-zinc-800/50"
+					class="flex h-16 w-16 items-center justify-center rounded-2xl border border-zinc-200/50 bg-white text-3xl shadow-xl dark:border-zinc-700/50 dark:bg-zinc-800/50"
 				>
 					⚡
 				</div>
 			</div>
 
-			<div class="relative z-10 space-y-4">
-				<div class="mb-1 flex items-end justify-between">
-					<span class={`${TEXT.small} ${COLOR.textMuted}`}>Curriculum Completion</span>
+			<div class="relative z-10 mt-10 space-y-6">
+				<div class="flex items-end justify-between">
+					<span class="text-xs font-black tracking-widest text-zinc-400 uppercase"
+						>Curriculum Completion</span
+					>
 					<span class="text-sm font-black text-zinc-900 dark:text-white"
 						>{data.stats.completedLessons || 0} / {data.totalLessons || 100} Lessons</span
 					>
 				</div>
 				<div
-					class="h-4 w-full overflow-hidden rounded-full bg-zinc-100 p-1 shadow-inner ring-1 ring-zinc-200/50 dark:bg-zinc-800/50 dark:ring-zinc-700/50"
+					class="h-6 w-full overflow-hidden rounded-full bg-zinc-100/50 p-1.5 shadow-inner ring-1 ring-zinc-200/50 dark:bg-zinc-800/50 dark:ring-zinc-700/50"
 				>
 					<div
-						class="cubic-bezier(0.34, 1.56, 0.64, 1) h-full rounded-full bg-linear-to-r from-blue-600 via-indigo-500 to-purple-500 transition-all duration-2000"
+						class="h-full rounded-full bg-linear-to-r from-blue-600 via-indigo-500 to-purple-500 shadow-[0_0_12px_rgba(37,99,235,0.4)] transition-all duration-2000 ease-out"
 						style="width: {data.stats.progress || 0}%"
 					></div>
 				</div>
-				<div class="flex items-center gap-4">
-					<div class="flex -space-x-2">
-						{#each Array(3) as _}
-							<div
-								class="h-6 w-6 overflow-hidden rounded-full border-2 border-white bg-zinc-200 dark:border-zinc-900"
-							>
-								<img src={`https://i.pravatar.cc/100?u=${Math.random()}`} alt="" />
-							</div>
-						{/each}
+				<div class="flex items-center gap-5 pt-2">
+					<div
+						class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/10 text-blue-600"
+					>
+						<svg
+							class="h-4 w-4"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="3"
+							><path
+								d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 110-8 4 4 0 010 8zm8-7a4 4 0 010 8m-2 5a4 4 0 014 4v2"
+							/></svg
+						>
 					</div>
-					<p class={`${TEXT.muted} text-[10px]!`}>
-						Join <span class="font-bold text-zinc-900 dark:text-white">1.2k alumni</span> who finished
-						this path.
+					<p class="text-xs font-bold text-zinc-400">
+						Collaborate with <span class="text-zinc-900 dark:text-white">peers</span> enrolled in this
+						track.
 					</p>
 				</div>
 			</div>
 		</div>
 
-		<!-- Square Card: Active Courses -->
-		<div
-			class={`row-span-1 md:col-span-2 lg:col-span-4 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} group flex cursor-pointer flex-col justify-between p-8 ${ELEVATION.card} ${ELEVATION.cardHover} hover:-translate-y-1`}
-			in:fly={{ y: 40, duration: 800, delay: 200 }}
-		>
-			<div class="flex items-center justify-between">
+		<!-- Vertical Actions Column (Split) -->
+		<div class="lg:col-span-4 lg:row-span-2 flex flex-col gap-8">
+			<!-- Top: Verified Wallet -->
+			<div
+				class={`flex-1 ${RADIUS.card} ${GRADIENT.primary} group relative flex flex-col justify-center items-center overflow-hidden p-8 text-center text-white lg:p-10 ${ELEVATION.card} transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/30`}
+				in:fly={{ y: 40, duration: 800, delay: 300 }}
+			>
 				<div
-					class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-2xl transition-transform group-hover:scale-110 dark:bg-blue-900/20"
+					class="absolute -right-16 -bottom-16 h-48 w-48 rounded-full bg-white/10 blur-3xl transition-transform duration-1000 group-hover:scale-150"
+				></div>
+				<div
+					class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/20 text-3xl shadow-xl backdrop-blur-md"
 				>
-					📚
+					🎓
 				</div>
-				<svg
-					class="h-5 w-5 text-zinc-300 transition-transform group-hover:translate-x-1"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7" /></svg
-				>
+				<div class="relative z-10 w-full">
+					<p class="mb-2 text-7xl leading-none font-black tracking-tighter lg:text-8xl">
+						{data.stats.certificates || 0}
+					</p>
+					<p class="mb-8 text-[10px] font-black tracking-[0.25em] text-white/60 uppercase">
+						Verified Credentials
+					</p>
+					<button
+						class="w-full rounded-2xl border border-white/30 bg-white/10 py-5 text-[10px] font-black tracking-widest uppercase backdrop-blur-md transition-all hover:scale-[1.02] hover:bg-white hover:text-blue-700 active:scale-95"
+						>View Wallet</button
+					>
+				</div>
 			</div>
-			<div>
-				<p
-					class="mb-1 text-5xl leading-none font-black tracking-tighter text-zinc-900 dark:text-white"
-				>
-					{data.stats.myCourses || 0}
-				</p>
-				<span class={`${TEXT.small} ${COLOR.textMuted}`}>Courses in focus</span>
+
+			<!-- Bottom: Daily Mission (New Engagement Feature) -->
+			<div
+				class={`flex-1 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} group relative flex flex-col justify-center gap-8 overflow-hidden p-8 ${ELEVATION.card} ${ELEVATION.cardHover} transition-all duration-500 hover:-translate-y-1`}
+				in:fly={{ y: 40, duration: 800, delay: 450 }}
+			>
+				<div class="flex items-start justify-between relative z-10">
+					<div class="space-y-4">
+						<h3 class="text-xs font-black tracking-[0.2em] text-blue-600 uppercase">
+							Daily Mission
+						</h3>
+						<p class="text-2xl font-black tracking-tight text-zinc-900 dark:text-white">
+							Level Up Today
+						</p>
+					</div>
+					<div class="h-12 w-12 flex items-center justify-center rounded-2xl border border-orange-500/20 bg-orange-50 text-2xl shadow-sm dark:bg-orange-900/10">🔥</div>
+				</div>
+
+				<div class="mt-4 space-y-5 relative z-10">
+					<div class="flex items-center justify-between text-[11px] font-black tracking-widest text-zinc-400 uppercase">
+						<span>Progress</span>
+						<span class="text-zinc-900 dark:text-white">60%</span>
+					</div>
+					<div class="h-2 w-full bg-zinc-100 rounded-full overflow-hidden dark:bg-zinc-800 shadow-inner">
+						<div class="h-full bg-linear-to-r from-orange-400 via-orange-500 to-amber-500 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.3)] transition-all duration-1000" style="width: 60%"></div>
+					</div>
+					<p class="text-[11px] font-medium text-zinc-500 leading-relaxed">
+						Complete <span class="text-zinc-900 dark:text-white font-black">1 more lesson</span> to hit your daily expert goal.
+					</p>
+				</div>
 			</div>
 		</div>
 
-		<!-- Vertical Accent: Certificates -->
-		<div
-			class={`row-span-2 md:col-span-2 lg:col-span-2 ${RADIUS.card} ${GRADIENT.primary} group relative flex flex-col justify-between overflow-hidden p-8 text-white ${ELEVATION.card} hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 hover:-translate-y-1`}
-			in:fly={{ y: 40, duration: 800, delay: 300 }}
-		>
+		<!-- Mini Stack of Cards (Grouped in 4 cols) -->
+		<div class="grid grid-cols-1 gap-8 md:col-span-4 md:grid-cols-2 lg:col-span-8">
+			<!-- Square Card: Active Training -->
 			<div
-				class="absolute -right-10 -bottom-10 h-32 w-32 rounded-full bg-white/10 blur-2xl transition-transform duration-1000 group-hover:scale-150"
-			></div>
-			<div
-				class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 text-2xl backdrop-blur-md"
+				class={` ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} group flex cursor-pointer flex-col justify-between p-8 ${ELEVATION.card} ${ELEVATION.cardHover} transition-all hover:-translate-y-1`}
+				in:fly={{ y: 40, duration: 800, delay: 200 }}
 			>
-				🎓
-			</div>
-			<div>
-				<p class="mb-2 text-6xl leading-none font-black tracking-tighter">
-					{data.stats.certificates || 0}
-				</p>
-				<p class="text-[10px] font-black tracking-widest text-white/70 uppercase">
-					Verified Credentials
-				</p>
-			</div>
-			<button
-				class="mt-6 w-full rounded-xl border border-white/20 bg-white/10 py-3 text-[10px] font-black tracking-widest uppercase backdrop-blur-md transition-all hover:bg-white hover:text-blue-700"
-				>View Wallet</button
-			>
-		</div>
-
-		<!-- Horizontal Long: Activity Summary / Mini Graph -->
-		<div
-			class={`row-span-1 md:col-span-2 lg:col-span-2 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} flex flex-col justify-between p-6 ${ELEVATION.card} ${ELEVATION.cardHover} hover:-translate-y-1`}
-			in:fly={{ y: 40, duration: 800, delay: 400 }}
-		>
-			<div class="flex items-center gap-3">
-				<div
-					class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-lg dark:bg-amber-900/20"
-				>
-					💳
+				<div class="mb-6 flex items-center justify-between">
+					<div
+						class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-2xl shadow-sm dark:bg-blue-900/20"
+					>
+						📚
+					</div>
+					<div
+						class="rounded-full bg-zinc-50 p-2 transition-transform group-hover:translate-x-1 dark:bg-zinc-800"
+					>
+						<svg
+							class="h-5 w-5 text-zinc-300"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7" /></svg
+						>
+					</div>
 				</div>
-				<span class={`${TEXT.small} font-bold text-zinc-400`}>PENDING</span>
+				<div>
+					<p
+						class="mb-2 text-5xl leading-none font-black tracking-tighter text-zinc-900 dark:text-white"
+					>
+						{data.stats.myCourses || 0}
+					</p>
+					<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase"
+						>Courses in focus</span
+					>
+				</div>
 			</div>
-			<p class="text-4xl font-black tracking-tighter text-zinc-900 dark:text-white">
-				{data.stats.pendingPayments || 0}
-			</p>
+
+			<!-- Mini Card: Pending Actions -->
+			<div
+				class={`${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} flex flex-col justify-between p-8 ${ELEVATION.card} ${ELEVATION.cardHover} transition-all hover:-translate-y-1`}
+				in:fly={{ y: 40, duration: 800, delay: 400 }}
+			>
+				<div class="mb-6 flex items-center gap-4">
+					<div
+						class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-xl shadow-sm dark:bg-amber-900/20"
+					>
+						💳
+					</div>
+					<span class="text-[10px] font-black tracking-[0.2em] text-amber-600 uppercase"
+						>PAYMENTS</span
+					>
+				</div>
+				<div>
+					<p
+						class="mb-2 text-5xl leading-none font-black tracking-tighter text-zinc-900 dark:text-white"
+					>
+						{data.stats.pendingPayments || 0}
+					</p>
+					<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase"
+						>Active Invoice</span
+					>
+				</div>
+			</div>
 		</div>
 	</div>
 
-	<!-- Continuous Journey Section -->
-	<div class="mt-16 grid grid-cols-1 items-start gap-10 lg:grid-cols-12">
+	<!-- Bottom Sections: Harmonized Grid -->
+	<div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-16">
+		<!-- Journey Feed (Wider Column) -->
 		<div class="space-y-8 lg:col-span-7" in:fade={{ duration: 1000, delay: 500 }}>
-			<div class="flex items-center justify-between">
-				<h2 class={`${TEXT.h2} font-black tracking-tight`}>Continue Journey</h2>
+			<div
+				class="flex items-center justify-between border-b border-zinc-100 pb-5 dark:border-zinc-800"
+			>
+				<h2 class={`${TEXT.h2} font-black tracking-tight`}>Journey Resume</h2>
 				<a
-					href="/app/my-courses"
-					class="text-xs font-black tracking-widest text-blue-600 uppercase transition-colors hover:text-blue-700"
-					>Curriculum Library →</a
+					href="/app/learning/courses"
+					class="flex items-center gap-2 text-[10px] font-black tracking-widest text-blue-600 uppercase transition-all hover:gap-3 hover:text-blue-700"
+					>Curriculum Library <span>→</span></a
 				>
 			</div>
 
-			<div class="grid gap-4">
+			<div class="grid gap-5">
 				{#if data.courses && data.courses.length > 0}
 					{#each data.courses.slice(0, 3) as course}
 						<div
-							class={`${COLOR.card} ${RADIUS.card} ${COLOR.cardBorder} group flex cursor-pointer items-center gap-6 p-6 ${ELEVATION.base} ${ELEVATION.cardHover} transition-all duration-500 hover:-translate-y-1`}
+							class={`${COLOR.card} ${RADIUS.card} ${COLOR.cardBorder} group flex cursor-pointer items-center gap-7 p-7 ${ELEVATION.base} ${ELEVATION.cardHover} transition-all duration-500 hover:-translate-y-1 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30`}
 						>
 							<div
-								class="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-zinc-100 shadow-inner transition-transform group-hover:scale-105 dark:bg-zinc-800"
+								class="h-24 w-24 shrink-0 overflow-hidden rounded-[1.5rem] bg-zinc-100 shadow-xl transition-transform group-hover:scale-105 group-hover:rotate-2 dark:bg-zinc-800"
 							>
 								{#if course.thumbnailUrl}
 									<img src={course.thumbnailUrl} alt="" class="h-full w-full object-cover" />
 								{:else}
-									<div class="flex h-full w-full items-center justify-center text-3xl">📘</div>
+									<div class="flex h-full w-full items-center justify-center text-4xl">📘</div>
 								{/if}
 							</div>
-							<div class="min-w-0 flex-1 space-y-2">
-								<div class="flex items-center gap-2">
+							<div class="min-w-0 flex-1 space-y-3">
+								<div class="flex items-center gap-3">
 									<span
-										class="rounded-md bg-zinc-100 px-2 py-0.5 text-[9px] font-black tracking-widest text-zinc-500 uppercase dark:bg-zinc-800"
-										>Module 0{Math.floor(Math.random() * 5) + 1}</span
+										class="rounded-lg bg-zinc-100 px-3 py-1 text-[9px] font-black tracking-[0.1em] text-zinc-500 uppercase dark:bg-zinc-800"
+										>UNIT 0{Math.floor(Math.random() * 5) + 1}</span
 									>
-									<div class="h-1 w-1 rounded-full bg-zinc-300"></div>
-									<span class="text-[10px] font-bold text-blue-600"
-										>{course.progress || 0}% Done</span
+									<span class="text-[10px] font-black tracking-widest text-blue-600 uppercase"
+										>{course.progress || 0}% COMPLETED</span
 									>
 								</div>
-								<h3 class="truncate text-lg font-bold tracking-tight text-zinc-900 dark:text-white">
+								<h3 class="truncate text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
 									{course.title}
 								</h3>
-								<div class="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+								<div class="h-2 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
 									<div
-										class="h-full rounded-full bg-blue-600"
+										class="h-full rounded-full bg-blue-600 transition-all duration-1000"
 										style="width: {course.progress || 0}%"
 									></div>
 								</div>
 							</div>
 							<a
-								href={`/app/courses/${course.id}/learn`}
-								class={`flex h-11 w-11 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-lg transition-all hover:scale-110 active:scale-95 dark:bg-zinc-100 dark:text-zinc-900`}
-								aria-label="Continue learning this course"
-								title="Continue learning"
+								href={`/app/explore/${course.id}/learn`}
+								class={`flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 text-white shadow-xl transition-all hover:scale-110 hover:bg-blue-600 active:scale-95 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white`}
+								aria-label="Continue learning"
 							>
 								<svg
-									class="h-5 w-5"
+									class="h-6 w-6"
 									viewBox="0 0 24 24"
 									fill="none"
 									stroke="currentColor"
@@ -286,47 +329,51 @@
 					{/each}
 				{:else}
 					<div
-						class="rounded-[2rem] border-2 border-dashed border-zinc-200 bg-zinc-50/50 py-20 text-center dark:border-zinc-800 dark:bg-zinc-900/30"
+						class="rounded-[3rem] border-2 border-dashed border-zinc-200 bg-zinc-50/50 py-24 text-center dark:border-zinc-800 dark:bg-zinc-900/30"
 					>
 						<div
-							class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 text-3xl dark:bg-zinc-800"
+							class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-zinc-100 text-4xl dark:bg-zinc-800"
 						>
 							🧭
 						</div>
-						<h3 class="font-bold text-zinc-900 dark:text-white">Begin your mastery</h3>
-						<p class={`${TEXT.muted} mt-1`}>
-							No active courses. Explore our curated high-performance catalog.
+						<h3 class="text-xl font-black text-zinc-900 dark:text-white">New Horizon Awaits</h3>
+						<p class="mt-2 text-xs font-medium text-zinc-400">
+							Zero active curriculum. Start your expert journey today.
 						</p>
 						<a
-							href="/app/courses"
-							class="mt-6 inline-block rounded-xl bg-zinc-900 px-8 py-3 text-xs font-black tracking-widest text-white uppercase transition-all hover:shadow-xl dark:bg-zinc-100 dark:text-zinc-900"
-							>Explore Catalog</a
+							href="/app/explore"
+							class="mt-8 inline-block rounded-2xl bg-zinc-900 px-10 py-4 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:scale-105 hover:shadow-2xl dark:bg-zinc-100 dark:text-zinc-900"
+							>Explore Tracks</a
 						>
 					</div>
 				{/if}
 			</div>
 		</div>
 
+		<!-- Behavioral Analytics (Narrower Column) -->
 		<div class="space-y-8 lg:col-span-5" in:fade={{ duration: 1000, delay: 700 }}>
-			<div class="flex items-center justify-between">
-				<h2 class={`${TEXT.h2} font-black tracking-tight`}>Consistency</h2>
-			</div>
 			<div
-				class={`${COLOR.card} ${RADIUS.card} ${COLOR.cardBorder} relative flex flex-col items-center overflow-hidden p-10 text-center ${ELEVATION.card} ${ELEVATION.cardHover}`}
+				class="flex items-center justify-between border-b border-zinc-100 pb-5 dark:border-zinc-800"
 			>
-				<div class="absolute top-0 right-0 p-4">
+				<h2 class={`${TEXT.h2} font-black tracking-tight`}>Performance</h2>
+			</div>
+
+			<div
+				class={`${COLOR.card} ${RADIUS.card} ${COLOR.cardBorder} group relative flex flex-col items-center overflow-hidden p-10 text-center lg:p-12 ${ELEVATION.card} ${ELEVATION.cardHover}`}
+			>
+				<div class="absolute top-0 right-0 p-6">
 					<div
-						class="rounded-full bg-amber-500/10 px-3 py-1 text-[10px] font-black tracking-widest text-amber-600 uppercase"
+						class="rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-1.5 text-[9px] font-black tracking-widest text-amber-600 uppercase"
 					>
-						Ongoing Streak
+						ONGOING STREAK
 					</div>
 				</div>
 
-				<div class="relative mb-8 h-48 w-48 scale-110">
+				<div class="relative mb-10 h-56 w-56 scale-110">
 					<svg class="h-full w-full -rotate-90" viewBox="0 0 36 36">
 						<circle
 							class="stroke-zinc-100 dark:stroke-zinc-800"
-							stroke-width="2.5"
+							stroke-width="3"
 							fill="none"
 							cx="18"
 							cy="18"
@@ -334,7 +381,7 @@
 						/>
 						<circle
 							class="stroke-blue-600 transition-all duration-1000"
-							stroke-width="2.5"
+							stroke-width="3"
 							stroke-dasharray="{data.stats.progress || 0}, 100"
 							stroke-linecap="round"
 							fill="none"
@@ -344,37 +391,42 @@
 						/>
 					</svg>
 					<div class="absolute inset-0 flex flex-col items-center justify-center">
-						<span class="mb-1 text-xs font-black tracking-widest text-zinc-400 uppercase"
+						<span class="mb-1 text-[10px] font-black tracking-[0.2em] text-zinc-400 uppercase"
 							>Weekly</span
 						>
-						<span class="text-5xl font-black tracking-tighter text-zinc-900 dark:text-white"
+						<span class="text-6xl font-black tracking-tighter text-zinc-900 dark:text-white"
 							>{data.stats.progress || 0}%</span
 						>
-						<span class="mt-1 text-[10px] font-bold text-emerald-500 uppercase">↑ 12% Growth</span>
 					</div>
 				</div>
 
-				<div class="w-full space-y-4">
+				<div class="w-full space-y-6">
 					<div
-						class="rounded-2xl border border-zinc-200/50 bg-zinc-50 p-6 dark:border-zinc-800/50 dark:bg-zinc-900"
+						class="rounded-3xl border border-zinc-200/50 bg-zinc-50/50 p-7 dark:border-zinc-800/50 dark:bg-zinc-900/50"
 					>
-						<div class="mb-2 flex items-center justify-between">
-							<span class="text-[10px] font-black text-zinc-400 uppercase">Current Streak</span>
-							<span class="text-xl font-black text-zinc-900 dark:text-white">🔥 3 Days</span>
+						<div
+							class="mb-5 flex items-center justify-between border-b border-zinc-100 pb-4 dark:border-zinc-800"
+						>
+							<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase"
+								>Frequency</span
+							>
+							<span class="text-2xl leading-none font-black text-zinc-900 dark:text-white"
+								>🔥 {data.stats.streak || 0} DAYS</span
+							>
 						</div>
-						<div class="flex justify-between gap-1">
+						<div class="flex justify-between gap-1.5">
 							{#each ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as day, i}
+								{@const active = data.stats.streak > i}
 								<div
-									class={`flex h-8 flex-1 items-center justify-center rounded-lg text-[10px] font-bold ${i < 3 ? 'bg-blue-600 text-white' : 'bg-zinc-200 text-zinc-400 dark:bg-zinc-800'}`}
+									class={`flex h-10 flex-1 items-center justify-center rounded-xl text-[10px] font-black ${active ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-black/5 text-zinc-300 dark:bg-white/5 dark:text-zinc-600'}`}
 								>
 									{day}
 								</div>
 							{/each}
 						</div>
 					</div>
-					<p class="text-[11px] font-medium text-zinc-500">
-						You're outperforming <span class="font-black text-zinc-900 dark:text-white">92%</span> of
-						active learners in your organization.
+					<p class="px-4 text-xs leading-relaxed font-bold text-zinc-400">
+						Monitor your learning patterns to maintain peak performance and achieve your goals.
 					</p>
 				</div>
 			</div>
@@ -383,11 +435,6 @@
 </div>
 
 <style>
-	/* Animation enhancement */
-	.cubic-bezier {
-		transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
-	}
-
 	:global(.role-switcher) {
 		background-color: transparent !important;
 		border: none !important;

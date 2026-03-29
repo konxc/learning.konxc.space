@@ -102,7 +102,7 @@
 								</p>
 								<span class={`${COLOR.textMuted}`}>on</span>
 								<a
-									href="/app/courses/{review.course.id}"
+									href="/app/explore/{review.course.id}"
 									class="font-medium text-blue-600 hover:underline"
 								>
 									{review.course.title}

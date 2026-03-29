@@ -51,7 +51,7 @@
 				<div class="text-center">
 					<p class={`mb-4 ${COLOR.textSecondary}`}>No courses pending payment</p>
 					<a
-						href="/app/my-courses"
+						href="/app/learning/courses"
 						class={`inline-flex items-center ${COLOR.accent} ${TRANSITION.colors} hover:underline`}
 						>Back to My Courses</a
 					>
