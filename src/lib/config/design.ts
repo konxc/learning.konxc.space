@@ -1,4 +1,29 @@
 export const COLOR = {
+	// Role-specific accents
+	roleAdmin: {
+		text: 'text-blue-600 dark:text-blue-400',
+		bg: 'bg-blue-600 dark:bg-blue-500',
+		bgMuted: 'bg-blue-50/50 dark:bg-blue-950/30',
+		border: 'border-blue-500/50 dark:border-blue-400/50'
+	},
+	roleMentor: {
+		text: 'text-emerald-600 dark:text-emerald-400',
+		bg: 'bg-emerald-600 dark:bg-emerald-500',
+		bgMuted: 'bg-emerald-50/50 dark:bg-emerald-950/30',
+		border: 'border-emerald-500/50 dark:border-emerald-400/50'
+	},
+	roleUser: {
+		text: 'text-indigo-600 dark:text-indigo-400',
+		bg: 'bg-indigo-600 dark:bg-indigo-500',
+		bgMuted: 'bg-indigo-50/50 dark:bg-indigo-950/30',
+		border: 'border-indigo-500/50 dark:border-indigo-400/50'
+	},
+	roleBd: {
+		text: 'text-amber-600 dark:text-amber-400',
+		bg: 'bg-amber-600 dark:bg-amber-500',
+		bgMuted: 'bg-amber-50/50 dark:bg-amber-950/30',
+		border: 'border-amber-500/50 dark:border-amber-400/50'
+	},
 	bg: 'bg-zinc-50 dark:bg-zinc-950',
 	card: 'bg-white/70 backdrop-blur-xl dark:bg-zinc-900/70',
 	cardBorder: 'border border-zinc-200/50 dark:border-zinc-800/50',
@@ -42,7 +67,8 @@ export const RADIUS = {
 export const ELEVATION = {
 	base: 'shadow-[0_1px_3px_0_rgba(0,0,0,0.02),0_1px_2px_-1px_rgba(0,0,0,0.03)] dark:shadow-none',
 	card: 'shadow-[0_8px_30px_rgb(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.02)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2),0_4px_12px_rgba(0,0,0,0.1)]',
-	cardHover: 'hover:shadow-[0_30px_60px_rgba(0,0,0,0.08),0_12px_24px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_30px_60px_rgba(0,0,0,0.3),0_12px_24px_rgba(0,0,0,0.15)] transition-all duration-500',
+	cardHover:
+		'hover:shadow-[0_30px_60px_rgba(0,0,0,0.08),0_12px_24px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_30px_60px_rgba(0,0,0,0.3),0_12px_24px_rgba(0,0,0,0.15)] transition-all duration-500',
 	transition: 'transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1)'
 };
 

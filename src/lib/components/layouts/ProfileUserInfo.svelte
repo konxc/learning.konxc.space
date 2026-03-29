@@ -8,18 +8,50 @@
 		role?: string | null;
 	}
 
+	let { user, activeRole }: { user: User | null; activeRole?: string | null } = $props();
+
+	let currentRoleColor = $state<{
+		text: string;
+		bg: string;
+		bgMuted: string;
+		border: string;
+	} | null>(null);
+
+	$effect(() => {
+		switch (activeRole) {
+			case 'admin':
+				currentRoleColor = COLOR.roleAdmin;
+				break;
+			case 'mentor':
+				currentRoleColor = COLOR.roleMentor;
+				break;
+			case 'bd':
+				currentRoleColor = COLOR.roleBd;
+				break;
+			case 'user':
+				currentRoleColor = COLOR.roleUser;
+				break;
+			default:
+				currentRoleColor = {
+					text: COLOR.textMuted,
+					bg: 'bg-zinc-100 dark:bg-zinc-800',
+					bgMuted: 'bg-zinc-50/50 dark:bg-zinc-900/30',
+					border: 'border-zinc-200/50 dark:border-zinc-700/50'
+				};
+		}
+	});
+
 	function getRoleLabel(role: string | null | undefined): string {
 		if (!role) return '';
 		const roleMap: Record<string, string> = {
 			admin: 'Admin',
 			mentor: 'Mentor',
 			siswa: 'Siswa',
-			user: 'Siswa'
+			user: 'Siswa',
+			bd: 'Business Dev'
 		};
 		return roleMap[role] || role.charAt(0).toUpperCase() + role.slice(1);
 	}
-
-	let { user, activeRole }: { user: User | null; activeRole?: string | null } = $props();
 
 	// Check if emulation mode is active
 	const isEmulating = $derived(
@@ -33,6 +65,13 @@
 		<div class="min-w-0 flex-1">
 			<div class={`${TEXT.button} ${COLOR.textPrimary} truncate font-semibold`}>
 				{user?.fullName ?? user?.username}
+				{#if activeRole && currentRoleColor && !isEmulating}
+					<span
+						class={`ml-2 inline-flex items-center gap-1 ${currentRoleColor.bgMuted} ${currentRoleColor.border} border ${RADIUS.badge} px-2 py-0.5 ${TEXT.small} ${currentRoleColor.text} font-bold capitalize`}
+					>
+						{getRoleLabel(activeRole)}
+					</span>
+				{/if}
 			</div>
 			<div class={`${TEXT.small} ${COLOR.textSecondary} mt-0.5 truncate`}>
 				{user?.email}
