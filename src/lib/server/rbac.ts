@@ -1,6 +1,7 @@
 import type { User } from './db/schema';
+import { type UserRole, type OrgRole, type WorkspaceRole, ORG_ROLES, WORKSPACE_ROLES } from '$lib/constants/roles';
 
-export type UserRole = 'user' | 'mentor' | 'admin' | 'bd' | 'facilitator' | 'owner' | 'member';
+export { type UserRole, type OrgRole, type WorkspaceRole, ORG_ROLES, WORKSPACE_ROLES };
 
 export function hasRole(user: User | null, role: UserRole | UserRole[]): boolean {
 	if (!user) return false;

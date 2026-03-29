@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ROLES, ROLE_ALIASES, type UserRole } from '$lib/constants/roles';
+	import { ROLES, ROLE_ALIASES, ROLE_SWITCH_MAP, type UserRole } from '$lib/constants/roles';
 	import { activeRole } from '$lib/hooks/useRole';
 	import { setRole } from '$lib/stores/user';
 	import { RADIUS, COLOR, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
@@ -17,20 +17,20 @@
 		facilitator: { label: 'Facilitator', icon: '🎯', color: 'orange' }
 	};
 
-	// Determine available roles based on base permission
+	// Determine available roles based on ROLE_SWITCH_MAP from roles.ts
 	const availableRoles = $derived.by(() => {
-		if (userRole === 'admin') return ['admin', 'bd', 'mentor', 'user', 'facilitator'] as string[];
-		if (userRole === 'bd') return ['bd', 'user'] as string[];
-		if (userRole === 'mentor') return ['mentor', 'user'] as string[];
-		if (userRole === 'facilitator') return ['facilitator', 'user'] as string[];
-		return [] as string[]; // Regular users see no switcher
+		const validRoles = ROLES as readonly string[];
+		if (validRoles.includes(userRole)) {
+			return ROLE_SWITCH_MAP[userRole as UserRole] ?? [];
+		}
+		return [];
 	});
 
 	// Only show if there is actually a choice to make
 	const showSwitcher = $derived(availableRoles.length >= 2);
 
 	function handleRoleChange(role: string) {
-		setRole(role as 'user' | 'mentor' | 'admin' | 'bd');
+		setRole(role as UserRole);
 		isOpen = false;
 	}
 

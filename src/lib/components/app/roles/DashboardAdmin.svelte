@@ -74,7 +74,7 @@
 
 				<div class={`p-6 ${RADIUS.card} bg-zinc-50 dark:bg-zinc-800/50 border ${COLOR.cardBorder} flex items-center gap-4 group hover:border-blue-500/30 transition-colors`}>
 					<div class="text-right">
-						<p class="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-2">Concurrents</p>
+						<p class="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-2">Active Nodes</p>
 						<p class="text-2xl font-black text-zinc-900 dark:text-white leading-none tracking-tighter">{activeUsers}</p>
 					</div>
 					<div class="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
