@@ -24,6 +24,7 @@
 		'trophy': 'Trophy',
 		'crown': 'Crown',
 		'award': 'Award',
+		'shield-check': 'ShieldCheck',
 		'wallet': 'Wallet',
 		'credit-card': 'CreditCard',
 		'dollar': 'DollarSign',
@@ -48,7 +49,10 @@
 		'x': 'X',
 		'plus': 'Plus',
 		'arrow-right': 'ArrowRight',
+		'arrow-left': 'ArrowLeft',
 		'chevron-right': 'ChevronRight',
+		'chevron-down': 'ChevronDown',
+		'chevron-up': 'ChevronUp',
 		'bell': 'Bell',
 		'sun': 'Sun',
 		'moon': 'Moon',
@@ -88,9 +92,12 @@
 		'eye': 'Eye',
 		'loading': 'RefreshCw',
 		'chart': 'BarChart3',
+		'bar-chart-2': 'BarChart2',
 		'trending': 'TrendingUp',
 		'activity': 'Activity',
 		'zap': 'Zap',
+		'layers': 'Layers',
+		'check-circle': 'CheckCircle2',
 		'building': 'Building2',
 		'store': 'Building2',
 		'calendar': 'Calendar',
@@ -138,7 +145,8 @@
 		'shield': 'Shield',
 		'pen-tool': 'PenTool',
 		'megaphone': 'Megaphone',
-		'hammer': 'Hammer'
+		'hammer': 'Hammer',
+		'refresh-ccw': 'RefreshCcw'
 	};
 
 	const pascalName = $derived(iconNames[name] || iconNames['help'] || 'HelpCircle');

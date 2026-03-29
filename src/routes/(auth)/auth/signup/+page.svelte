@@ -5,11 +5,16 @@
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
 	import AuthMessage from '$lib/components/AuthMessage.svelte';
 	import { enhance } from '$app/forms';
+	import { TEXT, COLOR, RADIUS, TRANSITION, SPACING } from '$lib/config/design';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
+	let username = $state('');
+	let email = $state('');
+	let fullName = $state('');
 	let password = $state('');
 	let confirmPassword = $state('');
+	let isLoading = $state(false);
 
 	function validatePasswordStrength(password: string): { valid: boolean; message: string } {
 		if (password.length < 6) {
@@ -21,6 +26,14 @@
 	function validatePasswordMatch(password: string, confirmPassword: string): boolean {
 		return password === confirmPassword;
 	}
+
+	const isFormValid = $derived(
+		username.length >= 3 &&
+		email.includes('@') &&
+		fullName.length > 0 &&
+		password.length >= 6 &&
+		password === confirmPassword
+	);
 </script>
 
 <svelte:head>
@@ -28,257 +41,146 @@
 </svelte:head>
 
 <AuthContainer
-	title="Daftar Akun"
-	subtitle="Bergabunglah dengan Naik Kelas dan mulailah perjalanan belajar kamu!"
+	title="Buat Akun Baru"
+	subtitle="Mulai perjalanan transformatif kamu hari ini dan bergabunglah dengan ribuan builder lainnya."
 >
-	<div class="auth-grid">
-		<aside class="auth-aside">
-			<h3>Yang kamu dapatkan</h3>
-			<ul>
-				<li>Roadmap belajar yang jelas</li>
-				<li>Feedback mentor dan komunitas</li>
-				<li>Akses materi up-to-date</li>
-			</ul>
-		</aside>
+	<div class="space-y-8">
+		{#if form?.message}
+			<AuthMessage type="error" message={form.message} />
+		{/if}
 
-		<section class="auth-main">
-			{#if form?.message}
-				<AuthMessage type="error" message={form.message} />
-			{/if}
+		<form
+			method="POST"
+			action="?/signup"
+			use:enhance={() => {
+				isLoading = true;
+				return async ({ update }) => {
+					await update();
+					isLoading = false;
+				};
+			}}
+			class="space-y-5"
+		>
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				<AuthFormField
+					label="Username"
+					name="username"
+					bind:value={username}
+					placeholder="johndoe123"
+					pattern="[a-z0-9_-]+"
+					required={true}
+					autocomplete="username"
+					minlength={3}
+					maxlength={31}
+					hint="Huruf kecil, angka, _ atau -"
+				/>
 
-			<form
-				method="POST"
-				use:enhance
-				onsubmit={(e) => {
-					const formData = new FormData(e.currentTarget as HTMLFormElement);
-					password = (formData.get('password') as string) || '';
-					confirmPassword = (formData.get('confirmPassword') as string) || '';
-				}}
-			>
-				<div class="auth-form">
+				<div class="space-y-1">
 					<AuthFormField
-						label="Username"
-						name="username"
-						placeholder="contoh: johndoe123"
-						pattern="[a-z0-9_-]+"
+						label="Email"
+						type="email"
+						name="email"
+						bind:value={email}
+						placeholder="nama@email.com"
 						required={true}
-						autocomplete="username"
-						minlength={3}
-						maxlength={31}
-						hint="Minimal 3 karakter, huruf kecil, angka, underscore atau tanda hubung"
+						autocomplete="email"
 					/>
-
-					<div class="email-group">
-						<AuthFormField
-							label="Email"
-							type="email"
-							name="email"
-							placeholder="email@example.com atau nama@belajar.id"
-							required={true}
-							autocomplete="email"
-						/>
-						<p class="field-hint">Email belajar.id dapat digunakan (contoh: nama@belajar.id)</p>
-					</div>
-
-					<AuthFormField
-						label="Nama Lengkap"
-						name="fullName"
-						placeholder="Masukkan nama lengkap kamu"
-						autocomplete="name"
-					/>
-
-					<div class="form-group-wrapper">
-						<AuthFormField
-							label="Password"
-							type="password"
-							name="password"
-							placeholder="Minimal 6 karakter"
-							required={true}
-							autocomplete="new-password"
-							minlength={6}
-						/>
-						{#if password}
-							<div class="validation-hint">
-								{#if validatePasswordStrength(password).valid}
-									<span class="text-success">✓ Password kuat</span>
-								{:else}
-									<span class="text-error">{validatePasswordStrength(password).message}</span>
-								{/if}
-							</div>
-						{/if}
-					</div>
-
-					<div class="form-group-wrapper">
-						<AuthFormField
-							label="Konfirmasi Password"
-							type="password"
-							name="confirmPassword"
-							placeholder="Masukkan password lagi"
-							required={true}
-							autocomplete="new-password"
-						/>
-						{#if confirmPassword}
-							<div class="validation-hint">
-								{#if validatePasswordMatch(password, confirmPassword)}
-									<span class="text-success">✓ Password cocok</span>
-								{:else}
-									<span class="text-error">Password tidak cocok</span>
-								{/if}
-							</div>
-						{/if}
-
-						<AuthSubmitButton
-							text="Daftar"
-							disabled={!password ||
-								!confirmPassword ||
-								!validatePasswordMatch(password, confirmPassword)}
-						/>
-
-						<div class="divider"><span>atau</span></div>
-						<div class="socials">
-							<button type="button" class="social-button" aria-label="Daftar dengan Google"
-								>Daftar dengan Google</button
-							>
-							<button type="button" class="social-button alt" aria-label="Daftar dengan GitHub"
-								>Daftar dengan GitHub</button
-							>
-						</div>
-					</div>
 				</div>
-			</form>
-
-			<div class="signin-link">
-				<p>
-					Sudah punya akun?
-					<a href="/auth/signin">Masuk di sini</a>
-				</p>
 			</div>
-		</section>
+
+			<AuthFormField
+				label="Nama Lengkap"
+				name="fullName"
+				bind:value={fullName}
+				placeholder="Masukkan nama lengkap kamu"
+				autocomplete="name"
+				required={true}
+			/>
+
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				<div class="space-y-2">
+					<AuthFormField
+						label="Password"
+						type="password"
+						name="password"
+						bind:value={password}
+						placeholder="Minimal 6 karakter"
+						required={true}
+						autocomplete="new-password"
+						minlength={6}
+					/>
+					{#if password}
+						<div class={`${TEXT.small} flex items-center gap-1.5 px-1`}>
+							{#if validatePasswordStrength(password).valid}
+								<span class="text-green-600 dark:text-green-400 font-bold">✓ Kuat</span>
+							{:else}
+								<span class="text-red-500 font-bold">{validatePasswordStrength(password).message}</span>
+							{/if}
+						</div>
+					{/if}
+				</div>
+
+				<div class="space-y-2">
+					<AuthFormField
+						label="Konfirmasi"
+						type="password"
+						name="confirmPassword"
+						bind:value={confirmPassword}
+						placeholder="Ulangi password"
+						required={true}
+						autocomplete="new-password"
+					/>
+					{#if confirmPassword}
+						<div class={`${TEXT.small} flex items-center gap-1.5 px-1`}>
+							{#if validatePasswordMatch(password, confirmPassword)}
+								<span class="text-green-600 dark:text-green-400 font-bold">✓ Cocok</span>
+							{:else}
+								<span class="text-red-500 font-bold">Tidak cocok</span>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			</div>
+
+			<div class="pt-2">
+				<AuthSubmitButton 
+					text="Daftar Sekarang" 
+					disabled={!isFormValid}
+					loading={isLoading} 
+				/>
+			</div>
+
+			<div class="relative flex items-center py-2">
+				<div class="grow border-t border-zinc-200 dark:border-zinc-800"></div>
+				<span class={`mx-4 shrink ${TEXT.small} ${COLOR.textMuted} uppercase tracking-widest`}>Atau</span>
+				<div class="grow border-t border-zinc-200 dark:border-zinc-800"></div>
+			</div>
+
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+				<button 
+					type="button" 
+					class={`flex items-center justify-center gap-2 px-4 py-3 ${RADIUS.button} border ${COLOR.cardBorder} bg-white dark:bg-zinc-800 font-bold text-xs ${TRANSITION.all} hover:bg-zinc-50 dark:hover:bg-zinc-700 active:scale-95`}
+				>
+					<img src="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png" alt="Google" class="h-4 w-4" />
+					Google
+				</button>
+				<button 
+					type="button" 
+					class={`flex items-center justify-center gap-2 px-4 py-3 ${RADIUS.button} border ${COLOR.cardBorder} bg-white dark:bg-zinc-800 font-bold text-xs ${TRANSITION.all} hover:bg-zinc-50 dark:hover:bg-zinc-700 active:scale-95`}
+				>
+					<svg class="h-4 w-4 fill-current" viewBox="0 0 24 24">
+						<path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+					</svg>
+					GitHub
+				</button>
+			</div>
+
+			<p class={`text-center pt-4 ${TEXT.small} ${COLOR.textSecondary}`}>
+				Sudah punya akun? 
+				<a href="/auth/signin" class="font-bold text-blue-600 hover:text-blue-700 transition-colors ml-1">
+					Masuk di sini
+				</a>
+			</p>
+		</form>
 	</div>
 </AuthContainer>
-
-<style>
-	.auth-grid {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 24px;
-	}
-
-	.auth-aside {
-		display: none;
-		background: rgba(255, 255, 255, 0.6);
-		border: 1px solid rgba(255, 255, 255, 0.5);
-		border-radius: 16px;
-		padding: 20px;
-	}
-
-	.auth-aside h3 {
-		margin: 0 0 8px;
-		color: var(--color-primary-dark);
-		font-weight: 700;
-	}
-
-	.auth-aside ul {
-		margin: 0;
-		padding-left: 18px;
-		color: var(--color-primary-medium);
-		line-height: 1.6;
-	}
-
-	.auth-main {
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-	}
-
-	.auth-form {
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-	}
-
-	.form-group-wrapper {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.validation-hint {
-		font-size: 0.85em;
-		padding-left: 4px;
-		margin-top: -12px;
-	}
-
-	.text-success {
-		color: #059669;
-	}
-
-	.text-error {
-		color: #dc2626;
-	}
-
-	.signin-link {
-		margin-top: 24px;
-		text-align: center;
-	}
-
-	.signin-link p {
-		color: var(--color-primary-medium);
-		font-size: 0.95em;
-	}
-
-	.signin-link a {
-		color: var(--color-gradient-purple-start);
-		text-decoration: none;
-		font-weight: 600;
-		transition: all 0.2s ease;
-	}
-
-	.signin-link a:hover {
-		text-decoration: underline;
-	}
-
-	.divider {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		color: var(--color-primary-medium);
-		font-size: 0.9em;
-	}
-	.divider::before,
-	.divider::after {
-		content: '';
-		height: 1px;
-		flex: 1;
-		background: rgba(0, 0, 0, 0.08);
-	}
-	.socials {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 10px;
-	}
-	.social-button {
-		padding: 10px 14px;
-		border-radius: 10px;
-		border: 1px solid rgba(0, 0, 0, 0.08);
-		background: rgba(255, 255, 255, 0.8);
-		font-weight: 600;
-		cursor: pointer;
-		transition: transform 0.2s ease;
-	}
-	.social-button:hover {
-		transform: translateY(-1px);
-	}
-	.social-button.alt {
-		background: rgba(255, 255, 255, 0.9);
-	}
-
-	@media (min-width: 1024px) {
-		.auth-grid {
-			grid-template-columns: 1fr 1fr;
-			gap: 32px;
-		}
-		.auth-aside {
-			display: block;
-		}
-	}
-</style>

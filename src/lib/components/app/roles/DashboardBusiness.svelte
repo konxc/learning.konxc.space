@@ -5,7 +5,7 @@
 	import Table from '$lib/components/ui/Table.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
-	import { COLOR, TEXT, SPACING, RADIUS, ELEVATION, GRADIENT } from '$lib/config/design';
+	import { COLOR, TEXT, SPACING, RADIUS, ELEVATION, GRADIENT, TRANSITION } from '$lib/config/design';
 	import { formatCurrency } from '$lib/utils/format';
 	import { fade, fly } from 'svelte/transition';
 
@@ -16,119 +16,160 @@
 	let { data }: DashboardBusinessProps = $props();
 
 	const columns = [
-		{ key: 'date', label: 'Date' },
-		{ key: 'amount', label: 'Amount' },
-		{ key: 'user', label: 'User' }
+		{ key: 'date', label: 'Settlement Date' },
+		{ key: 'user', label: 'Associate/User' },
+		{ key: 'amount', label: 'Amount Settled' }
 	];
 	const rows = (data.recentTransactions?.slice(0, 5) ?? []).map((t: any) => ({
-		date: new Date(t.createdAt).toLocaleDateString('id-ID'),
+		date: new Date(t.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
 		amount: formatCurrency(t.amount ?? 0),
 		user: t.username ?? t.userId
 	}));
 </script>
 
-<div class="flex flex-col gap-12 lg:gap-14">
-	<!-- Standardized Header -->
-	<header
-		class="flex flex-col items-start justify-between gap-10 md:flex-row md:items-end"
-		in:fade={{ duration: 800 }}
-	>
-		<div class="space-y-4">
-			<div class="flex items-center gap-2.5">
-				<div class="h-2 w-2 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]"></div>
-				<span class={`${TEXT.small} ${COLOR.textMuted} tracking-[0.25em]`}
-					>BUSINESS OVERVIEW • FINANCIALS LIVE</span
-				>
+<div class="flex flex-col gap-10 md:gap-14 animate-in fade-in duration-1000">
+	<!-- Financial Analytics Header -->
+	<header class="relative overflow-hidden pt-8 pb-4">
+		<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+			<div class="space-y-4">
+				<div class="flex items-center gap-3">
+					<div class="px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/30 dark:bg-emerald-900/20 text-[10px] font-bold tracking-widest uppercase shadow-sm">
+						Business Ops
+					</div>
+					<div class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+					<span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Revenue Live</span>
+				</div>
+				<h1 class="text-5xl md:text-6xl font-black tracking-tighter leading-none text-zinc-900 dark:text-white">
+					Revenue <span class="bg-linear-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">Nexus</span>
+				</h1>
+				<p class="text-sm md:text-base font-medium text-zinc-500 dark:text-zinc-400 max-w-2xl leading-relaxed">
+					Track financial velocity, acquisition efficiency, and ecosystem growth. 
+					Data-driven transparency for Naik Kelas business operations.
+				</p>
 			</div>
-			<h1 class="text-4xl md:text-5xl font-black tracking-tighter leading-none text-zinc-900 dark:text-white">
-				Revenue <span class="bg-linear-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">Analytics</span>
-			</h1>
-			<p class={`${TEXT.secondary} max-w-xl font-medium leading-relaxed`}>
-				Track financial performance, Average Revenue Per User (ARPU), and subscription churn in one unified view.
-			</p>
-		</div>
 
-		<div
-			class="flex items-center gap-5 rounded-[1.5rem] bg-white/5 shadow-sm transition-all"
-			in:fade={{ duration: 1000, delay: 200 }}
-		>
-			<RoleSwitcher userRole={data.user.role} />
+			<div class="flex items-center gap-3">
+				<a href="/app/admin/reports">
+					<Button variant="ghost" class="h-12 px-8 font-black tracking-widest uppercase border border-zinc-200 dark:border-zinc-800 rounded-full transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800">
+						Analytical Export ⬇
+					</Button>
+				</a>
+			</div>
 		</div>
 	</header>
 
-	<!-- Bento Grid for Business Stats -->
-	<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-		<div
-			class={`p-8 lg:p-10 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} ${ELEVATION.card} hover:-translate-y-1 transition-all border-l-4 border-l-emerald-500`}
-		>
-			<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Total Revenue</span>
-			<p class="mt-4 text-3xl font-black tracking-tighter text-zinc-900 dark:text-white leading-none">
-				{formatCurrency(data.stats.revenue || 0)}
-			</p>
+	<!-- Financial Bento Grid -->
+	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+		<div class={`group relative p-8 ${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} ${ELEVATION.card} ${TRANSITION.all} hover:-translate-y-1 border-l-4 border-l-emerald-600`}>
+			<div class="space-y-1">
+				<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Gross Revenue</span>
+				<p class="text-3xl font-black tracking-tighter text-zinc-900 dark:text-white leading-tight">
+					{formatCurrency(data.stats.revenue || 0)}
+				</p>
+			</div>
+			<div class="absolute bottom-4 right-4 text-3xl opacity-10 group-hover:opacity-20 transition-opacity">💰</div>
 		</div>
-		<div
-			class={`p-8 lg:p-10 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} ${ELEVATION.card} hover:-translate-y-1 transition-all`}
-		>
-			<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">ARPU</span>
-			<p class="mt-4 text-3xl font-black tracking-tighter text-zinc-900 dark:text-white leading-none">
-				{formatCurrency(data.stats.arpu || 0)}
-			</p>
+
+		<div class={`group relative p-8 ${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} ${ELEVATION.card} ${TRANSITION.all} hover:-translate-y-1`}>
+			<div class="space-y-1">
+				<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">User ARPU</span>
+				<p class="text-3xl font-black tracking-tighter text-zinc-900 dark:text-white leading-tight">
+					{formatCurrency(data.stats.arpu || 0)}
+				</p>
+			</div>
+			<div class="absolute bottom-4 right-4 text-3xl opacity-10 group-hover:opacity-20 transition-opacity">🎯</div>
 		</div>
-		<div
-			class={`p-8 lg:p-10 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} ${ELEVATION.card} hover:-translate-y-1 transition-all`}
-		>
-			<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Active Subscriptions</span>
-			<p class="mt-4 text-5xl font-black tracking-tighter text-zinc-900 dark:text-white leading-none">
-				{data.stats.activeSubs || 0}
-			</p>
+
+		<div class={`group relative p-8 ${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} ${ELEVATION.card} ${TRANSITION.all} hover:-translate-y-1`}>
+			<div class="space-y-1">
+				<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Active Subs</span>
+				<p class="text-5xl font-black tracking-tighter text-zinc-900 dark:text-white leading-tight">
+					{data.stats.activeSubs || 0}
+				</p>
+			</div>
+			<div class="absolute bottom-4 right-4 text-3xl opacity-10 group-hover:opacity-20 transition-opacity">🔄</div>
 		</div>
-		<div
-			class={`p-8 lg:p-10 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} ${ELEVATION.card} hover:-translate-y-1 transition-all`}
-		>
-			<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Churn Rate</span>
-			<p class="mt-4 text-5xl font-black tracking-tighter text-zinc-900 dark:text-white leading-none">
-				{data.stats.churn || 0}<span class="text-2xl text-zinc-400">%</span>
-			</p>
+
+		<div class={`group relative p-8 ${RADIUS.card} border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/30 dark:bg-emerald-900/10 ${TRANSITION.all}`}>
+			<div class="space-y-1">
+				<span class="text-[10px] font-black tracking-widest text-emerald-600 dark:text-emerald-400 uppercase">Retention Rate</span>
+				<p class="text-5xl font-black tracking-tighter text-zinc-900 dark:text-white leading-tight">
+					{100 - (data.stats.churn || 0)}<span class="text-2xl opacity-40">%</span>
+				</p>
+			</div>
+			<div class="absolute bottom-4 right-4 text-3xl opacity-10 group-hover:opacity-20 transition-opacity">📈</div>
 		</div>
 	</div>
 
-	<div class="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
-		<!-- Financial Activity Graph -->
+	<!-- Revenue Intelligence Graph -->
+	<div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
 		<div class="lg:col-span-8">
 			<OverviewGraph
-				title="Finance Activity"
-				description="Settled revenue vs. projections over 30 days"
+				title="Capital Inflow"
+				description="Transactional volume and revenue spikes mapped across 30 active cycles."
 				dataPoints={[120, 150, 180, 140, 200, 250, 220, 280, 310, 290, 350, 400]}
 			/>
 		</div>
 
-		<!-- Action Sidebar: Financial Ops -->
-		<div class="lg:col-span-4 space-y-8">
-			<div class={`${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} p-10 ${ELEVATION.card}`}>
-				<h3 class="text-xs font-black tracking-widest text-zinc-400 uppercase mb-8">Financial Operations</h3>
-				<div class="space-y-4">
-					<a href="/app/admin/payments" class="flex items-center justify-between p-4 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all border border-transparent hover:border-zinc-100 dark:hover:border-zinc-700">
-						<span class="text-sm font-bold">Payout Registry</span>
-						<span class="text-zinc-300">→</span>
+		<div class="lg:col-span-4 space-y-6">
+			<!-- Advanced Ops Actions -->
+			<div class={`${RADIUS.card} ${COLOR.card} border-2 border-zinc-100 dark:border-zinc-800 p-8 shadow-sm`}>
+				<h3 class="text-xs font-black tracking-widest text-zinc-400 uppercase mb-8">Capital Operations</h3>
+				<div class="space-y-3">
+					<a href="/app/admin/payments" class={`flex items-center justify-between p-4 ${RADIUS.button} border ${COLOR.cardBorder} ${COLOR.card} ${TRANSITION.all} hover:bg-zinc-50 dark:hover:bg-zinc-800`}>
+						<div class="flex items-center gap-3">
+							<span class="text-lg">🏦</span>
+							<span class="text-xs font-black uppercase tracking-tight">Payout Hub</span>
+						</div>
 					</a>
-					<a href="/app/admin/reports" class="flex items-center justify-between p-4 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all border border-transparent hover:border-zinc-100 dark:hover:border-zinc-700">
-						<span class="text-sm font-bold">Download Reports</span>
-						<span class="text-zinc-300">⬇</span>
+
+					<a href="/app/admin/coupons" class={`flex items-center justify-between p-4 ${RADIUS.button} border ${COLOR.cardBorder} ${COLOR.card} ${TRANSITION.all} hover:bg-zinc-50 dark:hover:bg-zinc-800`}>
+						<div class="flex items-center gap-3">
+							<span class="text-lg">🎟️</span>
+							<span class="text-xs font-black uppercase tracking-tight">Promotions</span>
+						</div>
+					</a>
+
+					<a href="/app/admin/refunds" class={`flex items-center justify-between p-4 ${RADIUS.button} border ${COLOR.cardBorder} ${COLOR.card} ${TRANSITION.all} hover:bg-zinc-50 dark:hover:bg-zinc-800 opacity-60`}>
+						<div class="flex items-center gap-3">
+							<span class="text-lg">↩️</span>
+							<span class="text-xs font-black uppercase tracking-tight">Refund Queue</span>
+						</div>
 					</a>
 				</div>
+			</div>
+
+			<!-- Financial Health Card -->
+			<div class={`${RADIUS.card} bg-linear-to-br from-emerald-600 to-teal-700 p-8 text-white relative overflow-hidden group shadow-lg`}>
+				<div class="relative z-10 space-y-2">
+					<h4 class="text-xs font-black text-emerald-200 uppercase tracking-widest leading-none">Healthy Growth</h4>
+					<p class="text-lg font-black leading-tight italic tracking-tighter">Naik Kelas +24% MoM</p>
+					<p class="text-[10px] opacity-70 font-medium leading-relaxed">
+						Revenue sustainability index is looking exceptionally strong for this quarter. Keep scaling acquisition tracks.
+					</p>
+				</div>
+				<div class="absolute -right-2 -bottom-2 text-6xl opacity-20 transition-transform group-hover:scale-110 duration-700">💎</div>
 			</div>
 		</div>
 	</div>
 
+	<!-- Transaction Ledger -->
 	<PageSection>
-		<div class="mb-8 flex items-center justify-between">
-			<h2 class={`${TEXT.h2} font-black tracking-tight`}>Recent Transactions</h2>
+		<div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+			<div class="space-y-2">
+				<h2 class="text-3xl font-black tracking-tighter leading-none text-zinc-900 dark:text-white">Settlement Ledger</h2>
+				<p class="text-xs font-medium text-zinc-500 uppercase tracking-widest">Real-time financial reconciliation</p>
+			</div>
 			<a href="/app/admin/payments">
-				<Button variant="ghost" class="text-[10px] font-black tracking-widest uppercase">View All Logs</Button>
+				<Button variant="ghost" class="text-[10px] font-black tracking-widest uppercase border border-zinc-200 dark:border-zinc-800 px-6 py-2.5 rounded-full">Explore Financial Audit</Button>
 			</a>
 		</div>
-		<div class="overflow-hidden rounded-[2.5rem] border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+
+		<div class={`overflow-hidden ${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} animate-in fade-in slide-in-from-bottom-5 duration-1000 delay-300 shadow-sm`}>
 			<Table {columns} {rows} />
+			<div class="px-8 py-4 bg-zinc-50/50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800 flex justify-center">
+				<a href="/app/admin/payments" class="text-[10px] font-black text-emerald-600 hover:underline uppercase tracking-widest">Show total transaction history</a>
+			</div>
 		</div>
 	</PageSection>
 </div>

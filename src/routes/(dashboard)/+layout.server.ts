@@ -51,11 +51,15 @@ export const load: LayoutServerLoad = async ({ locals, cookies, url }) => {
 	const effectiveRole = activeWorkspaceId === 'personal' ? baseRole : activeOrg?.role || baseRole;
 
 	// 4. Determine available roles for the switcher
-	let availableRoles: string[] = ['learner'];
+	let availableRoles: string[] = ['user'];
 	if (baseRole === 'admin') {
-		availableRoles = ['admin', 'mentor', 'learner'];
+		availableRoles = ['admin', 'bd', 'mentor', 'user'];
+	} else if (baseRole === 'bd') {
+		availableRoles = ['bd', 'user'];
 	} else if (baseRole === 'mentor') {
-		availableRoles = ['mentor', 'learner'];
+		availableRoles = ['mentor', 'user'];
+	} else if (baseRole === 'facilitator') {
+		availableRoles = ['facilitator', 'user'];
 	}
 
 	// 5. Get active role from cookie

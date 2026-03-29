@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { FullAutoFill } from 'svelte/elements';
+	import { COLOR, RADIUS, TEXT, TRANSITION, SPACING } from '$lib/config/design';
 
 	type AutoCompleteValue = FullAutoFill | 'on' | 'off';
 
@@ -7,6 +8,7 @@
 		label: string;
 		type?: string;
 		name: string;
+		value?: string;
 		placeholder?: string;
 		required?: boolean;
 		autocomplete?: AutoCompleteValue | null;
@@ -20,6 +22,7 @@
 		label,
 		type = 'text',
 		name,
+		value = $bindable(''),
 		placeholder,
 		required = false,
 		autocomplete,
@@ -30,54 +33,34 @@
 	}: Props = $props();
 </script>
 
-<div class="form-group">
-	<label for={name}>{label}</label>
-	<input
-		{type}
-		id={name}
-		{name}
-		{required}
-		{autocomplete}
-		{placeholder}
-		{pattern}
-		{minlength}
-		{maxlength}
-	/>
+<div class="flex flex-col gap-2">
+	<label 
+		for={name}
+		class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+	>
+		{label}
+		{#if required}<span class="text-red-500 ml-1">*</span>{/if}
+	</label>
+	
+	<div class="relative group">
+		<input
+			{type}
+			id={name}
+			{name}
+			{required}
+			{autocomplete}
+			{placeholder}
+			{pattern}
+			{minlength}
+			{maxlength}
+			bind:value
+			class={`w-full ${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary} outline-none border ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:border-blue-500 dark:focus:ring-blue-900/50`}
+		/>
+	</div>
+	
 	{#if hint}
-		<small>{hint}</small>
+		<p class={`${TEXT.small} ${COLOR.textMuted} mt-1 leading-relaxed`}>
+			{hint}
+		</p>
 	{/if}
 </div>
-
-<style>
-	.form-group {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-
-	label {
-		font-weight: 600;
-		color: var(--color-primary-dark);
-		font-size: 0.95em;
-	}
-
-	input {
-		padding: 12px 16px;
-		border: 2px solid #e5e7eb;
-		border-radius: 8px;
-		font-size: 1em;
-		transition: all 0.2s ease;
-		font-family: inherit;
-	}
-
-	input:focus {
-		outline: none;
-		border-color: var(--color-gradient-purple-start);
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-	}
-
-	small {
-		font-size: 0.85em;
-		color: var(--color-primary-medium);
-	}
-</style>

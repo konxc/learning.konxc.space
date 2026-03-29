@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ROLES, type UserRole } from '$lib/constants/roles';
+	import { ROLES, ROLE_ALIASES, type UserRole } from '$lib/constants/roles';
 	import { activeRole } from '$lib/hooks/useRole';
 	import { setRole } from '$lib/stores/user';
 	import { RADIUS, COLOR, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
@@ -9,26 +9,28 @@
 
 	let isOpen = $state(false);
 
-	const roleMap: Record<UserRole, { label: string; icon: string; color: string }> = {
-		learner: { label: 'Learner', icon: '🎓', color: 'blue' },
+	const roleMap: Record<string, { label: string; icon: string; color: string }> = {
+		user: { label: 'Siswa', icon: '🎓', color: 'blue' },
 		mentor: { label: 'Mentor', icon: '🖋️', color: 'indigo' },
-		business: { label: 'Business', icon: '📈', color: 'emerald' },
-		admin: { label: 'Admin', icon: '🛡️', color: 'red' }
+		bd: { label: 'Business Dev', icon: '📈', color: 'emerald' },
+		admin: { label: 'Admin', icon: '🛡️', color: 'red' },
+		facilitator: { label: 'Facilitator', icon: '🎯', color: 'orange' }
 	};
 
 	// Determine available roles based on base permission
 	const availableRoles = $derived.by(() => {
-		if (userRole === 'admin') return ROLES;
-		if (userRole === 'mentor') return ['learner', 'mentor'] as UserRole[];
-		if (userRole === 'bd' || userRole === 'facilitator') return ['learner', 'mentor'] as UserRole[]; // Can monitor both
-		return [] as UserRole[]; // Regular users see no switcher
+		if (userRole === 'admin') return ['admin', 'bd', 'mentor', 'user', 'facilitator'] as string[];
+		if (userRole === 'bd') return ['bd', 'user'] as string[];
+		if (userRole === 'mentor') return ['mentor', 'user'] as string[];
+		if (userRole === 'facilitator') return ['facilitator', 'user'] as string[];
+		return [] as string[]; // Regular users see no switcher
 	});
 
 	// Only show if there is actually a choice to make
 	const showSwitcher = $derived(availableRoles.length >= 2);
 
-	function handleRoleChange(role: UserRole) {
-		setRole(role);
+	function handleRoleChange(role: string) {
+		setRole(role as 'user' | 'mentor' | 'admin' | 'bd');
 		isOpen = false;
 	}
 
