@@ -28,13 +28,31 @@ export const load: PageServerLoad = async ({ locals }) => {
 		}
 	}
 
-	// For Students (User role) - Load available courses
+	// Redirect to dashboard if onboarding already completed (for mentor/facilitator)
+	if ((user.role === 'mentor' || user.role === 'facilitator') && user.onboardingCompleted) {
+		throw redirect(303, '/app');
+	}
+
+	// For Students (User role) - Load available courses with track config
 	const courses = await db
 		.select()
 		.from(schema.course)
 		.where(eq(schema.course.status, 'published'));
 
-	// For Mentors - Load application status or existing courses
+	// Parse featuresConfig for each course
+	const coursesWithTracks = courses.map((course) => {
+		let featuresConfig = { tracks: false, affiliate: false, performance: false };
+		try {
+			if (course.featuresConfig) {
+				featuresConfig = JSON.parse(course.featuresConfig);
+			}
+		} catch {
+			// Keep default
+		}
+		return { ...course, featuresConfig };
+	});
+
+	// For Mentors - Load application status
 	let mentorData = null;
 	if (user.role === 'mentor') {
 		mentorData = await db.query.mentorApplication.findFirst({
@@ -42,10 +60,23 @@ export const load: PageServerLoad = async ({ locals }) => {
 		});
 	}
 
+	// For Facilitators - Load available organizations
+	let organizations: Array<{ id: string; name: string; slug: string }> = [];
+	if (user.role === 'facilitator') {
+		organizations = await db
+			.select({
+				id: schema.organization.id,
+				name: schema.organization.name,
+				slug: schema.organization.slug
+			})
+			.from(schema.organization);
+	}
+
 	return {
 		role: user.role,
-		courses,
-		mentorData
+		courses: coursesWithTracks,
+		mentorData,
+		organizations
 	};
 };
 
@@ -105,6 +136,11 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const courseId = formData.get('courseId') as string;
 		const couponCode = formData.get('couponCode') as string | null;
+		const track = formData.get('track') as string | null;
+
+		// Validate track if provided
+		const validTracks = ['creator', 'seller', 'affiliate'];
+		const validatedTrack = track && validTracks.includes(track) ? track : null;
 
 		// Get course
 		const courses = await db
@@ -148,7 +184,7 @@ export const actions: Actions = {
 				couponId = validation.coupon!.id;
 			}
 
-			// Create enrollment and mark onboarding as complete
+			// Create enrollment with track and mark onboarding as complete
 			const enrollmentId = generateId();
 			await db.transaction(async (tx) => {
 				await tx.insert(schema.enrollment).values({
@@ -156,6 +192,7 @@ export const actions: Actions = {
 					userId: user.id,
 					courseId: courseId,
 					couponId,
+					track: validatedTrack,
 					status: finalPrice === 0 ? 'active' : 'pending'
 				});
 
@@ -179,14 +216,38 @@ export const actions: Actions = {
 		}
 	},
 
-	completeOnboarding: async ({ locals }) => {
+	completeOnboarding: async ({ request, locals }) => {
 		const user = locals.user;
 		if (!user) {
 			return fail(401, { error: 'Not authenticated' });
 		}
 
+		const formData = await request.formData();
+		const organizationId = formData.get('organizationId') as string | null;
+
 		try {
-			// Persistent synchronization of onboarding status
+			// If facilitator, add them to the organization
+			if (user.role === 'facilitator' && organizationId) {
+				// Check if already a member
+				const existingMember = await db.query.organizationMember.findFirst({
+					where: (fields, operators) =>
+						operators.and(
+							operators.eq(fields.orgId, organizationId),
+							operators.eq(fields.userId, user.id)
+						)
+				});
+
+				if (!existingMember) {
+					await db.insert(schema.organizationMember).values({
+						id: generateId(),
+						orgId: organizationId,
+						userId: user.id,
+						role: 'facilitator'
+					});
+				}
+			}
+
+			// Mark onboarding as complete
 			await db
 				.update(schema.user)
 				.set({ onboardingCompleted: true })
@@ -197,6 +258,27 @@ export const actions: Actions = {
 			if (isRedirect(error)) throw error;
 			console.error('Failed to complete onboarding:', error);
 			return fail(500, { error: 'Terjadi kesalahan saat menyelesaikan onboarding' });
+		}
+	},
+
+	redirectToSettings: async ({ locals }) => {
+		const user = locals.user;
+		if (!user) {
+			return fail(401, { error: 'Not authenticated' });
+		}
+
+		// Mark onboarding as complete and redirect to settings
+		try {
+			await db
+				.update(schema.user)
+				.set({ onboardingCompleted: true })
+				.where(eq(schema.user.id, user.id));
+
+			throw redirect(303, '/app/settings');
+		} catch (error) {
+			if (isRedirect(error)) throw error;
+			console.error('Failed to redirect to settings:', error);
+			return fail(500, { error: 'Terjadi kesalahan' });
 		}
 	}
 };
