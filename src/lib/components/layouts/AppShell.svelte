@@ -25,6 +25,7 @@
 		} | null;
 		navItems: NavItem[];
 		activeRole?: string | null;
+		availableRoles?: string[];
 		workspaces?: {
 			organizations: any[];
 			activeId: string;
@@ -43,7 +44,6 @@
 	// Refs untuk profile menu dan accordions
 	let profileDetailsRef: HTMLDetailsElement | undefined = $state(undefined);
 	let themeAccordionRef: HTMLDetailsElement | undefined = $state(undefined);
-	let roleAccordionRef: HTMLDetailsElement | null = $state(null);
 
 	onMount(() => {
 		// Initialize sidebar state from data attribute (set by inline script)
@@ -99,12 +99,12 @@
 		user={data.user ?? null}
 		{theme}
 		activeRole={data.activeRole ?? null}
+		availableRoles={data.availableRoles ?? []}
 		onThemeChange={handleThemeChange}
 		onProfileToggle={handleProfileToggle}
 		onAccordionToggle={handleAccordionToggle}
 		{profileDetailsRef}
 		{themeAccordionRef}
-		{roleAccordionRef}
 		{sidebarCollapsed}
 		onSidebarToggle={() => (sidebarCollapsed = !sidebarCollapsed)}
 		notifications={data.user?.notifications}
@@ -116,6 +116,8 @@
 		<!-- Enhanced Sidebar Component -->
 		<Sidebar
 			items={data.navItems}
+			activeRole={data.activeRole ?? null}
+			availableRoles={data.availableRoles ?? []}
 			config={{
 				collapsible: true,
 				grouped: true,
@@ -139,13 +141,13 @@
 
 			<div class="min-h-[calc(100vh-56px)] w-full">
 				<!-- Page Content with Smooth Transition -->
-				<div class="min-h-[calc(100vh-116px)] pb-6 md:pb-8">
+				<div class="min-h-[calc(100vh-116px)] w-full pb-10 px-4 sm:px-6 lg:px-8 pt-6 md:pt-8">
 					<div class="relative w-full">
 						{#key $page.url.pathname}
 							<div
 								in:fly={{ y: 15, duration: 400, delay: 200, opacity: 0 }}
 								out:fade={{ duration: 150 }}
-								class="w-full"
+								class="contents"
 							>
 								{@render children?.()}
 							</div>

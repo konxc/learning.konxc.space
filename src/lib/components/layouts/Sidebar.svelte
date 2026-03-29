@@ -4,6 +4,8 @@
 	import type { NavItem, NavGroup } from '$lib/server/rbac';
 	import Logo from './Logo.svelte';
 	import WorkspaceSwitcher from './WorkspaceSwitcher.svelte';
+	import RoleSegmentedControl from './RoleSegmentedControl.svelte';
+	import Icon from '$lib/components/ui/Icon.svelte';
 
 	function groupNavItems(items: NavItem[]): NavGroup[] {
 		const groups: Record<string, NavItem[]> = {};
@@ -14,22 +16,26 @@
 		});
 
 		const categoryLabels: Record<string, string> = {
-			dashboard: 'Home',
+			dashboard: '',
+			workspace: 'Workspace',
 			learning: 'Learning',
 			management: 'Management',
+			platform: 'Platform Admin',
 			admin: 'Administration',
 			crm: 'CRM',
 			other: 'Other'
 		};
 
 		return Object.entries(groups).map(([category, items]) => ({
-			label: categoryLabels[category] || category,
+			label: categoryLabels[category] ?? category, // Use ?? instead of || so '' is preserved
 			items
 		}));
 	}
 
 	export interface SidebarProps {
 		items: NavItem[];
+		activeRole?: string | null;
+		availableRoles?: string[];
 		config?: {
 			collapsible?: boolean;
 			grouped?: boolean;
@@ -47,6 +53,8 @@
 
 	let {
 		items,
+		activeRole,
+		availableRoles = [],
 		config = {},
 		isCollapsed = $bindable(false),
 		onToggle,
@@ -68,22 +76,22 @@
 	}
 
 	const mockItems: NavItem[] = [
-		{ label: 'Dashboard', href: '/app', icon: '📊', category: 'dashboard' },
-		{ label: 'My Courses', href: '/app/my-courses', icon: '📚', category: 'learning' },
-		{ label: 'Certificates', href: '/app/certificates', icon: '🎓', category: 'learning' },
-		{ label: 'Manage Courses', href: '/app/admin/courses', icon: '📖', category: 'admin' },
-		{ label: 'Users', href: '/app/admin/users', icon: '👥', category: 'admin' },
+		{ label: 'Dashboard', href: '/app', icon: 'dashboard', category: 'dashboard' },
+		{ label: 'My Courses', href: '/app/my-courses', icon: 'book-open', category: 'learning' },
+		{ label: 'Certificates', href: '/app/certificates', icon: 'graduation', category: 'learning' },
+		{ label: 'Manage Courses', href: '/app/admin/courses', icon: 'book', category: 'admin' },
+		{ label: 'Users', href: '/app/admin/users', icon: 'users', category: 'admin' },
 		{
 			label: 'Mentor Applications',
 			href: '/app/admin/mentor-applications',
-			icon: '📝',
+			icon: 'file-text',
 			category: 'admin',
 			badge: '2',
 			badgeColor: 'yellow'
 		},
-		{ label: 'Coupons', href: '/app/admin/coupons', icon: '🎫', category: 'admin' },
-		{ label: 'Payment Proofs', href: '/app/admin/payments', icon: '💳', category: 'admin' },
-		{ label: 'CRM: Waiting List', href: '/app/crm/waiting-list', icon: '⏳', category: 'crm' }
+		{ label: 'Coupons', href: '/app/admin/coupons', icon: 'coupon', category: 'admin' },
+		{ label: 'Payment Proofs', href: '/app/admin/payments', icon: 'credit-card', category: 'admin' },
+		{ label: 'CRM: Waiting List', href: '/app/crm/waiting-list', icon: 'clock', category: 'crm' }
 	];
 
 	const allItems = items.length > 0 ? items : mockItems;
@@ -118,15 +126,21 @@
 		collapsedGroups = newSet;
 	}
 
+	const currentPathname = $derived($page.url?.pathname ?? '');
+
 	function isActive(href: string): boolean {
-		if (!$page.url) return false;
-		const pathname = $page.url.pathname;
-		if (href === '/app') return pathname === '/app';
-		return pathname === href || pathname.startsWith(href + '/');
+		if (!currentPathname) return false;
+		if (href === '/app') return currentPathname === '/app';
+		return (
+			currentPathname === href ||
+			currentPathname.startsWith(href + '/') ||
+			currentPathname.startsWith(href + '?') ||
+			href.startsWith(currentPathname + '/')
+		);
 	}
 
 	$effect(() => {
-		if (!collapsible || !$page.url) return;
+		if (!collapsible || !currentPathname) return;
 		const newGroups = new Set(collapsedGroups);
 		let changed = false;
 		navGroups.forEach((group) => {
@@ -154,12 +168,13 @@
 		>
 			<Logo size={isCollapsed ? 'sm' : 'md'} showText={!isCollapsed} />
 		</div>
+
+		{#if !isCollapsed && availableRoles.length > 1 && activeRole && activeRole !== 'admin' && currentPathname !== '/app/leaderboard'}
+			<div class="px-3 pt-6 pb-1">
+				<RoleSegmentedControl {activeRole} {availableRoles} />
+			</div>
+		{/if}
 		
-		<!-- Top Padding replaced SidebarHeader/Switcher -->
-		<div class="h-1"></div>
-
-
-
 		<!-- Navigation -->
 		<nav class="sidebar-nav flex-1 space-y-2 overflow-y-auto p-3" aria-label="Main navigation">
 			{#if filteredItems.length === 0 && !isCollapsed}
@@ -176,7 +191,7 @@
 								<button
 									type="button"
 									onclick={() => toggleGroup(groupKey)}
-									class={`flex w-full items-center justify-between ${RADIUS.small} mt-4 px-2 py-2 ${TEXT.small} font-bold tracking-widest uppercase ${COLOR.textMuted} opacity-70 ${TRANSITION.colors} hover:opacity-100 dark:hover:text-gray-100`}
+									class={`flex w-full items-center justify-between ${RADIUS.small} mt-4 px-2 py-2 ${TEXT.small} font-semibold ${COLOR.textMuted} opacity-70 ${TRANSITION.colors} hover:opacity-100 dark:hover:text-gray-100`}
 								>
 									<span class="flex items-center gap-2">
 										<span class="h-1 w-1 rounded-full bg-blue-600/30"></span>
@@ -198,7 +213,7 @@
 								</button>
 							{:else}
 								<div
-									class={`${TEXT.small} font-bold tracking-widest uppercase ${COLOR.textMuted} mt-4 flex items-center gap-2 px-2 py-2 opacity-70`}
+									class={`${TEXT.small} font-semibold ${COLOR.textMuted} mt-4 flex items-center gap-2 px-2 py-2 opacity-70`}
 								>
 									<span class="h-1 w-1 rounded-full bg-blue-600/30"></span>
 									{group.label}
@@ -227,8 +242,8 @@
 											></span>
 										{/if}
 										{#if item.icon}
-											<span class="sidebar-icon shrink-0 text-base leading-none" aria-hidden="true">
-												{item.icon}
+											<span class="sidebar-icon shrink-0" aria-hidden="true">
+												<Icon name={item.icon} size={18} strokeWidth={1.75} />
 											</span>
 										{/if}
 										{#if !isCollapsed}

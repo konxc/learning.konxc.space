@@ -19,25 +19,26 @@
 		user,
 		theme,
 		activeRole,
+		availableRoles = [],
 		onThemeChange,
 		onProfileToggle,
 		onAccordionToggle,
 		profileDetailsRef,
-		themeAccordionRef,
-		roleAccordionRef
+		themeAccordionRef
 	}: {
 		user: ProfileMenuUser | null;
 		theme: Theme;
 		activeRole?: string | null;
+		availableRoles?: string[];
 		onThemeChange: (theme: Theme, e: MouseEvent) => void;
 		onProfileToggle?: (e: Event) => void;
 		onAccordionToggle?: (accordionType: 'theme' | 'role', e: Event) => void;
 		profileDetailsRef?: HTMLDetailsElement;
 		themeAccordionRef?: HTMLDetailsElement;
-		roleAccordionRef?: HTMLDetailsElement | null;
 	} = $props();
 
 	let menuContainerRef: HTMLDivElement | null = $state(null);
+	let roleAccordionRef: HTMLDetailsElement | undefined = $state(undefined);
 
 	// Click outside handler untuk menutup profile menu
 	onMount(() => {
@@ -65,7 +66,7 @@
 	<details bind:this={profileDetailsRef} class="group" ontoggle={onProfileToggle}>
 		<ProfileMenuSummary {user} {activeRole} />
 		<div
-			class={`absolute right-0 mt-2 min-w-[200px] ${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} p-1.5 ${ELEVATION.card} dark:border-neutral-800`}
+			class={`absolute right-0 z-50 mt-4 min-w-[280px] ${RADIUS.card} border border-zinc-200/50 bg-white/95 p-3 ${ELEVATION.card} backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] dark:border-zinc-800/50 dark:bg-zinc-900/95`}
 		>
 			<ProfileUserInfo {user} {activeRole} />
 
@@ -79,7 +80,7 @@
 			<RoleSwitcherAccordion
 				{user}
 				{activeRole}
-				accordionRef={roleAccordionRef ?? undefined}
+				accordionRef={roleAccordionRef}
 				onToggle={(e) => onAccordionToggle?.('role', e)}
 			/>
 

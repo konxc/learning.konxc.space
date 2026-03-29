@@ -403,10 +403,9 @@
 		margin: 0;
 		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 		line-height: 1.6;
-		color: var(--text, #111827); /* Fallback: gray-900 */
-		background-color: var(--surface, #ffffff); /* Fallback: white */
-		overflow-x: hidden;
-		/* Smooth transition for body background and text */
+		color: var(--text, #111827);
+		background-color: var(--surface, #ffffff);
+		overflow-x: clip;
 		transition-property: color, background-color;
 		transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 		transition-duration: 300ms;

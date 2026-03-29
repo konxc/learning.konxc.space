@@ -1,11 +1,12 @@
 <script lang="ts">
 	import ProfileMenu from './ProfileMenu.svelte';
-	import { TEXT, COLOR, SPACING, RADIUS } from '$lib/config/design';
+	import { TEXT, COLOR, SPACING, RADIUS, TRANSITION, ELEVATION } from '$lib/config/design';
 	import { getPageMetadata } from '$lib/stores/pageMetadata';
 	import type { Theme } from '$lib/stores/theme';
 	import type { User as DbUser } from '$lib/server/db/schema';
 	import DashboardBreadcrumb from './DashboardBreadcrumb.svelte';
-	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 
 	type HeaderUser = Partial<DbUser> & {
 		avatarUrl?: string | null;
@@ -28,11 +29,13 @@
 		onSidebarToggle,
 		profileDetailsRef,
 		themeAccordionRef,
-		roleAccordionRef,
 		sidebarCollapsed = false,
 		notifications = [],
 		unreadCount = 0,
-		workspaces = { organizations: [], activeId: 'personal', activeOrg: null }
+		workspaces = { organizations: [], activeId: 'personal', activeOrg: null },
+		availableRoles = [],
+		breadcrumbs,
+		actions
 	}: {
 		user: HeaderUser | null;
 		theme: Theme;
@@ -43,7 +46,6 @@
 		onSidebarToggle?: () => void;
 		profileDetailsRef?: HTMLDetailsElement;
 		themeAccordionRef?: HTMLDetailsElement;
-		roleAccordionRef?: HTMLDetailsElement | null;
 		sidebarCollapsed?: boolean;
 		notifications?: any[];
 		unreadCount?: number;
@@ -52,23 +54,37 @@
 			activeId: string;
 			activeOrg: any;
 		};
+		availableRoles?: string[];
+		breadcrumbs?: import('svelte').Snippet;
+		actions?: import('svelte').Snippet;
 	} = $props();
 
 	const pageMetadataStore = getPageMetadata();
 
 	let showNotifications = $state(false);
+
+	// Tab selection handler for PageData-driven tabs
+	function handleTabSelect(tabId: string) {
+		const url = new URL($page.url);
+		if (tabId === 'profile' || !tabId) {
+			url.searchParams.delete('tab');
+		} else {
+			url.searchParams.set('tab', tabId);
+		}
+		goto(url.toString(), { replaceState: true, keepFocus: true, noScroll: true });
+	}
 </script>
 
 <header
-	class={`sticky top-0 z-30 border-b-[0.5px] border-zinc-200/50 bg-white/70 backdrop-blur-xl transition-[padding] duration-500 cubic-bezier(0.32, 0.72, 0, 1) dark:border-zinc-800/50 dark:bg-zinc-900/70 ${sidebarCollapsed ? 'pl-16' : 'pl-64'}`}
+	class={`cubic-bezier(0.32, 0.72, 0, 1) sticky top-0 z-30 border-b-[0.5px] border-zinc-200/50 bg-white/70 backdrop-blur-xl transition-[padding] duration-500 dark:border-zinc-800/50 dark:bg-zinc-900/70 ${sidebarCollapsed ? 'pl-16' : 'pl-64'}`}
 >
 	<div class="flex items-center">
-		<!-- Main Header Content: Title + Profile Menu -->
+		<!-- Main Header Content -->
 		<div
-			class={`flex min-h-[56px] w-full flex-1 items-center justify-between gap-4 px-4 py-3 md:px-6`}
+			class="flex min-h-[56px] w-full flex-1 items-center justify-between gap-4 px-4 py-3 md:px-6"
 		>
 			<!-- Left Side: Toggle + Breadcrumb -->
-			<div class="flex min-w-0 items-center gap-3">
+			<div class="flex shrink-0 items-center">
 				<!-- Enhanced Sidebar Toggle -->
 				<button
 					type="button"
@@ -94,12 +110,50 @@
 					</svg>
 				</button>
 
-				<div class="hidden h-4 w-px bg-zinc-200 lg:block dark:bg-zinc-800"></div>
-				<DashboardBreadcrumb />
+				<div class="mx-3 h-4 w-px bg-zinc-200 dark:bg-zinc-800"></div>
+				{#if breadcrumbs}
+					{@render breadcrumbs()}
+				{:else}
+					<DashboardBreadcrumb />
+				{/if}
+			</div>
+
+			<!-- Center Content: Navigation Tabs (driven by $page.data) -->
+			<div class="flex flex-1 justify-center min-w-0 px-4">
+				{#if $page.data.headerTabs}
+					<nav
+						class="flex items-center gap-8 overflow-x-auto overflow-y-hidden scrollbar-hide py-1"
+						aria-label="Tabs"
+					>
+						{#each $page.data.headerTabs.tabs as tab}
+							{@const active = $page.data.headerTabs.activeTab === tab.id}
+							<button
+								type="button"
+								onclick={() => handleTabSelect(tab.id)}
+								class={`relative whitespace-nowrap px-1 py-1 ${TEXT.button} ${TRANSITION.colors} ${
+									active
+										? 'text-neutral-900 dark:text-white'
+										: 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300'
+								}`}
+								aria-current={active ? 'page' : undefined}
+							>
+								{tab.label}
+								{#if active}
+									<div
+										class="absolute right-0 -bottom-[12px] left-0 h-0.5 bg-neutral-900 dark:bg-white"
+									></div>
+								{/if}
+							</button>
+						{/each}
+					</nav>
+				{/if}
 			</div>
 
 			<!-- Right Side Actions -->
-			<div class="flex flex-1 items-center justify-end gap-3 lg:gap-4">
+			<div class="flex shrink-0 items-center justify-end gap-3 lg:gap-4">
+				{#if actions}
+					{@render actions()}
+				{/if}
 				<!-- Search Trigger / Command Palette Trigger -->
 				<button
 					type="button"
@@ -153,7 +207,7 @@
 
 							{#if showNotifications}
 								<div
-									class="absolute right-0 z-50 mt-2 w-80 rounded-xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
+									class={`absolute right-0 z-50 mt-2 w-80 ${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${ELEVATION.card} overflow-hidden`}
 								>
 									<div class="border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
 										<h3 class="font-bold text-zinc-900 dark:text-zinc-100">Notifications</h3>
@@ -211,7 +265,7 @@
 						{onAccordionToggle}
 						{profileDetailsRef}
 						{themeAccordionRef}
-						{roleAccordionRef}
+						{availableRoles}
 					/>
 				</div>
 			</div>
