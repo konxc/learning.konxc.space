@@ -98,12 +98,7 @@
 		toast.success('Mode kampanye berhasil diubah!');
 	}
 
-	const tabs = [
-		{ id: 'profile', label: 'Profil', icon: '👤' },
-		{ id: 'security', label: 'Keamanan', icon: '🔒' },
-		{ id: 'payments', label: 'Pembayaran', icon: '💳' },
-		{ id: 'preferences', label: 'Preferensi', icon: '⚙️' }
-	] as const;
+	// (tabs removed)
 </script>
 
 <svelte:head>
@@ -116,29 +111,9 @@
 		description="Kelola identitas, keamanan, dan preferensi platform kamu di satu tempat."
 	/>
 
-	<div class="flex flex-col items-start gap-8 lg:flex-row">
-		<!-- Modern Sidebar Nav -->
-		<aside
-			class={`sticky top-24 z-10 w-full space-y-2 p-1 lg:w-64 ${RADIUS.card} border ${COLOR.cardBorder} bg-white/50 backdrop-blur-md dark:bg-zinc-900/50`}
-		>
-			{#each tabs as tab}
-				<button
-					onclick={() => (activeTab = tab.id)}
-					class={`flex w-full items-center gap-3 px-4 py-3 ${RADIUS.button} ${TEXT.button} font-bold ${TRANSITION.all}
-					${
-						activeTab === tab.id
-							? `${COLOR.accentBg} text-white shadow-lg`
-							: `${COLOR.textSecondary} hover:bg-zinc-100 dark:hover:bg-zinc-800`
-					}`}
-				>
-					<span class="text-lg">{tab.icon}</span>
-					{tab.label}
-				</button>
-			{/each}
-		</aside>
-
+	<div class="max-w-6xl mx-auto w-full">
 		<!-- Content Area -->
-		<main class="w-full flex-1 space-y-6">
+		<main class="w-full space-y-6">
 			{#if form?.error}
 				<AuthMessage type="error" message={form.error} />
 			{/if}
