@@ -785,3 +785,181 @@ export const discussion = sqliteTable('discussion', (t) => ({
 		.notNull()
 		.$defaultFn(() => new Date())
 }));
+
+// ============================================================
+// VERIFICATION SYSTEMS
+// ============================================================
+
+// User KTP Verification (Required to create Organization)
+export const userVerification = sqliteTable('user_verification', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id)
+		.unique(),
+	// KTP Data
+	ktpNumber: text('ktp_number'),
+	ktpName: text('ktp_name'),
+	ktpAddress: text('ktp_address'),
+	ktpDob: integer('ktp_dob', { mode: 'timestamp' }), // Date of birth
+	ktpPhotoUrl: text('ktp_photo_url'), // Base64 or uploaded URL
+	selfieWithKtpUrl: text('selfie_with_ktp_url'),
+	// Status
+	status: text('status').default('pending'), // 'pending' | 'approved' | 'rejected'
+	verifiedAt: integer('verified_at', { mode: 'timestamp' }),
+	verifiedBy: text('verified_by').references(() => user.id),
+	rejectionReason: text('rejection_reason'),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Organization Verification (Trusted/Verified badge)
+export const organizationVerification = sqliteTable('organization_verification', {
+	id: text('id').primaryKey(),
+	orgId: text('org_id')
+		.notNull()
+		.references(() => organization.id)
+		.unique(),
+	// Legal Entity Data
+	legalName: text('legal_name'), // "Yayasan ASIB", "PT Koneksi Digital"
+	legalType: text('legal_type'), // 'yayasan' | 'pt' | 'cv' | 'koperasi' | 'perorangan'
+	npwp: text('npwp'),
+	skPendirian: text('sk_pendirian'), // URL to document
+	siup: text('siup'), // Optional
+	// Representative
+	representativeName: text('representative_name'), // Penanggung jawab
+	representativeKtp: text('representative_ktp'),
+	representativePosition: text('representative_position'), // 'ketua' | 'direktur' | 'pemilik'
+	// Address
+	legalAddress: text('legal_address'),
+	city: text('city'),
+	province: text('province'),
+	postalCode: text('postal_code'),
+	// Verification
+	status: text('status').default('pending'), // 'pending' | 'verified' | 'rejected'
+	verifiedAt: integer('verified_at', { mode: 'timestamp' }),
+	verifiedBy: text('verified_by').references(() => user.id),
+	rejectionReason: text('rejection_reason'),
+	// Trust Benefits
+	isTrusted: integer('is_trusted', { mode: 'boolean' }).default(false),
+	trustedBadgeUrl: text('trusted_badge_url'),
+	// Timestamps
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// ============================================================
+// AUTO-AFFILIATE SYSTEM FOR MENTORS & FACILITATORS
+// ============================================================
+
+// Affiliate Account (Auto-created when user becomes mentor/facilitator)
+export const affiliateAccount = sqliteTable('affiliate_account', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	orgId: text('org_id')
+		.notNull()
+		.references(() => organization.id),
+	role: text('role').notNull(), // 'mentor' | 'facilitator'
+	// Commission
+	commissionRate: integer('commission_rate').default(25), // Default 25%
+	totalEarnings: integer('total_earnings').default(0),
+	pendingPayout: integer('pending_payout').default(0),
+	paidOut: integer('paid_out').default(0),
+	// Payout Info
+	bankName: text('bank_name'),
+	bankAccountNumber: text('bank_account_number'),
+	bankAccountName: text('bank_account_name'),
+	// Status
+	isActive: integer('is_active', { mode: 'boolean' }).default(true),
+	// Tier (based on tracker points)
+	tier: text('tier').default('bronze'), // 'bronze' | 'silver' | 'gold' | 'platinum'
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Affiliate Links (Auto-generated for mentors/facilitators)
+export const autoAffiliateLink = sqliteTable('auto_affiliate_link', {
+	id: text('id').primaryKey(),
+	accountId: text('account_id')
+		.notNull()
+		.references(() => affiliateAccount.id),
+	courseId: text('course_id').references(() => course.id), // null = org landing page
+	orgId: text('org_id').references(() => organization.id),
+	// Link
+	code: text('code').notNull().unique(), // e.g., "mentor-budi-abc123"
+	url: text('url').notNull(), // Full URL
+	// Tracking
+	clickCount: integer('click_count').default(0),
+	conversionCount: integer('conversion_count').default(0),
+	// Status
+	isActive: integer('is_active', { mode: 'boolean' }).default(true),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// ============================================================
+// TRACKER SYSTEM (Differentiating Feature)
+// ============================================================
+
+// User Tracker Points - Enhanced gamification
+export const userTracker = sqliteTable('user_tracker', {
+	userId: text('user_id')
+		.primaryKey()
+		.references(() => user.id),
+	// Points
+	totalPoints: integer('total_points').default(0),
+	weeklyPoints: integer('weekly_points').default(0),
+	// Streak
+	currentStreak: integer('current_streak').default(0),
+	longestStreak: integer('longest_streak').default(0),
+	lastActiveDate: text('last_active_date'), // YYYY-MM-DD format
+	// Stats
+	totalLessonsCompleted: integer('total_lessons_completed').default(0),
+	totalCheckpointsCompleted: integer('total_checkpoints_completed').default(0),
+	totalDiscussions: integer('total_discussions').default(0),
+	totalReferrals: integer('total_referrals').default(0),
+	// Tier
+	tier: text('tier').default('starter'), // 'starter' | 'learner' | 'achiever' | 'champion' | 'legend'
+	tierProgress: integer('tier_progress').default(0), // Points to next tier
+	// Rewards
+	earnedCoupons: integer('earned_coupons').default(0),
+	earnedCertificates: integer('earned_certificates').default(0),
+	// Timestamps
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Tracker Activity Log
+export const trackerActivity = sqliteTable('tracker_activity', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	activityType: text('activity_type').notNull(), // 'lesson_complete' | 'checkpoint' | 'discussion' | 'referral' | 'streak'
+	points: integer('points').notNull(),
+	description: text('description'),
+	referenceId: text('reference_id'), // lessonId, checkpointId, etc
+	referenceType: text('reference_type'), // 'lesson' | 'checkpoint' | 'discussion' | 'referral'
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});

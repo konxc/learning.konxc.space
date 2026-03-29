@@ -5,152 +5,321 @@
 
 ## Overview
 
-This document outlines the organizational hierarchy and key workflows for multi-tenant operations in Naik Kelas 2.0.
+This document outlines the organizational hierarchy and key workflows for the Naik Kelas 2.0 gotong royong education ecosystem.
 
 ---
 
 ## Hierarchy Structure
 
 ```
-Organization (Tenant)
-├── Workspaces (Departments/Teams)
-│   └── Members
-├── Courses (Organization-specific)
-│   └── Cohorts (Batches)
-│       ├── Facilitator
-│       └── Students
-└── Billing & Subscription
+Platform
+├── User (Student)
+│   ├── [KTP Verified] → Can create Organization
+│   └── [Invited] → Can become Mentor/Facilitator (with auto-affiliate)
+│
+├── Organization (Tenant)
+│   ├── [Unverified] → Can operate normally
+│   └── [Verified] → Courses get "Trusted" badge
+│   │
+│   ├── Workspaces (Departments/Teams)
+│   │   └── Members
+│   ├── Courses (Organization-specific)
+│   │   └── Cohorts (Batches)
+│   │       ├── Facilitator
+│   │       └── Students
+│   └── Affiliate Accounts (Mentors & Facilitators)
+│       └── Auto-generated links
+│
+└── Tracker System (Gamification)
+    ├── Points
+    ├── Streaks
+    ├── Tiers
+    └── Rewards
 ```
 
 ### Entity Relationships
 
-| Entity       | Parent        | Children                     |
-| ------------ | ------------- | ---------------------------- |
-| Organization | -             | Workspaces, Courses, Members |
-| Workspace    | Organization  | Members                      |
-| Course       | Organization  | Modules, Lessons             |
-| Cohort       | Course        | Enrollments, Checkpoints     |
-| Enrollment   | Cohort/Course | Progress, Grades             |
+| Entity                    | Parent              | Children                                  |
+| ------------------------- | ------------------- | ----------------------------------------- |
+| User                      | -                   | Verifications, Organizations, Enrollments |
+| User Verification         | User                | -                                         |
+| Organization              | User (owner)        | Workspaces, Courses, Members              |
+| Organization Verification | Organization        | -                                         |
+| Affiliate Account         | User + Organization | Links, Earnings                           |
+| Workspace                 | Organization        | Members                                   |
+| Course                    | Organization        | Modules, Lessons                          |
+| Cohort                    | Course              | Enrollments, Checkpoints                  |
+| Enrollment                | Cohort/Course       | Progress, Grades                          |
+| UserTracker               | User                | Activities                                |
 
 ---
 
-## Workflow 1: Creating an Organization
+## Workflow 0: User Registration & KTP Verification
 
 ### Actors
 
-- **Admin** or any user can create an organization
+- **New User** (registers with email/password)
+- **Admin** (verifies KTP)
 
 ### Steps
 
-1. **Navigate** to Organization Settings
-2. **Create Organization**
-   - Name (required)
-   - Slug (auto-generated, unique)
-   - Brand Color (optional)
-   - Plan Type (free/pro/enterprise)
-3. **Auto-assignment**: Creator becomes `owner`
-
-### API Flow
-
-```
-POST /api/organizations
-Body: { name, slug, brandColor, planType }
-→ Creates organization
-→ Adds creator as owner
-→ Returns organization object
-```
-
-### Code Reference
-
-```
-src/routes/(dashboard)/app/organizations/+page.server.ts
-```
-
----
-
-## Workflow 2: Adding Members to Organization
-
-### Actors
-
-- **Organization Owner/Admin** can invite members
-
-### Roles Available
-
-- `owner` - Full control (1 per org)
-- `admin` - Manage members, courses
-- `creator` - Create courses
-- `facilitator` - Manage cohorts
-- `member` - Read-only
-
-### Steps
-
-1. **Navigate** to Organization → Members
-2. **Invite Member**
-   - Enter email
-   - Select role
-   - Send invitation
-3. **Accept Invitation**
-   - Invitee receives email/notification
-   - Clicks invitation link
-   - Joins organization
-
-### Code Reference
-
-```
-src/routes/(dashboard)/app/organizations/[id]/members/
-src/lib/server/db/schema.ts (organizationInvitation table)
-```
-
----
-
-## Workflow 3: Assigning Facilitators to Batches
-
-### Actors
-
-- **Mentor** or **Organization Admin**
-
-### Steps
-
-1. **Create Cohort**
+1. **User Registration**
 
    ```
-   POST /api/cohorts
+   POST /auth/register
+   Body: { email, password, fullName }
+   ```
+
+2. **Onboarding (Student Path)**
+   - Select first course
+   - Select track: `creator` | `seller` | `affiliate`
+   - Dashboard access granted
+
+3. **Optional: KTP Verification**
+
+   ```
+   POST /api/verification/ktp
    Body: {
-     courseId,
-     name,
-     facilitatorId,
-     startDate,
-     endDate
+     ktpNumber,
+     ktpName,
+     ktpAddress,
+     ktpDob,
+     ktpPhoto (base64),
+     selfieWithKtp (base64)
    }
    ```
 
-2. **Select Facilitator**
-   - Must be organization member with `facilitator` role
-   - One facilitator per cohort
+4. **Admin Review**
+   - Admin reviews KTP submission
+   - Approves or rejects with reason
 
-3. **Enroll Students**
-   - Bulk enroll from organization members
-   - Individual enrollment
+5. **Result**
+   - If approved: User can now create Organization
+   - Status stored in `userVerification` table
 
-4. **Facilitator Access**
-   - Facilitator can now see cohort in "My Batches"
-   - Can track student progress
-   - Can moderate discussions
+### Business Rules
 
-### Code Reference
+- Only verified users can create organizations
+- KTP verification is permanent (no expiry)
+- Each user can only have one verification record
+
+---
+
+## Workflow 1: Creating an Organization (KTP Required)
+
+### Prerequisites
+
+- User must have `userVerification.status = 'approved'`
+
+### Actors
+
+- **Verified User** (creates organization, becomes owner)
+
+### Steps
+
+1. **Check Verification Status**
+
+   ```typescript
+   const verification = await db.query.userVerification.findFirst({
+   	where: eq(userVerification.userId, user.id)
+   });
+
+   if (verification?.status !== 'approved') {
+   	return fail(403, { error: 'KTP verification required' });
+   }
+   ```
+
+2. **Create Organization**
+
+   ```
+   POST /api/organizations
+   Body: {
+     name: "Koneksi Digital",
+     slug: "koneksi-digital",
+     brandColor: "#4f46e5",
+     planType: "free"
+   }
+   ```
+
+3. **Auto-assign Owner**
+   - Creator automatically becomes `owner` role
+   - Owner gets full permissions
+
+4. **Fill Organization Details** (Optional)
+   - Legal name
+   - Description
+   - Logo upload
+   - Contact information
+
+5. **Organization Verification** (Optional)
+   - Submit legal documents for "Trusted" badge
+   - See Workflow 1.1
+
+### Result
 
 ```
-src/lib/server/db/schema.ts (cohort table)
-src/routes/(dashboard)/app/mentor/students/
+Organization Created:
+├── Owner: User who created (KTP verified)
+├── Status: Unverified (can operate)
+├── Courses: Can create
+└── Invite: Can invite mentors/facilitators
 ```
 
 ---
 
-## Workflow 4: Course Creation & Publishing
+## Workflow 1.1: Organization Verification (Trusted Badge)
+
+### Prerequisites
+
+- Organization must exist
+- Organization owner must have legal documents
 
 ### Actors
 
-- **Mentor** or **Organization Creator**
+- **Organization Owner/Admin** (submits verification)
+- **Admin** (approves verification)
+
+### Steps
+
+1. **Submit Verification**
+
+   ```
+   POST /api/organizations/{orgId}/verification
+   Body: {
+     legalName: "Yayasan Koneksi Digital",
+     legalType: "yayasan",
+     npwp: "12.345.678.9-000.000",
+     skPendirian: "<document_url>",
+     siup: "<optional_document_url>",
+     representativeName: "Sandikodev",
+     representativePosition: "ketua",
+     legalAddress: "Jl. Teknologi No. 123, Jakarta",
+     city: "Jakarta",
+     province: "DKI Jakarta",
+     postalCode: "12345"
+   }
+   ```
+
+2. **Admin Review**
+   - Admin checks submitted documents
+   - Verifies legal entity existence
+   - Approves or rejects
+
+3. **Result**
+   - If approved:
+     - `organizationVerification.isTrusted = true`
+     - Courses get "Verified Organization" badge
+     - Higher visibility in marketplace
+   - If rejected:
+     - Reason provided
+     - Can resubmit with corrected docs
+
+### Benefits of Verification
+
+| Feature                 | Unverified | Verified    |
+| ----------------------- | ---------- | ----------- |
+| Create courses          | ✅         | ✅          |
+| Invite mentors          | ✅         | ✅          |
+| Trusted badge           | ❌         | ✅          |
+| Marketplace priority    | Standard   | Higher      |
+| Enterprise partnerships | Limited    | Full access |
+
+---
+
+## Workflow 2: Inviting Mentor/Facilitator (Auto-Affiliate)
+
+### Actors
+
+- **Organization Owner/Admin** (sends invitation)
+- **Invited User** (accepts invitation, becomes mentor/facilitator)
+
+### Steps
+
+1. **Send Invitation**
+
+   ```
+   POST /api/organizations/{orgId}/invite
+   Body: {
+     email: "mentor@example.com",
+     role: "mentor" // or "facilitator"
+   }
+   ```
+
+2. **Validation Rules**
+
+   ```typescript
+   // Check if user already has role in this org
+   const existingRole = await db.query.organizationMember.findFirst({
+   	where: and(eq(organizationMember.orgId, orgId), eq(organizationMember.userId, invitee.id))
+   });
+
+   if (existingRole) {
+   	// NO DOUBLE ROLES in same organization
+   	return fail(400, {
+   		error: 'User already has a role in this organization'
+   	});
+   }
+   ```
+
+3. **User Accepts Invitation**
+
+   ```
+   POST /api/invitations/{inviteId}/accept
+   ```
+
+4. **Auto-Affiliate Creation** (Automatic)
+
+   ```typescript
+   // Auto-create affiliate account
+   const affiliateAccount = await db.insert(affiliateAccount).values({
+   	id: generateId(),
+   	userId: invitee.id,
+   	orgId: orgId,
+   	role: invitedRole, // 'mentor' or 'facilitator'
+   	commissionRate: 25, // Default 25%
+   	tier: 'bronze',
+   	isActive: true
+   });
+
+   // Auto-generate affiliate links for all org courses
+   const orgCourses = await getCoursesByOrg(orgId);
+   for (const course of orgCourses) {
+   	await createAutoAffiliateLink(affiliateAccount.id, course.id);
+   }
+   ```
+
+5. **Role-Specific Onboarding** (Required)
+   - **For Mentor**: Complete profile, expertise, portfolio, payout setup
+   - **For Facilitator**: Confirm org context, payout setup
+   - **Different from student onboarding!**
+
+6. **Role Switcher Enabled**
+   - User can now switch between Student view and Mentor/Facilitator view
+   - Via RoleSwitcher in sidebar
+
+### Auto-Affiliate Features
+
+| Feature              | Description                       |
+| -------------------- | --------------------------------- |
+| Auto-generated links | Links for all org courses         |
+| Unique referral code | e.g., "mentor-budi-abc123"        |
+| Default commission   | 25%                               |
+| Tier system          | Bronze → Silver → Gold → Platinum |
+| Payout tracking      | Earnings tracked automatically    |
+
+### Important Rules
+
+1. **No Double Roles**: A user can only be mentor OR facilitator in one organization
+2. **Different Onboarding**: Invited mentors/facilitators have different onboarding than students
+3. **Auto-Affiliate**: Affiliate account created automatically on invitation accept
+
+---
+
+## Workflow 3: Creating Courses
+
+### Actors
+
+- **Organization Owner/Admin** or **Mentor** (course creator)
 
 ### Steps
 
@@ -158,7 +327,17 @@ src/routes/(dashboard)/app/mentor/students/
 
    ```
    POST /api/courses
-   Body: { title, description, price, category }
+   Body: {
+     title: "Akselerasi Bisnis Digital",
+     description: "...",
+     price: 1500000,
+     category: "marketing",
+     featuresConfig: {
+       tracks: true,      // Enable track selection
+       affiliate: true,   // Enable affiliate program
+       performance: true  // Enable progress tracking
+     }
+   }
    ```
 
 2. **Add Content**
@@ -166,46 +345,32 @@ src/routes/(dashboard)/app/mentor/students/
    - Add Lessons to modules
    - Add Materials to lessons
 
-3. **Configure Features**
-
-   ```json
-   {
-   	"tracks": true, // Enable track selection
-   	"affiliate": true, // Enable affiliate program
-   	"performance": true // Enable progress tracking
-   }
-   ```
-
-4. **Publish Course**
+3. **Publish Course**
    - Set status to `published`
    - Course appears in marketplace
+   - Affiliate links auto-generated for mentors/facilitators
 
-5. **Assign to Organization** (optional)
-   ```sql
-   UPDATE course SET org_id = 'org-xxx' WHERE id = 'course-xxx';
+4. **Verified Organization Badge**
    ```
-
-### Code Reference
-
-```
-src/routes/(dashboard)/app/my-courses/
-src/routes/(dashboard)/app/explore/[id]/
-```
+   IF org.isTrusted === true:
+     Course shows "Verified Organization" badge
+   ```
 
 ---
 
-## Workflow 5: Student Enrollment Flow
+## Workflow 4: Student Enrollment
 
 ### Actors
 
 - **Student** (self-enrollment)
 - **Admin/Facilitator** (bulk enrollment)
 
-### Self-Enrollment Steps
+### Steps
 
 1. **Browse Marketplace**
    - View available courses
    - See course details
+   - Note "Verified Organization" badge if applicable
 
 2. **Select Track** (if course has tracks enabled)
    - Content Creator
@@ -217,242 +382,183 @@ src/routes/(dashboard)/app/explore/[id]/
    - Validate and apply discount
 
 4. **Checkout**
-   - Review order
-   - Make payment (Midtrans)
+   - Payment via Midtrans
    - Or submit payment proof
 
 5. **Activation**
-   - Payment verified
    - Enrollment status → `active`
    - Access granted to course content
-
-### Bulk Enrollment (Admin)
-
-```
-POST /api/enrollments/bulk
-Body: {
-  courseId,
-  cohortId,
-  studentIds: [...]
-}
-```
-
-### Code Reference
-
-```
-src/routes/(dashboard)/app/explore/[id]/enroll/
-src/routes/(public)/marketplace/[id]/checkout/
-```
+   - Tracker system activated
 
 ---
 
-## Workflow 6: Learning Progress Flow
+## Workflow 5: Earning Income
 
-### Student Journey
+### Income Sources
 
-```
-1. Start Lesson
-   ↓
-2. Watch Video / Read Material
-   ↓
-3. Mark as Complete
-   ↓
-4. Take Quiz (if exists)
-   ↓
-5. Submit Assignment (if exists)
-   ↓
-6. Next Lesson
-   ↓
-7. Complete Module
-   ↓
-8. Complete Course
-   ↓
-9. Earn Certificate
-```
-
-### Checkpoint System
-
-| Week | Checkpoint    | Submission  |
-| ---- | ------------- | ----------- |
-| 1-2  | Weekly Task   | Text/File   |
-| 3-4  | Milestone 1   | Quiz + Task |
-| 5-6  | Weekly Task   | Text/File   |
-| 7-8  | Final Project | Portfolio   |
-
-### Code Reference
-
-```
-src/routes/(dashboard)/app/learning/
-src/routes/(dashboard)/app/checkpoints/
-```
-
----
-
-## Workflow 7: Grading & Certification
-
-### Assessment Flow
-
-1. **Student Submits**
-   - Quiz answer or assignment file
-   - Timestamp recorded
-
-2. **Auto-Grading** (MCQ)
-   - Immediate result
-   - Grade recorded
-
-3. **Manual Grading** (Assignments)
-   - Mentor reviews submission
-   - Adds grade and feedback
-   - Student notified
-
-4. **Certificate Generation**
-   - Course completed
-   - All checkpoints passed
-   - Certificate PDF generated
-   - Unique serial number
-
-### Code Reference
-
-```
-src/routes/(dashboard)/app/explore/[courseId]/learn/quiz/
-src/routes/(dashboard)/app/learning/certificates/
-```
-
----
-
-## Workflow 8: Affiliate Program
-
-### How It Works
-
-1. **Generate Link**
-   - Student/Affiliate creates link for a course
-   - Gets unique tracking URL
-
-2. **Share Link**
-   - Social media, blog, etc.
-
-3. **Track Clicks**
-   - Link clicked → recorded
-   - Unique visitor tracked
-
-4. **Conversion**
-   - Visitor enrolls via link
-   - Sale recorded
-   - Commission calculated
-
-5. **Payout**
-   - Commission accumulated
-   - Manual payout by admin
-
-### Commission Example
+#### 1. Course Creator Revenue
 
 ```
 Course Price: Rp 1,500,000
-Commission Rate: 25%
-Commission: Rp 375,000
+├── Creator Share: 70% = Rp 1,050,000
+└── Platform Fee: 30% = Rp 450,000
 ```
 
-### Code Reference
+#### 2. Affiliate Commission (Mentors/Facilitators)
 
 ```
-src/routes/(dashboard)/app/affiliate/
-src/lib/server/db/schema.ts (affiliateLink, affiliateSale)
+Via auto-generated links:
+Course Price: Rp 1,500,000
+Commission (Bronze 25%): Rp 375,000
+
+Tier-based rates:
+├── Bronze (0-1000 pts): 25%
+├── Silver (1001-5000 pts): 27%
+├── Gold (5001-10000 pts): 30%
+└── Platinum (10001+ pts): 35%
+```
+
+#### 3. Tracker Rewards
+
+```
+High tracker score → Unlock benefits:
+├── Coupon rewards
+├── Certificate priority
+├── Affiliate tier upgrade
+└── Revenue share (Legend tier)
 ```
 
 ---
 
-## Workflow 9: Organization Billing
+## Workflow 6: Tracker System
 
-### Plan Types
+### Points Sources
 
-| Plan       | Price  | Features                 |
-| ---------- | ------ | ------------------------ |
-| Free       | -      | 1 course, 10 students    |
-| Pro        | Custom | 10 courses, 100 students |
-| Enterprise | Custom | Unlimited                |
+| Activity            | Points | Frequency       |
+| ------------------- | ------ | --------------- |
+| Complete Lesson     | 10     | Per lesson      |
+| Complete Module     | 50     | Per module      |
+| Complete Checkpoint | 100    | Per checkpoint  |
+| Daily Streak        | 5/day  | Daily           |
+| Discussion Post     | 5      | Per post        |
+| Discussion Reply    | 2      | Per reply       |
+| Referral            | 50     | Per referral    |
+| Course Completion   | 200    | Per course      |
+| Certificate         | 100    | Per certificate |
 
-### Billing Flow
-
-1. **Organization Created**
-   - Default: Free plan
-   - Limited features
-
-2. **Upgrade Request**
-   - Contact admin/BD
-   - Select plan
-   - Generate invoice
-
-3. **Activation**
-   - Payment received
-   - Plan upgraded
-   - Features unlocked
-
-### Code Reference
+### Tier Progression
 
 ```
-src/lib/server/db/schema.ts (organization.planType)
+Starter (0-100)
+    └── Basic access
+        │
+        ▼
+Learner (101-500)
+    └── Unlock coupons
+        │
+        ▼
+Achiever (501-2000)
+    └── Higher affiliate tier
+        │
+        ▼
+Champion (2001-5000)
+    └── Priority support, beta features
+        │
+        ▼
+Legend (5001+)
+    └── Revenue share, mentor network
 ```
 
 ---
 
 ## Quick Reference: Key API Endpoints
 
-| Action                | Method | Endpoint                          |
-| --------------------- | ------ | --------------------------------- |
-| Create Org            | POST   | `/api/organizations`              |
-| Invite Member         | POST   | `/api/organizations/[id]/invite`  |
-| Create Course         | POST   | `/api/courses`                    |
-| Create Cohort         | POST   | `/api/cohorts`                    |
-| Enroll Student        | POST   | `/api/enrollments`                |
-| Generate Certificate  | POST   | `/api/certificates/[id]/generate` |
-| Create Affiliate Link | POST   | `/api/affiliate/links`            |
+### User & Verification
+
+| Action             | Method | Endpoint                |
+| ------------------ | ------ | ----------------------- |
+| Register           | POST   | `/auth/register`        |
+| Submit KTP         | POST   | `/api/verification/ktp` |
+| Check Verification | GET    | `/api/verification/ktp` |
+
+### Organization
+
+| Action                  | Method | Endpoint                               |
+| ----------------------- | ------ | -------------------------------------- |
+| Create Org              | POST   | `/api/organizations`                   |
+| Submit Org Verification | POST   | `/api/organizations/{id}/verification` |
+| Invite Member           | POST   | `/api/organizations/{id}/invite`       |
+
+### Courses & Enrollment
+
+| Action        | Method | Endpoint           |
+| ------------- | ------ | ------------------ |
+| Create Course | POST   | `/api/courses`     |
+| Enroll        | POST   | `/api/enrollments` |
+
+### Affiliate
+
+| Action                   | Method | Endpoint               |
+| ------------------------ | ------ | ---------------------- |
+| View Affiliate Dashboard | GET    | `/api/affiliate`       |
+| Generate Link            | POST   | `/api/affiliate/links` |
+
+### Tracker
+
+| Action          | Method | Endpoint                  |
+| --------------- | ------ | ------------------------- |
+| View Tracker    | GET    | `/api/tracker`            |
+| View Activities | GET    | `/api/tracker/activities` |
 
 ---
 
 ## Diagrams
 
-### Multi-Tenant Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    NAIK KELAS 2.0                        │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
-│  │ Organization│  │ Organization│  │ Organization│     │
-│  │  (Yayasan)  │  │  (Sekolah)  │  │   (Bisnis)  │     │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘     │
-│         │                │                │             │
-│  ┌──────┴──────┐  ┌──────┴──────┐  ┌──────┴──────┐     │
-│  │  Workspace  │  │  Workspace  │  │  Workspace  │     │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘     │
-│         │                │                │             │
-│  ┌──────┴──────┐  ┌──────┴──────┐  ┌──────┴──────┐     │
-│  │   Courses   │  │   Courses   │  │   Courses   │     │
-│  └──────┬──────┘  └──────┬──────┘  └──────┴──────┘     │
-│         │                │                             │
-│  ┌──────┴──────┐  ┌──────┴──────┐                      │
-│  │   Cohorts   │  │   Cohorts   │                      │
-│  └──────┬──────┘  └──────┴──────┘                      │
-│         │                                              │
-│  ┌──────┴──────┐                                       │
-│  │  Students   │                                       │
-│  └─────────────┘                                       │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
-
-### Student Enrollment Flow
+### Complete User Journey
 
 ```
 ┌─────────┐     ┌──────────┐     ┌─────────┐     ┌──────────┐
-│ Browse  │────▶│ Select   │────▶│ Apply   │────▶│ Checkout │
-│ Course  │     │ Track    │     │ Coupon  │     │ Payment  │
+│ Register│────▶│ Onboard  │────▶│ Learn   │────▶│ Earn     │
+│ (Email) │     │ (Track)  │     │         │     │ Tracker  │
 └─────────┘     └──────────┘     └─────────┘     └────┬─────┘
                                                        │
-                                                       ▼
-┌─────────┐     ┌──────────┐     ┌─────────┐     ┌──────────┐
-│ Earn    │◀────│ Complete │◀────│ Submit  │◀────│ Access   │
-│ Cert    │     │ Course   │     │ Tasks   │     │ Content  │
-└─────────┘     └──────────┘     └─────────┘     └──────────┘
+                    ┌──────────────────────────────────┘
+                    │
+                    ▼
+            ┌──────────────┐     ┌──────────────┐     ┌──────────┐
+            │ KTP Verify   │────▶│ Create Org   │────▶│ Invite   │
+            │ (Optional)   │     │ (Required)   │     │ M/F      │
+            └──────────────┘     └──────┬───────┘     └────┬─────┘
+                                        │                   │
+                                        ▼                   ▼
+                               ┌──────────────┐    ┌──────────────┐
+                               │ Org Verify   │    │ Auto-Affiliate│
+                               │ (Optional)   │    │ Links Created │
+                               └──────────────┘    └──────────────┘
+```
+
+### Invitation & Auto-Affiliate Flow
+
+```
+Org Owner
+    │
+    ▼
+Invite "mentor@example.com" as "mentor"
+    │
+    ▼
+User Accepts Invitation
+    │
+    ├──▶ Add to OrganizationMember (role: 'mentor')
+    │
+    ├──▶ Create AffiliateAccount (25% commission)
+    │
+    ├──▶ Generate AutoAffiliateLinks for all org courses
+    │
+    └──▶ Trigger Mentor Onboarding (different from student)
+            │
+            ▼
+        Complete Profile + Payout Setup
+            │
+            ▼
+        Dashboard with RoleSwitcher enabled
 ```

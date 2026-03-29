@@ -242,6 +242,44 @@
 
 ---
 
+---
+
+## Verification Systems (NEW)
+
+| Feature                    | Status         | Notes                       |
+| -------------------------- | -------------- | --------------------------- |
+| KTP Verification           | ⚠️ SCHEMA-ONLY | Schema complete, UI pending |
+| Organization Verification  | ⚠️ SCHEMA-ONLY | Schema complete, UI pending |
+| Verification Queue (Admin) | ❌ PLANNED     | Admin approval workflow     |
+| Trusted Badge              | ⚠️ SCHEMA-ONLY | Display logic pending       |
+
+---
+
+## Auto-Affiliate System (NEW)
+
+| Feature              | Status         | Notes                         |
+| -------------------- | -------------- | ----------------------------- |
+| Affiliate Account    | ⚠️ SCHEMA-ONLY | Auto-create on invite         |
+| Auto Affiliate Links | ⚠️ SCHEMA-ONLY | Auto-generate for org courses |
+| Tier System          | ⚠️ SCHEMA-ONLY | bronze/silver/gold/platinum   |
+| Commission Tracking  | ⚠️ SCHEMA-ONLY | Based on tier rates           |
+| Payout System        | ⚠️ SCHEMA-ONLY | Bank account setup            |
+
+---
+
+## Tracker System (NEW - Differentiator)
+
+| Feature           | Status         | Notes                                            |
+| ----------------- | -------------- | ------------------------------------------------ |
+| User Tracker      | ⚠️ SCHEMA-ONLY | Points, streaks, tiers                           |
+| Activity Logging  | ⚠️ SCHEMA-ONLY | Track all point-earning activities               |
+| Streak System     | ⚠️ SCHEMA-ONLY | Daily activity tracking                          |
+| Tier Progression  | ⚠️ SCHEMA-ONLY | starter → learner → achiever → champion → legend |
+| Tracker Rewards   | ❌ PLANNED     | Coupons, priority, revenue share                 |
+| Tracker Dashboard | ❌ PLANNED     | Visual progress display                          |
+
+---
+
 ## Known Issues
 
 | Issue                           | Severity | Status                        |
@@ -254,10 +292,14 @@
 
 ## Code References
 
-| Module     | Path                          |
-| ---------- | ----------------------------- |
-| Schema     | `src/lib/server/db/schema.ts` |
-| Auth       | `src/lib/server/auth.ts`      |
-| RBAC       | `src/lib/server/rbac.ts`      |
-| Payments   | `src/lib/server/payments/`    |
-| Onboarding | `src/routes/onboarding/`      |
+| Module            | Path                                                         |
+| ----------------- | ------------------------------------------------------------ |
+| Schema            | `src/lib/server/db/schema.ts`                                |
+| Auth              | `src/lib/server/auth.ts`                                     |
+| RBAC              | `src/lib/server/rbac.ts`                                     |
+| Payments          | `src/lib/server/payments/`                                   |
+| Onboarding        | `src/routes/onboarding/`                                     |
+| User Verification | `src/lib/server/db/schema.ts` (userVerification)             |
+| Org Verification  | `src/lib/server/db/schema.ts` (organizationVerification)     |
+| Affiliate Account | `src/lib/server/db/schema.ts` (affiliateAccount)             |
+| Tracker           | `src/lib/server/db/schema.ts` (userTracker, trackerActivity) |
