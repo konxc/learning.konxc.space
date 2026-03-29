@@ -2,6 +2,7 @@
 	import '../app.css';
 	import { browser } from '$app/environment';
 	import { afterNavigate } from '$app/navigation';
+	import Toaster from '$lib/components/Toaster.svelte';
 
 	let { children } = $props();
 
@@ -64,3 +65,5 @@
 </svelte:head>
 
 {@render children?.()}
+
+<Toaster />

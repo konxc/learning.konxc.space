@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
+	import { toast } from '$lib/stores/toast';
 	import AuthContainer from '$lib/components/AuthContainer.svelte';
 	import AuthFormField from '$lib/components/AuthFormField.svelte';
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
-	import AuthMessage from '$lib/components/AuthMessage.svelte';
 	import { enhance } from '$app/forms';
 	import { TEXT, COLOR, RADIUS, TRANSITION, SPACING } from '$lib/config/design';
 
@@ -15,6 +15,13 @@
 	let password = $state('');
 	let confirmPassword = $state('');
 	let isLoading = $state(false);
+
+	// Show toast when form error message changes
+	$effect(() => {
+		if (form?.message) {
+			toast.error(form.message);
+		}
+	});
 
 	function validatePasswordStrength(password: string): { valid: boolean; message: string } {
 		if (password.length < 6) {
@@ -45,10 +52,6 @@
 	subtitle="Mulai perjalanan transformatif kamu hari ini dan bergabunglah dengan ribuan builder lainnya."
 >
 	<div class="space-y-8">
-		{#if form?.message}
-			<AuthMessage type="error" message={form.message} />
-		{/if}
-
 		<form
 			method="POST"
 			use:enhance={() => {
