@@ -331,7 +331,7 @@
 									{#if savingNotes[selectedLesson.id]}
 										<span class="text-[10px] font-black text-amber-500 uppercase tracking-widest animate-pulse">Syncing...</span>
 									{:else if notesLoaded}
-										<span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Encypted & Stored</span>
+										<span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Encrypted & Stored</span>
 									{/if}
 								</div>
 							</div>

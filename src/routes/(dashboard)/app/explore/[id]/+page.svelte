@@ -405,7 +405,7 @@
 									class="flex w-full items-center justify-center gap-3 cursor-pointer rounded-2xl border-none bg-linear-to-r from-blue-600 via-blue-700 to-indigo-700 py-6 text-center text-[12px] font-black text-white shadow-2xl shadow-blue-500/40 transition-all hover:-translate-y-1 hover:shadow-blue-500/60 active:scale-[0.98] uppercase tracking-widest disabled:opacity-50"
 								>
 									{#if submitting}
-										Initialising... <Icon name="refresh-ccw" size={16} class="animate-spin" />
+										Initializing... <Icon name="refresh-ccw" size={16} class="animate-spin" />
 									{:else}
 										Initialize Deployment <Icon name="arrow-right" size={16} />
 									{/if}
