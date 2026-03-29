@@ -35,6 +35,7 @@
 	export interface SidebarProps {
 		items: NavItem[];
 		activeRole?: string | null;
+		effectiveRole?: string | null;
 		availableRoles?: string[];
 		config?: {
 			collapsible?: boolean;
@@ -54,6 +55,7 @@
 	let {
 		items,
 		activeRole,
+		effectiveRole,
 		availableRoles = [],
 		config = {},
 		isCollapsed = $bindable(false),
@@ -169,12 +171,6 @@
 			<Logo size={isCollapsed ? 'sm' : 'md'} showText={!isCollapsed} />
 		</div>
 
-		{#if !isCollapsed && availableRoles.length > 1 && activeRole && activeRole !== 'admin' && currentPathname !== '/app/leaderboard'}
-			<div class="px-3 pt-6 pb-1">
-				<RoleSegmentedControl {activeRole} {availableRoles} />
-			</div>
-		{/if}
-		
 		<!-- Navigation -->
 		<nav class="sidebar-nav flex-1 space-y-2 overflow-y-auto p-3" aria-label="Main navigation">
 			{#if filteredItems.length === 0 && !isCollapsed}

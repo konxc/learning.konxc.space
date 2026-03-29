@@ -25,6 +25,7 @@
 		} | null;
 		navItems: NavItem[];
 		activeRole?: string | null;
+		effectiveRole?: string | null;
 		availableRoles?: string[];
 		workspaces?: {
 			organizations: any[];
@@ -117,6 +118,7 @@
 		<Sidebar
 			items={data.navItems}
 			activeRole={data.activeRole ?? null}
+			effectiveRole={data.effectiveRole ?? null}
 			availableRoles={data.availableRoles ?? []}
 			config={{
 				collapsible: true,

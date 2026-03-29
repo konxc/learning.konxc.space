@@ -3,17 +3,17 @@
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
+	import AuthFormField from '$lib/components/AuthFormField.svelte';
+	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
+	import AuthMessage from '$lib/components/AuthMessage.svelte';
 	import { enhance } from '$app/forms';
-	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
+	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION, GRADIENT } from '$lib/config/design';
 	import { toast } from '$lib/stores/toast';
-	import { initTheme, setTheme, getStoredTheme, applyTheme, type Theme } from '$lib/stores/theme';
+	import { initTheme, setTheme, getStoredTheme, type Theme } from '$lib/stores/theme';
 	import { setLocale, getLocale } from '$lib/paraglide/runtime.js';
 	import { brandMode, toggleBrandMode } from '$lib/stores/brandMode';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
-	import { updateQueryParam } from '$lib/utils/url-params';
-
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -38,15 +38,13 @@
 	let currentLocale = $state('id');
 	let brandModeValue = $state<'chill' | 'hardcore'>('chill');
 
-	// Payment Gateway state
+	// Payment Gateway state (placeholder/partial implementation)
 	let midtransEnvironment = $state<'sandbox' | 'production'>('sandbox');
 	let merchantId = $state('');
 	let clientKey = $state('');
 	let serverKey = $state('');
-	let webhookUrl = $state('');
 	let isProcessing = $state(false);
 
-	// Initialize activeTab from URL query parameter on mount
 	onMount(() => {
 		const param = $page.url.searchParams.get('tab');
 		if (param && validTabs.includes(param as TabType)) {
@@ -65,20 +63,12 @@
 		brandModeValue = $brandMode;
 	});
 
-	// Sync with URL changes (e.g., browser back/forward)
 	$effect(() => {
 		const param = $page.url.searchParams.get('tab');
 		if (param && validTabs.includes(param as TabType)) {
-			if (activeTab !== param) {
-				activeTab = param as TabType;
-			}
-		} else if (activeTab !== 'profile') {
-			// If URL doesn't have tab param but activeTab is not default, reset to default
-			activeTab = 'profile';
+			activeTab = param as TabType;
 		}
 	});
-
-
 
 	function handleThemeChange(newTheme: Theme) {
 		theme = newTheme;
@@ -99,685 +89,500 @@
 		brandModeValue = $brandMode;
 		toast.success('Mode kampanye berhasil diubah!');
 	}
+
+	const tabs = [
+		{ id: 'profile', label: 'Profil', icon: '👤' },
+		{ id: 'security', label: 'Keamanan', icon: '🔒' },
+		{ id: 'payments', label: 'Pembayaran', icon: '💳' },
+		{ id: 'preferences', label: 'Preferensi', icon: '⚙️' }
+	] as const;
 </script>
 
 <svelte:head>
-	<title>Settings - Naik Kelas</title>
+	<title>Pengaturan - Naik Kelas</title>
 </svelte:head>
 
 <PageWrapper>
+	<PageHeader 
+		title="Pengaturan Akun" 
+		description="Kelola identitas, keamanan, dan preferensi platform kamu di satu tempat."
+	/>
 
-	<!-- Form Messages - Consistent with other pages -->
-	{#if form?.error}
-		<PageSection>
-			<div
-				class={`${RADIUS.button} ${SPACING.cardPadding} border border-red-200 bg-red-50 ${TEXT.body} text-red-800 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-300 ${ELEVATION.base}`}
-				role="alert"
-			>
-				<strong class="font-semibold">Error:</strong>
-				{form.error}
-			</div>
-		</PageSection>
-	{/if}
+	<div class="flex flex-col lg:flex-row gap-8 items-start">
+		<!-- Modern Sidebar Nav -->
+		<aside class={`w-full lg:w-64 sticky top-24 z-10 space-y-2 p-1 ${RADIUS.card} border ${COLOR.cardBorder} bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md`}>
+			{#each tabs as tab}
+				<button
+					onclick={() => activeTab = tab.id}
+					class={`w-full flex items-center gap-3 px-4 py-3 ${RADIUS.button} ${TEXT.button} font-bold ${TRANSITION.all}
+					${activeTab === tab.id 
+						? `${COLOR.accentBg} text-white shadow-lg` 
+						: `${COLOR.textSecondary} hover:bg-zinc-100 dark:hover:bg-zinc-800`}`}
+				>
+					<span class="text-lg">{tab.icon}</span>
+					{tab.label}
+				</button>
+			{/each}
+		</aside>
 
-	{#if form?.success}
-		<PageSection>
-			<div
-				class={`${RADIUS.button} ${SPACING.cardPadding} border border-green-200 bg-green-50 ${TEXT.body} text-green-800 dark:border-green-900/50 dark:bg-green-950/20 dark:text-green-300 ${ELEVATION.base}`}
-				role="alert"
-			>
-				<strong class="font-semibold">Berhasil!</strong>
-				{form?.message ?? 'Perubahan berhasil disimpan.'}
-			</div>
-		</PageSection>
-	{/if}
+		<!-- Content Area -->
+		<main class="flex-1 w-full space-y-6">
+			{#if form?.error}
+				<AuthMessage type="error" message={form.error} />
+			{/if}
 
-	<!-- Profile Tab -->
-	{#if activeTab === 'profile'}
-		<PageSection>
-			<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-6`}>Informasi Profil</h2>
-			<form
-				method="POST"
-				action="?/updateProfile"
-				use:enhance={() => {
-					return async ({ result, update }) => {
-						if (result.type === 'success') {
-							toast.success('Profil berhasil diperbarui!');
-							await update();
-						} else if (result.type === 'failure') {
-							const failureData = result.data;
-							const message =
-								typeof failureData === 'object' &&
-								failureData &&
-								'error' in failureData &&
-								typeof (failureData as { error?: unknown }).error === 'string'
-									? (failureData as { error: string }).error
-									: 'Gagal memperbarui profil';
-							toast.error(message);
-						}
-					};
-				}}
-				class="space-y-6"
-			>
-				<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-					<div class="flex flex-col gap-2">
-						<label
-							for="username"
-							class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
+			{#if form?.success}
+				<AuthMessage type="success" message={form.message || 'Perubahan berhasil disimpan.'} />
+			{/if}
+
+			<!-- Profile Tab -->
+			{#if activeTab === 'profile'}
+				<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in slide-in-from-bottom-5 duration-700">
+					<!-- Essential Identity Card -->
+					<div class={`lg:col-span-8 ${RADIUS.card} border ${COLOR.cardBorder} bg-white dark:bg-zinc-900 shadow-sm overflow-hidden`}>
+						<div class="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+							<h2 class={`${TEXT.h3} ${COLOR.textPrimary} font-black`}>Identitas Inti</h2>
+							<span class="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-md uppercase tracking-widest">Wajib</span>
+						</div>
+						
+						<form
+							method="POST"
+							action="?/updateProfile"
+							use:enhance={() => {
+								isProcessing = true;
+								return async ({ result, update }) => {
+									if (result.type === 'success') {
+										toast.success('Profil berhasil diperbarui!');
+										await update();
+									} else if (result.type === 'failure') {
+										const msg = String(result.data?.error || 'Gagal memperbarui profil');
+										toast.error(msg);
+									}
+									isProcessing = false;
+								};
+							}}
+							class="p-6 space-y-6"
 						>
-							Username
-						</label>
-						<input
-							type="text"
-							id="username"
-							name="username"
-							value={username}
-							disabled
-							class={`${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} ${COLOR.card} ${COLOR.textSecondary} cursor-not-allowed opacity-70`}
-						/>
-						<p class={`${TEXT.small} ${COLOR.textMuted} mt-1`}>
-							Username tidak dapat diubah setelah akun dibuat.
-						</p>
+							<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+								<AuthFormField
+									label="Username"
+									name="username"
+									bind:value={username}
+									placeholder="Username"
+									required={true}
+									hint="Username tidak dapat diubah."
+									autocomplete="username"
+								/>
+
+								<AuthFormField
+									label="Nama Lengkap"
+									name="fullName"
+									bind:value={fullName}
+									placeholder="Nama Lengkap"
+									required={true}
+									autocomplete="name"
+								/>
+
+								<AuthFormField
+									label="Email Utama"
+									type="email"
+									name="email"
+									bind:value={email}
+									placeholder="email@example.com"
+									required={true}
+									autocomplete="email"
+								/>
+
+								<AuthFormField
+									label="Nomor Telepon"
+									type="tel"
+									name="phone"
+									bind:value={phone}
+									placeholder="+62 8xx-xxxx-xxxx"
+									autocomplete="tel"
+								/>
+							</div>
+
+							<div class="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-end">
+								<div class="w-full sm:w-auto">
+									<AuthSubmitButton text="Simpan Identitas" loading={isProcessing} disabled={isProcessing} />
+								</div>
+							</div>
+						</form>
 					</div>
 
-					<div class="flex flex-col gap-2">
-						<label
-							for="fullName"
-							class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
-						>
-							Nama Lengkap
-						</label>
-						<input
-							type="text"
-							id="fullName"
-							name="fullName"
-							bind:value={fullName}
-							placeholder="Masukkan nama lengkap"
-							class={`${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
-						/>
-					</div>
+					<!-- Sidebar Info / Stats Card -->
+					<div class="lg:col-span-4 space-y-6">
+						<div class={`${RADIUS.card} border ${COLOR.cardBorder} bg-linear-to-br from-blue-600 to-indigo-700 p-6 text-white overflow-hidden relative group`}>
+							<div class="relative z-10 flex flex-col h-full justify-between gap-8">
+								<div>
+									<p class="text-[10px] font-black tracking-[0.2em] uppercase opacity-70 mb-1">Status Keanggotaan</p>
+									<h3 class="text-2xl font-black italic tracking-tighter uppercase">Premium Squad</h3>
+								</div>
+								<div class="space-y-1">
+									<p class="text-xs opacity-80">Terdaftar Sejak</p>
+									<p class="font-bold">
+										{data.user?.createdAt ? new Date(data.user.createdAt).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) : '-'}
+									</p>
+								</div>
+							</div>
+							<!-- Decorative Blobs -->
+							<div class="absolute top-[-20%] right-[-20%] w-32 h-32 bg-white/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-1000"></div>
+							<div class="absolute bottom-[-20%] left-[-20%] w-24 h-24 bg-blue-400/30 rounded-full blur-xl animate-pulse"></div>
+						</div>
 
-					<div class="flex flex-col gap-2">
-						<label for="email" class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}>
-							Email
-						</label>
-						<input
-							type="email"
-							id="email"
-							name="email"
-							bind:value={email}
-							placeholder="your@email.com"
-							class={`${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
-						/>
-					</div>
-
-					<div class="flex flex-col gap-2">
-						<label for="phone" class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}>
-							Nomor Telepon
-						</label>
-						<input
-							type="tel"
-							id="phone"
-							name="phone"
-							bind:value={phone}
-							placeholder="+62 812-3456-7890"
-							class={`${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
-						/>
+						<div class={`${RADIUS.card} border ${COLOR.cardBorder} bg-white dark:bg-zinc-900 p-6 space-y-4`}>
+							<h4 class="text-xs font-black tracking-widest text-zinc-400 uppercase">Aktivitas Terakhir</h4>
+							<div class="space-y-4">
+								<div class="flex items-center gap-3">
+									<div class="h-2 w-2 rounded-full bg-green-500"></div>
+									<p class="text-xs font-semibold">Berhasil login hari ini</p>
+								</div>
+								<div class="flex items-center gap-3">
+									<div class="h-2 w-2 rounded-full bg-blue-500"></div>
+									<p class="text-xs font-semibold">Update profil terdeteksi</p>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
+			{/if}
 
-				<div class="flex items-center justify-end gap-3 pt-4">
-					<button
-						type="submit"
-						class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:opacity-90 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
-					>
-						Simpan Perubahan
-					</button>
-				</div>
-			</form>
-		</PageSection>
-	{/if}
-
-	<!-- Security Tab -->
-	{#if activeTab === 'security'}
-		<PageSection>
-			<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-6`}>Keamanan Akun</h2>
-			<form
-				method="POST"
-				action="?/changePassword"
-				use:enhance={() => {
-					return async ({ result, update }) => {
-						if (result.type === 'success') {
-							toast.success('Password berhasil diubah!');
-							currentPassword = '';
-							newPassword = '';
-							confirmPassword = '';
-							showPasswordChange = false;
-							await update();
-						} else if (result.type === 'failure') {
-							const failureData = result.data;
-							const message =
-								typeof failureData === 'object' &&
-								failureData &&
-								'error' in failureData &&
-								typeof (failureData as { error?: unknown }).error === 'string'
-									? (failureData as { error: string }).error
-									: 'Gagal mengubah password';
-							toast.error(message);
-						}
-					};
-				}}
-				class="space-y-6"
-			>
-				{#if !showPasswordChange}
-					<div
-						class={`flex items-center justify-between ${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding}`}
-					>
-						<div>
-							<h3 class={`${TEXT.button} ${COLOR.textPrimary} mb-1 font-semibold`}>Password</h3>
-							<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
-								Terakhir diubah: {data.user?.createdAt
-									? new Date(data.user.createdAt).toLocaleDateString('id-ID')
-									: 'Belum pernah diubah'}
-							</p>
-						</div>
-						<button
-							type="button"
-							onclick={() => (showPasswordChange = true)}
-							class={`inline-flex items-center ${RADIUS.button} ${COLOR.cardBorder} ${SPACING.button} ${TEXT.button} ${TRANSITION.all} hover:border-blue-600 hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1 dark:hover:bg-blue-950/30 dark:hover:text-blue-300`}
-						>
-							Ubah Password
-						</button>
-					</div>
-				{:else}
-					<div class="space-y-4">
-						<div class="flex flex-col gap-2">
-							<label
-								for="currentPassword"
-								class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
-							>
-								Password Saat Ini
-							</label>
-							<input
-								type="password"
-								id="currentPassword"
-								name="currentPassword"
-								bind:value={currentPassword}
-								required
-								placeholder="Masukkan password saat ini"
-								class={`${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
-							/>
+			<!-- Security Tab -->
+			{#if activeTab === 'security'}
+				<div class="max-w-2xl animate-in fade-in slide-in-from-bottom-5 duration-700">
+					<div class={`overflow-hidden ${RADIUS.card} border ${COLOR.cardBorder} bg-white dark:bg-zinc-900 shadow-sm`}>
+						<div class="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+							<span class="text-xl">🛡️</span>
+							<h2 class={`${TEXT.h3} ${COLOR.textPrimary} font-black`}>Keamanan Akun</h2>
 						</div>
 
-						<div class="flex flex-col gap-2">
-							<label
-								for="newPassword"
-								class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
-							>
-								Password Baru
-							</label>
-							<input
-								type="password"
-								id="newPassword"
-								name="newPassword"
-								bind:value={newPassword}
-								required
-								minlength="8"
-								placeholder="Minimum 8 karakter"
-								class={`${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
-							/>
-							<p class={`${TEXT.small} ${COLOR.textMuted} mt-1`}>
-								Password harus terdiri dari minimal 8 karakter.
-							</p>
-						</div>
-
-						<div class="flex flex-col gap-2">
-							<label
-								for="confirmPassword"
-								class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
-							>
-								Konfirmasi Password Baru
-							</label>
-							<input
-								type="password"
-								id="confirmPassword"
-								name="confirmPassword"
-								bind:value={confirmPassword}
-								required
-								placeholder="Ulangi password baru"
-								class={`${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
-							/>
-							{#if confirmPassword && newPassword !== confirmPassword}
-								<p class={`${TEXT.small} mt-1 text-red-600 dark:text-red-400`}>
-									Password tidak cocok.
-								</p>
-							{/if}
-						</div>
-
-						<div class="flex items-center justify-end gap-3 pt-4">
-							<button
-								type="button"
-								onclick={() => {
-									showPasswordChange = false;
-									currentPassword = '';
-									newPassword = '';
-									confirmPassword = '';
+						<div class="p-6">
+							<form
+								method="POST"
+								action="?/changePassword"
+								use:enhance={() => {
+									isProcessing = true;
+									return async ({ result, update }) => {
+										if (result.type === 'success') {
+											toast.success('Password berhasil diubah!');
+											currentPassword = '';
+											newPassword = '';
+											confirmPassword = '';
+											showPasswordChange = false;
+											await update();
+										} else if (result.type === 'failure') {
+											toast.error(String(result.data?.error) || 'Gagal mengubah password');
+										}
+										isProcessing = false;
+									};
 								}}
-								class={`inline-flex items-center ${RADIUS.button} ${COLOR.cardBorder} ${SPACING.button} ${TEXT.button} ${COLOR.card} ${TRANSITION.colors} ${COLOR.neutralHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+								class="space-y-6"
 							>
-								Batal
-							</button>
-							<button
-								type="submit"
-								disabled={!currentPassword ||
-									!newPassword ||
-									newPassword !== confirmPassword ||
-									newPassword.length < 8}
-								class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:opacity-90 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-neutral-900`}
-							>
-								Simpan Password Baru
-							</button>
+								{#if !showPasswordChange}
+									<div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
+										<div class="flex items-center gap-4">
+											<div class="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+												<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+												</svg>
+											</div>
+											<div>
+												<p class={`${TEXT.body} font-bold ${COLOR.textPrimary}`}>Kata Sandi</p>
+												<p class={`${TEXT.small} ${COLOR.textSecondary}`}>Rutin ubah password untuk menjaga keamanan.</p>
+											</div>
+										</div>
+										<button
+											type="button"
+											onclick={() => (showPasswordChange = true)}
+											class={`px-4 py-2 ${RADIUS.button} border ${COLOR.cardBorder} bg-white dark:bg-zinc-800 ${TEXT.button} font-bold shadow-sm ${TRANSITION.all} hover:bg-zinc-50 dark:hover:bg-zinc-700 active:scale-95`}
+										>
+											Ubah Password
+										</button>
+									</div>
+								{:else}
+									<div class="space-y-5 animate-in fade-in duration-300">
+										<AuthFormField
+											label="Password Saat Ini"
+											type="password"
+											name="currentPassword"
+											bind:value={currentPassword}
+											placeholder="••••••••"
+											required={true}
+										/>
+
+										<div class="space-y-2">
+											<AuthFormField
+												label="Password Baru"
+												type="password"
+												name="newPassword"
+												bind:value={newPassword}
+												placeholder="••••••••"
+												required={true}
+												minlength={8}
+											/>
+											<p class={`${TEXT.small} ${COLOR.textMuted}`}>Minimum 8 karakter kombinasi.</p>
+										</div>
+
+										<AuthFormField
+											label="Konfirmasi Password Baru"
+											type="password"
+											name="confirmPassword"
+											bind:value={confirmPassword}
+											placeholder="••••••••"
+											required={true}
+										/>
+
+										{#if confirmPassword && newPassword !== confirmPassword}
+											<p class="text-xs font-bold text-red-500 px-1 italic animate-bounce">
+												⚠️ Password tidak cocok!
+											</p>
+										{/if}
+
+										<div class="flex items-center gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+											<button
+												type="button"
+												onclick={() => (showPasswordChange = false)}
+												class={`flex-1 px-4 py-3 ${RADIUS.button} border ${COLOR.cardBorder} bg-white dark:bg-zinc-800 ${TEXT.button} font-bold ${TRANSITION.all} hover:bg-zinc-50 dark:hover:bg-zinc-700`}
+											>
+												Batal
+											</button>
+											<div class="flex-[2]">
+												<AuthSubmitButton 
+													text="Update Password" 
+													loading={isProcessing} 
+													disabled={isProcessing || !currentPassword || !newPassword || newPassword !== confirmPassword || newPassword.length < 8} 
+												/>
+											</div>
+										</div>
+									</div>
+								{/if}
+							</form>
 						</div>
 					</div>
-				{/if}
-			</form>
-		</PageSection>
-	{/if}
+
+					<!-- Trust Shield Info -->
+					<div class="mt-6 p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900/30 flex gap-4">
+						<span class="text-2xl mt-1">🛡️</span>
+						<div>
+							<p class={`${TEXT.body} font-bold text-blue-800 dark:text-blue-300`}>Keamanan Terenkripsi</p>
+							<p class={`${TEXT.small} text-blue-700/70 dark:text-blue-400/60 leading-relaxed`}>
+								Seluruh data pribadi kamu dienkripsi menggunakan standar industri. Kami tidak pernah membagikan password kamu kepada siapapun.
+							</p>
+						</div>
+					</div>
+				</div>
+			{/if}
 
 	<!-- Preferences Tab -->
 	{#if activeTab === 'preferences'}
 		<PageSection>
 			<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-6`}>Preferensi</h2>
 			<div class="space-y-6">
-				<!-- Theme Selection -->
-				<div class={`${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding}`}>
-					<h3 class={`${TEXT.button} ${COLOR.textPrimary} mb-2 font-semibold`}>Tema</h3>
-					<p class={`${TEXT.small} ${COLOR.textSecondary} mb-4`}>
-						Pilih tampilan yang paling nyaman untuk Anda. Pilih antara tema terang, gelap, atau
-						mengikuti preferensi sistem.
-					</p>
-					<div class="flex flex-wrap gap-2">
-						<button
-							type="button"
-							onclick={() => handleThemeChange('light')}
-							class={`inline-flex items-center gap-2 ${RADIUS.button} px-4 py-2 ${TEXT.button} font-medium ${TRANSITION.all} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 ${
-								theme === 'light'
-									? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/50 dark:bg-amber-950/15 dark:text-amber-400 dark:ring-amber-800/30'
-									: 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-neutral-800 dark:text-gray-300 dark:ring-neutral-700 dark:hover:bg-neutral-700'
-							}`}
-						>
-							<span>☀️</span>
-							Light
-						</button>
-						<button
-							type="button"
-							onclick={() => handleThemeChange('dark')}
-							class={`inline-flex items-center gap-2 ${RADIUS.button} px-4 py-2 ${TEXT.button} font-medium ${TRANSITION.all} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 ${
-								theme === 'dark'
-									? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200/50 dark:bg-indigo-950/15 dark:text-indigo-400 dark:ring-indigo-800/30'
-									: 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-neutral-800 dark:text-gray-300 dark:ring-neutral-700 dark:hover:bg-neutral-700'
-							}`}
-						>
-							<span>🌙</span>
-							Dark
-						</button>
-						<button
-							type="button"
-							onclick={() => handleThemeChange('system')}
-							class={`inline-flex items-center gap-2 ${RADIUS.button} px-4 py-2 ${TEXT.button} font-medium ${TRANSITION.all} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 ${
-								theme === 'system'
-									? 'bg-gray-50 text-gray-700 ring-1 ring-gray-200/50 dark:bg-neutral-800/40 dark:text-gray-300 dark:ring-neutral-700/50'
-									: 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-neutral-800 dark:text-gray-300 dark:ring-neutral-700 dark:hover:bg-neutral-700'
-							}`}
-						>
-							<span>💻</span>
-							System
-						</button>
+			<!-- Preferences Tab -->
+			{#if activeTab === 'preferences'}
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-5 duration-700">
+					<!-- Theme Selection -->
+					<div class={`${RADIUS.card} border ${COLOR.cardBorder} bg-white dark:bg-zinc-900 overflow-hidden shadow-sm`}>
+						<div class="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800">
+							<h3 class={`${TEXT.body} font-black ${COLOR.textPrimary} uppercase tracking-widest`}>Tema Visual</h3>
+						</div>
+						<div class="p-6 space-y-4">
+							<p class={`${TEXT.small} ${COLOR.textSecondary}`}>Pilih suasana yang paling nyaman untuk matamu selama belajar.</p>
+							<div class="flex flex-col gap-2">
+								{#each [{id: 'light', label: 'Terang', icon: '☀️'}, {id: 'dark', label: 'Gelap', icon: '🌙'}, {id: 'system', label: 'Sistem', icon: '💻'}] as t}
+									<button
+										type="button"
+										onclick={() => handleThemeChange(t.id as Theme)}
+										class={`flex items-center justify-between px-4 py-3 ${RADIUS.button} border ${TRANSITION.all}
+										${theme === t.id 
+											? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-bold' 
+											: `border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 ${COLOR.textPrimary}`}`}
+									>
+										<div class="flex items-center gap-3">
+											<span>{t.icon}</span>
+											{t.label}
+										</div>
+										{#if theme === t.id}
+											<div class="h-2 w-2 rounded-full bg-blue-600"></div>
+										{/if}
+									</button>
+								{/each}
+							</div>
+						</div>
 					</div>
-				</div>
 
-				<!-- Language Selection -->
-				<div class={`${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding}`}>
-					<h3 class={`${TEXT.button} ${COLOR.textPrimary} mb-2 font-semibold`}>Bahasa</h3>
-					<p class={`${TEXT.small} ${COLOR.textSecondary} mb-4`}>
-						Pilih bahasa antarmuka yang Anda inginkan.
-					</p>
-					<div class="flex flex-wrap gap-2">
-						<button
-							type="button"
-							onclick={() => handleLocaleChange('id')}
-							class={`inline-flex items-center gap-2 ${RADIUS.button} px-4 py-2 ${TEXT.button} font-medium ${TRANSITION.all} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 ${
-								currentLocale === 'id'
-									? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200/50 dark:bg-blue-950/15 dark:text-blue-400 dark:ring-blue-800/30'
-									: 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-neutral-800 dark:text-gray-300 dark:ring-neutral-700 dark:hover:bg-neutral-700'
-							}`}
-						>
-							🇮🇩 Indonesia
-						</button>
-						<button
-							type="button"
-							onclick={() => handleLocaleChange('en')}
-							class={`inline-flex items-center gap-2 ${RADIUS.button} px-4 py-2 ${TEXT.button} font-medium ${TRANSITION.all} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 ${
-								currentLocale === 'en'
-									? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200/50 dark:bg-blue-950/15 dark:text-blue-400 dark:ring-blue-800/30'
-									: 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-neutral-800 dark:text-gray-300 dark:ring-neutral-700 dark:hover:bg-neutral-700'
-							}`}
-						>
-							🇬🇧 English
-						</button>
-						<button
-							type="button"
-							onclick={() => handleLocaleChange('jp')}
-							class={`inline-flex items-center gap-2 ${RADIUS.button} px-4 py-2 ${TEXT.button} font-medium ${TRANSITION.all} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 ${
-								currentLocale === 'jp'
-									? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200/50 dark:bg-blue-950/15 dark:text-blue-400 dark:ring-blue-800/30'
-									: 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-neutral-800 dark:text-gray-300 dark:ring-neutral-700 dark:hover:bg-neutral-700'
-							}`}
-						>
-							🇯🇵 日本語
-						</button>
+					<!-- Language Selection -->
+					<div class={`${RADIUS.card} border ${COLOR.cardBorder} bg-white dark:bg-zinc-900 overflow-hidden shadow-sm`}>
+						<div class="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800">
+							<h3 class={`${TEXT.body} font-black ${COLOR.textPrimary} uppercase tracking-widest`}>Bahasa Antarmuka</h3>
+						</div>
+						<div class="p-6 space-y-4">
+							<p class={`${TEXT.small} ${COLOR.textSecondary}`}>Gunakan bahasa yang paling kamu kuasai untuk efisiensi belajar.</p>
+							<div class="flex flex-col gap-2">
+								{#each [{id: 'id', label: 'Indonesia', flag: '🇮🇩'}, {id: 'en', label: 'English', flag: '🇬🇧'}, {id: 'jp', label: '日本語', flag: '🇯🇵'}] as l}
+									<button
+										type="button"
+										onclick={() => handleLocaleChange(l.id)}
+										class={`flex items-center justify-between px-4 py-3 ${RADIUS.button} border ${TRANSITION.all}
+										${currentLocale === l.id 
+											? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-bold' 
+											: `border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 ${COLOR.textPrimary}`}`}
+									>
+										<div class="flex items-center gap-3">
+											<span>{l.flag}</span>
+											{l.label}
+										</div>
+										{#if currentLocale === l.id}
+											<div class="h-2 w-2 rounded-full bg-blue-600"></div>
+										{/if}
+									</button>
+								{/each}
+							</div>
+						</div>
 					</div>
-				</div>
 
-				<!-- Brand Mode Toggle -->
-				<div class={`${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding}`}>
-					<h3 class={`${TEXT.button} ${COLOR.textPrimary} mb-2 font-semibold`}>Mode Kampanye</h3>
-					<p class={`${TEXT.small} ${COLOR.textSecondary} mb-4`}>
-						Pilih mode kampanye yang ingin Anda lihat di platform.
-					</p>
-					<div class="flex items-center gap-4">
-						<button
-							type="button"
-							onclick={handleBrandModeChange}
-							role="switch"
-							aria-checked={brandModeValue === 'hardcore'}
-							aria-label="Toggle brand mode"
-							class={`relative inline-flex h-6 w-11 items-center rounded-full ${TRANSITION.colors} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 ${
-								brandModeValue === 'hardcore' ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
-							}`}
-						>
-							<span
-								class={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-									brandModeValue === 'hardcore' ? 'translate-x-6' : 'translate-x-1'
-								}`}
-							></span>
-						</button>
-						<div class="flex-1">
-							<p class={`${TEXT.body} ${COLOR.textPrimary} font-medium`}>
-								{brandModeValue === 'hardcore' ? '🔥 Hardcore Mode' : '😎 Chill Mode'}
-							</p>
-							<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
-								{brandModeValue === 'hardcore'
-									? 'Semangat belajar maksimal dengan energi tinggi!'
-									: 'Belajar dengan santai dan nyaman'}
-							</p>
+					<!-- Brand Mode Card -->
+					<div class={`md:col-span-2 ${RADIUS.card} border ${COLOR.cardBorder} bg-white dark:bg-zinc-900 p-6 shadow-sm`}>
+						<div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+							<div class="space-y-1 text-center sm:text-left">
+								<h3 class={`${TEXT.body} font-black ${COLOR.textPrimary} uppercase tracking-widest`}>Mode Kampanye</h3>
+								<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
+									{brandModeValue === 'hardcore' 
+										? '🔥 Mode Hardcore: Visual penuh energi untuk meningkatkan motivasi.' 
+										: '😎 Mode Chill: Tampilan tenang dan minimalis untuk fokus mendalam.'}
+								</p>
+							</div>
+							<button
+								type="button"
+								onclick={handleBrandModeChange}
+								class={`px-8 py-4 ${RADIUS.button} font-black tracking-widest uppercase ${TRANSITION.all} shadow-lg active:scale-95
+								${brandModeValue === 'hardcore' 
+									? 'bg-linear-to-r from-orange-600 to-red-600 text-white hover:shadow-orange-500/20' 
+									: 'bg-linear-to-r from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-700 text-zinc-900 dark:text-zinc-100'}`}
+							>
+								{brandModeValue === 'hardcore' ? 'Switch to Chill' : 'Switch to Hardcore'}
+							</button>
 						</div>
 					</div>
 				</div>
-
-				<!-- Notifications (Coming Soon) -->
-				<div class={`${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding}`}>
-					<h3 class={`${TEXT.button} ${COLOR.textPrimary} mb-2 font-semibold`}>Notifikasi</h3>
-					<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
-						Pengaturan notifikasi akan segera tersedia.
-					</p>
-				</div>
+			{/if}
 			</div>
 		</PageSection>
 	{/if}
 
-	<!-- Payment Gateway Tab -->
-	{#if activeTab === 'payments'}
-		<PageSection>
-			<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-6`}>Konfigurasi Payment Gateway</h2>
-			<div class="space-y-6">
-				<!-- Info Banner -->
-				<div
-					class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-950/20"
-				>
-					<div class="flex items-start gap-3">
-						<span class="text-2xl">💳</span>
-						<div class="flex-1">
-							<h3 class={`${TEXT.button} ${COLOR.textPrimary} mb-1 font-semibold`}>
-								Midtrans Payment Gateway
-							</h3>
-							<p class={`${TEXT.small} ${COLOR.textSecondary} mb-2`}>
-								Konfigurasi kredensial Midtrans Anda untuk mengaktifkan pembayaran online. Pastikan
-								Anda memasukkan credentials yang valid untuk environment yang dipilih.
-							</p>
-							<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
-								<strong>Catatan:</strong> Sandbox untuk testing, Production untuk transaksi real.
-							</p>
-						</div>
-					</div>
-				</div>
-
-				<!-- Environment Selection -->
-				<div class={`${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding}`}>
-					<h3 class={`${TEXT.button} ${COLOR.textPrimary} mb-2 font-semibold`}>Environment</h3>
-					<p class={`${TEXT.small} ${COLOR.textSecondary} mb-4`}>
-						Pilih environment yang ingin Anda konfigurasi.
-					</p>
-					<div class="flex flex-wrap gap-2">
-						<button
-							type="button"
-							onclick={() => (midtransEnvironment = 'sandbox')}
-							class={`inline-flex items-center gap-2 ${RADIUS.button} px-4 py-2 ${TEXT.button} font-medium ${TRANSITION.all} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 ${
-								midtransEnvironment === 'sandbox'
-									? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/50 dark:bg-amber-950/15 dark:text-amber-400 dark:ring-amber-800/30'
-									: 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-neutral-800 dark:text-gray-300 dark:ring-neutral-700 dark:hover:bg-neutral-700'
-							}`}
-						>
-							<span>🧪</span>
-							Sandbox (Testing)
-						</button>
-						<button
-							type="button"
-							onclick={() => (midtransEnvironment = 'production')}
-							class={`inline-flex items-center gap-2 ${RADIUS.button} px-4 py-2 ${TEXT.button} font-medium ${TRANSITION.all} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 ${
-								midtransEnvironment === 'production'
-									? 'bg-green-50 text-green-700 ring-1 ring-green-200/50 dark:bg-green-950/15 dark:text-green-400 dark:ring-green-800/30'
-									: 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-neutral-800 dark:text-gray-300 dark:ring-neutral-700 dark:hover:bg-neutral-700'
-							}`}
-						>
-							<span>🚀</span>
-							Production (Live)
-						</button>
-					</div>
-				</div>
-
-				<!-- Configuration Form -->
-				<div class={`${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding}`}>
-					<h3 class={`${TEXT.button} ${COLOR.textPrimary} mb-4 font-semibold`}>Kredensial</h3>
-					<div class="space-y-4">
-						<div class="flex flex-col gap-2">
-							<label
-								for="merchantId"
-								class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
-							>
-								Merchant ID
-							</label>
-							<input
-								type="text"
-								id="merchantId"
-								bind:value={merchantId}
-								placeholder="Masukkan Merchant ID"
-								class={`${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
-							/>
-							<p class={`${TEXT.small} ${COLOR.textMuted} mt-1`}>
-								Merchant ID Anda dari dashboard Midtrans.
-							</p>
-						</div>
-
-						<div class="flex flex-col gap-2">
-							<label
-								for="clientKey"
-								class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
-							>
-								Client Key
-							</label>
-							<input
-								type="text"
-								id="clientKey"
-								bind:value={clientKey}
-								placeholder="Masukkan Client Key"
-								class={`${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
-							/>
-							<p class={`${TEXT.small} ${COLOR.textMuted} mt-1`}>
-								Client Key untuk menginisialisasi Snap payment.
-							</p>
-						</div>
-
-						<div class="flex flex-col gap-2">
-							<label
-								for="serverKey"
-								class={`${TEXT.button} ${COLOR.textPrimary} text-sm font-semibold`}
-							>
-								Server Key
-							</label>
-							<input
-								type="password"
-								id="serverKey"
-								bind:value={serverKey}
-								placeholder="Masukkan Server Key"
-								class={`${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50`}
-							/>
-							<p class={`${TEXT.small} ${COLOR.textMuted} mt-1`}>
-								Server Key untuk otentikasi dan verifikasi webhook (sensitif!).
-							</p>
-						</div>
-					</div>
-				</div>
-
-				<!-- Webhook Configuration -->
-				<div
-					class="rounded-lg border border-purple-200 bg-purple-50 p-4 dark:border-purple-900/50 dark:bg-purple-950/20"
-				>
-					<h3 class={`${TEXT.button} ${COLOR.textPrimary} mb-2 font-semibold`}>Webhook URL</h3>
-					<p class={`${TEXT.small} ${COLOR.textSecondary} mb-3`}>
-						Salin URL ini dan konfigurasi di dashboard Midtrans Anda:
-					</p>
-					<div class="flex flex-col gap-2">
-						{#if typeof window !== 'undefined'}
-							<div class="flex items-center gap-2">
-								<input
-									type="text"
-									readonly
-									value={`${window.location.origin}/api/payments/midtrans/webhook`}
-									class={`flex-1 ${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary}`}
-								/>
-								<button
-									type="button"
-									onclick={async () => {
-										const url = `${window.location.origin}/api/payments/midtrans/webhook`;
-										try {
-											await navigator.clipboard.writeText(url);
-											toast.success('Webhook URL berhasil disalin!');
-										} catch {
-											toast.error('Gagal menyalin URL');
-										}
-									}}
-									class={`inline-flex items-center ${RADIUS.button} ${COLOR.cardBorder} ${SPACING.button} ${TEXT.button} ${TRANSITION.all} hover:border-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/30 dark:hover:text-blue-300`}
+			<!-- Payment Gateway Tab -->
+			{#if activeTab === 'payments'}
+				<div class="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
+					<!-- Finance Header -->
+					<div class={`p-8 ${RADIUS.card} bg-linear-to-r from-zinc-900 to-zinc-800 text-white overflow-hidden relative shadow-xl`}>
+						<div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+							<div class="space-y-2">
+								<div class="flex items-center gap-2">
+									<div class="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></div>
+									<span class="text-[10px] font-black tracking-widest uppercase opacity-70">Payment Gateway</span>
+								</div>
+								<h2 class="text-3xl font-black tracking-tight">Midtrans Configuration</h2>
+								<p class="text-xs opacity-60 max-w-md">Sambungkan akun Midtrans kamu untuk mulai menerima pembayaran otomatis dari ribuan peserta didik.</p>
+							</div>
+							<div class="flex items-center gap-4">
+								<button 
+									onclick={() => midtransEnvironment = 'sandbox'}
+									class={`px-4 py-2 ${RADIUS.button} text-[10px] font-black uppercase tracking-widest border border-white/20 ${midtransEnvironment === 'sandbox' ? 'bg-white text-zinc-900' : 'hover:bg-white/10'}`}
 								>
-									📋 Salin
+									🧪 Sandbox
+								</button>
+								<button 
+									onclick={() => midtransEnvironment = 'production'}
+									class={`px-4 py-2 ${RADIUS.button} text-[10px] font-black uppercase tracking-widest border border-white/20 ${midtransEnvironment === 'production' ? 'bg-green-500 text-white border-green-400' : 'hover:bg-white/10'}`}
+								>
+									🚀 Production
 								</button>
 							</div>
-						{:else}
-							<div class="flex items-center gap-2">
-								<input
-									type="text"
-									readonly
-									value="Loading..."
-									class={`flex-1 ${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary}`}
+						</div>
+						<!-- Decorative -->
+						<div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+					</div>
+
+					<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+						<!-- Credentials Card -->
+						<div class={`${RADIUS.card} border ${COLOR.cardBorder} bg-white dark:bg-zinc-900 shadow-sm overflow-hidden`}>
+							<div class="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800">
+								<h3 class={`${TEXT.body} font-black ${COLOR.textPrimary} uppercase tracking-widest`}>Kredensial Gateway</h3>
+							</div>
+							<div class="p-6 space-y-6">
+								<AuthFormField
+									name="merchantId"
+									label="Merchant ID"
+									bind:value={merchantId}
+									placeholder="G12345678"
+									hint="Cek di Dashboard Midtrans -> Settings -> Configuration"
+								/>
+								<AuthFormField
+									name="clientKey"
+									label="Client Key"
+									bind:value={clientKey}
+									placeholder="VT-client-xxxx"
+								/>
+								<AuthFormField
+									name="serverKey"
+									label="Server Key"
+									type="password"
+									bind:value={serverKey}
+									placeholder="••••••••••••"
+									required={true}
 								/>
 							</div>
-						{/if}
-						<div class={`${TEXT.small} ${COLOR.textMuted} flex items-start gap-2`}>
-							<span>💡</span>
-							<p>
-								Pergi ke <strong>Settings → Configuration → Notification URL</strong> di dashboard Midtrans
-								dan paste URL di atas.
-							</p>
+						</div>
+
+						<!-- Webhook & Status Card -->
+						<div class="space-y-6">
+							<div class={`${RADIUS.card} border ${COLOR.cardBorder} bg-zinc-50 dark:bg-zinc-800/50 p-6 space-y-4`}>
+								<div class="flex items-center gap-2">
+									<span class="text-xl">📡</span>
+									<h3 class="text-xs font-black tracking-widest text-zinc-400 uppercase">Webhook Endpoint</h3>
+								</div>
+								<div class="space-y-3">
+									<p class="text-[10px] text-zinc-500 font-bold leading-relaxed">
+										Konfigurasi URL di bawah ini pada bagian <b>Notification URL</b> di dashboard Midtrans untuk sinkronisasi status transaksi.
+									</p>
+									<div class="flex gap-2">
+										<input
+											readonly
+											value="https://naikkelas.id/api/payments/webhook"
+											class={`flex-1 ${RADIUS.input} border ${COLOR.cardBorder} bg-white dark:bg-zinc-900 px-3 py-2 text-xs font-mono truncate`}
+										/>
+										<button 
+											onclick={() => {
+												navigator.clipboard.writeText("https://naikkelas.id/api/payments/webhook");
+												toast.success("Webhook URL copied!");
+											}}
+											class={`px-3 py-2 ${RADIUS.button} border ${COLOR.cardBorder} bg-white dark:bg-zinc-800 text-[10px] font-bold hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors`}
+										>
+											COPY
+										</button>
+									</div>
+								</div>
+							</div>
+
+							<!-- Actions -->
+							<div class="grid grid-cols-2 gap-4">
+								<button 
+									onclick={() => toast.info("Testing connection...")}
+									class={`h-14 ${RADIUS.button} border ${COLOR.cardBorder} bg-white dark:bg-zinc-900 ${TEXT.button} font-black uppercase tracking-widest hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-all active:scale-95 shadow-sm`}
+								>
+									🔗 Test Connection
+								</button>
+								<AuthSubmitButton 
+									text="Simpan Config" 
+									loading={isProcessing} 
+									disabled={!merchantId || !clientKey || !serverKey}
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
-
-				<!-- Actions -->
-				<div class="flex items-center justify-end gap-3 pt-4">
-					<button
-						type="button"
-						disabled={isProcessing}
-						onclick={async () => {
-							isProcessing = true;
-							// TODO: Implement test connection
-							setTimeout(() => {
-								toast.success('Koneksi berhasil! Credentials valid.');
-								isProcessing = false;
-							}, 1000);
-						}}
-						class={`inline-flex items-center ${RADIUS.button} ${COLOR.cardBorder} ${SPACING.button} ${TEXT.button} ${TRANSITION.all} hover:border-blue-600 hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-blue-950/30 dark:hover:text-blue-300`}
-					>
-						🔗 Test Connection
-					</button>
-					<button
-						type="submit"
-						disabled={isProcessing || !merchantId || !clientKey || !serverKey}
-						onclick={() => {
-							toast.info('Penyimpanan konfigurasi akan segera tersedia');
-						}}
-						class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:opacity-90 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-neutral-900`}
-					>
-						{isProcessing ? 'Menyimpan...' : 'Simpan Konfigurasi'}
-					</button>
-				</div>
-
-				<!-- Documentation Link -->
-				<div
-					class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/50"
-				>
-					<div class="flex items-start gap-3">
-						<span class="text-2xl">📚</span>
-						<div>
-							<h3 class={`${TEXT.button} ${COLOR.textPrimary} mb-1 font-semibold`}>Dokumentasi</h3>
-							<p class={`${TEXT.small} ${COLOR.textSecondary} mb-2`}>
-								Pelajari lebih lanjut tentang konfigurasi Midtrans:
-							</p>
-							<ul class={`${TEXT.small} ${COLOR.textSecondary} space-y-1`}>
-								<li>
-									<a
-										href="https://docs.midtrans.com/docs/getting-started"
-										target="_blank"
-										rel="noopener noreferrer"
-										class="text-blue-600 hover:underline dark:text-blue-400"
-									>
-										📖 Getting Started Guide
-									</a>
-								</li>
-								<li>
-									<a
-										href="https://app.sandbox.midtrans.com"
-										target="_blank"
-										rel="noopener noreferrer"
-										class="text-blue-600 hover:underline dark:text-blue-400"
-									>
-										🧪 Sandbox Dashboard
-									</a>
-								</li>
-								<li>
-									<a
-										href="https://app.midtrans.com"
-										target="_blank"
-										rel="noopener noreferrer"
-										class="text-blue-600 hover:underline dark:text-blue-400"
-									>
-										🚀 Production Dashboard
-									</a>
-								</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-		</PageSection>
-	{/if}
+			{/if}
+		</main>
+	</div>
 </PageWrapper>

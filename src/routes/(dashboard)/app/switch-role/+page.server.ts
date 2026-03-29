@@ -2,6 +2,7 @@ import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { requireAdmin } from '$lib/server/middleware';
 import { logAudit } from '$lib/server/audit';
+import { ROLES } from '$lib/constants/roles';
 
 const ACTIVE_ROLE_COOKIE = 'active-role';
 
@@ -10,7 +11,7 @@ export const load: PageServerLoad = async (event) => {
 	const user = await requireAdmin(event);
 
 	const requestedRole = event.url.searchParams.get('role');
-	const validRoles = ['admin', 'mentor', 'siswa', 'user'];
+	const validRoles = [...ROLES, 'facilitator'];
 
 	// Get current active role before changing it
 	const currentActiveRole = event.cookies.get(ACTIVE_ROLE_COOKIE) || user.role || 'admin';

@@ -96,7 +96,72 @@ export const load: PageServerLoad = async (event) => {
 			user: user,
 			workspace: { id: activeWorkspaceId, org: activeOrg }
 		};
-	} else if (roleInContext === 'mentor' || roleInContext === 'facilitator' || roleInContext === 'admin') {
+	} else if (roleInContext === 'admin') {
+		// Get platform-wide stats for admin
+		const allUsers = await db.select().from(schema.user);
+		const allCourses = await db.select().from(schema.course);
+		const allEnrollments = await db.select().from(schema.enrollment);
+		const allCohorts = await db.select().from(schema.cohort);
+		
+		// Count users by role
+		const userCounts = {
+			total: allUsers.length,
+			admin: allUsers.filter(u => u.role === 'admin').length,
+			mentor: allUsers.filter(u => u.role === 'mentor').length,
+			user: allUsers.filter(u => u.role === 'user').length,
+		};
+
+		// Count active enrollments
+		const activeEnrollments = allEnrollments.filter(e => e.status === 'active').length;
+		const pendingEnrollments = allEnrollments.filter(e => e.status === 'pending').length;
+
+		// Count courses by status
+		const courseCounts = {
+			total: allCourses.length,
+			published: allCourses.filter(c => c.status === 'published').length,
+			draft: allCourses.filter(c => c.status === 'draft').length,
+		};
+
+		// Count cohorts by status
+		const cohortCounts = {
+			total: allCohorts.length,
+			active: allCohorts.filter(c => c.status === 'active').length,
+		};
+
+		// Get pending mentor applications
+		const pendingApplications = await db
+			.select()
+			.from(schema.mentorApplication)
+			.where(eq(schema.mentorApplication.status, 'pending'));
+
+		// Count global tracks from enrollments
+		const trackCounts = { creator: 0, seller: 0, affiliate: 0, student: userCounts.user };
+		for (const enrollment of allEnrollments) {
+			if (enrollment.status === 'active') {
+				if (enrollment.track === 'creator') trackCounts.creator++;
+				else if (enrollment.track === 'seller') trackCounts.seller++;
+				else if (enrollment.track === 'affiliate') trackCounts.affiliate++;
+			}
+		}
+
+		return {
+			stats: {
+				totalUsers: userCounts.total,
+				totalMentors: userCounts.mentor,
+				totalStudents: userCounts.user,
+				activeEnrollments,
+				pendingPayments: pendingEnrollments,
+				totalCourses: courseCounts.total,
+				publishedCourses: courseCounts.published,
+				activeCohorts: cohortCounts.active,
+				pendingApplications: pendingApplications.length,
+				trackCounts
+			},
+			pendingApplicationsList: pendingApplications.slice(0, 10),
+			user: user,
+			workspace: { id: activeWorkspaceId, org: activeOrg }
+		};
+	} else if (roleInContext === 'mentor' || roleInContext === 'facilitator') {
 		// Get mentor's courses filtered by workspace
 		let mentorCoursesQuery = db
 			.select()
