@@ -2,20 +2,11 @@
 	import type { PageData, ActionData } from './$types';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
-	import PageSection from '$lib/components/layouts/PageSection.svelte';
 	import AuthFormField from '$lib/components/AuthFormField.svelte';
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
 	import AuthMessage from '$lib/components/AuthMessage.svelte';
 	import { enhance } from '$app/forms';
-	import {
-		COLOR,
-		RADIUS,
-		SPACING,
-		TRANSITION,
-		TEXT,
-		ELEVATION,
-		GRADIENT
-	} from '$lib/config/design';
+	import { COLOR, RADIUS, TRANSITION, TEXT } from '$lib/config/design';
 	import { toast } from '$lib/stores/toast';
 	import { initTheme, setTheme, getStoredTheme, type Theme } from '$lib/stores/theme';
 	import { setLocale, getLocale } from '$lib/paraglide/runtime.js';
@@ -24,10 +15,10 @@
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	const validTabs = ['profile', 'security', 'preferences', 'payments'] as const;
-	type TabType = (typeof validTabs)[number];
+	const availableTabs = $derived(data.headerTabs.tabs.map((t) => t.id));
+	type TabType = string;
 
-	let activeTab = $state<TabType>('profile');
+	let activeTab = $state<TabType>(data.headerTabs.activeTab);
 
 	let fullName = $state(data.user?.fullName || '');
 	let email = $state(data.user?.email || '');
@@ -44,7 +35,7 @@
 	let theme = $state<Theme>('system');
 	let currentLocale = $state('id');
 
-	// Payment Gateway state (placeholder/partial implementation)
+	// Payment Gateway state
 	let midtransEnvironment = $state<'sandbox' | 'production'>('sandbox');
 	let merchantId = $state('');
 	let clientKey = $state('');
@@ -52,13 +43,6 @@
 	let isProcessing = $state(false);
 
 	onMount(() => {
-		const param = $page.url.searchParams.get('tab');
-		if (param && validTabs.includes(param as TabType)) {
-			activeTab = param as TabType;
-		} else {
-			activeTab = 'profile';
-		}
-
 		initTheme();
 		theme = getStoredTheme();
 		try {
@@ -69,9 +53,8 @@
 	});
 
 	$effect(() => {
-		const param = $page.url.searchParams.get('tab');
-		if (param && validTabs.includes(param as TabType)) {
-			activeTab = param as TabType;
+		if (data.headerTabs.activeTab !== activeTab) {
+			activeTab = data.headerTabs.activeTab;
 		}
 	});
 
@@ -101,8 +84,7 @@
 	/>
 
 	<div class="w-full">
-		<!-- Content Area -->
-		<main class="w-full space-y-6">
+		<main class="w-full">
 			{#if form?.error}
 				<AuthMessage type="error" message={form.error} />
 			{/if}
@@ -116,7 +98,6 @@
 				<div
 					class="animate-in fade-in slide-in-from-bottom-5 grid grid-cols-1 gap-6 duration-700 lg:grid-cols-12"
 				>
-					<!-- Essential Identity Card -->
 					<div
 						class={`lg:col-span-8 ${RADIUS.card} border ${COLOR.cardBorder} overflow-hidden bg-white shadow-sm dark:bg-zinc-900`}
 					>
@@ -200,18 +181,35 @@
 						</form>
 					</div>
 
-					<!-- Sidebar Info / Stats Card -->
 					<div class="space-y-6 lg:col-span-4">
 						<div
-							class={`${RADIUS.card} border ${COLOR.cardBorder} group relative overflow-hidden bg-linear-to-br from-blue-600 to-indigo-700 p-6 text-white`}
+							class={`${RADIUS.card} border ${COLOR.cardBorder} group relative overflow-hidden p-6 text-white shadow-lg transition-all duration-500
+							${
+								data.user?.role === 'admin'
+									? 'bg-linear-to-br from-slate-900 via-purple-900 to-slate-900'
+									: data.user?.role === 'mentor'
+										? 'bg-linear-to-br from-indigo-600 via-blue-700 to-indigo-800'
+										: data.user?.role === 'facilitator'
+											? 'bg-linear-to-br from-amber-600 via-orange-700 to-amber-800'
+											: 'bg-linear-to-br from-blue-600 to-indigo-700'
+							}`}
 						>
 							<div class="relative z-10 flex h-full flex-col justify-between gap-8">
-								<div>
-									<p class="mb-1 text-[10px] font-black tracking-[0.2em] uppercase opacity-70">
-										Status Keanggotaan
-									</p>
+								<div class="space-y-1">
+									<div class="flex items-center gap-2">
+										<div class="h-1.5 w-1.5 animate-pulse rounded-full bg-white"></div>
+										<p class="text-[10px] font-black tracking-[0.2em] uppercase opacity-70">
+											Status Otoritas
+										</p>
+									</div>
 									<h3 class="text-2xl font-black tracking-tighter uppercase italic">
-										Premium Squad
+										{data.user?.role === 'admin'
+											? 'Platform Admin'
+											: data.user?.role === 'mentor'
+												? 'Expert Mentor'
+												: data.user?.role === 'facilitator'
+													? 'Learning Facilitator'
+													: 'Premium Student'}
 									</h3>
 								</div>
 								<div class="space-y-1">
@@ -243,7 +241,9 @@
 							</h4>
 							<div class="space-y-4">
 								<div class="flex items-center gap-3">
-									<div class="h-2 w-2 rounded-full bg-green-500"></div>
+									<div
+										class={`h-2 w-2 rounded-full ${data.user?.role === 'admin' ? 'bg-purple-500' : 'bg-green-500'}`}
+									></div>
 									<p class="text-xs font-semibold">Berhasil login hari ini</p>
 								</div>
 								<div class="flex items-center gap-3">
@@ -256,124 +256,6 @@
 				</div>
 			{/if}
 
-			<!-- Security Tab -->
-			{#if activeTab === 'security'}
-				<div class="animate-in fade-in slide-in-from-bottom-5 duration-700">
-					<div
-						class={`overflow-hidden ${RADIUS.card} border ${COLOR.cardBorder} bg-white shadow-sm dark:bg-zinc-900`}
-					>
-						<div
-							class="flex items-center gap-3 border-b border-zinc-100 px-6 py-4 dark:border-zinc-800"
-						>
-							<span class="text-xl">🛡️</span>
-							<h2 class={`${TEXT.h3} ${COLOR.textPrimary} font-black`}>Keamanan Akun</h2>
-						</div>
-
-						<div class="p-6">
-							<form
-								method="POST"
-								action="?/changePassword"
-								use:enhance={() => {
-									isProcessing = true;
-									return async ({ result, update }) => {
-										if (result.type === 'success') {
-											toast.success('Password berhasil diubah!');
-											currentPassword = '';
-											newPassword = '';
-											confirmPassword = '';
-											showPasswordChange = false;
-											await update();
-										} else if (result.type === 'failure') {
-											toast.error(String(result.data?.error) || 'Gagal mengubah password');
-										}
-										isProcessing = false;
-									};
-								}}
-								class="space-y-6"
-							>
-								{#if !showPasswordChange}
-									<div
-										class="flex flex-col items-center justify-between gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 sm:flex-row dark:border-zinc-700 dark:bg-zinc-800/50"
-									>
-										<div class="flex items-center gap-4">
-											<div
-												class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-											>
-												<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-													<path
-														stroke-linecap="round"
-														stroke-linejoin="round"
-														stroke-width="2"
-														d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-													/>
-												</svg>
-											</div>
-											<div>
-												<p class={`${TEXT.body} font-bold ${COLOR.textPrimary}`}>Kata Sandi</p>
-												<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
-													Rutin ubah password untuk menjaga keamanan.
-												</p>
-											</div>
-										</div>
-										<button
-											type="button"
-											onclick={() => (showPasswordChange = true)}
-											class={`px-4 py-2 ${RADIUS.button} border ${COLOR.cardBorder} bg-white dark:bg-zinc-800 ${TEXT.button} font-bold shadow-sm ${TRANSITION.all} hover:bg-zinc-50 active:scale-95 dark:hover:bg-zinc-700`}
-										>
-											Ubah Password
-										</button>
-									</div>
-								{:else}
-									<div class="animate-in fade-in space-y-5 duration-300">
-										<AuthFormField
-											label="Password Saat Ini"
-											type="password"
-											name="currentPassword"
-											bind:value={currentPassword}
-											placeholder="••••••••"
-											required={true}
-										/>
-
-										<div class="space-y-2">
-											<AuthFormField
-												label="Password Baru"
-												type="password"
-												name="newPassword"
-												bind:value={newPassword}
-												placeholder="••••••••"
-												required={true}
-												minlength={8}
-											/>
-											<p class={`${TEXT.small} ${COLOR.textMuted}`}>
-												Minimum 8 karakter kombinasi.
-											</p>
-										</div>
-
-										<AuthFormField
-											label="Konfirmasi Password Baru"
-											type="password"
-											name="confirmPassword"
-											bind:value={confirmPassword}
-											placeholder="••••••••"
-											required={true}
-										/>
-
-										{#if confirmPassword && newPassword !== confirmPassword}
-											<p class="animate-bounce px-1 text-xs font-bold text-red-500 italic">
-												⚠️ Password tidak cocok!
-											</p>
-										{/if}
-
-										<div
-											class="flex items-center gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800"
-										>
-											<button
-												type="button"
-												onclick={() => (showPasswordChange = false)}
-												class={`flex-1 px-4 py-3 ${RADIUS.button} border ${COLOR.cardBorder} bg-white dark:bg-zinc-800 ${TEXT.button} font-bold ${TRANSITION.all} hover:bg-zinc-50 dark:hover:bg-zinc-700`}
-											>
-												Batal
-											</button>
 			<!-- Security Tab -->
 			{#if activeTab === 'security'}
 				<div class="animate-in fade-in slide-in-from-bottom-5 w-full duration-700">
@@ -510,7 +392,6 @@
 						</div>
 					</div>
 
-					<!-- Trust Shield Info -->
 					<div
 						class="mt-6 flex gap-4 rounded-2xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-900/30 dark:bg-blue-950/10"
 					>
@@ -530,15 +411,14 @@
 
 			<!-- Preferences Tab -->
 			{#if activeTab === 'preferences'}
-				<div class="animate-in fade-in slide-in-from-bottom-5 grid grid-cols-1 gap-6 duration-700 md:grid-cols-2">
-					<!-- Theme Selection -->
+				<div
+					class="animate-in fade-in slide-in-from-bottom-5 grid grid-cols-1 gap-6 duration-700 md:grid-cols-2"
+				>
 					<div
 						class={`${RADIUS.card} border ${COLOR.cardBorder} overflow-hidden bg-white shadow-sm dark:bg-zinc-900`}
 					>
 						<div class="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
-							<h3
-								class={`${TEXT.body} font-black ${COLOR.textPrimary} tracking-widest uppercase`}
-							>
+							<h3 class={`${TEXT.body} font-black ${COLOR.textPrimary} tracking-widest uppercase`}>
 								Tema Visual
 							</h3>
 						</div>
@@ -571,14 +451,11 @@
 						</div>
 					</div>
 
-					<!-- Language Selection -->
 					<div
 						class={`${RADIUS.card} border ${COLOR.cardBorder} overflow-hidden bg-white shadow-sm dark:bg-zinc-900`}
 					>
 						<div class="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
-							<h3
-								class={`${TEXT.body} font-black ${COLOR.textPrimary} tracking-widest uppercase`}
-							>
+							<h3 class={`${TEXT.body} font-black ${COLOR.textPrimary} tracking-widest uppercase`}>
 								Bahasa Antarmuka
 							</h3>
 						</div>
@@ -616,7 +493,6 @@
 			<!-- Payment Gateway Tab -->
 			{#if activeTab === 'payments'}
 				<div class="animate-in fade-in slide-in-from-bottom-5 space-y-8 duration-700">
-					<!-- Finance Header -->
 					<div
 						class={`p-8 ${RADIUS.card} relative overflow-hidden bg-linear-to-r from-zinc-900 to-zinc-800 text-white shadow-xl`}
 					>
@@ -651,14 +527,12 @@
 								</button>
 							</div>
 						</div>
-						<!-- Decorative -->
 						<div
 							class="absolute top-0 right-0 h-64 w-64 translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600/10 blur-3xl"
 						></div>
 					</div>
 
 					<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-						<!-- Credentials Card -->
 						<div
 							class={`${RADIUS.card} border ${COLOR.cardBorder} overflow-hidden bg-white shadow-sm dark:bg-zinc-900`}
 						>
@@ -694,7 +568,6 @@
 							</div>
 						</div>
 
-						<!-- Webhook & Status Card -->
 						<div class="space-y-6">
 							<div
 								class={`${RADIUS.card} border ${COLOR.cardBorder} space-y-4 bg-zinc-50 p-6 dark:bg-zinc-800/50`}
@@ -729,7 +602,6 @@
 								</div>
 							</div>
 
-							<!-- Actions -->
 							<div class="grid grid-cols-2 gap-4">
 								<button
 									onclick={() => toast.info('Testing connection...')}

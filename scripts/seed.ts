@@ -69,37 +69,76 @@ console.log(`\n📊 Seed Target: ${isLocal ? 'LOCAL' : 'REMOTE'} (${DATABASE_URL
 const client = createClient({ url: DATABASE_URL, authToken: DATABASE_AUTH_TOKEN });
 const db = drizzle(client, { schema });
 
+async function safeDelete(table: any, tableName: string) {
+	try {
+		await db.delete(table);
+		console.log(`  ✓ Cleared ${tableName}`);
+	} catch (err: any) {
+		if (err?.cause?.code === 'SQLITE_ERROR' && err?.cause?.message?.includes('no such table')) {
+			console.log(`  ⊘ Skipped ${tableName} (table doesn't exist yet)`);
+		} else {
+			throw err;
+		}
+	}
+}
+
 async function resetTables() {
 	console.log('🗑️  Resetting tables...');
-	await db.delete(schema.affiliateSale);
-	await db.delete(schema.affiliateLink);
-	await db.delete(schema.courseReview);
-	await db.delete(schema.notification);
-	await db.delete(schema.broadcastMessage);
-	await db.delete(schema.discussion);
-	await db.delete(schema.lessonNote);
-	await db.delete(schema.checkpointSubmission);
-	await db.delete(schema.checkpoint);
-	await db.delete(schema.userBadge);
-	await db.delete(schema.badge);
-	await db.delete(schema.userXP);
-	await db.delete(schema.cohort);
-	await db.delete(schema.partner);
-	await db.delete(schema.material);
-	await db.delete(schema.lesson);
-	await db.delete(schema.module);
-	await db.delete(schema.mentorApplication);
-	await db.delete(schema.waitingList);
-	await db.delete(schema.enrollment);
-	await db.delete(schema.couponUsage);
-	await db.delete(schema.coupon);
-	await db.delete(schema.course);
-	await db.delete(schema.organizationMember);
-	await db.delete(schema.workspaceMember);
-	await db.delete(schema.workspace);
-	await db.delete(schema.organization);
-	await db.delete(schema.session);
-	await db.delete(schema.user);
+
+	// Delete in correct order: child tables first, then parent tables
+	// Level 1: Tables with no dependencies or only user dependencies
+	await safeDelete(schema.affiliateSale, 'affiliateSale');
+	await safeDelete(schema.affiliateLink, 'affiliateLink');
+	await safeDelete(schema.courseReview, 'courseReview');
+	await safeDelete(schema.notification, 'notification');
+	await safeDelete(schema.broadcastMessage, 'broadcastMessage');
+	await safeDelete(schema.discussion, 'discussion');
+	await safeDelete(schema.lessonNote, 'lessonNote');
+	await safeDelete(schema.lessonProgress, 'lessonProgress');
+	await safeDelete(schema.checkpointSubmission, 'checkpointSubmission');
+	await safeDelete(schema.checkpoint, 'checkpoint');
+	await safeDelete(schema.userBadge, 'userBadge');
+	await safeDelete(schema.badge, 'badge');
+	await safeDelete(schema.userXP, 'userXP');
+	await safeDelete(schema.couponUsage, 'couponUsage');
+	await safeDelete(schema.mentorApplication, 'mentorApplication');
+	await safeDelete(schema.waitingList, 'waitingList');
+	await safeDelete(schema.paymentProof, 'paymentProof');
+	await safeDelete(schema.transaction, 'transaction');
+	await safeDelete(schema.certificate, 'certificate');
+	await safeDelete(schema.coursePlugin, 'coursePlugin');
+	await safeDelete(schema.submissionGrade, 'submissionGrade');
+	await safeDelete(schema.submission, 'submission');
+	await safeDelete(schema.quizChoice, 'quizChoice');
+	await safeDelete(schema.quizQuestion, 'quizQuestion');
+	await safeDelete(schema.quiz, 'quiz');
+	
+	// Level 2: Tables that depend on course
+	await safeDelete(schema.enrollment, 'enrollment');
+	await safeDelete(schema.material, 'material');
+	await safeDelete(schema.lesson, 'lesson');
+	await safeDelete(schema.module, 'module');
+	await safeDelete(schema.cohort, 'cohort');
+	
+	// Level 3: Course and coupon (after enrollments)
+	await safeDelete(schema.course, 'course');
+	await safeDelete(schema.coupon, 'coupon');
+	await safeDelete(schema.pluginRegistry, 'pluginRegistry');
+	
+	// Level 4: Organization related
+	await safeDelete(schema.organizationMember, 'organizationMember');
+	await safeDelete(schema.organizationInvitation, 'organizationInvitation');
+	await safeDelete(schema.workspaceMember, 'workspaceMember');
+	await safeDelete(schema.workspace, 'workspace');
+	await safeDelete(schema.organization, 'organization');
+	
+	// Level 5: Partners
+	await safeDelete(schema.partner, 'partner');
+	
+	// Level 6: Session and user (must be last)
+	await safeDelete(schema.session, 'session');
+	await safeDelete(schema.user, 'user');
+
 	console.log('✅ Tables reset complete');
 }
 

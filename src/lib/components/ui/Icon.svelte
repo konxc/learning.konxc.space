@@ -112,6 +112,7 @@
 		'box': 'Box',
 		'boxes': 'Boxes',
 		'sparkle': 'Sparkles',
+		'sparkles': 'Sparkles',
 		'rocket': 'Rocket',
 		'lightbulb': 'Lightbulb',
 		'puzzle': 'Puzzle',

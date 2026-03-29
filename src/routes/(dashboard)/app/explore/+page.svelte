@@ -138,26 +138,33 @@
 </svelte:head>
 
 <PageWrapper>
-	<div class="space-y-12 pb-20 animate-in fade-in duration-1000">
-		<header class="flex flex-col md:flex-row md:items-end justify-between gap-8 py-4">
+	<div class="animate-in fade-in pb-20 duration-1000">
+		<header class="flex flex-col justify-between gap-8 py-4 md:flex-row md:items-end">
 			<div class="space-y-4">
 				<div class="flex items-center gap-3">
-					<div class="h-2 w-2 rounded-full bg-blue-600 animate-pulse"></div>
-					<span class="text-[10px] font-black tracking-[0.3em] text-zinc-400 uppercase">Knowledge Protocol</span>
+					<div class="h-2 w-2 animate-pulse rounded-full bg-blue-600"></div>
+					<span class="text-[10px] font-black tracking-[0.3em] text-zinc-400 uppercase"
+						>Knowledge Protocol</span
+					>
 				</div>
-				<h1 class="text-5xl md:text-7xl font-black tracking-tighter text-zinc-900 dark:text-white leading-[0.85]">
-					Explore <span class="bg-linear-to-r from-blue-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent italic">Catalog</span>
+				<h1
+					class="text-5xl leading-[0.85] font-black tracking-tighter text-zinc-900 md:text-7xl dark:text-white"
+				>
+					Explore <span
+						class="bg-linear-to-r from-blue-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent italic"
+						>Catalog</span
+					>
 				</h1>
-				<p class="max-w-xl text-base font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed">
-					Discover high-performance learning tracks across five strategic domains. 
-					Acquire industry-standard skills and join specialized cohorts.
+				<p class="max-w-xl text-base leading-relaxed font-medium text-zinc-500 dark:text-zinc-400">
+					Discover high-performance learning tracks across five strategic domains. Acquire
+					industry-standard skills and join specialized cohorts.
 				</p>
 			</div>
 
 			<div class="flex items-center gap-3">
-				<button 
-					onclick={() => showFilters = !showFilters}
-					class={`h-11 px-6 rounded-2xl border transition-all flex items-center gap-3 text-[10px] font-black uppercase tracking-widest shadow-sm ${showFilters ? 'bg-zinc-950 text-white border-zinc-950 dark:bg-white dark:text-zinc-950 dark:border-white' : 'bg-white text-zinc-900 border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-white dark:border-zinc-800'}`}
+				<button
+					onclick={() => (showFilters = !showFilters)}
+					class={`flex h-11 items-center gap-3 rounded-2xl border px-6 text-[10px] font-black tracking-widest uppercase shadow-sm transition-all ${showFilters ? 'border-zinc-950 bg-zinc-950 text-white dark:border-white dark:bg-white dark:text-zinc-950' : 'border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white'}`}
 				>
 					<Icon name={showFilters ? 'x' : 'filters'} size={14} />
 					{showFilters ? 'Hide Tools' : 'Discovery Tools'}
@@ -165,7 +172,7 @@
 			</div>
 		</header>
 
-		<div class="border-b border-zinc-100 dark:border-zinc-800 pb-2">
+		<div class="border-b border-zinc-100 pb-2 dark:border-zinc-800">
 			<Tabs
 				queryParam="category"
 				variant="action"
@@ -181,82 +188,122 @@
 		</div>
 
 		<!-- Architectural Layout -->
-		<div class="flex flex-col lg:flex-row gap-12 items-start">
+		<div class="flex flex-col items-start gap-12 lg:flex-row">
 			<!-- Discovery Feed -->
-			<main class="flex-1 min-w-0">
+			<main class="min-w-0 flex-1">
 				{#if filteredCourses.length === 0}
-					<div class="flex flex-col items-center justify-center rounded-[3rem] border border-zinc-200 bg-zinc-50/50 py-32 text-center dark:border-zinc-800 dark:bg-zinc-900/30">
-						<div class="mb-8 text-7xl grayscale opacity-30">🧭</div>
-						<h3 class="text-3xl font-black text-zinc-900 dark:text-white mb-4 italic tracking-tighter">Null Catalog State</h3>
-						<p class="mt-2 max-w-sm text-sm font-medium text-zinc-500 uppercase tracking-widest leading-relaxed px-6">
+					<div
+						class="flex flex-col items-center justify-center rounded-[3rem] border border-zinc-200 bg-zinc-50/50 py-32 text-center dark:border-zinc-800 dark:bg-zinc-900/30"
+					>
+						<div class="mb-8 text-7xl opacity-30 grayscale">🧭</div>
+						<h3
+							class="mb-4 text-3xl font-black tracking-tighter text-zinc-900 italic dark:text-white"
+						>
+							Null Catalog State
+						</h3>
+						<p
+							class="mt-2 max-w-sm px-6 text-sm leading-relaxed font-medium tracking-widest text-zinc-500 uppercase"
+						>
 							The current filter combination yielded zero matching tracks. Modify your protocol.
 						</p>
-						<button 
+						<button
 							onclick={clearFilters}
-							class="mt-10 h-12 bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 px-10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:scale-105 active:scale-95 transition-all shadow-xl"
+							class="mt-10 h-12 rounded-2xl bg-zinc-950 px-10 text-[10px] font-black tracking-[0.3em] text-white uppercase shadow-xl transition-all hover:scale-105 active:scale-95 dark:bg-white dark:text-zinc-950"
 						>
 							RESET FILTERS
 						</button>
 					</div>
 				{:else}
-					<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+					<div class="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
 						{#each filteredCourses as course, i}
 							{@const category = course.category?.toLowerCase() || 'general'}
 							{@const catConfig = categoryConfig[category] || categoryConfig.general}
 							<div
-								class={`flex flex-col overflow-hidden ${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} ${TRANSITION.all} hover:-translate-y-2 hover:shadow-2xl hover:border-blue-500/20 group animate-in fade-in slide-in-from-bottom-5 duration-700`}
+								class={`flex flex-col overflow-hidden ${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} ${TRANSITION.all} group animate-in fade-in slide-in-from-bottom-5 duration-700 hover:-translate-y-2 hover:border-blue-500/20 hover:shadow-2xl`}
 								style="animation-delay: {i * 50}ms"
 							>
 								<!-- Visual Hub -->
 								<div class="relative h-56 w-full overflow-hidden">
 									{#if course.thumbnailUrl}
-										<img src={course.thumbnailUrl} alt={course.title} class="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110" loading="lazy" />
+										<img
+											src={course.thumbnailUrl}
+											alt={course.title}
+											class="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110"
+											loading="lazy"
+										/>
 									{:else}
-										<div class={`flex h-full w-full items-center justify-center bg-linear-to-br ${catConfig.gradient} opacity-90 transition-all duration-1000 group-hover:scale-110`}>
-											<span class="text-7xl group-hover:rotate-12 transition-transform duration-700">{catConfig.icon}</span>
+										<div
+											class={`flex h-full w-full items-center justify-center bg-linear-to-br ${catConfig.gradient} opacity-90 transition-all duration-1000 group-hover:scale-110`}
+										>
+											<span class="text-7xl transition-transform duration-700 group-hover:rotate-12"
+												>{catConfig.icon}</span
+											>
 										</div>
 									{/if}
-									<div class="absolute inset-0 bg-linear-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-									
+									<div
+										class="absolute inset-0 bg-linear-to-t from-black/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+									></div>
+
 									<!-- Level/Badge -->
 									<div class="absolute top-4 left-4">
-										<span class={`px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase shadow-sm ${catConfig.badge} border border-white/20`}>
+										<span
+											class={`rounded-full px-3 py-1 text-[9px] font-black tracking-widest uppercase shadow-sm ${catConfig.badge} border border-white/20`}
+										>
 											{category.replace('_', ' ')}
 										</span>
 									</div>
 								</div>
 
 								<div class="flex flex-1 flex-col p-8">
-									<h3 class="text-xl font-black tracking-tight text-zinc-900 dark:text-white mb-3 line-clamp-1 italic uppercase group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+									<h3
+										class="mb-3 line-clamp-1 text-xl font-black tracking-tight text-zinc-900 uppercase italic transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400"
+									>
 										{course.title}
 									</h3>
-									<p class="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-8 line-clamp-3 min-h-[60px] leading-relaxed italic">
+									<p
+										class="mb-8 line-clamp-3 min-h-[60px] text-sm leading-relaxed font-medium text-zinc-500 italic dark:text-zinc-400"
+									>
 										{course.description}
 									</p>
 
-									<div class="mt-auto pt-6 border-t border-zinc-100 dark:border-zinc-800">
-										<div class="flex items-center justify-between mb-8">
+									<div class="mt-auto border-t border-zinc-100 pt-6 dark:border-zinc-800">
+										<div class="mb-8 flex items-center justify-between">
 											<div class="flex flex-col">
-												<span class="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Admissions</span>
-												<span class="text-xl font-black tracking-tighter text-zinc-900 dark:text-white italic">Rp {course.price.toLocaleString('id-ID')}</span>
+												<span
+													class="mb-1 text-[9px] leading-none font-black tracking-widest text-zinc-400 uppercase"
+													>Admissions</span
+												>
+												<span
+													class="text-xl font-black tracking-tighter text-zinc-900 italic dark:text-white"
+													>Rp {course.price.toLocaleString('id-ID')}</span
+												>
 											</div>
 											{#if course.duration}
 												<div class="text-right">
-													<span class="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Cycles</span>
-													<p class="text-xs font-black tracking-widest text-blue-600 dark:text-blue-400 uppercase">{course.duration} Weeks</p>
+													<span
+														class="mb-1 text-[9px] leading-none font-black tracking-widest text-zinc-400 uppercase"
+														>Cycles</span
+													>
+													<p
+														class="text-xs font-black tracking-widest text-blue-600 uppercase dark:text-blue-400"
+													>
+														{course.duration} Weeks
+													</p>
 												</div>
 											{/if}
 										</div>
 
 										<div class="flex gap-3">
-											<a 
-												href="/app/explore/{course.id}" 
-												class="flex-1 h-12 flex items-center justify-center rounded-2xl border border-zinc-200 bg-white text-[10px] font-black uppercase tracking-widest hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-all text-zinc-600 dark:text-zinc-300 shadow-sm"
-											>Details</a>
-											<a 
-												href="/app/explore/{course.id}/enroll" 
-												class="flex-1 h-12 flex items-center justify-center rounded-2xl bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-zinc-950/20 dark:shadow-white/5"
-											>Enroll Now</a>
+											<a
+												href="/app/explore/{course.id}"
+												class="flex h-12 flex-1 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-[10px] font-black tracking-widest text-zinc-600 uppercase shadow-sm transition-all hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+												>Details</a
+											>
+											<a
+												href="/app/explore/{course.id}/enroll"
+												class="flex h-12 flex-1 items-center justify-center rounded-2xl bg-zinc-950 text-[10px] font-black tracking-widest text-white uppercase shadow-xl shadow-zinc-950/20 transition-all hover:scale-[1.02] active:scale-[0.98] dark:bg-white dark:text-zinc-950 dark:shadow-white/5"
+												>Enroll Now</a
+											>
 										</div>
 									</div>
 								</div>
@@ -268,40 +315,66 @@
 
 			<!-- Strategic Filter Panel -->
 			{#if showFilters}
-				<aside class="w-full lg:w-96 shrink-0 lg:sticky lg:top-32 animate-in slide-in-from-right-10 duration-700">
-					<div class="p-8 rounded-[2.5rem] bg-white border border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800 shadow-2xl space-y-10 relative overflow-hidden">
+				<aside
+					class="animate-in slide-in-from-right-10 w-full shrink-0 duration-700 lg:sticky lg:top-32 lg:w-96"
+				>
+					<div
+						class="relative space-y-10 overflow-hidden rounded-[2.5rem] border border-zinc-200 bg-white p-8 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
+					>
 						<!-- Atmospheric Accent -->
-						<div class="absolute -top-10 -right-10 h-32 w-32 bg-blue-500/5 rounded-full blur-3xl"></div>
-						
-						<div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-6">
+						<div
+							class="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-blue-500/5 blur-3xl"
+						></div>
+
+						<div
+							class="flex items-center justify-between border-b border-zinc-100 pb-6 dark:border-zinc-800"
+						>
 							<div class="flex items-center gap-3">
 								<div class="h-2 w-2 rounded-full bg-blue-600"></div>
-								<h3 class="text-xs font-black tracking-[0.2em] text-zinc-900 dark:text-white uppercase">Discovery Tools</h3>
+								<h3
+									class="text-xs font-black tracking-[0.2em] text-zinc-900 uppercase dark:text-white"
+								>
+									Discovery Tools
+								</h3>
 							</div>
-							<button onclick={clearFilters} class="text-[9px] font-black text-blue-600 uppercase tracking-widest hover:underline">Reset</button>
+							<button
+								onclick={clearFilters}
+								class="text-[9px] font-black tracking-widest text-blue-600 uppercase hover:underline"
+								>Reset</button
+							>
 						</div>
 
 						<div class="space-y-8">
 							<div class="space-y-3">
-								<label for="search" class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Input Search</label>
+								<label
+									for="search"
+									class="text-[10px] font-black tracking-widest text-zinc-400 uppercase"
+									>Input Search</label
+								>
 								<div class="group relative">
-									<div class="absolute inset-y-0 left-4 flex items-center text-zinc-300 group-focus-within:text-blue-500 transition-colors">
+									<div
+										class="absolute inset-y-0 left-4 flex items-center text-zinc-300 transition-colors group-focus-within:text-blue-500"
+									>
 										<Icon name="search" size={16} />
 									</div>
-									<input 
-										type="text" 
+									<input
+										type="text"
 										placeholder="Keywords..."
 										bind:value={searchQuery}
-										class="w-full h-14 bg-zinc-50 border-none dark:bg-zinc-800/50 rounded-2xl pl-12 pr-4 text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-blue-500/10 transition-all"
+										class="h-14 w-full rounded-2xl border-none bg-zinc-50 pr-4 pl-12 text-xs font-black tracking-widest uppercase transition-all focus:ring-2 focus:ring-blue-500/10 dark:bg-zinc-800/50"
 									/>
 								</div>
 							</div>
 
 							<div class="space-y-3">
-								<label for="sortBy" class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Sort Order</label>
-								<select 
+								<label
+									for="sortBy"
+									class="text-[10px] font-black tracking-widest text-zinc-400 uppercase"
+									>Sort Order</label
+								>
+								<select
 									bind:value={sortBy}
-									class="w-full h-14 bg-zinc-50 border-none dark:bg-zinc-800/50 rounded-2xl px-4 text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-blue-500/10 transition-all cursor-pointer"
+									class="h-14 w-full cursor-pointer rounded-2xl border-none bg-zinc-50 px-4 text-xs font-black tracking-widest uppercase transition-all focus:ring-2 focus:ring-blue-500/10 dark:bg-zinc-800/50"
 								>
 									<option value="newest">Recent Arrivals</option>
 									<option value="price-low">Value Orientation</option>
@@ -311,36 +384,60 @@
 							</div>
 
 							<div class="space-y-3">
-								<label for="maxPrice" class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Budget Cap (RP)</label>
+								<label
+									for="maxPrice"
+									class="text-[10px] font-black tracking-widest text-zinc-400 uppercase"
+									>Budget Cap (RP)</label
+								>
 								<div class="relative">
-									<span class="absolute inset-y-0 left-4 flex items-center text-[10px] font-black text-zinc-300 uppercase">Rp</span>
-									<input 
+									<span
+										class="absolute inset-y-0 left-4 flex items-center text-[10px] font-black text-zinc-300 uppercase"
+										>Rp</span
+									>
+									<input
 										type="number"
 										placeholder="Threshold..."
 										bind:value={maxPrice}
-										class="w-full h-14 bg-zinc-50 border-none dark:bg-zinc-800/50 rounded-2xl pl-10 pr-4 text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-blue-500/10 transition-all"
+										class="h-14 w-full rounded-2xl border-none bg-zinc-50 pr-4 pl-10 text-xs font-black tracking-widest uppercase transition-all focus:ring-2 focus:ring-blue-500/10 dark:bg-zinc-800/50"
 									/>
 								</div>
 							</div>
 
 							<div class="space-y-3">
-								<label for="minDuration" class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Min Commitment (Weeks)</label>
-								<input 
+								<label
+									for="minDuration"
+									class="text-[10px] font-black tracking-widest text-zinc-400 uppercase"
+									>Min Commitment (Weeks)</label
+								>
+								<input
 									type="number"
 									placeholder="Timeline..."
 									bind:value={minDuration}
-									class="w-full h-14 bg-zinc-50 border-none dark:bg-zinc-800/50 rounded-2xl px-4 text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-blue-500/10 transition-all"
+									class="h-14 w-full rounded-2xl border-none bg-zinc-50 px-4 text-xs font-black tracking-widest uppercase transition-all focus:ring-2 focus:ring-blue-500/10 dark:bg-zinc-800/50"
 								/>
 							</div>
 						</div>
 
-						<div class="mt-4 p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-900/30 text-center">
-							<p class="text-[9px] font-black text-blue-700/70 dark:text-blue-300 uppercase tracking-widest">Matching <span class="text-blue-950 dark:text-white">{filteredCourses.length}</span> Protocols</p>
+						<div
+							class="mt-4 rounded-2xl border border-blue-100/50 bg-blue-50/50 p-4 text-center dark:border-blue-900/30 dark:bg-blue-900/10"
+						>
+							<p
+								class="text-[9px] font-black tracking-widest text-blue-700/70 uppercase dark:text-blue-300"
+							>
+								Matching <span class="text-blue-950 dark:text-white">{filteredCourses.length}</span>
+								Protocols
+							</p>
 						</div>
 					</div>
-					
-					<div class="mt-8 p-10 rounded-[2.5rem] border border-dashed border-zinc-200 dark:border-zinc-800 text-center opacity-50 group transition-opacity hover:opacity-100">
-						<p class="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] group-hover:text-zinc-600 transition-colors">Knowledge AI Assistant Coming Soon</p>
+
+					<div
+						class="group mt-8 rounded-[2.5rem] border border-dashed border-zinc-200 p-10 text-center opacity-50 transition-opacity hover:opacity-100 dark:border-zinc-800"
+					>
+						<p
+							class="text-[9px] font-black tracking-[0.2em] text-zinc-400 uppercase transition-colors group-hover:text-zinc-600"
+						>
+							Knowledge AI Assistant Coming Soon
+						</p>
 					</div>
 				</aside>
 			{/if}

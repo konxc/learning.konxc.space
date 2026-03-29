@@ -67,18 +67,35 @@ const handleOnboarding: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
-	// Skip onboarding check for admin and bd roles
-	if (event.locals.user.role === 'admin' || event.locals.user.role === 'bd') {
+	// Pathfinder: Role-Aware Onboarding Protocol
+	const user = event.locals.user;
+	if (!user) return resolve(event);
+
+	// Whitelist Platform Governance roles
+	if (user.role === 'admin' || user.role === 'bd') {
 		return resolve(event);
 	}
 
-	// Check if user has any enrollments
-	const enrollments = await db.query.enrollment.findFirst({
-		where: eq(schema.enrollment.userId, event.locals.user.id)
-	});
+	// Specialized Check for Onboarding Completion
+	if (!user.onboardingCompleted) {
+		// Legacy Handshake for Students (Role: 'user')
+		// If they have enrollments, they have completed onboarding in the past
+		if (user.role === 'user') {
+			const enrollment = await db.query.enrollment.findFirst({
+				where: eq(schema.enrollment.userId, user.id)
+			});
 
-	// Redirect to onboarding if user has no enrollments
-	if (!enrollments) {
+			if (enrollment) {
+				// Persistent synchronization for legacy students
+				await db
+					.update(schema.user)
+					.set({ onboardingCompleted: true })
+					.where(eq(schema.user.id, user.id));
+				return resolve(event);
+			}
+		}
+
+		// Specialized Onboarding Pathfinder Redirection
 		throw redirect(303, '/onboarding');
 	}
 

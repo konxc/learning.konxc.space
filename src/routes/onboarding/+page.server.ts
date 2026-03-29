@@ -1,4 +1,4 @@
-import { redirect, fail } from '@sveltejs/kit';
+import { fail, isRedirect, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
@@ -11,14 +11,41 @@ export const load: PageServerLoad = async ({ locals }) => {
 		throw redirect(303, '/auth/signin');
 	}
 
-	// Get all published courses
+	const user = locals.user;
+
+	// Bridge logic for students with existing enrollments
+	if (user.role === 'user' && !user.onboardingCompleted) {
+		const existingEnrollment = await db.query.enrollment.findFirst({
+			where: eq(schema.enrollment.userId, user.id)
+		});
+
+		if (existingEnrollment) {
+			await db
+				.update(schema.user)
+				.set({ onboardingCompleted: true })
+				.where(eq(schema.user.id, user.id));
+			throw redirect(303, '/app');
+		}
+	}
+
+	// For Students (User role) - Load available courses
 	const courses = await db
 		.select()
 		.from(schema.course)
 		.where(eq(schema.course.status, 'published'));
 
+	// For Mentors - Load application status or existing courses
+	let mentorData = null;
+	if (user.role === 'mentor') {
+		mentorData = await db.query.mentorApplication.findFirst({
+			where: eq(schema.mentorApplication.userId, user.id)
+		});
+	}
+
 	return {
-		courses
+		role: user.role,
+		courses,
+		mentorData
 	};
 };
 
@@ -70,7 +97,8 @@ export const actions: Actions = {
 	},
 
 	enroll: async ({ request, locals }) => {
-		if (!locals.user) {
+		const user = locals.user;
+		if (!user) {
 			return fail(401, { error: 'Not authenticated' });
 		}
 
@@ -95,7 +123,7 @@ export const actions: Actions = {
 		const existingEnrollment = await db
 			.select()
 			.from(schema.enrollment)
-			.where(eq(schema.enrollment.userId, locals.user.id))
+			.where(eq(schema.enrollment.userId, user.id))
 			.limit(1);
 
 		// Filter in-memory to check specific course enrollment
@@ -120,28 +148,55 @@ export const actions: Actions = {
 				couponId = validation.coupon!.id;
 			}
 
-			// Create enrollment
+			// Create enrollment and mark onboarding as complete
 			const enrollmentId = generateId();
-			await db.insert(schema.enrollment).values({
-				id: enrollmentId,
-				userId: locals.user.id,
-				courseId: courseId,
-				couponId,
-				status: finalPrice === 0 ? 'active' : 'pending'
+			await db.transaction(async (tx) => {
+				await tx.insert(schema.enrollment).values({
+					id: enrollmentId,
+					userId: user.id,
+					courseId: courseId,
+					couponId,
+					status: finalPrice === 0 ? 'active' : 'pending'
+				});
+
+				await tx
+					.update(schema.user)
+					.set({ onboardingCompleted: true })
+					.where(eq(schema.user.id, user.id));
 			});
 
 			// Apply coupon if used
 			if (couponCode && couponId) {
-				await applyCoupon(couponId, locals.user.id, courseId, course.price, discountAmount);
+				await applyCoupon(couponId, user.id, courseId, course.price, discountAmount);
 			}
 
 			// Redirect to dashboard
 			throw redirect(303, '/app');
 		} catch (error) {
-			if (error instanceof Error && error.message.includes('redirect')) {
-				throw error;
-			}
+			if (isRedirect(error)) throw error;
+			console.error('Failed to enroll:', error);
 			return fail(500, { error: 'Failed to enroll' });
+		}
+	},
+
+	completeOnboarding: async ({ locals }) => {
+		const user = locals.user;
+		if (!user) {
+			return fail(401, { error: 'Not authenticated' });
+		}
+
+		try {
+			// Persistent synchronization of onboarding status
+			await db
+				.update(schema.user)
+				.set({ onboardingCompleted: true })
+				.where(eq(schema.user.id, user.id));
+
+			throw redirect(303, '/app');
+		} catch (error) {
+			if (isRedirect(error)) throw error;
+			console.error('Failed to complete onboarding:', error);
+			return fail(500, { error: 'Terjadi kesalahan saat menyelesaikan onboarding' });
 		}
 	}
 };

@@ -37,7 +37,8 @@ export async function validateSessionToken(token: string) {
 				role: table.user.role,
 				fullName: table.user.fullName,
 				email: table.user.email,
-				lastWorkspaceId: table.user.lastWorkspaceId
+				lastWorkspaceId: table.user.lastWorkspaceId,
+				onboardingCompleted: table.user.onboardingCompleted
 			},
 			session: table.session
 		})

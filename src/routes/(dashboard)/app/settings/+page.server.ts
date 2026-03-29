@@ -31,6 +31,21 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	const tabParam = url.searchParams.get('tab') || 'profile';
 
+	// Define base tabs available to everyone
+	const tabs = [
+		{ label: 'Profil', id: 'profile' },
+		{ label: 'Keamanan', id: 'security' },
+		{ label: 'Preferensi', id: 'preferences' }
+	];
+
+	// Add administrative tabs
+	if (currentUser.role === 'admin') {
+		tabs.push({ label: 'Payment Gateway', id: 'payments' });
+	}
+
+	// Validate requested tab against available tabs for this role
+	const activeTab = tabs.some((t) => t.id === tabParam) ? tabParam : 'profile';
+
 	return {
 		user: {
 			id: currentUser.id,
@@ -42,13 +57,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			createdAt: currentUser.createdAt
 		},
 		headerTabs: {
-			tabs: [
-				{ label: 'Profil', id: 'profile' },
-				{ label: 'Keamanan', id: 'security' },
-				{ label: 'Preferensi', id: 'preferences' },
-				{ label: 'Payment Gateway', id: 'payments' }
-			],
-			activeTab: tabParam
+			tabs,
+			activeTab
 		}
 	};
 };
