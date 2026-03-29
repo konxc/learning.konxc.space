@@ -111,7 +111,7 @@
 		description="Kelola identitas, keamanan, dan preferensi platform kamu di satu tempat."
 	/>
 
-	<div class="max-w-6xl mx-auto w-full">
+	<div class="w-full">
 		<!-- Content Area -->
 		<main class="w-full space-y-6">
 			{#if form?.error}

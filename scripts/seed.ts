@@ -5,7 +5,7 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 // Modular seeders
-import { seedUsers, seedMoreStudents } from './seed/users.js';
+import { seedUsers, seedStudents } from './seed/users.js';
 import { seedCourses, seedCoupons, seedEnrollments } from './seed/courses.js';
 import { seedCourseContent } from './seed/content.ts';
 import { seedPartners, seedCohorts } from './seed/partners.js';
@@ -94,6 +94,10 @@ async function resetTables() {
 	await db.delete(schema.couponUsage);
 	await db.delete(schema.coupon);
 	await db.delete(schema.course);
+	await db.delete(schema.organizationMember);
+	await db.delete(schema.workspaceMember);
+	await db.delete(schema.workspace);
+	await db.delete(schema.organization);
 	await db.delete(schema.session);
 	await db.delete(schema.user);
 	console.log('✅ Tables reset complete');
@@ -103,64 +107,120 @@ async function main() {
 	try {
 		if (shouldReset) await resetTables();
 
-		const users = await seedUsers(db);
-		const userIds = users.map((u) => u.id);
-		const adminId = userIds[0];
-		const mentorId = userIds[2];
+		// ===== STEP 1: Core Users (Admin, BD, Mentors, Facilitators) =====
+		console.log('\n📋 STEP 1: Creating core users...');
+		const coreUsers = await seedUsers(db);
+		const adminId = coreUsers[0].id; // admin
+		const bdId = coreUsers[1].id; // bd_salsabila
+		const mentorIds = coreUsers.slice(2, 8).map(u => u.id); // 6 mentors
+		const facilitatorIds = coreUsers.slice(8, 11).map(u => u.id); // 3 facilitators
 
-		const courses = await seedCourses(db, adminId, mentorId);
-		const courseIds = courses.map((c) => c.id);
+		// ===== STEP 2: Students =====
+		console.log('\n📋 STEP 2: Creating students...');
+		const students = await seedStudents(db);
+		const studentIds = students.map(s => s.id);
 
-		const coupons = await seedCoupons(db, adminId);
-		const couponIds = coupons.map((c) => c.id);
+		// ===== STEP 3: Organizations =====
+		console.log('\n📋 STEP 3: Creating organizations...');
+		const orgIds = [adminId, bdId, mentorIds[0]];
+		await seedOrganizations(db, orgIds);
 
-		await seedEnrollments(db, userIds, courseIds, couponIds);
-		await seedMentorApplications(db, userIds.slice(4)); // student2
-		await seedWaitingList(db);
-		await seedCourseContent(db, courseIds);
+		// ===== STEP 4: Courses =====
+		console.log('\n📋 STEP 4: Creating courses...');
+		const courses = await seedCourses(db, adminId);
+		const courseIds = courses.map(c => c.id);
+
+		// ===== STEP 5: Partners & Cohorts =====
+		console.log('\n📋 STEP 5: Creating partners and cohorts...');
 		await seedPartners(db);
+		const cohorts = await seedCohorts(db, mentorIds, facilitatorIds, courseIds);
+		const cohortIds = cohorts.map(c => c.id);
 
-		// Seed organizations and assign members
-		const adminIds = [userIds[0], userIds[1], userIds[2]]; // admin, bd, mentor
-		await seedOrganizations(db, adminIds);
-		await assignCoursesToOrganizations(db, courseIds);
+		// ===== STEP 6: Coupons =====
+		console.log('\n📋 STEP 6: Creating coupons...');
+		const coupons = await seedCoupons(db, adminId);
+		const couponIds = coupons.map(c => c.id);
 
-		// Seed workspaces (sub-divisions within organizations)
-		await seedWorkspaces(db, adminIds);
+		// ===== STEP 7: Enrollments with Tracks =====
+		console.log('\n📋 STEP 7: Creating enrollments with tracks...');
+		await seedEnrollments(db, studentIds, courseIds, couponIds, cohortIds);
 
-		// Seed plugins
+		// ===== STEP 8: Course Content =====
+		console.log('\n📋 STEP 8: Creating course content...');
+		await seedCourseContent(db, courseIds);
+
+		// ===== STEP 9: Mentor Applications & Waiting List =====
+		console.log('\n📋 STEP 9: Creating mentor applications and waiting list...');
+		await seedMentorApplications(db, studentIds.slice(0, 5));
+		await seedWaitingList(db);
+
+		// ===== STEP 10: Workspaces =====
+		console.log('\n📋 STEP 10: Creating workspaces...');
+		const workspaceAdminIds = [adminId, bdId, mentorIds[0]];
+		await seedWorkspaces(db, workspaceAdminIds);
+
+		// ===== STEP 11: Plugins =====
+		console.log('\n📋 STEP 11: Creating plugins...');
 		await seedPlugins(db);
 
-		const cohorts = await seedCohorts(db, [mentorId], courseIds);
-		const cohortIds = cohorts.map((c) => c.id);
-
+		// ===== STEP 12: Checkpoints =====
+		console.log('\n📋 STEP 12: Creating checkpoints...');
 		await seedCheckpoints(db, cohortIds);
 
-		const moreStudents = await seedMoreStudents(db);
-		const studentIds = moreStudents.map((u) => u.id);
-
+		// ===== STEP 13: Gamification =====
+		console.log('\n📋 STEP 13: Creating gamification data...');
 		await seedBadges(db);
 		await seedUserXP(db, studentIds);
 		await seedUserBadges(db, studentIds);
 
-		const checkpointIds = (await db.select().from(schema.checkpoint)).map((c) => c.id);
+		// ===== STEP 14: Checkpoint Submissions =====
+		console.log('\n📋 STEP 14: Creating checkpoint submissions...');
+		const checkpointIds = (await db.select().from(schema.checkpoint)).map(c => c.id);
 		await seedCheckpointSubmissions(db, studentIds, checkpointIds);
 
-		const lessonIds = ['lesson-001', 'lesson-002', 'lesson-003'];
+		// ===== STEP 15: Discussions & Notes =====
+		console.log('\n📋 STEP 15: Creating discussions and notes...');
+		const lessonIds = ['lesson-001', 'lesson-002', 'lesson-003', 'lesson-004', 'lesson-005'];
 		await seedDiscussions(db, studentIds, courseIds, lessonIds);
 		await seedLessonNotes(db, studentIds, lessonIds, courseIds);
-		await seedNotifications(db, studentIds);
-		await seedBroadcastMessages(db, adminId, mentorId);
 
+		// ===== STEP 16: Notifications =====
+		console.log('\n📋 STEP 16: Creating notifications...');
+		await seedNotifications(db, studentIds);
+		await seedBroadcastMessages(db, adminId, mentorIds[0]);
+
+		// ===== STEP 17: Affiliates =====
+		console.log('\n📋 STEP 17: Creating affiliate data...');
 		const links = await seedAffiliateLinks(db, studentIds);
 		await seedAffiliateSales(
 			db,
 			studentIds,
-			links.map((l) => l.id)
+			links.map((l: any) => l.id)
 		);
+
+		// ===== STEP 18: Reviews =====
+		console.log('\n📋 STEP 18: Creating course reviews...');
 		await seedCourseReviews(db, studentIds, courseIds);
 
-		console.log('\n✨ Seeding completed successfully!');
+		// ===== SUMMARY =====
+		console.log('\n' + '='.repeat(60));
+		console.log('✨ SEEDING COMPLETED SUCCESSFULLY!');
+		console.log('='.repeat(60));
+		console.log(`📊 Summary:`);
+		console.log(`   - Core Users: ${coreUsers.length} (admin, bd, mentors, facilitators)`);
+		console.log(`   - Students: ${students.length}`);
+		console.log(`   - Courses: ${courses.length}`);
+		console.log(`   - Cohorts: ${cohorts.length}`);
+		console.log(`   - Coupons: ${coupons.length}`);
+		console.log(`   - Enrollments: ~80 (with tracks)`);
+		console.log('\n🔑 Login Credentials:');
+		console.log('   Admin: admin / naikkelas2024');
+		console.log('   BD: bd_salsabila / naikkelas2024');
+		console.log('   Mentor: mentor_budi / naikkelas2024');
+		console.log('   Facilitator: facil_irwan / naikkelas2024');
+		console.log('   Student: ahmad_rizki / naikkelas2024');
+		console.log('='.repeat(60));
+		
 		process.exit(0);
 	} catch (error) {
 		console.error('\n❌ Seeding failed:', error);
