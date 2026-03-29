@@ -3,6 +3,78 @@ import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { encodeBase32LowerCase } from '@oslojs/encoding';
+
+function generateId(): string {
+	const bytes = crypto.getRandomValues(new Uint8Array(15));
+	return encodeBase32LowerCase(bytes);
+}
+
+/**
+ * Auto-create affiliate account for mentor/facilitator
+ * This enables them to earn commission by sharing links
+ */
+async function createAutoAffiliateAccount(
+	userId: string,
+	orgId: string,
+	role: string
+): Promise<void> {
+	// Only create for mentor or facilitator
+	if (role !== 'mentor' && role !== 'facilitator') {
+		return;
+	}
+
+	// Check if already has affiliate account for this org
+	const existing = await db.query.affiliateAccount.findFirst({
+		where: and(eq(schema.affiliateAccount.userId, userId), eq(schema.affiliateAccount.orgId, orgId))
+	});
+
+	if (existing) {
+		return; // Already exists
+	}
+
+	// Create affiliate account
+	const accountId = generateId();
+	await db.insert(schema.affiliateAccount).values({
+		id: accountId,
+		userId,
+		orgId,
+		role,
+		commissionRate: 25, // Default 25%
+		tier: 'bronze',
+		isActive: true
+	});
+
+	// Auto-generate affiliate links for all org courses
+	const orgCourses = await db.query.course.findMany({
+		where: eq(schema.course.orgId, orgId)
+	});
+
+	for (const course of orgCourses) {
+		const linkCode = `${role}-${userId.substring(0, 6)}-${course.id.substring(0, 6)}`;
+		await db.insert(schema.autoAffiliateLink).values({
+			id: generateId(),
+			accountId,
+			courseId: course.id,
+			orgId,
+			code: linkCode,
+			url: `https://naikkelas.id/c/${linkCode}`,
+			isActive: true
+		});
+	}
+
+	// Create affiliate link for organization landing page
+	const orgLinkCode = `${role}-${userId.substring(0, 6)}-org`;
+	await db.insert(schema.autoAffiliateLink).values({
+		id: generateId(),
+		accountId,
+		courseId: null,
+		orgId,
+		code: orgLinkCode,
+		url: `https://naikkelas.id/o/${orgLinkCode}`,
+		isActive: true
+	});
+}
 
 export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 	const { token } = params;
@@ -46,7 +118,8 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 
 		if (existingMember) {
 			// Delete the invitation and redirect
-			await db.delete(schema.organizationInvitation)
+			await db
+				.delete(schema.organizationInvitation)
 				.where(eq(schema.organizationInvitation.id, invitation.id));
 
 			// Switch to this workspace
@@ -61,14 +134,18 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 
 		// Check if email matches
 		if (user.email !== invitation.email) {
-			throw error(403, 'This invitation was sent to a different email address. Please log in with ' + invitation.email);
+			throw error(
+				403,
+				'This invitation was sent to a different email address. Please log in with ' +
+					invitation.email
+			);
 		}
 
 		// Add user as member
-		const generateMemberId = () => 'mem-' + Math.random().toString(36).substring(2, 11);
-		
+		const memberId = generateId();
+
 		await db.insert(schema.organizationMember).values({
-			id: generateMemberId(),
+			id: memberId,
 			orgId: invitation.orgId,
 			userId: user.id,
 			role: invitation.role,
@@ -76,8 +153,12 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 			updatedAt: new Date()
 		});
 
+		// Auto-create affiliate account for mentor/facilitator
+		await createAutoAffiliateAccount(user.id, invitation.orgId, invitation.role);
+
 		// Delete the used invitation
-		await db.delete(schema.organizationInvitation)
+		await db
+			.delete(schema.organizationInvitation)
 			.where(eq(schema.organizationInvitation.id, invitation.id));
 
 		// Switch to this workspace
@@ -88,9 +169,15 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 		});
 
 		// Update user's last workspace
-		await db.update(schema.user)
+		await db
+			.update(schema.user)
 			.set({ lastWorkspaceId: invitation.orgId })
 			.where(eq(schema.user.id, user.id));
+
+		// Redirect to appropriate onboarding based on role
+		if (invitation.role === 'mentor' || invitation.role === 'facilitator') {
+			throw redirect(302, `/onboarding?org=${invitation.orgId}&role=${invitation.role}`);
+		}
 
 		throw redirect(302, '/app');
 	}
