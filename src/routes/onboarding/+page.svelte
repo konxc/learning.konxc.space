@@ -29,8 +29,11 @@
 	let couponError = $state<string | null>(null);
 	let isApplying = $state(false);
 
-	// Facilitator organization selection
-	let selectedOrganization = $state<string | null>(null);
+	// Facilitator organization selection - auto-select if invited
+	let selectedOrganization = $state<string | null>(data.invitedOrgId ?? null);
+
+	// Check if this is an invitation flow
+	let isInvitationFlow = $derived(!!data.invitedOrgId);
 
 	// Track options
 	const trackOptions = [
@@ -113,21 +116,25 @@
 				>
 					<Icon name="sparkle" size={13} strokeWidth={2.5} />
 					<span class={`${TEXT.small} translate-y-[0.5px] leading-none font-bold`}
-						>Onboarding Pathfinder</span
+						>{isInvitationFlow ? 'Undangan Diterima' : 'Onboarding Pathfinder'}</span
 					>
 				</div>
 
 				{#if data.role === 'mentor'}
 					<h1 class={`${TEXT.h1} ${COLOR.textPrimary}`}>Selamat Datang, Expert Mentor! 🎓</h1>
 					<p class={`${TEXT.secondary} mx-auto max-w-2xl`}>
-						Lengkapi aktivasi akademi kamu untuk mulai membagikan ilmu dan membimbing generasi
-						digital masa depan.
+						{isInvitationFlow
+							? `Anda telah diundang untuk menjadi mentor. Lengkapi aktivasi akademi kamu untuk mulai membagikan ilmu.`
+							: 'Lengkapi aktivasi akademi kamu untuk mulai membagikan ilmu dan membimbing generasi digital masa depan.'}
 					</p>
 				{:else if data.role === 'facilitator'}
-					<h1 class={`${TEXT.h1} ${COLOR.textPrimary}`}>Halo, Learning Facilitator! 👋</h1>
+					<h1 class={`${TEXT.h1} ${COLOR.textPrimary}`}>
+						{isInvitationFlow ? 'Undangan Diterima! 👋' : 'Halo, Learning Facilitator! 👋'}
+					</h1>
 					<p class={`${TEXT.secondary} mx-auto max-w-2xl`}>
-						Siapkan pusat fasilitasi kamu untuk mendampingi setiap batch dalam perjalanan
-						transformasi digital mereka.
+						{isInvitationFlow
+							? 'Anda telah diundang untuk menjadi fasilitator. Aktivasi akun untuk mulai mendampingi.'
+							: 'Siapkan pusat fasilitasi kamu untuk mendampingi setiap batch dalam perjalanan transformasi digital mereka.'}
 					</p>
 				{:else}
 					<h1 class={`${TEXT.h1} ${COLOR.textPrimary}`}>Selamat Datang di Naik Kelas! 🚀</h1>
@@ -150,10 +157,20 @@
 							class={`${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding} space-y-8`}
 						>
 							<div class="space-y-2">
-								<h2 class={`${TEXT.h3} ${COLOR.textPrimary}`}>Aktivasi Akademi Expert</h2>
-								<p class={TEXT.secondary}>
-									Konfigurasi profil mentor kamu untuk visibilitas maksimal.
-								</p>
+								{#if isInvitationFlow}
+									<h2 class={`${TEXT.h3} ${COLOR.textPrimary}`}>
+										Selamat Datang, Expert Mentor! Undangan Diterima
+									</h2>
+									<p class={TEXT.secondary}>
+										Anda telah diundang untuk menjadi mentor di {data.organizations[0]?.name}.
+										Lengkapi profil untuk memulai.
+									</p>
+								{:else}
+									<h2 class={`${TEXT.h3} ${COLOR.textPrimary}`}>Aktivasi Akademi Expert</h2>
+									<p class={TEXT.secondary}>
+										Konfigurasi profil mentor kamu untuk visibilitas maksimal.
+									</p>
+								{/if}
 							</div>
 
 							<div class="grid grid-cols-1 gap-6">
@@ -229,47 +246,80 @@
 							</div>
 
 							<div class="space-y-2">
-								<h2 class={`${TEXT.h2} ${COLOR.textPrimary}`}>Kesiapan Fasilitasi</h2>
-								<p class={TEXT.secondary}>Pusat kendali fasilitasi kamu hampir siap digunakan.</p>
+								{#if isInvitationFlow}
+									<h2 class={`${TEXT.h2} ${COLOR.textPrimary}`}>
+										Selamat Datang! Undangan Diterima
+									</h2>
+									<p class={TEXT.secondary}>
+										Anda telah diundang untuk menjadi fasilitator di {data.organizations[0]?.name}.
+									</p>
+								{:else}
+									<h2 class={`${TEXT.h2} ${COLOR.textPrimary}`}>Kesiapan Fasilitasi</h2>
+									<p class={TEXT.secondary}>Pusat kendali fasilitasi kamu hampir siap digunakan.</p>
+								{/if}
 							</div>
 						</div>
 
-						<p class={`${TEXT.body} ${COLOR.textSecondary} text-center`}>
-							Anda akan membimbing kelompok belajar (batch) melalui materi yang disediakan oleh
-							Expert Mentor. Pilih organisasi yang ingin Anda fasilitasi.
-						</p>
-
-						<!-- Organization Selection -->
-						{#if data.organizations && data.organizations.length > 0}
-							<div class="space-y-3">
-								<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>Pilih Organisasi</p>
-								<div class="grid grid-cols-1 gap-3">
-									{#each data.organizations as org}
-										<button
-											type="button"
-											class={`flex items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
-												selectedOrganization === org.id
-													? 'border-emerald-500 bg-emerald-50 ring-4 ring-emerald-500/10 dark:bg-emerald-900/20'
-													: 'border-zinc-200 hover:border-emerald-500/30 dark:border-zinc-700 dark:hover:border-emerald-500/30'
-											}`}
-											onclick={() => (selectedOrganization = org.id)}
-										>
-											<div
-												class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600"
-											>
-												<Icon name="building" size={20} />
-											</div>
-											<div class="flex-1">
-												<h4 class="font-bold">{org.name}</h4>
-												<p class="text-xs text-zinc-500">/{org.slug}</p>
-											</div>
-											{#if selectedOrganization === org.id}
-												<Icon name="check" size={20} class="text-emerald-500" />
-											{/if}
-										</button>
-									{/each}
+						{#if isInvitationFlow}
+							<!-- Invitation Flow: Show selected organization -->
+							<div
+								class={`${RADIUS.card} border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/20`}
+							>
+								<div class="flex items-center gap-3">
+									<div
+										class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-600"
+									>
+										<Icon name="building" size={20} />
+									</div>
+									<div>
+										<p class="text-sm font-medium text-emerald-800 dark:text-emerald-200">
+											Organisasi:
+										</p>
+										<p class="font-bold text-emerald-900 dark:text-emerald-100">
+											{data.organizations[0]?.name}
+										</p>
+									</div>
 								</div>
 							</div>
+						{:else}
+							<!-- Regular Flow: Organization selection -->
+							<p class={`${TEXT.body} ${COLOR.textSecondary} text-center`}>
+								Anda akan membimbing kelompok belajar (batch) melalui materi yang disediakan oleh
+								Expert Mentor. Pilih organisasi yang ingin Anda fasilitasi.
+							</p>
+
+							<!-- Organization Selection -->
+							{#if data.organizations && data.organizations.length > 0}
+								<div class="space-y-3">
+									<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>Pilih Organisasi</p>
+									<div class="grid grid-cols-1 gap-3">
+										{#each data.organizations as org}
+											<button
+												type="button"
+												class={`flex items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
+													selectedOrganization === org.id
+														? 'border-emerald-500 bg-emerald-50 ring-4 ring-emerald-500/10 dark:bg-emerald-900/20'
+														: 'border-zinc-200 hover:border-emerald-500/30 dark:border-zinc-700 dark:hover:border-emerald-500/30'
+												}`}
+												onclick={() => (selectedOrganization = org.id)}
+											>
+												<div
+													class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600"
+												>
+													<Icon name="building" size={20} />
+												</div>
+												<div class="flex-1">
+													<h4 class="font-bold">{org.name}</h4>
+													<p class="text-xs text-zinc-500">/{org.slug}</p>
+												</div>
+												{#if selectedOrganization === org.id}
+													<Icon name="check" size={20} class="text-emerald-500" />
+												{/if}
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
 						{/if}
 
 						<form method="POST" action="?/completeOnboarding" use:enhance>

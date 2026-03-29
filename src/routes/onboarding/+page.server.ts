@@ -6,12 +6,13 @@ import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { eq } from 'drizzle-orm';
 import { validateCoupon, applyCoupon } from '$lib/server/coupon';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.user) {
 		throw redirect(303, '/auth/signin');
 	}
 
 	const user = locals.user;
+	const invitedOrgId = url.searchParams.get('org');
 
 	// Bridge logic for students with existing enrollments
 	if (user.role === 'user' && !user.onboardingCompleted) {
@@ -60,23 +61,45 @@ export const load: PageServerLoad = async ({ locals }) => {
 		});
 	}
 
-	// For Facilitators - Load available organizations
+	// For Facilitators & Mentors (invitation) - Load organizations
 	let organizations: Array<{ id: string; name: string; slug: string }> = [];
-	if (user.role === 'facilitator') {
-		organizations = await db
-			.select({
-				id: schema.organization.id,
-				name: schema.organization.name,
-				slug: schema.organization.slug
-			})
-			.from(schema.organization);
+	if (user.role === 'facilitator' || (user.role === 'mentor' && invitedOrgId)) {
+		// If invited to a specific org, only load that org
+		if (invitedOrgId) {
+			const invitedOrg = await db
+				.select({
+					id: schema.organization.id,
+					name: schema.organization.name,
+					slug: schema.organization.slug
+				})
+				.from(schema.organization)
+				.where(eq(schema.organization.id, invitedOrgId))
+				.limit(1);
+
+			if (invitedOrg.length > 0) {
+				organizations = invitedOrg;
+			} else {
+				// Org not found — strip invalid param and redirect
+				throw redirect(303, '/onboarding');
+			}
+		} else if (user.role === 'facilitator') {
+			// No specific invitation - load all available orgs for facilitator
+			organizations = await db
+				.select({
+					id: schema.organization.id,
+					name: schema.organization.name,
+					slug: schema.organization.slug
+				})
+				.from(schema.organization);
+		}
 	}
 
 	return {
 		role: user.role,
 		courses: coursesWithTracks,
 		mentorData,
-		organizations
+		organizations,
+		invitedOrgId
 	};
 };
 
