@@ -62,7 +62,7 @@
 		{
 			id: 'monetize-knowledge',
 			label: 'Monetisasi Pengetahuan',
-			icon: 'dollar-sign',
+			icon: 'dollar',
 			domain: 'general'
 		},
 		{
@@ -104,7 +104,7 @@
 		{ id: 'ui-ux', label: 'UI/UX Design', icon: 'layout', domain: 'design' },
 		{ id: 'graphic-design', label: 'Graphic Design', icon: 'image', domain: 'design' },
 		{ id: 'motion-design', label: 'Motion Design', icon: 'zap', domain: 'design' },
-		{ id: 'design-systems', label: 'Design Systems', icon: 'figma', domain: 'design' },
+		{ id: 'design-systems', label: 'Design Systems', icon: 'pen-tool', domain: 'design' },
 
 		// Outdoor interests
 		{ id: 'leadership', label: 'Leadership Training', icon: 'target', domain: 'outdoor' },
