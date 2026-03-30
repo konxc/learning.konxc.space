@@ -5,6 +5,7 @@
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
+	import { toast } from '$lib/stores/toast';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
@@ -33,24 +34,6 @@
 		</button>
 	</PageHeader>
 
-	{#if form?.error}
-		<div
-			class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700 dark:border-red-800/50 dark:bg-red-900/30 dark:text-red-400"
-		>
-			<Icon name="alert-circle" size={18} class="inline mr-2" />
-			{form.error}
-		</div>
-	{/if}
-
-	{#if form?.success && form?.message}
-		<div
-			class="animate-in fade-in mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700 dark:border-green-800/50 dark:bg-green-900/30 dark:text-green-400"
-		>
-			<Icon name="check-circle" size={18} class="inline mr-2" />
-			{form.message}
-		</div>
-	{/if}
-
 	<!-- Create Form -->
 	{#if showCreateForm}
 		<div
@@ -63,10 +46,16 @@
 				class="grid grid-cols-1 gap-5 sm:grid-cols-2"
 				use:enhance={() => {
 					creating = true;
-					return async ({ update }) => {
+					return async ({ result, update }) => {
 						await update();
 						creating = false;
-						if (form?.success) showCreateForm = false;
+						if (result.type === 'success') {
+							toast.success('Batch berhasil dibuat!');
+							showCreateForm = false;
+						} else if (result.type === 'failure') {
+							const errorMsg = (result.data as any)?.error || 'Gagal membuat batch';
+							toast.error(errorMsg);
+						}
 					};
 				}}
 			>
@@ -265,13 +254,19 @@
 										{#if cohort.stats && cohort.enrollmentCount > 0}
 											<div class="flex gap-2 text-[10px]">
 												{#if cohort.stats.tracks.creator > 0}
-													<span class="text-purple-600 dark:text-purple-400">{cohort.stats.tracks.creator}</span>
+													<span class="text-purple-600 dark:text-purple-400"
+														>{cohort.stats.tracks.creator}</span
+													>
 												{/if}
 												{#if cohort.stats.tracks.seller > 0}
-													<span class="text-orange-600 dark:text-orange-400">{cohort.stats.tracks.seller}</span>
+													<span class="text-orange-600 dark:text-orange-400"
+														>{cohort.stats.tracks.seller}</span
+													>
 												{/if}
 												{#if cohort.stats.tracks.affiliate > 0}
-													<span class="text-teal-600 dark:text-teal-400">{cohort.stats.tracks.affiliate}</span>
+													<span class="text-teal-600 dark:text-teal-400"
+														>{cohort.stats.tracks.affiliate}</span
+													>
 												{/if}
 											</div>
 										{/if}

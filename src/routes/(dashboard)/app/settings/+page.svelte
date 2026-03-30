@@ -176,7 +176,16 @@
 						<form
 							method="POST"
 							action="?/updateProfile"
-							use:enhance
+							use:enhance={() => {
+								return async ({ result }) => {
+									if (result.type === 'success') {
+										toast.success('Profil berhasil diperbarui!');
+									} else if (result.type === 'failure') {
+										const errorMsg = (result.data as any)?.error || 'Gagal memperbarui profil';
+										toast.error(errorMsg);
+									}
+								};
+							}}
 							class={`p-10 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} relative space-y-8 overflow-hidden shadow-sm`}
 						>
 							<div class="pointer-events-none absolute top-0 right-0 p-4 opacity-5">
@@ -187,13 +196,6 @@
 							>
 								Informasi Dasar
 							</h3>
-							{#if form?.error}
-								<div
-									class="rounded-lg bg-red-50 p-4 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
-								>
-									{form.error}
-								</div>
-							{/if}
 							<AuthFormField
 								label="Nama Lengkap"
 								name="fullName"
@@ -229,7 +231,16 @@
 					<form
 						method="POST"
 						action="?/changePassword"
-						use:enhance
+						use:enhance={() => {
+							return async ({ result }) => {
+								if (result.type === 'success') {
+									toast.success('Password berhasil diubah!');
+								} else if (result.type === 'failure') {
+									const errorMsg = (result.data as any)?.error || 'Gagal mengubah password';
+									toast.error(errorMsg);
+								}
+							};
+						}}
 						class={`p-10 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} relative space-y-8 shadow-sm`}
 					>
 						<div class="pointer-events-none absolute top-0 right-0 p-4 opacity-5">
@@ -240,13 +251,6 @@
 						>
 							Keamanan Akun
 						</h3>
-						{#if form?.error}
-							<div
-								class="rounded-lg bg-red-50 p-4 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
-							>
-								{form.error}
-							</div>
-						{/if}
 						<AuthFormField
 							label="Password Saat Ini"
 							name="currentPassword"
@@ -301,7 +305,16 @@
 								<form
 									method="POST"
 									action="?/createOrganization"
-									use:enhance
+									use:enhance={() => {
+										return async ({ result }) => {
+											if (result.type === 'success') {
+												toast.success('Organisasi berhasil dibuat!');
+											} else if (result.type === 'failure') {
+												const errorMsg = (result.data as any)?.error || 'Gagal membuat organisasi';
+												toast.error(errorMsg);
+											}
+										};
+									}}
 									class="mx-auto max-w-lg space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-8 text-left dark:border-zinc-800 dark:bg-zinc-900/50"
 								>
 									<AuthFormField
@@ -370,14 +383,22 @@
 										{data.organization.name?.[0]?.toUpperCase()}
 									</div>
 								</div>
-								<form method="POST" action="?/updateOrgSettings" use:enhance class="space-y-6">
-									{#if form?.error}
-										<div
-											class="rounded-lg bg-red-50 p-4 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
-										>
-											{form.error}
-										</div>
-									{/if}
+								<form
+									method="POST"
+									action="?/updateOrgSettings"
+									use:enhance={() => {
+										return async ({ result }) => {
+											if (result.type === 'success') {
+												toast.success('Pengaturan organisasi diperbarui!');
+											} else if (result.type === 'failure') {
+												const errorMsg =
+													(result.data as any)?.error || 'Gagal memperbarui pengaturan';
+												toast.error(errorMsg);
+											}
+										};
+									}}
+									class="space-y-6"
+								>
 									<AuthFormField
 										label="Nama Institusi"
 										name="name"
@@ -789,7 +810,20 @@
 						</button>
 					</div>
 				{:else}
-					<form method="POST" action="?/createApiKey" use:enhance class="space-y-6">
+					<form
+						method="POST"
+						action="?/createApiKey"
+						use:enhance={() => {
+							return async ({ result }) => {
+								if (result.type === 'failure') {
+									const errorMsg = (result.data as any)?.error || 'Gagal membuat API Key';
+									toast.error(errorMsg);
+								}
+								// Success case is handled by $effect that shows the modal
+							};
+						}}
+						class="space-y-6"
+					>
 						<AuthFormField
 							label="Identitas Key"
 							name="name"
@@ -838,7 +872,20 @@
 					> di bawah ini untuk mengonfirmasi.
 				</p>
 
-				<form method="POST" action="?/deleteAccount" use:enhance class="space-y-6">
+				<form
+					method="POST"
+					action="?/deleteAccount"
+					use:enhance={() => {
+						return async ({ result }) => {
+							if (result.type === 'failure') {
+								const errorMsg = (result.data as any)?.error || 'Gagal menghapus akun';
+								toast.error(errorMsg);
+							}
+							// Success redirects, no toast needed
+						};
+					}}
+					class="space-y-6"
+				>
 					<input
 						type="text"
 						name="confirmText"

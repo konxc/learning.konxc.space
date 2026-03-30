@@ -6,6 +6,7 @@
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
+	import { toast } from '$lib/stores/toast';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
@@ -43,22 +44,6 @@
 			← Back to Batches
 		</a>
 	</PageHeader>
-
-	{#if form?.error}
-		<div
-			class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700"
-		>
-			⚠️ {form.error}
-		</div>
-	{/if}
-
-	{#if form?.success && form?.message}
-		<div
-			class="animate-in fade-in mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700"
-		>
-			✅ {form.message}
-		</div>
-	{/if}
 
 	<!-- Cohort Info & Stats -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -112,7 +97,21 @@
 			</div>
 
 			<!-- Assign Facilitator Form -->
-			<form method="POST" action="?/assignFacilitator" use:enhance class="mt-6 space-y-3">
+			<form
+				method="POST"
+				action="?/assignFacilitator"
+				use:enhance={() => {
+					return async ({ result }) => {
+						if (result.type === 'success') {
+							toast.success('Facilitator assigned!');
+						} else if (result.type === 'failure') {
+							const errorMsg = (result.data as any)?.error || 'Failed to assign facilitator';
+							toast.error(errorMsg);
+						}
+					};
+				}}
+				class="mt-6 space-y-3"
+			>
 				<div>
 					<select
 						name="facilitatorId"

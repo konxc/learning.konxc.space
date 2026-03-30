@@ -4,6 +4,7 @@
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import { COLOR, RADIUS, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
+	import { toast } from '$lib/stores/toast';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
@@ -39,14 +40,6 @@
 			</div>
 		</div>
 	</PageHeader>
-
-	{#if form?.success && form?.message}
-		<div
-			class="animate-in fade-in mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700"
-		>
-			✅ {form.message}
-		</div>
-	{/if}
 
 	<!-- Filter Tabs -->
 	<div class="mb-6 flex flex-wrap gap-2">
@@ -122,7 +115,20 @@
 
 						{#if review.moderationStatus === 'pending'}
 							<div class="flex flex-col gap-2">
-								<form method="POST" action="?/approve" use:enhance>
+								<form
+									method="POST"
+									action="?/approve"
+									use:enhance={() => {
+										return async ({ result }) => {
+											if (result.type === 'success') {
+												toast.success('Review approved!');
+											} else if (result.type === 'failure') {
+												const errorMsg = (result.data as any)?.error || 'Failed to approve review';
+												toast.error(errorMsg);
+											}
+										};
+									}}
+								>
 									<input type="hidden" name="reviewId" value={review.id} />
 									<button
 										type="submit"
@@ -131,7 +137,20 @@
 										Approve
 									</button>
 								</form>
-								<form method="POST" action="?/reject" use:enhance>
+								<form
+									method="POST"
+									action="?/reject"
+									use:enhance={() => {
+										return async ({ result }) => {
+											if (result.type === 'success') {
+												toast.success('Review rejected!');
+											} else if (result.type === 'failure') {
+												const errorMsg = (result.data as any)?.error || 'Failed to reject review';
+												toast.error(errorMsg);
+											}
+										};
+									}}
+								>
 									<input type="hidden" name="reviewId" value={review.id} />
 									<button
 										type="submit"

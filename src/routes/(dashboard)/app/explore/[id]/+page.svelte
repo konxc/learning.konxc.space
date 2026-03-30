@@ -4,6 +4,7 @@
 	import { fly, fade } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import Icon from '$lib/components/ui/Icon.svelte';
+	import { toast } from '$lib/stores/toast';
 
 	let { data }: { data: PageData } = $props();
 	let expandedModules = $state<Set<string>>(new Set([data.modules?.[0]?.id || '']));
@@ -487,8 +488,14 @@
 								class="space-y-10"
 								use:enhance={() => {
 									submitting = true;
-									return async ({ update }) => {
+									return async ({ result, update }) => {
 										submitting = false;
+										if (result.type === 'success') {
+											toast.success('Berhasil mendaftar! Mengarahkan ke halaman pembayaran...');
+										} else if (result.type === 'failure') {
+											const errorMsg = (result.data as any)?.error || 'Gagal mendaftar kursus';
+											toast.error(errorMsg);
+										}
 										update();
 									};
 								}}

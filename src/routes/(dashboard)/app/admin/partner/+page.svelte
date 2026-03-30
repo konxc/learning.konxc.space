@@ -5,6 +5,7 @@
 	import StatCard from '$lib/components/ui/StatCard.svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
+	import { toast } from '$lib/stores/toast';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
@@ -31,22 +32,6 @@
 		</button>
 	</PageHeader>
 
-	{#if form?.error}
-		<div
-			class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700"
-		>
-			⚠️ {form.error}
-		</div>
-	{/if}
-
-	{#if form?.success && form?.message}
-		<div
-			class="animate-in fade-in mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700"
-		>
-			✅ {form.message}
-		</div>
-	{/if}
-
 	{#if showCreateForm}
 		<div
 			class={`mb-8 ${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} animate-in fade-in slide-in-from-top-4 p-6 duration-300`}
@@ -58,10 +43,16 @@
 				class="grid grid-cols-1 gap-5"
 				use:enhance={() => {
 					creating = true;
-					return async ({ update }) => {
+					return async ({ result, update }) => {
 						await update();
 						creating = false;
-						if (form?.success) showCreateForm = false;
+						if (result.type === 'success') {
+							toast.success('Partner berhasil ditambahkan!');
+							showCreateForm = false;
+						} else if (result.type === 'failure') {
+							const errorMsg = (result.data as any)?.error || 'Gagal menambahkan partner';
+							toast.error(errorMsg);
+						}
 					};
 				}}
 			>
@@ -176,7 +167,11 @@
 	{#if data.partners.length > 0}
 		<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
 			<StatCard value={data.stats.totalPartners} label="Total Partners" variant="default" />
-			<StatCard value={data.stats.totalEnrollments} label="Total Student Enrollments" variant="accent" />
+			<StatCard
+				value={data.stats.totalEnrollments}
+				label="Total Student Enrollments"
+				variant="accent"
+			/>
 		</div>
 	{/if}
 
@@ -276,7 +271,21 @@
 									</span>
 								</td>
 								<td class="px-5 py-4">
-									<form method="POST" action="?/updateStatus">
+									<form
+										method="POST"
+										action="?/updateStatus"
+										use:enhance={() => {
+											return async ({ result }) => {
+												if (result.type === 'success') {
+													toast.success('Status partner diperbarui!');
+												} else if (result.type === 'failure') {
+													const errorMsg =
+														(result.data as any)?.error || 'Gagal memperbarui status';
+													toast.error(errorMsg);
+												}
+											};
+										}}
+									>
 										<input type="hidden" name="partnerId" value={partner.id} />
 										<input
 											type="hidden"
