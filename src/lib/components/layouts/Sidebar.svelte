@@ -92,7 +92,12 @@
 			badgeColor: 'yellow'
 		},
 		{ label: 'Coupons', href: '/app/admin/coupons', icon: 'coupon', category: 'admin' },
-		{ label: 'Payment Proofs', href: '/app/admin/payments', icon: 'credit-card', category: 'admin' },
+		{
+			label: 'Payment Proofs',
+			href: '/app/admin/payments',
+			icon: 'credit-card',
+			category: 'admin'
+		},
 		{ label: 'CRM: Waiting List', href: '/app/crm/waiting-list', icon: 'clock', category: 'crm' }
 	];
 
@@ -170,6 +175,13 @@
 		>
 			<Logo size={isCollapsed ? 'sm' : 'md'} showText={!isCollapsed} />
 		</div>
+
+		<!-- Role Switcher under Logo (only when expanded) -->
+		{#if !isCollapsed && availableRoles.length > 1}
+			<div class="px-4 pb-3">
+				<RoleSegmentedControl activeRole={activeRole ?? 'user'} {availableRoles} />
+			</div>
+		{/if}
 
 		<!-- Navigation -->
 		<nav class="sidebar-nav flex-1 space-y-2 overflow-y-auto p-3" aria-label="Main navigation">
@@ -286,7 +298,9 @@
 
 		<!-- Workspace Switcher at the Bottom -->
 		{#if workspaces}
-			<div class={`px-3 pt-2 pb-4 border-t border-gray-100 dark:border-neutral-800 ${isCollapsed ? 'px-2' : ''}`}>
+			<div
+				class={`border-t border-gray-100 px-3 pt-2 pb-4 dark:border-neutral-800 ${isCollapsed ? 'px-2' : ''}`}
+			>
 				<WorkspaceSwitcher {workspaces} fullWidth={true} {isCollapsed} />
 			</div>
 		{/if}
