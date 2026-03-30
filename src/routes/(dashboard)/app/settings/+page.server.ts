@@ -1,9 +1,9 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
-import { hashPassword, verifyPassword } from '$lib/server/password';
+import { hashPassword, verifyPassword, hashApiKey } from '$lib/server/password';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
 import { sendEmail } from '$lib/server/email';
 import { timingSafeEqual } from 'crypto';
@@ -328,15 +328,16 @@ export const actions: Actions = {
 		const name = formData.get('name')?.toString() || 'New Agent Key';
 
 		try {
-			const key = 'nk_' + crypto.randomUUID().replace(/-/g, '');
+			const plainKey = 'nk_' + crypto.randomUUID().replace(/-/g, '');
+			const hashedKey = hashApiKey(plainKey);
 			await db.insert(schema.organizationApiKey).values({
 				id: crypto.randomUUID(),
 				orgId: activeWorkspaceId,
-				key,
+				key: hashedKey,
 				name,
 				status: 'active'
 			});
-			return actionSuccess({ message: 'API Key berhasil dibuat!', data: { key } });
+			return actionSuccess({ message: 'API Key berhasil dibuat!', data: { key: plainKey } });
 		} catch (e) {
 			return actionFailure(500, 'Gagal membuat API Key');
 		}

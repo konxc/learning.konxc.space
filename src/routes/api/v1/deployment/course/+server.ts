@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { hashApiKey } from '$lib/server/password';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const apiKey = request.headers.get('x-api-key');
@@ -11,10 +12,13 @@ export const POST: RequestHandler = async ({ request }) => {
 		return error(401, 'Unauthorized: Missing API Key');
 	}
 
+	// Hash the provided key for comparison with stored hash
+	const hashedKey = hashApiKey(apiKey);
+
 	// 1. Validate API Key
 	const keyRecord = await db.query.organizationApiKey.findFirst({
 		where: and(
-			eq(schema.organizationApiKey.key, apiKey),
+			eq(schema.organizationApiKey.key, hashedKey),
 			eq(schema.organizationApiKey.status, 'active')
 		)
 	});
@@ -24,7 +28,8 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	// Update last used timestamp
-	await db.update(schema.organizationApiKey)
+	await db
+		.update(schema.organizationApiKey)
 		.set({ lastUsedAt: new Date() })
 		.where(eq(schema.organizationApiKey.id, keyRecord.id));
 
@@ -42,7 +47,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		const result = await db.transaction(async (tx) => {
 			// A. Find or Create Course
 			let courseId = courseData.id;
-			const existingCourse = courseId 
+			const existingCourse = courseId
 				? await tx.query.course.findFirst({ where: eq(schema.course.id, courseId) })
 				: null;
 
@@ -55,10 +60,11 @@ export const POST: RequestHandler = async ({ request }) => {
 					description: courseData.description || '',
 					price: courseData.price || 0,
 					status: 'draft',
-					createdBy: courseData.createdBy || 'system-agent',
+					createdBy: courseData.createdBy || 'system-agent'
 				});
 			} else {
-				await tx.update(schema.course)
+				await tx
+					.update(schema.course)
 					.set({
 						title: courseData.title,
 						description: courseData.description,
@@ -71,13 +77,10 @@ export const POST: RequestHandler = async ({ request }) => {
 			if (courseData.modules && Array.isArray(courseData.modules)) {
 				for (const mod of courseData.modules) {
 					const moduleId = mod.id || crypto.randomUUID();
-					
+
 					// Upsert Module
 					const existingModule = await tx.query.module.findFirst({
-						where: and(
-							eq(schema.module.courseId, courseId),
-							eq(schema.module.title, mod.title)
-						)
+						where: and(eq(schema.module.courseId, courseId), eq(schema.module.title, mod.title))
 					});
 
 					if (!existingModule) {
@@ -89,7 +92,8 @@ export const POST: RequestHandler = async ({ request }) => {
 						});
 					} else {
 						// Update order if needed
-						await tx.update(schema.module)
+						await tx
+							.update(schema.module)
 							.set({ order: mod.order, updatedAt: new Date() })
 							.where(eq(schema.module.id, existingModule.id));
 					}
@@ -146,12 +150,14 @@ export const POST: RequestHandler = async ({ request }) => {
 			message: 'Course deployed successfully',
 			data: result
 		});
-
 	} catch (e: any) {
 		console.error('Deployment Error:', e);
-		return json({
-			success: false,
-			message: e.message || 'Internal Server Error during deployment'
-		}, { status: 500 });
+		return json(
+			{
+				success: false,
+				message: e.message || 'Internal Server Error during deployment'
+			},
+			{ status: 500 }
+		);
 	}
 };

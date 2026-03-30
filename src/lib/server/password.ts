@@ -1,4 +1,7 @@
 // Use Web Crypto API for password hashing (Cloudflare Workers compatible)
+import { createHmac } from 'crypto';
+
+const API_KEY_SECRET = process.env.API_KEY_SECRET || 'naik-kelas-default-secret-change-me';
 
 /**
  * Hash a password using PBKDF2 with Web Crypto API
@@ -67,4 +70,21 @@ export async function verifyPassword(hash: string, password: string): Promise<bo
 		derivedHash.length === storedHash.length &&
 		derivedHash.every((val, idx) => val === storedHash[idx])
 	);
+}
+
+/**
+ * Hash an API key using HMAC-SHA256
+ * The key is hashed with a secret before storing in the database
+ */
+export function hashApiKey(apiKey: string): string {
+	return createHmac('sha256', API_KEY_SECRET).update(apiKey).digest('hex');
+}
+
+/**
+ * Verify an API key against a stored hash
+ * Returns the original key (unhashed) for comparison
+ */
+export function verifyApiKey(apiKey: string, storedHash: string): boolean {
+	const hash = hashApiKey(apiKey);
+	return hash === storedHash;
 }

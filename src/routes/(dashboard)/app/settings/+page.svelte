@@ -73,6 +73,7 @@
 	let emailNotif = $state(data.preferences?.emailNotif ?? true);
 	let waNotif = $state(data.preferences?.waNotif ?? false);
 	let focusMode = $state(data.preferences?.focusMode ?? true);
+	let submittingPref = $state<string | null>(null);
 
 	$effect(() => {
 		if (form?.success && form?.data?.key) {
@@ -82,17 +83,23 @@
 	});
 
 	function toggleEmail() {
+		if (submittingPref) return;
 		emailNotif = !emailNotif;
+		submittingPref = 'email';
 		(document.getElementById('emailNotifForm') as HTMLFormElement)?.requestSubmit();
 	}
 
 	function toggleWA() {
+		if (submittingPref) return;
 		waNotif = !waNotif;
+		submittingPref = 'wa';
 		(document.getElementById('waNotifForm') as HTMLFormElement)?.requestSubmit();
 	}
 
 	function toggleFocus() {
+		if (submittingPref) return;
 		focusMode = !focusMode;
+		submittingPref = 'focus';
 		(document.getElementById('focusModeForm') as HTMLFormElement)?.requestSubmit();
 	}
 
@@ -180,6 +187,13 @@
 							>
 								Informasi Dasar
 							</h3>
+							{#if form?.error}
+								<div
+									class="rounded-lg bg-red-50 p-4 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
+								>
+									{form.error}
+								</div>
+							{/if}
 							<AuthFormField
 								label="Nama Lengkap"
 								name="fullName"
@@ -226,6 +240,13 @@
 						>
 							Keamanan Akun
 						</h3>
+						{#if form?.error}
+							<div
+								class="rounded-lg bg-red-50 p-4 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
+							>
+								{form.error}
+							</div>
+						{/if}
 						<AuthFormField
 							label="Password Saat Ini"
 							name="currentPassword"
@@ -350,6 +371,13 @@
 									</div>
 								</div>
 								<form method="POST" action="?/updateOrgSettings" use:enhance class="space-y-6">
+									{#if form?.error}
+										<div
+											class="rounded-lg bg-red-50 p-4 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
+										>
+											{form.error}
+										</div>
+									{/if}
 									<AuthFormField
 										label="Nama Institusi"
 										name="name"
@@ -460,9 +488,12 @@
 					id="emailNotifForm"
 					use:enhance={() => {
 						return async ({ result }) => {
+							submittingPref = null;
 							if (result.type === 'failure') {
 								emailNotif = !emailNotif;
 								toast.error('Gagal menyimpan preferensi');
+							} else {
+								toast.success('Notifikasi email ' + (emailNotif ? 'diaktifkan' : 'dinonaktifkan'));
 							}
 						};
 					}}
@@ -476,9 +507,12 @@
 					id="waNotifForm"
 					use:enhance={() => {
 						return async ({ result }) => {
+							submittingPref = null;
 							if (result.type === 'failure') {
 								waNotif = !waNotif;
 								toast.error('Gagal menyimpan preferensi');
+							} else {
+								toast.success('Notifikasi WhatsApp ' + (waNotif ? 'diaktifkan' : 'dinonaktifkan'));
 							}
 						};
 					}}
@@ -492,6 +526,7 @@
 					id="focusModeForm"
 					use:enhance={() => {
 						return async ({ result }) => {
+							submittingPref = null;
 							if (result.type === 'success') {
 								toast.success(focusMode ? 'Modus Fokus diaktifkan' : 'Modus Fokus dinonaktifkan');
 							} else if (result.type === 'failure') {
@@ -531,7 +566,8 @@
 										aria-label={emailNotif
 											? 'Nonaktifkan notifikasi email'
 											: 'Aktifkan notifikasi email'}
-										class={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors ${emailNotif ? 'bg-blue-600' : 'bg-zinc-200 dark:bg-zinc-700'}`}
+										disabled={submittingPref !== null}
+										class={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors ${emailNotif ? 'bg-blue-600' : 'bg-zinc-200 dark:bg-zinc-700'} ${submittingPref !== null ? 'cursor-not-allowed opacity-50' : ''}`}
 									>
 										<span
 											class={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${emailNotif ? 'translate-x-6' : 'translate-x-1'}`}
@@ -553,7 +589,8 @@
 										aria-label={waNotif
 											? 'Nonaktifkan notifikasi WhatsApp'
 											: 'Aktifkan notifikasi WhatsApp'}
-										class={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors ${waNotif ? 'bg-blue-600' : 'bg-zinc-200 dark:bg-zinc-700'}`}
+										disabled={submittingPref !== null}
+										class={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors ${waNotif ? 'bg-blue-600' : 'bg-zinc-200 dark:bg-zinc-700'} ${submittingPref !== null ? 'cursor-not-allowed opacity-50' : ''}`}
 									>
 										<span
 											class={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${waNotif ? 'translate-x-6' : 'translate-x-1'}`}
@@ -571,7 +608,8 @@
 									<button
 										onclick={toggleFocus}
 										aria-label={focusMode ? 'Nonaktifkan modus fokus' : 'Aktifkan modus fokus'}
-										class={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors ${focusMode ? 'bg-blue-600' : 'bg-zinc-200 dark:bg-zinc-700'}`}
+										disabled={submittingPref !== null}
+										class={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors ${focusMode ? 'bg-blue-600' : 'bg-zinc-200 dark:bg-zinc-700'} ${submittingPref !== null ? 'cursor-not-allowed opacity-50' : ''}`}
 									>
 										<span
 											class={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${focusMode ? 'translate-x-6' : 'translate-x-1'}`}
