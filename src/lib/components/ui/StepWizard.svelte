@@ -68,7 +68,7 @@
 		<!-- Progress Track - based on completed steps -->
 		<div class="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
 			<div
-				class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500 ease-out"
+				class="h-full bg-linear-to-r from-blue-500 to-indigo-500 transition-all duration-500 ease-out"
 				style={`width: ${progressWidth}`}
 			></div>
 		</div>

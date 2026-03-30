@@ -987,3 +987,20 @@ export const userPreferences = sqliteTable('user_preferences', {
 		.notNull()
 		.$defaultFn(() => new Date())
 });
+
+// Organization API Keys (Secure deployment for Agents)
+export const organizationApiKey = sqliteTable('organization_api_key', {
+	id: text('id').primaryKey(),
+	orgId: text('org_id')
+		.notNull()
+		.references(() => organization.id),
+	key: text('key').notNull().unique(), // Secure hashed or long random string
+	name: text('name').notNull(), // e.g., 'Naik Kelas Telegram Agent'
+	status: text('status').notNull().default('active'), // 'active' | 'revoked'
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	lastUsedAt: integer('last_used_at', { mode: 'timestamp' })
+});
+
+export type OrganizationApiKey = typeof organizationApiKey.$inferSelect;

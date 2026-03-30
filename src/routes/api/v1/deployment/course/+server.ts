@@ -5,21 +5,38 @@ import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 
-export const POST: RequestHandler = async ({ request, locals }) => {
-	// 1. Basic API Key Validation (Placeholder)
-	// In production, this should check a dedicated 'api_keys' table or Organization secret
+export const POST: RequestHandler = async ({ request }) => {
 	const apiKey = request.headers.get('x-api-key');
-	if (!apiKey || apiKey !== process.env.DEPLOYMENT_SECRET) {
-		// For now, if no env is set, we might want to restrict or allow during dev
-		// return error(401, 'Unauthorized deployment attempt');
+
+	if (!apiKey) {
+		return error(401, 'Unauthorized: Missing API Key');
 	}
+
+	// 1. Validate API Key
+	const keyRecord = await db.query.organizationApiKey.findFirst({
+		where: and(
+			eq(schema.organizationApiKey.key, apiKey),
+			eq(schema.organizationApiKey.status, 'active')
+		)
+	});
+
+	if (!keyRecord) {
+		return error(401, 'Unauthorized: Invalid or Revoked API Key');
+	}
+
+	// Update last used timestamp
+	await db.update(schema.organizationApiKey)
+		.set({ lastUsedAt: new Date() })
+		.where(eq(schema.organizationApiKey.id, keyRecord.id));
+
+	const organizationId = keyRecord.orgId;
 
 	try {
 		const payload = await request.json();
-		const { organizationId, courseData } = payload;
+		const { courseData } = payload;
 
-		if (!organizationId || !courseData) {
-			return error(400, 'Missing organizationId or courseData');
+		if (!courseData) {
+			return error(400, 'Missing courseData');
 		}
 
 		// 2. Perform Atomic Deployment Transaction
