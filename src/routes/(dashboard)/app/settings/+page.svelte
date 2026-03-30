@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import type { ActionData } from './$types';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import { COLOR, TEXT, RADIUS, TRANSITION, SPACING } from '$lib/config/design';
@@ -8,7 +9,51 @@
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
 	import { toast } from '$lib/stores/toast';
 
-	let { data, form } = $props();
+	interface SettingsPreferences {
+		emailNotif: boolean;
+		waNotif: boolean;
+		focusMode: boolean;
+	}
+
+	interface OrganizationApiKey {
+		id: string;
+		name: string;
+		status: string;
+		lastUsedAt: Date | null;
+		createdAt: Date;
+	}
+
+	interface Organization {
+		id: string;
+		name: string;
+		slug: string;
+		brandColor: string | null;
+		logoUrl: string | null;
+	}
+
+	interface SettingsPageData {
+		user: {
+			id: string;
+			username: string;
+			fullName: string | null;
+			email: string | null;
+			phone: string | null;
+			role: string;
+			createdAt: Date;
+			isVerified: boolean;
+		};
+		organization: Organization | null;
+		orgMembers: unknown[];
+		orgApiKeys: OrganizationApiKey[];
+		isOrgAdmin: boolean;
+		headerTabs: {
+			tabs: Array<{ label: string; id: string; icon: string }>;
+			activeTab: string;
+		};
+		preferences: SettingsPreferences;
+	}
+
+	let { data, form }: { data: SettingsPageData; form?: ActionData } = $props();
 
 	let activeTab = $derived(data.headerTabs.activeTab);
 	let isOrgAdmin = $derived(data.isOrgAdmin);
@@ -25,9 +70,9 @@
 	let newOrgSlug = $state('');
 
 	// Preferences toggles state - initialize from server data
-	let emailNotif = $state((data as any).preferences?.emailNotif ?? true);
-	let waNotif = $state((data as any).preferences?.waNotif ?? false);
-	let focusMode = $state((data as any).preferences?.focusMode ?? true);
+	let emailNotif = $state(data.preferences?.emailNotif ?? true);
+	let waNotif = $state(data.preferences?.waNotif ?? false);
+	let focusMode = $state(data.preferences?.focusMode ?? true);
 
 	$effect(() => {
 		if (form?.success && form?.data?.key) {

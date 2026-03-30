@@ -6,6 +6,7 @@ import { eq, and, desc } from 'drizzle-orm';
 import { hashPassword, verifyPassword } from '$lib/server/password';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
 import { sendEmail } from '$lib/server/email';
+import { timingSafeEqual } from 'crypto';
 
 function validateEmail(email: unknown): email is string {
 	if (typeof email !== 'string') return false;
@@ -15,6 +16,35 @@ function validateEmail(email: unknown): email is string {
 function validatePassword(password: unknown): password is string {
 	if (typeof password !== 'string') return false;
 	return password.length >= 8 && password.length <= 255;
+}
+
+function constantTimeEquals(a: string, b: string): boolean {
+	if (a.length !== b.length) return false;
+	try {
+		return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+	} catch {
+		return a === b;
+	}
+}
+
+async function requireOrgAdmin(
+	userId: string,
+	workspaceId: string
+): Promise<
+	| { error: true; message: string }
+	| { error: false; membership: typeof schema.organizationMember.$inferSelect }
+> {
+	const membership = await db.query.organizationMember.findFirst({
+		where: and(
+			eq(schema.organizationMember.orgId, workspaceId),
+			eq(schema.organizationMember.userId, userId)
+		)
+	});
+
+	if (!membership || !['owner', 'admin'].includes(membership.role)) {
+		return { error: true, message: 'Anda tidak memiliki akses untuk melakukan tindakan ini' };
+	}
+	return { error: false, membership };
 }
 
 export const load: PageServerLoad = async ({ locals, url, cookies }) => {
@@ -255,16 +285,9 @@ export const actions: Actions = {
 		if (!activeWorkspaceId || activeWorkspaceId === 'personal')
 			return actionFailure(400, 'Workspace tidak valid');
 
-		// Verify user is org admin/owner
-		const membership = await db.query.organizationMember.findFirst({
-			where: and(
-				eq(schema.organizationMember.orgId, activeWorkspaceId),
-				eq(schema.organizationMember.userId, locals.user.id)
-			)
-		});
-
-		if (!membership || !['owner', 'admin'].includes(membership.role)) {
-			return actionFailure(403, 'Anda tidak memiliki akses untuk mengubah pengaturan organisasi');
+		const authCheck = await requireOrgAdmin(locals.user.id, activeWorkspaceId!);
+		if (authCheck.error) {
+			return actionFailure(403, authCheck.message);
 		}
 
 		const formData = await request.formData();
@@ -274,7 +297,7 @@ export const actions: Actions = {
 		await db
 			.update(schema.organization)
 			.set({ name, brandColor, updatedAt: new Date() })
-			.where(eq(schema.organization.id, activeWorkspaceId));
+			.where(eq(schema.organization.id, activeWorkspaceId!));
 
 		return actionSuccess({ message: 'Pengaturan organisasi diperbarui' });
 	},
@@ -287,19 +310,12 @@ export const actions: Actions = {
 			return actionFailure(400, 'Workspace tidak valid');
 		}
 
-		// Verify user is org admin/owner
-		const membership = await db.query.organizationMember.findFirst({
-			where: and(
-				eq(schema.organizationMember.orgId, activeWorkspaceId),
-				eq(schema.organizationMember.userId, locals.user.id)
-			)
-		});
-
-		if (!membership || !['owner', 'admin'].includes(membership.role)) {
-			return actionFailure(403, 'Anda tidak memiliki akses untuk membuat API Key');
+		const authCheck = await requireOrgAdmin(locals.user.id, activeWorkspaceId);
+		if (authCheck.error) {
+			return actionFailure(403, authCheck.message);
 		}
 
-		// Verify the organization exists and belongs to user
+		// Verify the organization exists
 		const organization = await db.query.organization.findFirst({
 			where: eq(schema.organization.id, activeWorkspaceId)
 		});
@@ -334,16 +350,9 @@ export const actions: Actions = {
 			return actionFailure(400, 'Workspace tidak valid');
 		}
 
-		// Verify user is org admin/owner
-		const membership = await db.query.organizationMember.findFirst({
-			where: and(
-				eq(schema.organizationMember.orgId, activeWorkspaceId),
-				eq(schema.organizationMember.userId, locals.user.id)
-			)
-		});
-
-		if (!membership || !['owner', 'admin'].includes(membership.role)) {
-			return actionFailure(403, 'Anda tidak memiliki akses untuk mencabut API Key');
+		const authCheck = await requireOrgAdmin(locals.user.id, activeWorkspaceId);
+		if (authCheck.error) {
+			return actionFailure(403, authCheck.message);
 		}
 
 		const formData = await request.formData();
@@ -402,7 +411,8 @@ export const actions: Actions = {
 		if (!locals.user) throw redirect(302, '/auth/signin');
 
 		const formData = await request.formData();
-		if (formData.get('confirmText') !== 'HAPUS') {
+		const confirmText = formData.get('confirmText')?.toString() || '';
+		if (!constantTimeEquals(confirmText, 'HAPUS')) {
 			return actionFailure(400, 'Konfirmasi tidak valid');
 		}
 		if (locals.user.role === 'admin') {
