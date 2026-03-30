@@ -1,7 +1,7 @@
 // Minimal audit util; replace with DB insert via Drizzle when schema ready
 import type { RequestEvent } from '@sveltejs/kit';
 
-export type AuditAction = 'switch_role' | 'login' | 'logout' | 'admin_action';
+export type AuditAction = 'switch_role' | 'login' | 'logout' | 'admin_action' | 'account_deletion';
 
 export async function logAudit(
 	_event: RequestEvent,

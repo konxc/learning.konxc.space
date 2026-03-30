@@ -195,6 +195,36 @@ const templates: Record<string, (data: Record<string, string>) => EmailTemplate>
 			</html>
 		`,
 		text: `You're invited to join ${data.orgName} as a ${data.role}. Accept: ${data.inviteLink}`
+	}),
+
+	account_deleted: (data) => ({
+		subject: 'Akun Anda telah dihapus - Naik Kelas',
+		html: `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<meta charset="utf-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			</head>
+			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="text-align: center; margin-bottom: 30px;">
+					<h1 style="color: #dc2626; margin: 0;">Naik Kelas 🎓</h1>
+					<p style="color: #666; margin: 5px 0;">by Koneksi</p>
+				</div>
+				<div style="background: #fef2f2; border-radius: 12px; padding: 30px; margin-bottom: 20px; border: 1px solid #fecaca;">
+					<h2 style="margin-top: 0; color: #dc2626;">Akun Dihapus</h2>
+					<p>Halo ${data.name || 'Pengguna'},</p>
+					<p>Akun Anda dengan email <strong>${data.email}</strong> telah berhasil dihapus dari platform Naik Kelas.</p>
+					<p>Jika Anda tidak melakukan tindakan ini, segera hubungi tim support kami.</p>
+				</div>
+				<p style="color: #888; font-size: 12px; text-align: center;">
+					Email ini dikirim secara otomatis. Jangan membalas email ini.<br>
+					© 2026 Naik Kelas by Koneksi. All rights reserved.
+				</p>
+			</body>
+			</html>
+		`,
+		text: `Akun Anda dengan email ${data.email} telah dihapus dari Naik Kelas. Jika Anda tidak melakukan ini, hubungi support.`
 	})
 };
 
