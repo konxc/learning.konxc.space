@@ -24,10 +24,10 @@
 	let newOrgName = $state('');
 	let newOrgSlug = $state('');
 
-	// Preferences toggles state
-	let emailNotif = $state(true);
-	let waNotif = $state(false);
-	let focusMode = $state(true);
+	// Preferences toggles state - initialize from server data
+	let emailNotif = $state((data as any).preferences?.emailNotif ?? true);
+	let waNotif = $state((data as any).preferences?.waNotif ?? false);
+	let focusMode = $state((data as any).preferences?.focusMode ?? true);
 
 	$effect(() => {
 		if (form?.success && form?.data?.key) {
@@ -38,12 +38,12 @@
 
 	function toggleEmail() {
 		emailNotif = !emailNotif;
-		toast.success(emailNotif ? 'Notifikasi email diaktifkan' : 'Notifikasi email dinonaktifkan');
+		(document.getElementById('emailNotifForm') as HTMLFormElement)?.requestSubmit();
 	}
 
 	function toggleWA() {
 		waNotif = !waNotif;
-		toast.success(waNotif ? 'Notifikasi WhatsApp diaktifkan' : 'Notifikasi WhatsApp dinonaktifkan');
+		(document.getElementById('waNotifForm') as HTMLFormElement)?.requestSubmit();
 	}
 
 	function toggleFocus() {
@@ -408,6 +408,26 @@
 
 			<!-- Preferences Tab -->
 			{#if activeTab === 'preferences'}
+				<!-- Hidden forms for preference updates -->
+				<form
+					method="POST"
+					action="?/updatePreferences"
+					id="emailNotifForm"
+					use:enhance
+					class="hidden"
+				>
+					<input type="hidden" name="emailNotif" value={emailNotif.toString()} />
+				</form>
+				<form
+					method="POST"
+					action="?/updatePreferences"
+					id="waNotifForm"
+					use:enhance
+					class="hidden"
+				>
+					<input type="hidden" name="waNotif" value={waNotif.toString()} />
+				</form>
+
 				<div class="animate-in grid gap-8 md:grid-cols-3">
 					<div class="space-y-8 md:col-span-2">
 						<section

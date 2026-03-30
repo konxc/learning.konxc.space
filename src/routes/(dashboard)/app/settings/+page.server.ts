@@ -5,8 +5,6 @@ import * as schema from '$lib/server/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { hashPassword, verifyPassword } from '$lib/server/password';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
-import { logAudit } from '$lib/server/audit';
-import { deleteSessionTokenCookie } from '$lib/server/auth';
 import { sendEmail } from '$lib/server/email';
 
 function validateEmail(email: unknown): email is string {
@@ -105,6 +103,20 @@ export const load: PageServerLoad = async ({ locals, url, cookies }) => {
 
 	const activeTab = tabs.some((t) => t.id === tabParam) ? tabParam : 'profile';
 
+	// 3. Fetch User Preferences
+	const userPrefs = await db.query.userPreferences.findFirst({
+		where: eq(schema.userPreferences.userId, currentUser.id)
+	});
+
+	let notificationPrefs = { email: true, wa: false, push: false };
+	try {
+		if (userPrefs?.notificationPrefs) {
+			notificationPrefs = JSON.parse(userPrefs.notificationPrefs);
+		}
+	} catch {
+		notificationPrefs = { email: true, wa: false, push: false };
+	}
+
 	return {
 		user: {
 			id: currentUser.id,
@@ -123,6 +135,11 @@ export const load: PageServerLoad = async ({ locals, url, cookies }) => {
 		headerTabs: {
 			tabs,
 			activeTab
+		},
+		preferences: {
+			emailNotif: notificationPrefs.email,
+			waNotif: notificationPrefs.wa,
+			focusMode: true // Default, can be extended later
 		}
 	};
 };
@@ -326,6 +343,35 @@ export const actions: Actions = {
 		return actionSuccess({ message: 'API Key berhasil dicabut' });
 	},
 
+	updatePreferences: async ({ request, locals }) => {
+		if (!locals.user) throw redirect(302, '/auth/signin');
+
+		const formData = await request.formData();
+		const emailNotif = formData.get('emailNotif') === 'true';
+		const waNotif = formData.get('waNotif') === 'true';
+
+		const notificationPrefs = JSON.stringify({ email: emailNotif, wa: waNotif, push: false });
+
+		try {
+			await db
+				.insert(schema.userPreferences)
+				.values({
+					userId: locals.user.id,
+					notificationPrefs,
+					updatedAt: new Date()
+				})
+				.onConflictDoUpdate({
+					target: schema.userPreferences.userId,
+					set: { notificationPrefs, updatedAt: new Date() }
+				});
+
+			return actionSuccess({ message: 'Preferensi disimpan!' });
+		} catch (e) {
+			console.error('Save preferences error:', e);
+			return actionFailure(500, 'Gagal menyimpan preferensi');
+		}
+	},
+
 	deleteAccount: async ({ request, locals, cookies }) => {
 		if (!locals.user) throw redirect(302, '/auth/signin');
 
@@ -364,10 +410,11 @@ export const actions: Actions = {
 			// Delete all sessions
 			await db.delete(schema.session).where(eq(schema.session.userId, locals.user.id));
 
-			// Clear session cookie
-			cookies.delete('session', { path: '/' });
+			// Clear session cookie - set maxAge to 0 to ensure deletion
+			cookies.set('session', '', { path: '/', maxAge: 0 });
 
-			return actionSuccess({ message: 'Akun dihapus' });
+			// Redirect to home page after deletion
+			throw redirect(302, '/?deleted=true');
 		} catch (e) {
 			console.error('Delete account error:', e);
 			return actionFailure(500, 'Gagal menghapus akun');
