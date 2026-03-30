@@ -47,6 +47,25 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const courseData = courses[0];
 
+	// Check organization verification status for trusted badge
+	let orgVerified = false;
+	let orgVerification = null;
+	if (courseData.course.orgId) {
+		const verification = await db
+			.select({
+				status: schema.organizationVerification.status,
+				isTrusted: schema.organizationVerification.isTrusted
+			})
+			.from(schema.organizationVerification)
+			.where(eq(schema.organizationVerification.orgId, courseData.course.orgId))
+			.limit(1);
+
+		if (verification.length > 0) {
+			orgVerified = verification[0].status === 'verified' || verification[0].isTrusted === true;
+			orgVerification = verification[0];
+		}
+	}
+
 	// Check if user is enrolled in this specific course
 	let isEnrolled = false;
 	if (locals.user) {
