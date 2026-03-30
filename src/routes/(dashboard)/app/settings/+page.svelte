@@ -296,18 +296,10 @@
 										required
 									/>
 									<div class="space-y-2">
-										<label class="text-xs font-bold tracking-widest text-zinc-400 uppercase"
-											>Branding Color</label
-										>
+										<label for="brand-color" class="text-xs font-bold uppercase tracking-widest text-zinc-400">Branding Color</label>
 										<div class="flex items-center gap-4">
-											<input
-												type="color"
-												name="brandColor"
-												value={data.organization.brandColor}
-												class="h-12 w-12 cursor-pointer rounded-xl border-none bg-transparent"
-											/>
-											<span class="font-mono text-sm uppercase">{data.organization.brandColor}</span
-											>
+											<input id="brand-color" type="color" name="brandColor" value={data.organization.brandColor} class="h-12 w-12 cursor-pointer rounded-xl border-none bg-transparent" />
+											<span class="font-mono text-sm uppercase">{data.organization.brandColor}</span>
 										</div>
 									</div>
 									{#if isOrgAdmin}
