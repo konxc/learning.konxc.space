@@ -122,9 +122,9 @@ function getOrgNavItems(orgRole: string, context: WorkspaceContext): NavItem[] {
 	if (orgRole === 'owner' || orgRole === 'admin') {
 		return [
 			...baseOrgNav, ...learningNav,
-			{ label: 'Settings', href: '/app/settings/organization', icon: 'settings', category: 'management' },
-			{ label: 'Members', href: '/app/settings/organization', icon: 'users', category: 'management' },
-			{ label: 'Billing', href: '/app/settings/billing', icon: 'credit-card', category: 'management' },
+			{ label: 'Settings', href: '/app/settings?tab=organization', icon: 'settings', category: 'management' },
+			{ label: 'Members', href: '/app/settings?tab=organization', icon: 'users', category: 'management' },
+			{ label: 'Billing', href: '/app/settings?tab=payments', icon: 'credit-card', category: 'management' },
 			{ label: 'Course Builder', href: '/app/mentor/courses', icon: 'hammer', category: 'platform' },
 			{ label: 'Reviews', href: '/app/admin/reviews', icon: 'star', category: 'platform' },
 			{ label: 'Cohorts', href: '/app/admin/cohorts', icon: 'calendar', category: 'platform' },
