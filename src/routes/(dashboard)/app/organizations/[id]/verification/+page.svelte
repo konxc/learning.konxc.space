@@ -4,10 +4,10 @@
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import AuthFormField from '$lib/components/AuthFormField.svelte';
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
-	import AuthMessage from '$lib/components/AuthMessage.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import { enhance } from '$app/forms';
 	import { COLOR, RADIUS, TEXT, SPACING, ELEVATION } from '$lib/config/design';
+	import { toast } from '$lib/stores/toast';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -22,6 +22,16 @@
 	let province = $state('');
 	let postalCode = $state('');
 	let isSubmitting = $state(false);
+
+	// Show form errors/success as toasts
+	$effect(() => {
+		if (form?.error) {
+			toast.error(form.error);
+		}
+		if (form?.success && form?.message) {
+			toast.success(form.message);
+		}
+	});
 
 	const legalTypes = [
 		{ value: 'yayasan', label: 'Yayasan' },
@@ -64,14 +74,6 @@
 	/>
 
 	<main class="space-y-6">
-		{#if form?.error}
-			<AuthMessage type="error" message={form.error} />
-		{/if}
-
-		{#if form?.success}
-			<AuthMessage type="success" message={form.message} />
-		{/if}
-
 		<!-- Status Card -->
 		<div
 			class={`${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding} ${ELEVATION.card}`}

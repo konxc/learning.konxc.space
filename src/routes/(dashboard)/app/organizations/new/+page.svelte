@@ -4,17 +4,27 @@
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import AuthFormField from '$lib/components/AuthFormField.svelte';
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
-	import AuthMessage from '$lib/components/AuthMessage.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { COLOR, RADIUS, TEXT, SPACING, ELEVATION } from '$lib/config/design';
+	import { toast } from '$lib/stores/toast';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let orgName = $state('');
 	let brandColor = $state('#4f46e5');
 	let isSubmitting = $state(false);
+
+	// Show form errors/success as toasts
+	$effect(() => {
+		if (form?.error) {
+			toast.error(form.error);
+		}
+		if (form?.success && form?.message) {
+			toast.success(form.message);
+		}
+	});
 
 	// Color presets
 	const colorPresets = [
@@ -39,19 +49,6 @@
 	/>
 
 	<main class="mx-auto max-w-2xl">
-		{#if form?.error}
-			<AuthMessage type="error" message={form.error} />
-		{/if}
-
-		{#if form?.success}
-			<div class="mb-6 rounded-lg bg-emerald-50 p-4 text-emerald-700">
-				<div class="flex items-center gap-2">
-					<Icon name="check-circle" size={20} />
-					<span class="font-medium">{form.message}</span>
-				</div>
-			</div>
-		{/if}
-
 		<!-- KTP Verified Badge -->
 		<div
 			class={`${RADIUS.card} border border-emerald-200 bg-emerald-50 p-4 ${ELEVATION.card} dark:border-emerald-800 dark:bg-emerald-900/20`}

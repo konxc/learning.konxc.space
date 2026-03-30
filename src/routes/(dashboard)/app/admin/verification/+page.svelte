@@ -2,10 +2,10 @@
 	import type { PageData, ActionData } from './$types';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
-	import AuthMessage from '$lib/components/AuthMessage.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import { enhance } from '$app/forms';
 	import { COLOR, RADIUS, TEXT, SPACING, ELEVATION } from '$lib/config/design';
+	import { toast } from '$lib/stores/toast';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -14,6 +14,16 @@
 	let showRejectModal = $state(false);
 	let rejectTargetId = $state('');
 	let rejectType = $state<'ktp' | 'org'>('ktp');
+
+	// Show form errors/success as toasts
+	$effect(() => {
+		if (form?.error) {
+			toast.error(form.error);
+		}
+		if (form?.success && form?.message) {
+			toast.success(form.message);
+		}
+	});
 
 	function formatDate(date: Date | string | null) {
 		if (!date) return '-';
@@ -43,14 +53,6 @@
 		title="Verification Queue"
 		description="Review and approve KTP and organization verifications."
 	/>
-
-	{#if form?.error}
-		<AuthMessage type="error" message={form.error} />
-	{/if}
-
-	{#if form?.success}
-		<AuthMessage type="success" message={form.message} />
-	{/if}
 
 	<!-- Stats -->
 	<div class="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">

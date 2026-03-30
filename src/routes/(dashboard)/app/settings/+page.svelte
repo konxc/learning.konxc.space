@@ -4,7 +4,6 @@
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import AuthFormField from '$lib/components/AuthFormField.svelte';
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
-	import AuthMessage from '$lib/components/AuthMessage.svelte';
 	import { enhance } from '$app/forms';
 	import { COLOR, RADIUS, TRANSITION, TEXT } from '$lib/config/design';
 	import { toast } from '$lib/stores/toast';
@@ -58,6 +57,16 @@
 		}
 	});
 
+	// Show form errors/success as toasts
+	$effect(() => {
+		if (form?.error) {
+			toast.error(form.error);
+		}
+		if (form?.success) {
+			toast.success(form.message || 'Perubahan berhasil disimpan.');
+		}
+	});
+
 	function handleThemeChange(newTheme: Theme) {
 		theme = newTheme;
 		setTheme(newTheme);
@@ -85,14 +94,6 @@
 
 	<div class="w-full">
 		<main class="w-full">
-			{#if form?.error}
-				<AuthMessage type="error" message={form.error} />
-			{/if}
-
-			{#if form?.success}
-				<AuthMessage type="success" message={form.message || 'Perubahan berhasil disimpan.'} />
-			{/if}
-
 			<!-- Profile Tab -->
 			{#if activeTab === 'profile'}
 				<div
