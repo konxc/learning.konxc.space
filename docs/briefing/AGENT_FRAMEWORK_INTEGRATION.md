@@ -1,51 +1,80 @@
 # 📝 Briefing: Integrasi Framework Agen Naik Kelas
 
-Dokumen ini ditujukan bagi AI Agent yang bekerja pada repositori **naikkelas.id** agar memahami keberadaan ekosistem pendukung baru: **naikkelas-agent**.
+Dokumen ini ditujukan bagi AI Agent yang bekerja pada repositori **naikkelas.id** dan **naikkelas-agent** agar memahami infrastruktur pendukung untuk: **naikkelas-agent**.
 
 ---
 
-## 🔷 OVERVIEW EKOSISTEM
-Kita sedang membangun arsitektur dua-lapis untuk memodernisasi pembuatan kurikulum:
-1.  **naikkelas.id (App Layer)**: Platform SvelteKit/Turso yang menangani pengantaran materi, progres peserta, dan database utama.
-2.  **naikkelas-agent (Brain Layer)**: Repositori terpisah yang bertindak sebagai "Pusat Kendali AI". Di sinilah draf kurikulum dari berbagai institusi dirancang menggunakan AI sebelum dikirim ke platform utama.
+## 🔷 STATUS IMPLEMENTASI (UPDATE 2026-03-31)
+Infrastruktur dasar untuk deployment otomatis telah siap di sisi **naikkelas.id**:
+
+1.  **Database Layer**: Tabel `organizationApiKey` telah ditambahkan di `src/lib/server/db/schema.ts` untuk mengelola otentikasi per-organisasi.
+2.  **API Layer**: Endpoint `POST /api/v1/deployment/course` telah aktif di `src/routes/api/v1/deployment/course/+server.ts`.
+3.  **UI/UX Layer**: Menu manajemen API Key telah tersedia di Dashboard Pengguna (`/app/settings?tab=organization`).
+4.  **Security Policy**: Hanya akun dengan status **KTP Terverifikasi** yang dapat membuat organisasi dan mengelola API Key.
 
 ---
 
-## 🚀 VISI "CHAT-TO-CURRICULUM-TO-PRODUCTION"
-Fitur ini memungkinkan pengelola yayasan/instansi untuk:
-1.  Mengirim instruksi via Telegram/WhatsApp.
-2.  Agen AI di `naikkelas-agent` akan merumuskan draf kurikulum (.md) secara otomatis.
-3.  Agen akan melakukan **Deployment** langsung ke platform `naikkelas.id` melalui API.
+## 🚀 ALUR "CHAT-TO-CURRICULUM-TO-PRODUCTION"
+
+1.  **Input**: Pengguna mengirim instruksi (e.g. via Telegram) ke `naikkelas-agent`.
+2.  **Processing**: `naikkelas-agent` merumuskan draf kurikulum dalam format JSON sesuai skema platform.
+3.  **Authentication**: `naikkelas-agent` mengambil API Key organisasi dari environment variable.
+4.  **Deployment**: `naikkelas-agent` mengirim `POST` request ke `naikkelas.id/api/v1/deployment/course` dengan header `x-api-key`.
+5.  **Synchronization**: Platform utama melakukan *atomic transaction* untuk membuat/update Course, Module, Lesson, dan Material.
 
 ---
 
-## 🛠️ TUGAS UNTUK AGEN NAIKKELAS.ID
-Kepada agen yang bekerja di repositori utama, Anda diminta untuk:
+## 🛠️ PANDUAN INTEGRASI (UNTUK AGEN)
 
-### 1. Review Skema Database
-Pastikan tabel `courses`, `modules`, `lessons`, dan `materials` di `src/lib/server/db/schema.ts` dapat menampung data yang dikirim secara otomatis (misal: penanganan slug yang unik, urutan modul yang fleksibel, dan validasi link eksternal).
-
-### 2. Persiapan API Deployment
-Mulai rancang endpoint di `src/routes/api/v1/deployment/` yang mampu menerima payload JSON dari `naikkelas-agent`. Endpoint ini harus memiliki parameter keamanan yang ketat (API Key per-Organisasi).
-
-### 3. Sinkronisasi Telemetri
-Rancang agar progres peserta (Task/KC) yang didefinisikan di draf Markdown dapat terbaca secara presisi oleh sistem tracking di platform utama.
+### Endpoint Deployment
+- **URL**: `https://learning.naikkelas.id/api/v1/deployment/course` (atau localhost saat dev)
+- **Method**: `POST`
+- **Headers**:
+  ```http
+  Content-Type: application/json
+  x-api-key: nk_your_secret_key_here
+  ```
+- **Payload Structure**:
+  ```json
+  {
+    "courseData": {
+      "title": "Judul Kursus",
+      "description": "Deskripsi panjang...",
+      "price": 0,
+      "modules": [
+        {
+          "title": "Modul 1: Dasar-dasar",
+          "lessons": [
+            {
+              "title": "Pelajaran 1.1",
+              "materials": [
+                {
+                  "type": "text",
+                  "content": "Isi materi Markdown di sini..."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+  ```
 
 ---
 
-## 🏗️ STRUKTUR REPO TERKAIT
-Hubungan antara kedua repositori ini adalah:
-- `naikkelas-agent` berdiri sebagai repositori independen.
-- `naikkelas.id` akan bertindak sebagai "Consumer" dari output yang dihasilkan agen tersebut.
-- Konteks kurikulum spesifik (seperti ASIB) berada di `naikkelas-agent/instances/koneksi-digital`.
+## 🏗️ TATA KELOLA ORGANISASI
+Pengelola dapat mengelola koneksi agen melalui:
+- **Settings Dashboard**: Buka `/app/settings` -> Tab **Organisasi**.
+- **Generate Key**: Buat key baru untuk agen tertentu. Simpan segera karena key hanya ditampilkan sekali.
+- **Revoke Key**: Jika dicurigai ada kebocoran, admin dapat mencabut akses secara instan.
 
 ---
 
-## 🎯 TUJUAN AKHIR
-Membuat `naikkelas.id` menjadi platform LMS pertama yang memiliki integrasi AI end-to-end—mulai dari percakapan santai di aplikasi pesan hingga kelas yang siap diakses ribuan peserta secara otomatis.
+## 🎯 TARGET BERIKUTNYA
+1.  **Sync Progress (KC/Task)**: Menghubungkan definisi tugas di Markdown dengan sistem tracking di database.
+2.  **Webhook Notification**: Platform memberi tahu agen jika kursus telah berhasil di-deploy atau butuh revisi.
 
-**Mohon periksa codebase naikkelas.id dan berikan rekomendasi teknis untuk memperlancar integrasi ini.**
-
----
-**Lead Engineering**: sandikodev  
-**Last Updated**: 2026-03-30
+**Lead Engineering**: Antigravity AI
+**Status**: API Standardized & UI Unified
+**Last Updated**: 2026-03-31
