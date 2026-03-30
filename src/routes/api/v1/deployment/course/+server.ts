@@ -3,7 +3,6 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { v4 as uuidv4 } from 'uuid';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const apiKey = request.headers.get('x-api-key');
@@ -48,7 +47,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				: null;
 
 			if (!existingCourse) {
-				courseId = uuidv4();
+				courseId = crypto.randomUUID();
 				await tx.insert(schema.course).values({
 					id: courseId,
 					orgId: organizationId,
@@ -71,7 +70,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			// B. Process Modules
 			if (courseData.modules && Array.isArray(courseData.modules)) {
 				for (const mod of courseData.modules) {
-					const moduleId = mod.id || uuidv4();
+					const moduleId = mod.id || crypto.randomUUID();
 					
 					// Upsert Module
 					const existingModule = await tx.query.module.findFirst({
@@ -100,7 +99,7 @@ export const POST: RequestHandler = async ({ request }) => {
 					// C. Process Lessons
 					if (mod.lessons && Array.isArray(mod.lessons)) {
 						for (const les of mod.lessons) {
-							const lessonId = les.id || uuidv4();
+							const lessonId = les.id || crypto.randomUUID();
 
 							const existingLesson = await tx.query.lesson.findFirst({
 								where: and(
@@ -125,7 +124,7 @@ export const POST: RequestHandler = async ({ request }) => {
 								for (const mat of les.materials) {
 									// Simplified: Always insert material for now or match by order/type
 									await tx.insert(schema.material).values({
-										id: uuidv4(),
+										id: crypto.randomUUID(),
 										lessonId: finalLessonId,
 										type: mat.type,
 										content: mat.content,
