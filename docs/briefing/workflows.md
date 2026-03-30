@@ -1,11 +1,14 @@
-# Organizational Workflows
+# Organizational Workflows - Naik Kelas 2.0
 
-> **Status:** PRODUCTION
-> **Last Updated:** 2026-03-29
+> **Status:** PRODUCTION - All workflows implemented and verified  
+> **Last Updated:** 2026-03-30  
+> **Version:** Naik Kelas 2.0
+
+---
 
 ## Overview
 
-This document outlines the organizational hierarchy and key workflows for the Naik Kelas 2.0 gotong royong education ecosystem.
+This document outlines the complete organizational hierarchy and key workflows for the Naik Kelas 2.0 gotong royong education ecosystem.
 
 ---
 
@@ -39,18 +42,20 @@ Platform
 
 ### Entity Relationships
 
-| Entity                    | Parent              | Children                                  |
-| ------------------------- | ------------------- | ----------------------------------------- |
-| User                      | -                   | Verifications, Organizations, Enrollments |
-| User Verification         | User                | -                                         |
-| Organization              | User (owner)        | Workspaces, Courses, Members              |
-| Organization Verification | Organization        | -                                         |
-| Affiliate Account         | User + Organization | Links, Earnings                           |
-| Workspace                 | Organization        | Members                                   |
-| Course                    | Organization        | Modules, Lessons                          |
-| Cohort                    | Course              | Enrollments, Checkpoints                  |
-| Enrollment                | Cohort/Course       | Progress, Grades                          |
-| UserTracker               | User                | Activities                                |
+| Entity                    | Parent              | Children                                                   |
+| ------------------------- | ------------------- | ---------------------------------------------------------- |
+| User                      | -                   | Verifications, Organizations, Enrollments, UserPreferences |
+| User Verification         | User                | -                                                          |
+| User Preferences          | User                | -                                                          |
+| Organization              | User (owner)        | Workspaces, Courses, Members                               |
+| Organization Verification | Organization        | -                                                          |
+| Affiliate Account         | User + Organization | Links, Earnings                                            |
+| Workspace                 | Organization        | Members                                                    |
+| Course                    | Organization        | Modules, Lessons                                           |
+| Cohort                    | Course              | Enrollments, Checkpoints                                   |
+| Enrollment                | Cohort/Course       | Progress, Grades                                           |
+| UserTracker               | User                | Activities                                                 |
+| TrackerActivity           | User                | Point sources                                              |
 
 ---
 
@@ -63,41 +68,64 @@ Platform
 
 ### Steps
 
-1. **User Registration**
+#### 1. User Registration
 
-   ```
-   POST /auth/register
-   Body: { email, password, fullName }
-   ```
+```
+POST /auth/register
+Body: { email, password, fullName }
+```
 
-2. **Onboarding (Student Path)**
-   - Select first course
-   - Select track: `creator` | `seller` | `affiliate`
-   - Dashboard access granted
+**Database:** User created with `role = 'user'`
 
-3. **Optional: KTP Verification**
+#### 2. Onboarding (Student Path)
 
-   ```
-   POST /api/verification/ktp
-   Body: {
-     ktpNumber,
-     ktpName,
-     ktpAddress,
-     ktpDob,
-     ktpPhoto (base64),
-     selfieWithKtp (base64)
-   }
-   ```
+**IMPORTANT:** Student onboarding collects TELEMETERI only - NO course selection!
 
-4. **Admin Review**
-   - Admin reviews KTP submission
-   - Approves or rejects with reason
+```
+GET /onboarding
+```
 
-5. **Result**
-   - If approved: User can now create Organization
-   - Status stored in `userVerification` table
+Form collects:
 
-### Business Rules
+- Goals (career, business, skill, hobby)
+- Interests (creator, affiliate, seller, smm, seo)
+- Experience (beginner, intermediate, advanced)
+- Schedule (morning, afternoon, evening, flexible)
+- Notification preferences
+
+**Action:** `savePreferences` saves to `userPreferences` table and sets `onboardingCompleted = true`
+
+#### 3. KTP Verification (Optional but Required for Org Creation)
+
+```
+POST /app/verification
+Body: {
+  ktpNumber,
+  ktpName,
+  ktpAddress,
+  ktpDob,
+  ktpPhoto (base64),
+  selfieWithKtp (base64)
+}
+```
+
+**Database:** Creates/updates `userVerification` record with status 'pending'
+
+#### 4. Admin Review
+
+- Admin reviews KTP submission in `/app/admin/verification`
+- Approves or rejects with reason
+- Updates `userVerification.status`
+
+#### 5. Result
+
+| Status     | Permission                       |
+| ---------- | -------------------------------- |
+| `pending`  | Cannot create organization       |
+| `approved` | Can create organization          |
+| `rejected` | Can resubmit with corrected docs |
+
+**Business Rules:**
 
 - Only verified users can create organizations
 - KTP verification is permanent (no expiry)
@@ -105,7 +133,7 @@ Platform
 
 ---
 
-## Workflow 1: Creating an Organization (KTP Required)
+## Workflow 1: Creating an Organization
 
 ### Prerequisites
 
@@ -117,43 +145,47 @@ Platform
 
 ### Steps
 
-1. **Check Verification Status**
+#### 1. Check Verification Status
 
-   ```typescript
-   const verification = await db.query.userVerification.findFirst({
-   	where: eq(userVerification.userId, user.id)
-   });
+```typescript
+// src/routes/(dashboard)/app/organizations/new/+page.server.ts:26-33
+const verification = await db.query.userVerification.findFirst({
+	where: eq(schema.userVerification.userId, locals.user.id)
+});
 
-   if (verification?.status !== 'approved') {
-   	return fail(403, { error: 'KTP verification required' });
-   }
-   ```
+if (verification?.status !== 'approved') {
+	throw redirect(303, '/app/verification');
+}
+```
 
-2. **Create Organization**
+#### 2. Create Organization
 
-   ```
-   POST /api/organizations
-   Body: {
-     name: "Koneksi Digital",
-     slug: "koneksi-digital",
-     brandColor: "#4f46e5",
-     planType: "free"
-   }
-   ```
+```
+POST /app/organizations/new
+Body: {
+  name: "Koneksi Digital",
+  brandColor: "#4f46e5"
+}
+```
 
-3. **Auto-assign Owner**
-   - Creator automatically becomes `owner` role
-   - Owner gets full permissions
+**Database:** Creates organization record, auto-generates slug
 
-4. **Fill Organization Details** (Optional)
-   - Legal name
-   - Description
-   - Logo upload
-   - Contact information
+#### 3. Auto-assign Owner
 
-5. **Organization Verification** (Optional)
-   - Submit legal documents for "Trusted" badge
-   - See Workflow 1.1
+- Creator automatically becomes `owner` role in `organizationMember` table
+- Owner gets full permissions
+
+#### 4. Fill Organization Details (Optional)
+
+- Legal name
+- Description
+- Logo upload
+- Contact information
+
+#### 5. Organization Verification (Optional)
+
+- Submit legal documents for "Trusted" badge
+- See Workflow 1.1
 
 ### Result
 
@@ -181,38 +213,39 @@ Organization Created:
 
 ### Steps
 
-1. **Submit Verification**
+#### 1. Submit Verification
 
-   ```
-   POST /api/organizations/{orgId}/verification
-   Body: {
-     legalName: "Yayasan Koneksi Digital",
-     legalType: "yayasan",
-     npwp: "12.345.678.9-000.000",
-     skPendirian: "<document_url>",
-     siup: "<optional_document_url>",
-     representativeName: "Sandikodev",
-     representativePosition: "ketua",
-     legalAddress: "Jl. Teknologi No. 123, Jakarta",
-     city: "Jakarta",
-     province: "DKI Jakarta",
-     postalCode: "12345"
-   }
-   ```
+```
+POST /app/organizations/{orgId}/verification
+Body: {
+  legalName: "Yayasan Koneksi Digital",
+  legalType: "yayasan",
+  npwp: "12.345.678.9-000.000",
+  skPendirian: "<document_url>",
+  siup: "<optional_document_url>",
+  representativeName: "Sandikodev",
+  representativePosition: "ketua",
+  legalAddress: "Jl. Teknologi No. 123, Jakarta",
+  city: "Jakarta",
+  province: "DKI Jakarta",
+  postalCode: "12345"
+}
+```
 
-2. **Admin Review**
-   - Admin checks submitted documents
-   - Verifies legal entity existence
-   - Approves or rejects
+**Database:** Creates/updates `organizationVerification` record
 
-3. **Result**
-   - If approved:
-     - `organizationVerification.isTrusted = true`
-     - Courses get "Verified Organization" badge
-     - Higher visibility in marketplace
-   - If rejected:
-     - Reason provided
-     - Can resubmit with corrected docs
+#### 2. Admin Review
+
+- Admin checks submitted documents
+- Verifies legal entity existence
+- Approves or rejects
+
+#### 3. Result
+
+| Status     | Result                                         |
+| ---------- | ---------------------------------------------- |
+| `approved` | `isTrusted = true`, badge displayed on courses |
+| `rejected` | Reason provided, can resubmit                  |
 
 ### Benefits of Verification
 
@@ -235,74 +268,109 @@ Organization Created:
 
 ### Steps
 
-1. **Send Invitation**
+#### 1. Send Invitation
 
-   ```
-   POST /api/organizations/{orgId}/invite
-   Body: {
-     email: "mentor@example.com",
-     role: "mentor" // or "facilitator"
-   }
-   ```
+```
+POST /app/organizations/{orgId}/invite
+Body: {
+  email: "mentor@example.com",
+  role: "mentor" // or "facilitator"
+}
+```
 
-2. **Validation Rules**
+#### 2. Validation Rules (No Double Roles)
 
-   ```typescript
-   // Check if user already has role in this org
-   const existingRole = await db.query.organizationMember.findFirst({
-   	where: and(eq(organizationMember.orgId, orgId), eq(organizationMember.userId, invitee.id))
-   });
+```typescript
+// src/routes/org/invite/[token]/+page.server.ts:111-129
+const existingMember = await db.query.organizationMember.findFirst({
+	where: and(
+		eq(schema.organizationMember.orgId, invitation.orgId),
+		eq(schema.organizationMember.userId, user.id)
+	)
+});
 
-   if (existingRole) {
-   	// NO DOUBLE ROLES in same organization
-   	return fail(400, {
-   		error: 'User already has a role in this organization'
-   	});
-   }
-   ```
+if (existingMember) {
+	const isMentorOrFacilitatorInvite =
+		invitation.role === 'mentor' || invitation.role === 'facilitator';
+	const isExistingMentorOrFacilitator =
+		existingMember.role === 'mentor' || existingMember.role === 'facilitator';
 
-3. **User Accepts Invitation**
+	if (isMentorOrFacilitatorInvite && isExistingMentorOrFacilitator) {
+		throw error(403, 'Anda sudah memiliki peran di organisasi ini...');
+	}
+}
+```
 
-   ```
-   POST /api/invitations/{inviteId}/accept
-   ```
+**Rule:** A user can only have ONE mentor/facilitator role per organization.
 
-4. **Auto-Affiliate Creation** (Automatic)
+#### 3. User Accepts Invitation
 
-   ```typescript
-   // Auto-create affiliate account
-   const affiliateAccount = await db.insert(affiliateAccount).values({
-   	id: generateId(),
-   	userId: invitee.id,
-   	orgId: orgId,
-   	role: invitedRole, // 'mentor' or 'facilitator'
-   	commissionRate: 25, // Default 25%
-   	tier: 'bronze',
-   	isActive: true
-   });
+```
+GET /org/invite/{token}
+```
 
-   // Auto-generate affiliate links for all org courses
-   const orgCourses = await getCoursesByOrg(orgId);
-   for (const course of orgCourses) {
-   	await createAutoAffiliateLink(affiliateAccount.id, course.id);
-   }
-   ```
+#### 4. Auto-Affiliate Creation (Automatic)
 
-5. **Role-Specific Onboarding** (Required)
-   - **For Mentor**: Complete profile, expertise, portfolio, payout setup
-   - **For Facilitator**: Confirm org context, payout setup
-   - **Different from student onboarding!**
+```typescript
+// src/routes/org/invite/[token]/+page.server.ts:17-77
+async function createAutoAffiliateAccount(userId, orgId, role) {
+	// Check if already has affiliate account
+	const existing = await db.query.affiliateAccount.findFirst({
+		where: and(eq(schema.affiliateAccount.userId, userId), eq(schema.affiliateAccount.orgId, orgId))
+	});
 
-6. **Role Switcher Enabled**
-   - User can now switch between Student view and Mentor/Facilitator view
-   - Via RoleSwitcher in sidebar
+	if (existing) return;
+
+	// Create affiliate account
+	const accountId = generateId();
+	await db.insert(schema.affiliateAccount).values({
+		id: accountId,
+		userId,
+		orgId,
+		role,
+		commissionRate: 25, // Default 25%
+		tier: 'bronze',
+		isActive: true
+	});
+
+	// Auto-generate affiliate links for all org courses
+	const orgCourses = await db.query.course.findMany({
+		where: eq(schema.course.orgId, orgId)
+	});
+
+	for (const course of orgCourses) {
+		const linkCode = `${role}-${userId.substring(0, 6)}-${course.id.substring(0, 6)}`;
+		await db.insert(schema.autoAffiliateLink).values({
+			id: generateId(),
+			accountId,
+			courseId: course.id,
+			orgId,
+			code: linkCode,
+			url: `https://naikkelas.id/c/${linkCode}`,
+			isActive: true
+		});
+	}
+}
+```
+
+#### 5. Role-Specific Onboarding (Required)
+
+**Different from student onboarding!**
+
+- **For Mentor:** Complete profile, expertise, portfolio, payout setup
+- **For Facilitator:** Confirm org context, payout setup
+
+#### 6. Role Switcher Enabled
+
+- User can now switch between Student view and Mentor/Facilitator view
+- Via RoleSwitcher in sidebar (under logo)
 
 ### Auto-Affiliate Features
 
 | Feature              | Description                       |
 | -------------------- | --------------------------------- |
 | Auto-generated links | Links for all org courses         |
-| Unique referral code | e.g., "mentor-budi-abc123"        |
+| Unique referral code | e.g., `mentor-budi-abc123`        |
 | Default commission   | 25%                               |
 | Tier system          | Bronze → Silver → Gold → Platinum |
 | Payout tracking      | Earnings tracked automatically    |
@@ -323,42 +391,47 @@ Organization Created:
 
 ### Steps
 
-1. **Create Course** (Draft)
+#### 1. Create Course (Draft)
 
-   ```
-   POST /api/courses
-   Body: {
-     title: "Akselerasi Bisnis Digital",
-     description: "...",
-     price: 1500000,
-     category: "marketing",
-     featuresConfig: {
-       tracks: true,      // Enable track selection
-       affiliate: true,   // Enable affiliate program
-       performance: true  // Enable progress tracking
-     }
-   }
-   ```
+```
+POST /app/courses/new
+Body: {
+  title: "Akselerasi Bisnis Digital",
+  description: "...",
+  price: 1500000,
+  category: "marketing",
+  featuresConfig: {
+    tracks: true,      // Enable track selection
+    affiliate: true,   // Enable affiliate program
+    performance: true  // Enable progress tracking
+  }
+}
+```
 
-2. **Add Content**
-   - Create Modules
-   - Add Lessons to modules
-   - Add Materials to lessons
+**Database:** Creates course record with status 'draft'
 
-3. **Publish Course**
-   - Set status to `published`
-   - Course appears in marketplace
-   - Affiliate links auto-generated for mentors/facilitators
+#### 2. Add Content
 
-4. **Verified Organization Badge**
-   ```
-   IF org.isTrusted === true:
-     Course shows "Verified Organization" badge
-   ```
+- Create Modules
+- Add Lessons to modules
+- Add Materials to lessons
+
+#### 3. Publish Course
+
+- Set status to `published`
+- Course appears in marketplace
+- Affiliate links auto-generated for mentors/facilitators
+
+#### 4. Verified Organization Badge
+
+```
+IF org.verification.isTrusted === true:
+  Course shows "Verified Organization" badge
+```
 
 ---
 
-## Workflow 4: Student Enrollment
+## Workflow 4: Student Enrollment (with Track Selection)
 
 ### Actors
 
@@ -367,28 +440,43 @@ Organization Created:
 
 ### Steps
 
-1. **Browse Marketplace**
-   - View available courses
-   - See course details
-   - Note "Verified Organization" badge if applicable
+#### 1. Browse Marketplace
 
-2. **Select Track** (if course has tracks enabled)
-   - Content Creator
-   - E-Commerce Seller
-   - Affiliate Pro
+- View available courses
+- See course details
+- Note "Verified Organization" badge if applicable
 
-3. **Apply Coupon** (optional)
-   - Enter coupon code
-   - Validate and apply discount
+#### 2. Select Track (if course has tracks enabled)
 
-4. **Checkout**
-   - Payment via Midtrans
-   - Or submit payment proof
+**IMPORTANT:** Track selection happens at ENROLLMENT, not onboarding!
 
-5. **Activation**
-   - Enrollment status → `active`
-   - Access granted to course content
-   - Tracker system activated
+```
+GET /app/explore/{courseId}
+```
+
+Available tracks:
+
+- **Content Creator** - Build audience and create content
+- **E-Commerce Seller** - Sell products online
+- **Affiliate Pro** - Passive income through referrals
+
+#### 3. Apply Coupon (Optional)
+
+- Enter coupon code
+- Validate and apply discount
+
+#### 4. Checkout
+
+- Payment via Midtrans
+- Or submit payment proof
+
+#### 5. Activation
+
+- Enrollment status → `active`
+- Access granted to course content
+- Tracker system activated
+
+**Database:** `enrollment.track` stores selected track
 
 ---
 
@@ -416,6 +504,19 @@ Tier-based rates:
 ├── Silver (1001-5000 pts): 27%
 ├── Gold (5001-10000 pts): 30%
 └── Platinum (10001+ pts): 35%
+```
+
+**Auto-Calculation:** When sale is recorded, `affiliateAccount` totals are automatically updated:
+
+```typescript
+await db
+	.update(schema.affiliateAccount)
+	.set({
+		totalEarnings: sql`${schema.affiliateAccount.totalEarnings} + ${commission}`,
+		pendingPayout: sql`${schema.affiliateAccount.pendingPayout} + ${commission}`,
+		updatedAt: new Date()
+	})
+	.where(eq(schema.affiliateAccount.userId, userId));
 ```
 
 #### 3. Tracker Rewards
@@ -471,50 +572,7 @@ Legend (5001+)
 
 ---
 
-## Quick Reference: Key API Endpoints
-
-### User & Verification
-
-| Action             | Method | Endpoint                |
-| ------------------ | ------ | ----------------------- |
-| Register           | POST   | `/auth/register`        |
-| Submit KTP         | POST   | `/api/verification/ktp` |
-| Check Verification | GET    | `/api/verification/ktp` |
-
-### Organization
-
-| Action                  | Method | Endpoint                               |
-| ----------------------- | ------ | -------------------------------------- |
-| Create Org              | POST   | `/api/organizations`                   |
-| Submit Org Verification | POST   | `/api/organizations/{id}/verification` |
-| Invite Member           | POST   | `/api/organizations/{id}/invite`       |
-
-### Courses & Enrollment
-
-| Action        | Method | Endpoint           |
-| ------------- | ------ | ------------------ |
-| Create Course | POST   | `/api/courses`     |
-| Enroll        | POST   | `/api/enrollments` |
-
-### Affiliate
-
-| Action                   | Method | Endpoint               |
-| ------------------------ | ------ | ---------------------- |
-| View Affiliate Dashboard | GET    | `/api/affiliate`       |
-| Generate Link            | POST   | `/api/affiliate/links` |
-
-### Tracker
-
-| Action          | Method | Endpoint                  |
-| --------------- | ------ | ------------------------- |
-| View Tracker    | GET    | `/api/tracker`            |
-| View Activities | GET    | `/api/tracker/activities` |
-
----
-
-## Diagrams
-
-### Complete User Journey
+## Complete User Journey Diagram
 
 ```
 ┌─────────┐     ┌──────────┐     ┌─────────┐     ┌──────────┐
@@ -562,3 +620,46 @@ User Accepts Invitation
             ▼
         Dashboard with RoleSwitcher enabled
 ```
+
+---
+
+## Quick Reference: Key File Locations
+
+### User & Verification
+
+| Action                   | Location                                      |
+| ------------------------ | --------------------------------------------- |
+| Register                 | `src/routes/auth/register/`                   |
+| Submit KTP               | `src/routes/app/verification/`                |
+| KTP Server Logic         | `src/routes/app/verification/+page.server.ts` |
+| Admin Verification Queue | `src/routes/app/admin/verification/`          |
+
+### Organization
+
+| Action           | Location                                          |
+| ---------------- | ------------------------------------------------- |
+| Create Org       | `src/routes/app/organizations/new/`               |
+| Org Verification | `src/routes/app/organizations/[id]/verification/` |
+| Invite Member    | `src/routes/app/organizations/[id]/invite/`       |
+
+### Courses & Enrollment
+
+| Action                          | Location                                                    |
+| ------------------------------- | ----------------------------------------------------------- |
+| Create Course                   | `src/routes/app/courses/new/`                               |
+| Course Detail & Track Selection | `src/routes/app/explore/[id]/`                              |
+| Enroll                          | `src/routes/app/explore/[id]/+page.server.ts:enroll action` |
+
+### Affiliate
+
+| Action                | Location                                        |
+| --------------------- | ----------------------------------------------- |
+| Affiliate Dashboard   | `src/routes/app/affiliate/`                     |
+| Auto-Account Creation | `src/routes/org/invite/[token]/+page.server.ts` |
+
+### Tracker
+
+| Action             | Location                                      |
+| ------------------ | --------------------------------------------- |
+| Tracker Dashboard  | `src/routes/app/tracker/`                     |
+| Points Calculation | `src/lib/server/db/schema.ts:trackerActivity` |
