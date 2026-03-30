@@ -48,6 +48,7 @@
 
 	function toggleFocus() {
 		focusMode = !focusMode;
+		(document.getElementById('focusModeForm') as HTMLFormElement)?.requestSubmit();
 		toast.success(focusMode ? 'Modus Fokus diaktifkan' : 'Modus Fokus dinonaktifkan');
 	}
 
@@ -413,7 +414,14 @@
 					method="POST"
 					action="?/updatePreferences"
 					id="emailNotifForm"
-					use:enhance
+					use:enhance={() => {
+						return async ({ result }) => {
+							if (result.type === 'failure') {
+								emailNotif = !emailNotif;
+								toast.error('Gagal menyimpan preferensi');
+							}
+						};
+					}}
 					class="hidden"
 				>
 					<input type="hidden" name="emailNotif" value={emailNotif.toString()} />
@@ -422,10 +430,33 @@
 					method="POST"
 					action="?/updatePreferences"
 					id="waNotifForm"
-					use:enhance
+					use:enhance={() => {
+						return async ({ result }) => {
+							if (result.type === 'failure') {
+								waNotif = !waNotif;
+								toast.error('Gagal menyimpan preferensi');
+							}
+						};
+					}}
 					class="hidden"
 				>
 					<input type="hidden" name="waNotif" value={waNotif.toString()} />
+				</form>
+				<form
+					method="POST"
+					action="?/updatePreferences"
+					id="focusModeForm"
+					use:enhance={() => {
+						return async ({ result }) => {
+							if (result.type === 'failure') {
+								focusMode = !focusMode;
+								toast.error('Gagal menyimpan preferensi');
+							}
+						};
+					}}
+					class="hidden"
+				>
+					<input type="hidden" name="focusMode" value={focusMode.toString()} />
 				</form>
 
 				<div class="animate-in grid gap-8 md:grid-cols-3">

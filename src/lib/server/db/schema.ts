@@ -980,6 +980,8 @@ export const userPreferences = sqliteTable('user_preferences', {
 	learningSchedule: text('learning_schedule'), // 'morning' | 'afternoon' | 'evening' | 'flexible'
 	// Notification preferences
 	notificationPrefs: text('notification_prefs'), // JSON: ["email", "wa", "push"]
+	// Focus mode (LMS sidebar auto-hide)
+	focusMode: integer('focus_mode', { mode: 'boolean' }).default(true),
 	// Timestamps
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()

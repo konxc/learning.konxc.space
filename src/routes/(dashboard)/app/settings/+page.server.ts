@@ -139,7 +139,7 @@ export const load: PageServerLoad = async ({ locals, url, cookies }) => {
 		preferences: {
 			emailNotif: notificationPrefs.email,
 			waNotif: notificationPrefs.wa,
-			focusMode: true // Default, can be extended later
+			focusMode: userPrefs?.focusMode ?? true
 		}
 	};
 };
@@ -281,8 +281,32 @@ export const actions: Actions = {
 
 	createApiKey: async ({ request, locals, cookies }) => {
 		if (!locals.user) throw redirect(302, '/auth/signin');
+
 		const activeWorkspaceId = cookies.get('active-workspace');
-		if (!activeWorkspaceId) return actionFailure(400, 'Workspace tidak ditemukan');
+		if (!activeWorkspaceId || activeWorkspaceId === 'personal') {
+			return actionFailure(400, 'Workspace tidak valid');
+		}
+
+		// Verify user is org admin/owner
+		const membership = await db.query.organizationMember.findFirst({
+			where: and(
+				eq(schema.organizationMember.orgId, activeWorkspaceId),
+				eq(schema.organizationMember.userId, locals.user.id)
+			)
+		});
+
+		if (!membership || !['owner', 'admin'].includes(membership.role)) {
+			return actionFailure(403, 'Anda tidak memiliki akses untuk membuat API Key');
+		}
+
+		// Verify the organization exists and belongs to user
+		const organization = await db.query.organization.findFirst({
+			where: eq(schema.organization.id, activeWorkspaceId)
+		});
+
+		if (!organization) {
+			return actionFailure(404, 'Organisasi tidak ditemukan');
+		}
 
 		const formData = await request.formData();
 		const name = formData.get('name')?.toString() || 'New Agent Key';
@@ -349,6 +373,7 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const emailNotif = formData.get('emailNotif') === 'true';
 		const waNotif = formData.get('waNotif') === 'true';
+		const focusMode = formData.get('focusMode') === 'true';
 
 		const notificationPrefs = JSON.stringify({ email: emailNotif, wa: waNotif, push: false });
 
@@ -358,11 +383,12 @@ export const actions: Actions = {
 				.values({
 					userId: locals.user.id,
 					notificationPrefs,
+					focusMode,
 					updatedAt: new Date()
 				})
 				.onConflictDoUpdate({
 					target: schema.userPreferences.userId,
-					set: { notificationPrefs, updatedAt: new Date() }
+					set: { notificationPrefs, focusMode, updatedAt: new Date() }
 				});
 
 			return actionSuccess({ message: 'Preferensi disimpan!' });
@@ -383,41 +409,40 @@ export const actions: Actions = {
 			return actionFailure(400, 'Admin tidak dapat dihapus');
 		}
 
-		try {
-			// Get user email before deletion
-			const user = await db.query.user.findFirst({
-				where: eq(schema.user.id, locals.user.id)
-			});
+		// Get user email before deletion
+		const user = await db.query.user.findFirst({
+			where: eq(schema.user.id, locals.user.id)
+		});
 
-			// Soft delete user
-			await db
-				.update(schema.user)
-				.set({ deletedAt: new Date() })
-				.where(eq(schema.user.id, locals.user.id));
-
-			// Send deletion confirmation email
-			if (user?.email) {
-				sendEmail(user.email, 'account_deleted', {
-					name: user.fullName || user.username,
-					deletedAt: new Date().toLocaleDateString('id-ID', {
-						day: '2-digit',
-						month: 'long',
-						year: 'numeric'
-					})
-				}).catch(console.error);
-			}
-
-			// Delete all sessions
-			await db.delete(schema.session).where(eq(schema.session.userId, locals.user.id));
-
-			// Clear session cookie - set maxAge to 0 to ensure deletion
-			cookies.set('session', '', { path: '/', maxAge: 0 });
-
-			// Redirect to home page after deletion
-			throw redirect(302, '/?deleted=true');
-		} catch (e) {
-			console.error('Delete account error:', e);
-			return actionFailure(500, 'Gagal menghapus akun');
+		if (!user) {
+			return actionFailure(404, 'User tidak ditemukan');
 		}
+
+		// Perform deletion
+		await db
+			.update(schema.user)
+			.set({ deletedAt: new Date() })
+			.where(eq(schema.user.id, locals.user.id));
+
+		// Send deletion confirmation email (fire and forget)
+		if (user.email) {
+			sendEmail(user.email, 'account_deleted', {
+				name: user.fullName || user.username,
+				deletedAt: new Date().toLocaleDateString('id-ID', {
+					day: '2-digit',
+					month: 'long',
+					year: 'numeric'
+				})
+			}).catch(console.error);
+		}
+
+		// Delete all sessions
+		await db.delete(schema.session).where(eq(schema.session.userId, locals.user.id));
+
+		// Clear session cookie
+		cookies.set('session', '', { path: '/', maxAge: 0 });
+
+		// Redirect to home page after deletion
+		throw redirect(302, '/?deleted=true');
 	}
 };
