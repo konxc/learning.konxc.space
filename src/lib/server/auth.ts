@@ -32,15 +32,14 @@ export async function validateSessionToken(token: string) {
 		.select({
 			// Adjust user table here to tweak returned data
 			user: {
-				id: table.user.id,
-				username: table.user.username,
-				role: table.user.role,
-				fullName: table.user.fullName,
-				email: table.user.email,
-				lastWorkspaceId: table.user.lastWorkspaceId,
-				onboardingCompleted: table.user.onboardingCompleted,
-				onboardingMetadata: table.user.onboardingMetadata
-			},
+			id: table.user.id,
+			username: table.user.username,
+			role: table.user.role,
+			fullName: table.user.fullName,
+			email: table.user.email,
+			lastWorkspaceId: table.user.lastWorkspaceId,
+			onboardingCompleted: table.user.onboardingCompleted
+		},
 			session: table.session
 		})
 		.from(table.session)
