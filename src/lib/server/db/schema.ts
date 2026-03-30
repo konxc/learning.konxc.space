@@ -8,11 +8,7 @@ export const user = sqliteTable('user', {
 	fullName: text('full_name'),
 	email: text('email'),
 	phone: text('phone'),
-	// Legacy single-flag onboarding (still used for backward compatibility)
 	onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' }).default(false),
-	// Multi-role onboarding metadata (JSON)
-	// Format: { student: { completed, track }, mentor: { completed, profileComplete }, facilitator: { completed, orgId } }
-	onboardingMetadata: text('onboarding_metadata'),
 	lastWorkspaceId: text('last_workspace_id'), // To remember user's last active workspace
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
@@ -960,6 +956,33 @@ export const trackerActivity = sqliteTable('tracker_activity', {
 	referenceId: text('reference_id'), // lessonId, checkpointId, etc
 	referenceType: text('reference_type'), // 'lesson' | 'checkpoint' | 'discussion' | 'referral'
 	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// ============================================================
+// USER PREFERENCES (Telemetry for Personalization)
+// ============================================================
+
+export const userPreferences = sqliteTable('user_preferences', {
+	userId: text('user_id')
+		.primaryKey()
+		.references(() => user.id),
+	// Goals: what user wants to achieve
+	goals: text('goals'), // JSON: ["career", "business", "skill", "hobby"]
+	// Interests: topics user is interested in
+	interests: text('interests'), // JSON: ["creator", "affiliate", "seller", "smm", "seo"]
+	// Experience level
+	experienceLevel: text('experience_level'), // 'beginner' | 'intermediate' | 'advanced'
+	// Learning schedule preference
+	learningSchedule: text('learning_schedule'), // 'morning' | 'afternoon' | 'evening' | 'flexible'
+	// Notification preferences
+	notificationPrefs: text('notification_prefs'), // JSON: ["email", "wa", "push"]
+	// Timestamps
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date())
 });
