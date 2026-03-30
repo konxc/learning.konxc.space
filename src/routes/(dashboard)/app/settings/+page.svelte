@@ -1,658 +1,302 @@
 <script lang="ts">
-	import type { PageData, ActionData } from './$types';
+	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
-	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
+	import { COLOR, TEXT, RADIUS, ELEVATION, TRANSITION, SPACING, GRADIENT } from '$lib/config/design';
+	import Icon from '$lib/components/ui/Icon.svelte';
 	import AuthFormField from '$lib/components/AuthFormField.svelte';
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
-	import { enhance } from '$app/forms';
-	import { COLOR, RADIUS, TRANSITION, TEXT } from '$lib/config/design';
 	import { toast } from '$lib/stores/toast';
-	import { initTheme, setTheme, getStoredTheme, type Theme } from '$lib/stores/theme';
-	import { setLocale, getLocale } from '$lib/paraglide/runtime.js';
-	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
-	import Icon from '$lib/components/ui/Icon.svelte';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { data, form } = $props();
 
-	const availableTabs = $derived(data.headerTabs.tabs.map((t) => t.id));
-	type TabType = string;
+	let activeTab = $derived(data.headerTabs.activeTab);
+	let isOrgAdmin = $derived(data.isOrgAdmin);
 
-	let activeTab = $state<TabType>(data.headerTabs.activeTab);
+	// Modals & States
+	let showApiKeyModal = $state(false);
+	let generatedKey = $state('');
+	let newKeyName = $state('');
 
-	let fullName = $state(data.user?.fullName || '');
-	let email = $state(data.user?.email || '');
-	let phone = $state(data.user?.phone || '');
-	let username = $state(data.user?.username || '');
-
-	let currentPassword = $state('');
-	let newPassword = $state('');
-	let confirmPassword = $state('');
-
-	let showPasswordChange = $state(false);
-
-	// Preferences state
-	let theme = $state<Theme>('system');
-	let currentLocale = $state('id');
-
-	// Payment Gateway state
-	let midtransEnvironment = $state<'sandbox' | 'production'>('sandbox');
-	let merchantId = $state('');
-	let clientKey = $state('');
-	let serverKey = $state('');
-	let isProcessing = $state(false);
-
-	// Account deletion state
 	let showDeleteModal = $state(false);
 	let deleteConfirmText = $state('');
 
-	onMount(() => {
-		initTheme();
-		theme = getStoredTheme();
-		try {
-			currentLocale = getLocale();
-		} catch {
-			currentLocale = 'id';
-		}
-	});
+	let newOrgName = $state('');
+	let newOrgSlug = $state('');
 
 	$effect(() => {
-		if (data.headerTabs.activeTab !== activeTab) {
-			activeTab = data.headerTabs.activeTab;
+		if (form?.success && form?.data?.key) {
+			generatedKey = form.data.key;
+			showApiKeyModal = true;
 		}
 	});
-
-	// Show form errors/success as toasts
-	$effect(() => {
-		if (form?.error) {
-			toast.error(form.error);
-		}
-		if (form?.success) {
-			toast.success(form.message || 'Perubahan berhasil disimpan.');
-		}
-	});
-
-	function handleThemeChange(newTheme: Theme) {
-		theme = newTheme;
-		setTheme(newTheme);
-		toast.success('Tema berhasil diubah!');
-	}
-
-	function handleLocaleChange(locale: string) {
-		if (locale === 'id' || locale === 'en' || locale === 'jp') {
-			setLocale(locale);
-			currentLocale = locale;
-			toast.success('Bahasa berhasil diubah!');
-		}
-	}
 </script>
 
-<svelte:head>
-	<title>Pengaturan - Naik Kelas</title>
-</svelte:head>
+<PageWrapper title="Pengaturan Akun">
+	<div class="mx-auto max-w-6xl">
 
-<PageWrapper>
-	<PageHeader
-		title="Pengaturan Akun"
-		description="Kelola identitas, keamanan, dan preferensi platform kamu di satu tempat."
-	/>
 
-	<div class="w-full">
-		<main class="w-full">
+		<main>
 			<!-- Profile Tab -->
 			{#if activeTab === 'profile'}
-				<div
-					class="animate-in fade-in slide-in-from-bottom-5 grid grid-cols-1 gap-6 duration-700 lg:grid-cols-12"
-				>
-					<div
-						class={`lg:col-span-8 ${RADIUS.card} border ${COLOR.cardBorder} overflow-hidden bg-white shadow-sm dark:bg-zinc-900`}
-					>
-						<div
-							class="flex items-center justify-between border-b border-zinc-100 px-6 py-4 dark:border-zinc-800"
-						>
-							<h2 class={`${TEXT.h3} ${COLOR.textPrimary} font-black`}>Identitas Inti</h2>
-							<span
-								class="rounded-md bg-blue-50 px-2 py-1 text-xs font-bold tracking-widest text-blue-600 uppercase dark:bg-blue-900/20"
-								>Wajib</span
-							>
+				<div class="animate-in grid gap-10 md:grid-cols-3">
+					<div class="md:col-span-1 space-y-6">
+						<div class={`p-8 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} flex flex-col items-center text-center shadow-2xl transition-all hover:scale-[1.02]`}>
+							<div class="relative mb-6">
+								<div class="h-32 w-32 overflow-hidden rounded-full border-4 border-blue-500/20 bg-blue-100 p-1 dark:bg-zinc-800 flex items-center justify-center">
+									<Icon name="user" size={80} class="text-blue-600 dark:text-blue-400 opacity-40" />
+								</div>
+								{#if data.user.isVerified}
+									<div class="absolute -right-1 -bottom-1 h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center border-4 border-white dark:border-zinc-900 shadow-xl" title="Terverifikasi">
+										<Icon name="check" size={18} />
+									</div>
+								{/if}
+							</div>
+							<h2 class="mb-1 text-2xl font-black italic tracking-tighter uppercase">{data.user.fullName || data.user.username}</h2>
+							<p class="text-xs font-bold text-zinc-500 uppercase tracking-widest px-4 py-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full border border-zinc-200 dark:border-zinc-700">{data.user.role}</p>
 						</div>
 
-						<form
-							method="POST"
-							action="?/updateProfile"
-							use:enhance={() => {
-								isProcessing = true;
-								return async ({ result, update }) => {
-									if (result.type === 'success') {
-										toast.success('Profil berhasil diperbarui!');
-										await update();
-									} else if (result.type === 'failure') {
-										const msg = String(result.data?.error || 'Gagal memperbarui profil');
-										toast.error(msg);
-									}
-									isProcessing = false;
-								};
-							}}
-							class="space-y-6 p-6"
-						>
-							<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-								<AuthFormField
-									label="Username"
-									name="username"
-									bind:value={username}
-									placeholder="Username"
-									required={true}
-									hint="Username tidak dapat diubah."
-									autocomplete="username"
-								/>
-
-								<AuthFormField
-									label="Nama Lengkap"
-									name="fullName"
-									bind:value={fullName}
-									placeholder="Nama Lengkap"
-									required={true}
-									autocomplete="name"
-								/>
-
-								<AuthFormField
-									label="Email Utama"
-									type="email"
-									name="email"
-									bind:value={email}
-									placeholder="email@example.com"
-									required={true}
-									autocomplete="email"
-								/>
-
-								<AuthFormField
-									label="Nomor Telepon"
-									type="tel"
-									name="phone"
-									bind:value={phone}
-									placeholder="+62 8xx-xxxx-xxxx"
-									autocomplete="tel"
-								/>
+						<div class={`p-6 ${RADIUS.card} ${COLOR.card} border border-zinc-100 dark:border-zinc-800 space-y-4`}>
+							<div class="flex items-center justify-between text-xs font-bold uppercase tracking-tighter text-zinc-400">
+								<span>Status Akun</span>
+								<span class={data.user.isVerified ? 'text-green-500' : 'text-orange-500'}>
+									{data.user.isVerified ? 'Institusi' : 'Personal'}
+								</span>
 							</div>
-
-							<div class="flex justify-end border-t border-zinc-100 pt-4 dark:border-zinc-800">
-								<div class="w-full sm:w-auto">
-									<AuthSubmitButton
-										text="Simpan Identitas"
-										loading={isProcessing}
-										disabled={isProcessing}
-									/>
-								</div>
+							<div class="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+								<div class="h-full bg-blue-600" style="width: {data.user.isVerified ? '100%' : '30%'}"></div>
 							</div>
-						</form>
+							<p class="text-[10px] leading-relaxed text-zinc-500 italic">
+								{#if data.user.isVerified}
+									Anda memiliki akses penuh untuk membuat organisasi dan mendeploy draf agen.
+								{:else}
+									Verifikasi KTP Anda untuk mengaktifkan fitur Organisasi & Agentic Deployment.
+								{/if}
+							</p>
+						</div>
 					</div>
 
-					<div class="space-y-6 lg:col-span-4">
-						<div
-							class={`${RADIUS.card} border ${COLOR.cardBorder} group relative overflow-hidden p-6 text-white shadow-lg transition-all duration-500
-							${
-								data.user?.role === 'admin'
-									? 'bg-linear-to-br from-slate-900 via-purple-900 to-slate-900'
-									: data.user?.role === 'mentor'
-										? 'bg-linear-to-br from-indigo-600 via-blue-700 to-indigo-800'
-										: data.user?.role === 'facilitator'
-											? 'bg-linear-to-br from-amber-600 via-orange-700 to-amber-800'
-											: 'bg-linear-to-br from-blue-600 to-indigo-700'
-							}`}
-						>
-							<div class="relative z-10 flex h-full flex-col justify-between gap-8">
-								<div class="space-y-1">
-									<div class="flex items-center gap-2">
-										<div class="h-1.5 w-1.5 animate-pulse rounded-full bg-white"></div>
-										<p class="text-[10px] font-black tracking-[0.2em] uppercase opacity-70">
-											Status Otoritas
-										</p>
-									</div>
-									<h3 class="text-2xl font-black tracking-tighter uppercase italic">
-										{data.user?.role === 'admin'
-											? 'Platform Admin'
-											: data.user?.role === 'mentor'
-												? 'Expert Mentor'
-												: data.user?.role === 'facilitator'
-													? 'Learning Facilitator'
-													: 'Premium Student'}
-									</h3>
-								</div>
-								<div class="space-y-1">
-									<p class="text-xs opacity-80">Terdaftar Sejak</p>
-									<p class="font-bold">
-										{data.user?.createdAt
-											? new Date(data.user.createdAt).toLocaleDateString('id-ID', {
-													month: 'long',
-													year: 'numeric'
-												})
-											: '-'}
-									</p>
-								</div>
+					<div class="md:col-span-2">
+						<form method="POST" action="?/updateProfile" use:enhance class={`p-10 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} space-y-8 shadow-sm relative overflow-hidden`}>
+							<div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><Icon name="user" size={120} /></div>
+							<h3 class="text-xl font-black italic uppercase tracking-widest border-l-4 border-blue-600 pl-4 mb-4">Informasi Dasar</h3>
+							<AuthFormField label="Nama Lengkap" name="fullName" value={data.user.fullName ?? undefined} placeholder="Masukkan nama lengkap Anda" />
+							<div class="grid gap-6 md:grid-cols-2">
+								<AuthFormField label="Alamat Email" name="email" value={data.user.email ?? undefined} placeholder="email@contoh.com" required />
+								<AuthFormField label="Nomor Telepon" name="phone" value={data.user.phone ?? undefined} placeholder="628..." />
 							</div>
-							<!-- Decorative Blobs -->
-							<div
-								class="absolute top-[-20%] right-[-20%] h-32 w-32 rounded-full bg-white/20 blur-2xl transition-transform duration-1000 group-hover:scale-150"
-							></div>
-							<div
-								class="absolute bottom-[-20%] left-[-20%] h-24 w-24 animate-pulse rounded-full bg-blue-400/30 blur-xl"
-							></div>
-						</div>
-
-						<div
-							class={`${RADIUS.card} border ${COLOR.cardBorder} space-y-4 bg-white p-6 dark:bg-zinc-900`}
-						>
-							<h4 class="text-xs font-black tracking-widest text-zinc-400 uppercase">
-								Aktivitas Terakhir
-							</h4>
-							<div class="space-y-4">
-								<div class="flex items-center gap-3">
-									<div
-										class={`h-2 w-2 rounded-full ${data.user?.role === 'admin' ? 'bg-purple-500' : 'bg-green-500'}`}
-									></div>
-									<p class="text-xs font-semibold">Berhasil login hari ini</p>
-								</div>
-								<div class="flex items-center gap-3">
-									<div class="h-2 w-2 rounded-full bg-blue-500"></div>
-									<p class="text-xs font-semibold">Update profil terdeteksi</p>
-								</div>
+							<div class="pt-6 border-t border-zinc-100 dark:border-zinc-800 flex justify-end">
+								<AuthSubmitButton text="Simpan Perubahan" />
 							</div>
-						</div>
+						</form>
 					</div>
 				</div>
 			{/if}
 
 			<!-- Security Tab -->
 			{#if activeTab === 'security'}
-				<div class="animate-in fade-in slide-in-from-bottom-5 w-full duration-700">
-					<div
-						class={`overflow-hidden ${RADIUS.card} border ${COLOR.cardBorder} bg-white shadow-sm dark:bg-zinc-900`}
-					>
-						<div
-							class="flex items-center gap-3 border-b border-zinc-100 px-6 py-4 dark:border-zinc-800"
-						>
-							<span class="text-xl">🛡️</span>
-							<h2 class={`${TEXT.h3} ${COLOR.textPrimary} font-black`}>Keamanan Akun</h2>
+				<div class="animate-in mx-auto max-w-2xl">
+					<form method="POST" action="?/changePassword" use:enhance class={`p-10 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} space-y-8 shadow-sm relative`}>
+						<div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><Icon name="shield" size={120} /></div>
+						<h3 class="text-xl font-black italic uppercase tracking-widest border-l-4 border-blue-600 pl-4 mb-4">Keamanan Akun</h3>
+						<AuthFormField label="Password Saat Ini" name="currentPassword" type="password" placeholder="••••••••" required />
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+							<AuthFormField label="Password Baru" name="newPassword" type="password" placeholder="••••••••" required />
+							<AuthFormField label="Konfirmasi Password" name="confirmPassword" type="password" placeholder="••••••••" required />
 						</div>
+						<div class="pt-6 border-t border-zinc-100 dark:border-zinc-800 flex justify-end">
+							<AuthSubmitButton text="Perbarui Password" />
+						</div>
+					</form>
+				</div>
+			{/if}
 
-						<div class="p-6">
-							<form
-								method="POST"
-								action="?/changePassword"
-								use:enhance={() => {
-									isProcessing = true;
-									return async ({ result, update }) => {
-										if (result.type === 'success') {
-											toast.success('Password berhasil diubah!');
-											currentPassword = '';
-											newPassword = '';
-											confirmPassword = '';
-											showPasswordChange = false;
-											await update();
-										} else if (result.type === 'failure') {
-											toast.error(String(result.data?.error) || 'Gagal mengubah password');
-										}
-										isProcessing = false;
-									};
-								}}
-								class="space-y-6"
-							>
-								{#if !showPasswordChange}
-									<div
-										class="flex flex-col items-center justify-between gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 sm:flex-row dark:border-zinc-700 dark:bg-zinc-800/50"
-									>
+			<!-- Organization Tab -->
+			{#if activeTab === 'organization'}
+				<div class="animate-in space-y-10">
+					{#if !data.organization}
+						<div class={`mx-auto max-w-3xl border-2 border-dashed ${COLOR.cardBorder} ${RADIUS.card} p-12 text-center`}>
+							<div class="mb-6 flex justify-center"><div class="rounded-full bg-zinc-100 p-6 dark:bg-zinc-800"><Icon name="layout" size={48} class="text-zinc-400" /></div></div>
+							<h3 class="mb-2 text-2xl font-black italic uppercase tracking-tight">Belum Ada Organisasi</h3>
+							<p class="mx-auto mb-10 max-w-md text-zinc-500">Buat organisasi untuk mulai mendeploy kurikulum melalui AI Agent dan mengelola tim Anda secara profesional.</p>
+							
+							{#if data.user.isVerified || data.user.role === 'admin'}
+								<form method="POST" action="?/createOrganization" use:enhance class="mx-auto max-w-lg space-y-4 text-left p-8 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+									<AuthFormField label="Nama Organisasi" name="name" bind:value={newOrgName} placeholder="Contoh: Yayasan Klub Fisika" required />
+									<div>
+										<label for="org-slug" class={`${TEXT.small} mb-1 block font-bold transition-all duration-300`}>Workspace URL</label>
+										<div class="flex items-center gap-2">
+											<span class="text-xs text-zinc-400">naikkelas.id/org/</span>
+											<input id="org-slug" type="text" name="slug" bind:value={newOrgSlug} required pattern="[a-z0-9-]+" placeholder="klub-fisika" class={`flex-1 border-b-2 border-zinc-200 bg-transparent py-2 text-sm font-black outline-none transition-all focus:border-blue-600 dark:border-zinc-800`} />
+										</div>
+									</div>
+									<div class="pt-4">
+										<AuthSubmitButton text="Buat Organisasi Sekarang" />
+									</div>
+								</form>
+							{:else}
+								<div class="bg-orange-50 border border-orange-200 p-6 rounded-2xl dark:bg-orange-950/20 dark:border-orange-900">
+									<Icon name="alert-triangle" class="mx-auto mb-2 text-orange-600" />
+									<p class="text-sm font-bold text-orange-800 dark:text-orange-300 uppercase italic tracking-widest">Verifikasi Diperlukan</p>
+									<p class="text-xs text-orange-700 mt-2">Silakan hubungi administrator untuk melakukan verifikasi KTP sebelum Anda dapat membuat organisasi.</p>
+								</div>
+							{/if}
+						</div>
+					{:else}
+						<!-- Organization Info & Settings -->
+						<div class="grid gap-8 lg:grid-cols-2">
+							<section class={`p-10 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} shadow-sm space-y-6`}>
+								<div class="flex items-center justify-between">
+									<h3 class="text-xl font-black italic uppercase tracking-widest border-l-4 border-blue-600 pl-4">Pengaturan Organisasi</h3>
+									<div class="h-10 w-10 overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-black text-blue-600">
+										{data.organization.name?.[0]?.toUpperCase()}
+									</div>
+								</div>
+								<form method="POST" action="?/updateOrgSettings" use:enhance class="space-y-6">
+									<AuthFormField label="Nama Institusi" name="name" value={data.organization.name} required />
+									<div class="space-y-2">
+										<label class="text-xs font-bold uppercase tracking-widest text-zinc-400">Branding Color</label>
 										<div class="flex items-center gap-4">
-											<div
-												class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-											>
-												<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-													<path
-														stroke-linecap="round"
-														stroke-linejoin="round"
-														stroke-width="2"
-														d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-													/>
-												</svg>
-											</div>
+											<input type="color" name="brandColor" value={data.organization.brandColor} class="h-12 w-12 rounded-xl cursor-pointer bg-transparent border-none" />
+											<span class="font-mono text-sm uppercase">{data.organization.brandColor}</span>
+										</div>
+									</div>
+									{#if isOrgAdmin}
+										<div class="pt-6 border-t border-zinc-100 dark:border-zinc-800">
+											<AuthSubmitButton text="Update Organisasi" />
+										</div>
+									{/if}
+								</form>
+							</section>
+
+							<!-- API Key Section -->
+							<section class={`p-10 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} shadow-sm space-y-6 flex flex-col`}>
+								<div class="flex items-center justify-between">
+									<h3 class="text-xl font-black italic uppercase tracking-widest border-l-4 border-green-600 pl-4">Agent Deployment API</h3>
+									<Icon name="key" class="text-green-600" />
+								</div>
+								<p class="text-sm text-zinc-500 mb-4">Gunakan API Key untuk mengizinkan AI Agent (naikkelas-agent) melakukan deployment kurikulum secara otomatis.</p>
+								
+								<div class="flex-1 space-y-4">
+									{#each data.orgApiKeys as key}
+										<div class="flex items-center justify-between rounded-xl bg-zinc-50 p-4 border border-zinc-100 dark:bg-zinc-800/50 dark:border-zinc-800">
 											<div>
-												<p class={`${TEXT.body} font-bold ${COLOR.textPrimary}`}>Kata Sandi</p>
-												<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
-													Rutin ubah password untuk menjaga keamanan.
-												</p>
+												<p class="text-sm font-bold">{key.name}</p>
+												<p class="text-[10px] text-zinc-400 font-mono italic">Terakhir digunakan: {key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : 'Belum pernah'}</p>
 											</div>
+											{#if key.status === 'active'}
+												<form method="POST" action="?/revokeApiKey">
+													<input type="hidden" name="keyId" value={key.id} />
+													<button class="text-xs font-bold text-red-600 hover:underline uppercase tracking-widest">Revoke</button>
+												</form>
+											{:else}
+												<span class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Revoked</span>
+											{/if}
 										</div>
-										<button
-											type="button"
-											onclick={() => (showPasswordChange = true)}
-											class={`px-4 py-2 ${RADIUS.button} border ${COLOR.cardBorder} bg-white dark:bg-zinc-800 ${TEXT.button} font-bold shadow-sm ${TRANSITION.all} hover:bg-zinc-50 active:scale-95 dark:hover:bg-zinc-700`}
-										>
-											Ubah Password
-										</button>
-									</div>
-								{:else}
-									<div class="animate-in fade-in space-y-5 duration-300">
-										<AuthFormField
-											label="Password Saat Ini"
-											type="password"
-											name="currentPassword"
-											bind:value={currentPassword}
-											placeholder="••••••••"
-											required={true}
-										/>
-
-										<div class="space-y-2">
-											<AuthFormField
-												label="Password Baru"
-												type="password"
-												name="newPassword"
-												bind:value={newPassword}
-												placeholder="••••••••"
-												required={true}
-												minlength={8}
-											/>
-											<p class={`${TEXT.small} ${COLOR.textMuted}`}>
-												Minimum 8 karakter kombinasi.
-											</p>
+									{:else}
+										<div class="flex flex-col items-center justify-center h-40 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
+											<p class="text-xs font-bold text-zinc-400 uppercase italic">Belum ada API Key</p>
 										</div>
+									{/each}
+								</div>
 
-										<AuthFormField
-											label="Konfirmasi Password Baru"
-											type="password"
-											name="confirmPassword"
-											bind:value={confirmPassword}
-											placeholder="••••••••"
-											required={true}
-										/>
-
-										{#if confirmPassword && newPassword !== confirmPassword}
-											<p class="animate-bounce px-1 text-xs font-bold text-red-500 italic">
-												⚠️ Password tidak cocok!
-											</p>
-										{/if}
-
-										<div
-											class="flex items-center gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800"
-										>
-											<button
-												type="button"
-												onclick={() => (showPasswordChange = false)}
-												class={`flex-1 px-4 py-3 ${RADIUS.button} border ${COLOR.cardBorder} bg-white dark:bg-zinc-800 ${TEXT.button} font-bold ${TRANSITION.all} hover:bg-zinc-50 dark:hover:bg-zinc-700`}
-											>
-												Batal
-											</button>
-											<div class="flex-1">
-												<AuthSubmitButton
-													text="Update Password"
-													loading={isProcessing}
-													disabled={isProcessing ||
-														!currentPassword ||
-														!newPassword ||
-														newPassword !== confirmPassword ||
-														newPassword.length < 8}
-												/>
-											</div>
-										</div>
-									</div>
+								{#if isOrgAdmin}
+									<button onclick={() => (showApiKeyModal = true)} class={`mt-4 w-full py-4 ${RADIUS.button} bg-zinc-900 text-white font-black uppercase tracking-widest text-xs hover:bg-black transition-all shadow-lg`}>
+										Buat API Key Baru
+									</button>
 								{/if}
-							</form>
+							</section>
 						</div>
-					</div>
-
-					<div
-						class="mt-6 flex gap-4 rounded-2xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-900/30 dark:bg-blue-950/10"
-					>
-						<span class="mt-1 text-2xl">🛡️</span>
-						<div>
-							<p class={`${TEXT.body} font-bold text-blue-800 dark:text-blue-300`}>
-								Keamanan Terenkripsi
-							</p>
-							<p class={`${TEXT.small} leading-relaxed text-blue-700/70 dark:text-blue-400/60`}>
-								Seluruh data pribadi kamu dienkripsi menggunakan standar industri. Kami tidak pernah
-								membagikan password kamu kepada siapapun.
-							</p>
-						</div>
-					</div>
+					{/if}
 				</div>
 			{/if}
 
 			<!-- Preferences Tab -->
 			{#if activeTab === 'preferences'}
-				<div
-					class="animate-in fade-in slide-in-from-bottom-5 grid grid-cols-1 gap-6 duration-700 md:grid-cols-2"
-				>
-					<div
-						class={`${RADIUS.card} border ${COLOR.cardBorder} overflow-hidden bg-white shadow-sm dark:bg-zinc-900`}
-					>
-						<div class="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
-							<h3 class={`${TEXT.body} font-black ${COLOR.textPrimary} tracking-widest uppercase`}>
-								Tema Visual
-							</h3>
-						</div>
-						<div class="space-y-4 p-6">
-							<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
-								Pilih suasana yang paling nyaman untuk matamu selama belajar.
-							</p>
-							<div class="flex flex-col gap-2">
-								{#each [{ id: 'light', label: 'Terang', icon: '☀️' }, { id: 'dark', label: 'Gelap', icon: '🌙' }, { id: 'system', label: 'Sistem', icon: '💻' }] as t}
-									<button
-										type="button"
-										onclick={() => handleThemeChange(t.id as Theme)}
-										class={`flex items-center justify-between px-4 py-3 ${RADIUS.button} border ${TRANSITION.all}
-							${
-								theme === t.id
-									? 'border-blue-600 bg-blue-50 font-bold text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-									: `border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800 ${COLOR.textPrimary}`
-							}`}
-									>
-										<div class="flex items-center gap-3">
-											<span>{t.icon}</span>
-											{t.label}
-										</div>
-										{#if theme === t.id}
-											<div class="h-2 w-2 rounded-full bg-blue-600"></div>
-										{/if}
-									</button>
-								{/each}
-							</div>
-						</div>
-					</div>
-
-					<div
-						class={`${RADIUS.card} border ${COLOR.cardBorder} overflow-hidden bg-white shadow-sm dark:bg-zinc-900`}
-					>
-						<div class="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
-							<h3 class={`${TEXT.body} font-black ${COLOR.textPrimary} tracking-widest uppercase`}>
-								Bahasa Antarmuka
-							</h3>
-						</div>
-						<div class="space-y-4 p-6">
-							<p class={`${TEXT.small} ${COLOR.textSecondary}`}>
-								Gunakan bahasa yang paling kamu kuasai untuk efisiensi belajar.
-							</p>
-							<div class="flex flex-col gap-2">
-								{#each [{ id: 'id', label: 'Indonesia', flag: '🇮🇩' }, { id: 'en', label: 'English', flag: '🇬🇧' }, { id: 'jp', label: '日本語', flag: '🇯🇵' }] as l}
-									<button
-										type="button"
-										onclick={() => handleLocaleChange(l.id)}
-										class={`flex items-center justify-between px-4 py-3 ${RADIUS.button} border ${TRANSITION.all}
-							${
-								currentLocale === l.id
-									? 'border-blue-600 bg-blue-50 font-bold text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-									: `border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800 ${COLOR.textPrimary}`
-							}`}
-									>
-										<div class="flex items-center gap-3">
-											<span>{l.flag}</span>
-											{l.label}
-										</div>
-										{#if currentLocale === l.id}
-											<div class="h-2 w-2 rounded-full bg-blue-600"></div>
-										{/if}
-									</button>
-								{/each}
-							</div>
-						</div>
-					</div>
-				</div>
-			{/if}
-
-			<!-- Payment Gateway Tab -->
-			{#if activeTab === 'payments'}
-				<div class="animate-in fade-in slide-in-from-bottom-5 space-y-8 duration-700">
-					<div
-						class={`p-8 ${RADIUS.card} relative overflow-hidden bg-linear-to-r from-zinc-900 to-zinc-800 text-white shadow-xl`}
-					>
-						<div
-							class="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center"
-						>
-							<div class="space-y-2">
-								<div class="flex items-center gap-2">
-									<div class="h-2 w-2 animate-pulse rounded-full bg-blue-500"></div>
-									<span class="text-[10px] font-black tracking-widest uppercase opacity-70"
-										>Payment Gateway</span
-									>
+				<div class="animate-in grid gap-8 md:grid-cols-3">
+					<div class="md:col-span-2 space-y-8">
+						<section class={`p-10 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} space-y-6 relative`}>
+							<h3 class="text-xl font-black italic uppercase tracking-widest border-l-4 border-blue-600 pl-4 mb-4">Pengaturan Aplikasi</h3>
+							
+							<div class="space-y-6">
+								<div class="flex items-center justify-between py-4 border-b border-zinc-100 dark:border-zinc-800">
+									<div>
+										<h4 class="font-bold">Notifikasi Email</h4>
+										<p class="text-xs text-zinc-500 italic">Terima laporan mingguan progres belajar peserta.</p>
+									</div>
+									<div class="relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full bg-blue-600">
+										<span class="inline-block h-4 w-4 translate-x-6 rounded-full bg-white transition"></span>
+									</div>
 								</div>
-								<h2 class="text-3xl font-black tracking-tight">Midtrans Configuration</h2>
-								<p class="max-w-md text-xs opacity-60">
-									Sambungkan akun Midtrans kamu untuk mulai menerima pembayaran otomatis dari ribuan
-									peserta didik.
-								</p>
-							</div>
-							<div class="flex items-center gap-4">
-								<button
-									onclick={() => (midtransEnvironment = 'sandbox')}
-									class={`px-4 py-2 ${RADIUS.button} border border-white/20 text-[10px] font-black tracking-widest uppercase ${midtransEnvironment === 'sandbox' ? 'bg-white text-zinc-900' : 'hover:bg-white/10'}`}
-								>
-									🧪 Sandbox
-								</button>
-								<button
-									onclick={() => (midtransEnvironment = 'production')}
-									class={`px-4 py-2 ${RADIUS.button} border border-white/20 text-[10px] font-black tracking-widest uppercase ${midtransEnvironment === 'production' ? 'border-green-400 bg-green-500 text-white' : 'hover:bg-white/10'}`}
-								>
-									🚀 Production
-								</button>
-							</div>
-						</div>
-						<div
-							class="absolute top-0 right-0 h-64 w-64 translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600/10 blur-3xl"
-						></div>
-					</div>
-
-					<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-						<div
-							class={`${RADIUS.card} border ${COLOR.cardBorder} overflow-hidden bg-white shadow-sm dark:bg-zinc-900`}
-						>
-							<div class="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
-								<h3
-									class={`${TEXT.body} font-black ${COLOR.textPrimary} tracking-widest uppercase`}
-								>
-									Kredensial Gateway
-								</h3>
-							</div>
-							<div class="space-y-6 p-6">
-								<AuthFormField
-									name="merchantId"
-									label="Merchant ID"
-									bind:value={merchantId}
-									placeholder="G12345678"
-									hint="Cek di Dashboard Midtrans -> Settings -> Configuration"
-								/>
-								<AuthFormField
-									name="clientKey"
-									label="Client Key"
-									bind:value={clientKey}
-									placeholder="VT-client-xxxx"
-								/>
-								<AuthFormField
-									name="serverKey"
-									label="Server Key"
-									type="password"
-									bind:value={serverKey}
-									placeholder="••••••••••••"
-									required={true}
-								/>
-							</div>
-						</div>
-
-						<div class="space-y-6">
-							<div
-								class={`${RADIUS.card} border ${COLOR.cardBorder} space-y-4 bg-zinc-50 p-6 dark:bg-zinc-800/50`}
-							>
-								<div class="flex items-center gap-2">
-									<span class="text-xl">📡</span>
-									<h3 class="text-xs font-black tracking-widest text-zinc-400 uppercase">
-										Webhook Endpoint
-									</h3>
+								
+								<div class="flex items-center justify-between py-4 border-b border-zinc-100 dark:border-zinc-800">
+									<div>
+										<h4 class="font-bold">Notifikasi WhatsApp</h4>
+										<p class="text-xs text-zinc-500 italic">Terima alert instan saat ada tugas baru dikirim.</p>
+									</div>
+									<div class="relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full bg-zinc-200 dark:bg-zinc-700">
+										<span class="inline-block h-4 w-4 translate-x-1 rounded-full bg-white transition"></span>
+									</div>
 								</div>
-								<div class="space-y-3">
-									<p class="text-[10px] leading-relaxed font-bold text-zinc-500">
-										Konfigurasi URL di bawah ini pada bagian <b>Notification URL</b> di dashboard Midtrans
-										untuk sinkronisasi status transaksi.
-									</p>
-									<div class="flex gap-2">
-										<input
-											readonly
-											value="https://naikkelas.id/api/payments/webhook"
-											class={`flex-1 ${RADIUS.input} border ${COLOR.cardBorder} truncate bg-white px-3 py-2 font-mono text-xs dark:bg-zinc-900`}
-										/>
-										<button
-											onclick={() => {
-												navigator.clipboard.writeText('https://naikkelas.id/api/payments/webhook');
-												toast.success('Webhook URL copied!');
-											}}
-											class={`px-3 py-2 ${RADIUS.button} border ${COLOR.cardBorder} bg-white text-[10px] font-bold transition-colors hover:bg-zinc-50 dark:bg-zinc-800 dark:hover:bg-zinc-700`}
-										>
-											COPY
-										</button>
+
+								<div class="flex items-center justify-between py-4">
+									<div>
+										<h4 class="font-bold">Modus Fokus (LMS)</h4>
+										<p class="text-xs text-zinc-500 italic">Sembunyikan sidebar otomatis saat sedang belajar.</p>
+									</div>
+									<div class="relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full bg-blue-600">
+										<span class="inline-block h-4 w-4 translate-x-6 rounded-full bg-white transition"></span>
 									</div>
 								</div>
 							</div>
+						</section>
+					</div>
 
-							<div class="grid grid-cols-2 gap-4">
-								<button
-									onclick={() => toast.info('Testing connection...')}
-									class={`h-14 ${RADIUS.button} border ${COLOR.cardBorder} bg-white dark:bg-zinc-900 ${TEXT.button} font-black tracking-widest uppercase shadow-sm transition-all hover:bg-zinc-50 active:scale-95 dark:hover:bg-zinc-700`}
-								>
-									🔗 Test Connection
-								</button>
-								<AuthSubmitButton
-									text="Simpan Config"
-									loading={isProcessing}
-									disabled={!merchantId || !clientKey || !serverKey}
-								/>
-							</div>
+					<div class="space-y-6">
+						<div class={`p-8 ${RADIUS.card} bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xl relative overflow-hidden group`}>
+							<Icon name="zap" class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-150 transition-transform duration-1000" size={140} />
+							<h4 class="text-lg font-black italic uppercase tracking-tighter mb-2">Tips</h4>
+							<p class="text-xs leading-relaxed opacity-80 italic font-medium">Pengaturan ini membantu Anda mengatur kenyamanan saat berinteraksi dengan platform Naik Kelas.</p>
 						</div>
 					</div>
 				</div>
 			{/if}
 
-			<!-- Account Tab -->
-			{#if activeTab === 'account'}
-				<div class="animate-in fade-in slide-in-from-bottom-5 space-y-8 duration-700">
-					<!-- Delete Account Section -->
-					<div
-						class={`p-6 ${RADIUS.card} border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30`}
-					>
-						<div class="flex items-start gap-4">
-							<div
-								class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-600"
-							>
-								<Icon name="trash" size={24} />
+			<!-- Payment Gateway (Admin Only) -->
+			{#if activeTab === 'payments' && data.user.role === 'admin'}
+				<div class="animate-in space-y-8">
+					<section class={`p-10 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} space-y-6`}>
+						<div class="flex items-center gap-4 mb-4">
+							<Icon name="credit-card" class="text-blue-600" size={32} />
+							<div>
+								<h3 class="text-xl font-black italic uppercase tracking-widest">Midtrans Snap Configuration</h3>
+								<p class="text-xs text-zinc-500 italic">Hanya dapat diakses oleh Platform Admin.</p>
 							</div>
+						</div>
+						
+						<div class="grid gap-6 md:grid-cols-2">
+							<AuthFormField label="Client Key" name="midtransClientKey" value="••••••••••••••••••••" readonly />
+							<AuthFormField label="Server Key" name="midtransServerKey" value="••••••••••••••••••••" readonly />
+						</div>
+						<div class="bg-blue-50 border border-blue-100 p-4 rounded-xl dark:bg-blue-900/20 dark:border-blue-900">
+							<p class="text-xs font-bold text-blue-800 dark:text-blue-300">💡 Integrasi Aktif</p>
+							<p class="text-[10px] text-blue-700 mt-1 italic">Sistem pembayaran menggunakan Midtrans Snap v1.0. Konfigurasi didefinisikan melalui environment variables server.</p>
+						</div>
+					</section>
+				</div>
+			{/if}
+
+			<!-- Account / Danger Tab -->
+			{#if activeTab === 'account'}
+				<div class="animate-in mx-auto max-w-2xl">
+					<div class={`p-10 ${RADIUS.card} border-2 border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30 space-y-6 relative overflow-hidden`}>
+						<div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none text-red-600"><Icon name="trash-2" size={120} /></div>
+						<div class="flex items-start gap-4">
+							<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-500/20 text-red-600 shadow-lg"><Icon name="alert-triangle" size={24} /></div>
 							<div class="flex-1">
-								<h3 class="mb-2 text-lg font-bold text-red-800 dark:text-red-200">Hapus Akun</h3>
-								<p class="mb-4 text-sm text-red-700 dark:text-red-300">
-									Menghapus akun akan menghapus semua data Anda secara permanen. Tindakan ini tidak
-									dapat dibatalkan. Anda tidak akan dapat memulihkan akun atau data yang terkait
-									setelah penghapusan.
-								</p>
-								<button
-									type="button"
-									onclick={() => (showDeleteModal = true)}
-									class={`${RADIUS.button} bg-red-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-700`}
-								>
-									Hapus Akun Saya
-								</button>
+								<h3 class="mb-2 text-xl font-black italic tracking-widest text-red-800 dark:text-red-300 uppercase">Hapus Seluruh Data</h3>
+								<p class="mb-6 text-sm text-red-700 dark:text-red-400 leading-relaxed italic">Penghapusan akun bersifat final. Semua riwayat belajar, sertifikat, dan akses ke organisasi akan hilang selamanya dan tidak dapat dipulihkan oleh tim support.</p>
+								<button onclick={() => (showDeleteModal = true)} class={`w-full md:w-auto ${RADIUS.button} bg-red-600 px-10 py-4 text-xs font-black tracking-widest text-white uppercase shadow-xl hover:bg-red-700 transition-all hover:scale-105 active:scale-95`}>Mulai Penghapusan Akun</button>
 							</div>
 						</div>
 					</div>
@@ -661,90 +305,83 @@
 		</main>
 	</div>
 
-	<!-- Delete Account Modal -->
-	{#if showDeleteModal}
-		<div
-			role="dialog"
-			aria-modal="true"
-			aria-labelledby="delete-modal-title"
-			class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-			onclick={() => (showDeleteModal = false)}
-			onkeydown={(e) => {
-				if (e.key === 'Escape') {
-					showDeleteModal = false;
-					deleteConfirmText = '';
-				}
-			}}
-		>
-			<div
-				class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900"
-				onclick={(e) => e.stopPropagation()}
-			>
-				<div class="mb-4 flex items-center gap-3">
-					<div
-						class="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/10 text-red-600"
-					>
-						<Icon name="alert-triangle" size={20} />
-					</div>
-					<h3 id="delete-modal-title" class="text-lg font-bold text-red-600 dark:text-red-400">
-						Konfirmasi Penghapusan Akun
-					</h3>
+	<!-- API Key Modal -->
+	{#if showApiKeyModal}
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in">
+			<div class={`w-full max-w-lg ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} p-10 shadow-2xl relative`}>
+				<div class="mb-8 flex items-center justify-between">
+					<h3 class="text-2xl font-black italic tracking-tighter uppercase border-l-4 border-green-600 pl-4">Agent Secret Key</h3>
+					<button onclick={() => { showApiKeyModal = false; generatedKey = ''; }} class="text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"><Icon name="x" size={24} /></button>
 				</div>
 
-				<p class="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-					Ini adalah tindakan yang <span class="font-bold">tidak dapat dibatalkan</span>. Semua data
-					Anda akan dihapus secara permanen. Ketik
-					<span class="rounded bg-zinc-100 px-1 font-mono dark:bg-zinc-800">HAPUS</span> untuk melanjutkan.
+				{#if generatedKey}
+					<div class="space-y-6">
+						<div class="bg-green-50 border border-green-200 p-4 rounded-xl dark:bg-green-950/20 dark:border-green-900">
+							<p class="text-xs text-green-700 font-bold uppercase italic tracking-widest flex items-center gap-2">
+								<Icon name="alert-circle" size={14} />
+								Sangat Penting!
+							</p>
+							<p class="text-[10px] text-green-600 mt-1">Salin key ini sekarang. Demi keamanan, kami tidak akan menampilkannya lagi setelah Anda menutup jendela ini.</p>
+						</div>
+						
+						<div class="flex items-center gap-4 rounded-xl border-2 border-zinc-200 bg-zinc-50 p-6 font-mono text-lg dark:bg-zinc-800 dark:border-zinc-700 group relative">
+							<span class="flex-1 truncate tracking-tighter">{generatedKey}</span>
+							<button onclick={() => { navigator.clipboard.writeText(generatedKey); toast.success('Key disalin ke clipboard!'); }} class="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm border border-zinc-200 text-zinc-900 hover:bg-zinc-900 hover:text-white transition-all dark:bg-zinc-900 dark:border-zinc-600">
+								<Icon name="copy" size={16} />
+							</button>
+						</div>
+
+						<button onclick={() => { showApiKeyModal = false; generatedKey = ''; }} class={`w-full py-4 ${RADIUS.button} bg-zinc-900 text-white font-black uppercase tracking-widest text-xs shadow-xl active:scale-95 transition-all dark:bg-white dark:text-black`}>
+							Saya Sudah Mendokumentasikan Key Ini
+						</button>
+					</div>
+				{:else}
+					<form method="POST" action="?/createApiKey" use:enhance class="space-y-6">
+						<AuthFormField label="Identitas Key" name="name" bind:value={newKeyName} placeholder="Contoh: Production Agent ASIB" required />
+						<p class="text-[10px] text-zinc-400 italic">Key ini akan memberikan akses penuh bagi agen untuk mengelola kurikulum di organisasi {data.organization?.name}.</p>
+						<div class="pt-4 flex justify-end">
+							<AuthSubmitButton text="Generate Secret Key" />
+						</div>
+					</form>
+				{/if}
+			</div>
+		</div>
+	{/if}
+
+	<!-- Delete Modal -->
+	{#if showDeleteModal}
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in">
+			<div class={`w-full max-w-md ${RADIUS.card} bg-white p-10 shadow-2xl dark:bg-zinc-950 border-2 border-red-200 dark:border-red-900`}>
+				<div class="flex flex-col items-center text-center mb-8">
+					<div class="h-20 w-20 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 mb-6 border-2 border-red-200 dark:border-red-800">
+						<Icon name="alert-triangle" size={40} />
+					</div>
+					<h3 class="text-2xl font-black italic tracking-tighter uppercase text-red-600">Konfirmasi Final</h3>
+					<p class="text-sm text-zinc-500 mt-2 font-medium">Buktikan bahwa Anda serius menghapus masa depan digital Anda di platform ini.</p>
+				</div>
+
+				<p class="mb-6 text-xs text-zinc-600 dark:text-zinc-400 text-center italic">
+					Ketik kata kunci <span class="font-black text-red-600 uppercase border-b-2 border-red-600">HAPUS</span> di bawah ini untuk mengonfirmasi.
 				</p>
 
-				<form
-					method="POST"
-					action="?/deleteAccount"
-					use:enhance={() => {
-						return async ({ result, update }) => {
-							if (result.type === 'success') {
-								toast.success('Akun berhasil dihapus. Mengalihkan ke halaman signin...');
-								setTimeout(() => {
-									window.location.href = '/auth/signin';
-								}, 2000);
-							} else if (result.type === 'failure') {
-								const msg = String(result.data?.error || 'Gagal menghapus akun');
-								toast.error(msg);
-							}
-							await update();
-						};
-					}}
-				>
+				<form method="POST" action="?/deleteAccount" use:enhance class="space-y-6">
 					<input
 						type="text"
 						name="confirmText"
 						bind:value={deleteConfirmText}
-						placeholder="Ketik HAPUS untuk konfirmasi"
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} mb-4 bg-white px-4 py-3 dark:bg-zinc-800`}
+						placeholder="MASUKKAN KATAKUNCI"
+						class={`w-full p-4 border-2 ${deleteConfirmText === 'HAPUS' ? 'border-red-500 bg-red-50/50' : 'border-zinc-200'} rounded-2xl text-center font-black tracking-[0.2em] outline-none transition-all dark:bg-zinc-900 dark:border-zinc-800`}
 						required
 					/>
-
-					<div class="flex gap-3">
-						<button
-							type="button"
-							onclick={() => {
-								showDeleteModal = false;
-								deleteConfirmText = '';
-							}}
-							class={`flex-1 ${RADIUS.button} border ${COLOR.cardBorder} px-4 py-2.5 font-medium transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800`}
+					
+					<div class="flex gap-4">
+						<button type="button" onclick={() => { showDeleteModal = false; deleteConfirmText = ''; }} class="flex-1 p-4 text-xs font-black uppercase tracking-widest border-2 border-zinc-200 rounded-2xl hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900 transition-all">Batal</button>
+						<button 
+							type="submit" 
+							disabled={deleteConfirmText !== 'HAPUS'} 
+							class="flex-1 p-4 text-xs font-black uppercase tracking-widest bg-red-600 text-white rounded-2xl shadow-xl hover:bg-red-700 disabled:opacity-30 disabled:grayscale transition-all active:scale-95"
 						>
-							Batal
-						</button>
-						<button
-							type="submit"
-							disabled={deleteConfirmText !== 'HAPUS'}
-							class={`flex-1 ${RADIUS.button} px-4 py-2.5 font-bold transition-colors ${
-								deleteConfirmText === 'HAPUS'
-									? 'bg-red-600 text-white hover:bg-red-700'
-									: 'cursor-not-allowed bg-red-100 text-red-400'
-							}`}
-						>
-							Hapus Akun
+							Hapus Permanen
 						</button>
 					</div>
 				</form>
@@ -752,3 +389,13 @@
 		</div>
 	{/if}
 </PageWrapper>
+
+<style>
+	:global(.animate-in) {
+		animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+	@keyframes slide-up {
+		from { opacity: 0; transform: translateY(30px) scale(0.98); }
+		to { opacity: 1; transform: translateY(0) scale(1); }
+	}
+</style>
