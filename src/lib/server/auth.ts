@@ -32,14 +32,15 @@ export async function validateSessionToken(token: string) {
 		.select({
 			// Adjust user table here to tweak returned data
 			user: {
-			id: table.user.id,
-			username: table.user.username,
-			role: table.user.role,
-			fullName: table.user.fullName,
-			email: table.user.email,
-			lastWorkspaceId: table.user.lastWorkspaceId,
-			onboardingCompleted: table.user.onboardingCompleted
-		},
+				id: table.user.id,
+				username: table.user.username,
+				role: table.user.role,
+				fullName: table.user.fullName,
+				email: table.user.email,
+				lastWorkspaceId: table.user.lastWorkspaceId,
+				onboardingCompleted: table.user.onboardingCompleted,
+				deletedAt: table.user.deletedAt
+			},
 			session: table.session
 		})
 		.from(table.session)
@@ -50,6 +51,12 @@ export async function validateSessionToken(token: string) {
 		return { session: null, user: null };
 	}
 	const { session, user } = result;
+
+	// Check if user account has been deleted (soft delete)
+	if (user.deletedAt) {
+		await db.delete(table.session).where(eq(table.session.id, session.id));
+		return { session: null, user: null };
+	}
 
 	const sessionExpired = Date.now() >= session.expiresAt.getTime();
 	if (sessionExpired) {

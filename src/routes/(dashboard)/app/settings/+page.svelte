@@ -11,6 +11,7 @@
 	import { setLocale, getLocale } from '$lib/paraglide/runtime.js';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import Icon from '$lib/components/ui/Icon.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -40,6 +41,10 @@
 	let clientKey = $state('');
 	let serverKey = $state('');
 	let isProcessing = $state(false);
+
+	// Account deletion state
+	let showDeleteModal = $state(false);
+	let deleteConfirmText = $state('');
 
 	onMount(() => {
 		initTheme();
@@ -620,6 +625,130 @@
 					</div>
 				</div>
 			{/if}
+
+			<!-- Account Tab -->
+			{#if activeTab === 'account'}
+				<div class="animate-in fade-in slide-in-from-bottom-5 space-y-8 duration-700">
+					<!-- Delete Account Section -->
+					<div
+						class={`p-6 ${RADIUS.card} border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30`}
+					>
+						<div class="flex items-start gap-4">
+							<div
+								class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-600"
+							>
+								<Icon name="trash" size={24} />
+							</div>
+							<div class="flex-1">
+								<h3 class="mb-2 text-lg font-bold text-red-800 dark:text-red-200">Hapus Akun</h3>
+								<p class="mb-4 text-sm text-red-700 dark:text-red-300">
+									Menghapus akun akan menghapus semua data Anda secara permanen. Tindakan ini tidak
+									dapat dibatalkan. Anda tidak akan dapat memulihkan akun atau data yang terkait
+									setelah penghapusan.
+								</p>
+								<button
+									type="button"
+									onclick={() => (showDeleteModal = true)}
+									class={`${RADIUS.button} bg-red-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-700`}
+								>
+									Hapus Akun Saya
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			{/if}
 		</main>
 	</div>
+
+	<!-- Delete Account Modal -->
+	{#if showDeleteModal}
+		<div
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="delete-modal-title"
+			class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+			onclick={() => (showDeleteModal = false)}
+			onkeydown={(e) => {
+				if (e.key === 'Escape') {
+					showDeleteModal = false;
+					deleteConfirmText = '';
+				}
+			}}
+		>
+			<div
+				class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900"
+				onclick={(e) => e.stopPropagation()}
+			>
+				<div class="mb-4 flex items-center gap-3">
+					<div
+						class="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/10 text-red-600"
+					>
+						<Icon name="alert-triangle" size={20} />
+					</div>
+					<h3 id="delete-modal-title" class="text-lg font-bold text-red-600 dark:text-red-400">
+						Konfirmasi Penghapusan Akun
+					</h3>
+				</div>
+
+				<p class="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
+					Ini adalah tindakan yang <span class="font-bold">tidak dapat dibatalkan</span>. Semua data
+					Anda akan dihapus secara permanen. Ketik
+					<span class="rounded bg-zinc-100 px-1 font-mono dark:bg-zinc-800">HAPUS</span> untuk melanjutkan.
+				</p>
+
+				<form
+					method="POST"
+					action="?/deleteAccount"
+					use:enhance={() => {
+						return async ({ result, update }) => {
+							if (result.type === 'success') {
+								toast.success('Akun berhasil dihapus. Mengalihkan ke halaman signin...');
+								setTimeout(() => {
+									window.location.href = '/auth/signin';
+								}, 2000);
+							} else if (result.type === 'failure') {
+								const msg = String(result.data?.error || 'Gagal menghapus akun');
+								toast.error(msg);
+							}
+							await update();
+						};
+					}}
+				>
+					<input
+						type="text"
+						name="confirmText"
+						bind:value={deleteConfirmText}
+						placeholder="Ketik HAPUS untuk konfirmasi"
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} mb-4 bg-white px-4 py-3 dark:bg-zinc-800`}
+						required
+					/>
+
+					<div class="flex gap-3">
+						<button
+							type="button"
+							onclick={() => {
+								showDeleteModal = false;
+								deleteConfirmText = '';
+							}}
+							class={`flex-1 ${RADIUS.button} border ${COLOR.cardBorder} px-4 py-2.5 font-medium transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800`}
+						>
+							Batal
+						</button>
+						<button
+							type="submit"
+							disabled={deleteConfirmText !== 'HAPUS'}
+							class={`flex-1 ${RADIUS.button} px-4 py-2.5 font-bold transition-colors ${
+								deleteConfirmText === 'HAPUS'
+									? 'bg-red-600 text-white hover:bg-red-700'
+									: 'cursor-not-allowed bg-red-100 text-red-400'
+							}`}
+						>
+							Hapus Akun
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	{/if}
 </PageWrapper>

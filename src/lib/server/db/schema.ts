@@ -12,7 +12,8 @@ export const user = sqliteTable('user', {
 	lastWorkspaceId: text('last_workspace_id'), // To remember user's last active workspace
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
-		.$defaultFn(() => new Date())
+		.$defaultFn(() => new Date()),
+	deletedAt: integer('deleted_at', { mode: 'timestamp' }) // Soft delete timestamp
 });
 
 export const session = sqliteTable('session', {

@@ -1,7 +1,7 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { user } from '$lib/server/db/schema';
+import { user, session } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { hashPassword, verifyPassword } from '$lib/server/password';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
@@ -35,7 +35,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const tabs = [
 		{ label: 'Profil', id: 'profile' },
 		{ label: 'Keamanan', id: 'security' },
-		{ label: 'Preferensi', id: 'preferences' }
+		{ label: 'Preferensi', id: 'preferences' },
+		{ label: 'Akun', id: 'account' }
 	];
 
 	// Add administrative tabs
@@ -157,6 +158,33 @@ export const actions: Actions = {
 		} catch (e) {
 			console.error('Error changing password:', e);
 			return actionFailure(500, 'Terjadi kesalahan saat mengubah password');
+		}
+	},
+
+	deleteAccount: async ({ request, locals }) => {
+		if (!locals.user) {
+			throw redirect(302, '/auth/signin');
+		}
+
+		const formData = await request.formData();
+		const confirmText = formData.get('confirmText')?.toString() || '';
+
+		// Validation - require "HAPUS" confirmation
+		if (confirmText !== 'HAPUS') {
+			return actionFailure(400, 'Konfirmasi tidak valid. Ketik "HAPUS" untuk menghapus akun.');
+		}
+
+		try {
+			// Soft delete user by setting deleted_at timestamp
+			await db.update(user).set({ deletedAt: new Date() }).where(eq(user.id, locals.user.id));
+
+			// Invalidate all user sessions
+			await db.delete(session).where(eq(session.userId, locals.user.id));
+
+			return actionSuccess({ message: 'Akun berhasil dihapus. Anda akan segera dialihkan.' });
+		} catch (e) {
+			console.error('Error deleting account:', e);
+			return actionFailure(500, 'Terjadi kesalahan saat menghapus akun');
 		}
 	}
 };
