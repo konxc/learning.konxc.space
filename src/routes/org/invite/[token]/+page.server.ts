@@ -108,7 +108,7 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 
 	// If user is logged in, process the invitation
 	if (user) {
-		// Check if already a member
+		// Check if already a member (any role)
 		const existingMember = await db.query.organizationMember.findFirst({
 			where: and(
 				eq(schema.organizationMember.orgId, invitation.orgId),
@@ -117,6 +117,17 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 		});
 
 		if (existingMember) {
+			// Check if trying to invite as mentor/facilitator when already has a role
+			const isMentorOrFacilitatorInvite = invitation.role === 'mentor' || invitation.role === 'facilitator';
+			const isExistingMentorOrFacilitator = existingMember.role === 'mentor' || existingMember.role === 'facilitator';
+			
+			if (isMentorOrFacilitatorInvite && isExistingMentorOrFacilitator) {
+				throw error(
+					403,
+					'Anda sudah memiliki peran di organisasi ini. Tidak dapat menerima undangan untuk peran lain.'
+				);
+			}
+
 			// Delete the invitation and redirect
 			await db
 				.delete(schema.organizationInvitation)
