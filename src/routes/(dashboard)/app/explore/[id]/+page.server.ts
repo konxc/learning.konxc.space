@@ -1,14 +1,14 @@
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, isNull } from 'drizzle-orm';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { fail } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const courseId = params.id;
 
-	// Get course with mentor info
+	// Get course with mentor info (exclude soft-deleted courses)
 	const courses = await db
 		.select({
 			course: {
@@ -34,7 +34,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		})
 		.from(schema.course)
 		.leftJoin(schema.user, eq(schema.course.mentorId, schema.user.id))
-		.where(eq(schema.course.id, courseId))
+		.where(and(eq(schema.course.id, courseId), isNull(schema.course.deletedAt)))
 		.limit(1);
 
 	if (courses.length === 0) {
@@ -148,10 +148,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			// Sane defaults based on category
 			const category = courseData.course.category?.toLowerCase() || '';
 			const isMarketing = category === 'marketing' || category === 'business';
-			
-			features = { 
-				tracks: isMarketing, 
-				affiliate: isMarketing, 
+
+			features = {
+				tracks: isMarketing,
+				affiliate: isMarketing,
 				performance: true // Performance tracking generally useful
 			};
 		}
@@ -160,7 +160,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	// Get plugin tabs for this course
-	const { getCourseTabsForCourse, getEnabledPluginIdsForCourse } = await import('$lib/plugins/course-helpers');
+	const { getCourseTabsForCourse, getEnabledPluginIdsForCourse } = await import(
+		'$lib/plugins/course-helpers'
+	);
 	const courseTabs = await getCourseTabsForCourse(courseId);
 	const enabledPluginIds = await getEnabledPluginIdsForCourse(courseId);
 

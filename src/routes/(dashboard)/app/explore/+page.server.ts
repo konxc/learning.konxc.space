@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 
 export const load: PageServerLoad = async (event) => {
 	const user = event.locals.user;
@@ -12,11 +12,11 @@ export const load: PageServerLoad = async (event) => {
 	const parentData = await event.parent();
 	const activeWorkspaceId = parentData.workspaces?.activeId || 'personal';
 
-	// Filter courses by workspace
+	// Filter courses by workspace (exclude soft-deleted courses)
 	let query = db
 		.select()
 		.from(schema.course)
-		.where(eq(schema.course.status, 'published'));
+		.where(and(eq(schema.course.status, 'published'), isNull(schema.course.deletedAt)));
 
 	if (activeWorkspaceId !== 'personal') {
 		query = db
@@ -25,7 +25,8 @@ export const load: PageServerLoad = async (event) => {
 			.where(
 				and(
 					eq(schema.course.status, 'published'),
-					eq(schema.course.orgId, activeWorkspaceId)
+					eq(schema.course.orgId, activeWorkspaceId),
+					isNull(schema.course.deletedAt)
 				)
 			);
 	}

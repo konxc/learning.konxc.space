@@ -44,7 +44,8 @@ export const course = sqliteTable('course', {
 		.$defaultFn(() => new Date()),
 	updatedAt: integer('updated_at', { mode: 'timestamp' })
 		.notNull()
-		.$defaultFn(() => new Date())
+		.$defaultFn(() => new Date()),
+	deletedAt: integer('deleted_at', { mode: 'timestamp' }) // Soft delete timestamp
 });
 
 export const enrollment = sqliteTable('enrollment', {
