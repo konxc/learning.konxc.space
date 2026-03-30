@@ -17,107 +17,98 @@
 
 	let { data, form }: { data: PageData; form: any } = $props();
 
-	// Course selection state
-	let selectedCourse = $state<any>(null);
-	let selectedTrack = $state<string | null>(null);
-
-	// Coupon state
-	let couponCode = $state('');
-	let finalPrice = $state<number | null>(null);
-	let discountAmount = $state(0);
-	let couponValidated = $state(false);
-	let couponError = $state<string | null>(null);
-	let isApplying = $state(false);
-
 	// Facilitator organization selection - auto-select if invited
 	let selectedOrganization = $state<string | null>(data.invitedOrgId ?? null);
 
 	// Check if this is an invitation flow
 	let isInvitationFlow = $derived(!!data.invitedOrgId);
 
-	// Track options
-	const trackOptions = [
-		{
-			id: 'creator',
-			name: 'Content Creator',
-			icon: '🎬',
-			description: 'Buat konten & bangun audience'
-		},
-		{
-			id: 'seller',
-			name: 'E-Commerce Seller',
-			icon: '🛒',
-			description: 'Jual produk & optimasi marketplace'
-		},
-		{
-			id: 'affiliate',
-			name: 'Affiliate Pro',
-			icon: '🔗',
-			description: 'Komisi pasif dari rekomendasi'
-		}
+	// Telemetry state for students
+	let selectedGoals = $state<string[]>([]);
+	let selectedInterests = $state<string[]>([]);
+	let experienceLevel = $state<string>('');
+	let learningSchedule = $state<string>('');
+	let selectedNotifications = $state<string[]>(['email', 'wa']);
+
+	// Options for telemetry questions
+	const goalOptions = [
+		{ id: 'career', label: 'Karir di Digital Marketing', icon: 'briefcase' },
+		{ id: 'business', label: 'Bisnis Online Sendiri', icon: 'shopping-cart' },
+		{ id: 'skill', label: 'Skill Tambahan', icon: 'graduation' },
+		{ id: 'hobby', label: 'Hobi & Passion', icon: 'heart' }
 	];
 
-	// Simplified coupon response handling
-	async function handleValidateCoupon() {
-		if (!selectedCourse || !couponCode) return;
+	const interestOptions = [
+		{ id: 'creator', label: 'Content Creator', icon: 'film' },
+		{ id: 'affiliate', label: 'Affiliate Marketing', icon: 'link' },
+		{ id: 'seller', label: 'E-Commerce', icon: 'shopping-bag' },
+		{ id: 'smm', label: 'Social Media Manager', icon: 'share-2' },
+		{ id: 'seo', label: 'SEO & SEM', icon: 'search' }
+	];
 
-		isApplying = true;
-		couponError = null;
+	const experienceOptions = [
+		{ id: 'beginner', label: 'Pemula', description: 'Baru mulai belajar' },
+		{ id: 'intermediate', label: 'Menengah', description: 'Sudah paham dasar' },
+		{ id: 'advanced', label: 'Lanjutan', description: 'Punya pengalaman' }
+	];
 
-		const formData = new FormData();
-		formData.append('couponCode', couponCode);
-		formData.append('courseId', selectedCourse.id);
+	const scheduleOptions = [
+		{ id: 'morning', label: 'Pagi', time: '06:00 - 12:00' },
+		{ id: 'afternoon', label: 'Siang', time: '12:00 - 18:00' },
+		{ id: 'evening', label: 'Malam', time: '18:00 - 23:00' },
+		{ id: 'flexible', label: 'Fleksibel', time: 'Kapan saja' }
+	];
 
-		try {
-			const response = await fetch('?/validateCoupon', {
-				method: 'POST',
-				body: formData
-			});
+	const notificationOptions = [
+		{ id: 'email', label: 'Email' },
+		{ id: 'wa', label: 'WhatsApp' },
+		{ id: 'push', label: 'Push Notification' }
+	];
 
-			const result = await response.json();
-			const isSuccess = result.type === 'success';
-			const payload = result.data?.data ?? result.data ?? {};
-
-			if (isSuccess && payload.isValid) {
-				couponValidated = true;
-				finalPrice = payload.finalPrice ?? selectedCourse.price;
-				discountAmount = payload.discountAmount ?? 0;
-			} else {
-				couponValidated = false;
-				couponError = payload.error || 'Kupon tidak valid';
-				finalPrice = payload.finalPrice ?? selectedCourse.price;
-				discountAmount = 0;
-			}
-		} catch {
-			couponError = 'Gagal memvalidasi kupon';
-			couponValidated = false;
-		} finally {
-			isApplying = false;
+	// Toggle goal selection
+	function toggleGoal(goalId: string) {
+		if (selectedGoals.includes(goalId)) {
+			selectedGoals = selectedGoals.filter((g) => g !== goalId);
+		} else {
+			selectedGoals = [...selectedGoals, goalId];
 		}
 	}
 
-	// Check if course has tracks enabled
-	function hasTrackSelection(course: any): boolean {
-		return course?.featuresConfig?.tracks === true;
+	// Toggle interest selection
+	function toggleInterest(interestId: string) {
+		if (selectedInterests.includes(interestId)) {
+			selectedInterests = selectedInterests.filter((i) => i !== interestId);
+		} else {
+			selectedInterests = [...selectedInterests, interestId];
+		}
+	}
+
+	// Toggle notification selection
+	function toggleNotification(notifId: string) {
+		if (selectedNotifications.includes(notifId)) {
+			selectedNotifications = selectedNotifications.filter((n) => n !== notifId);
+		} else {
+			selectedNotifications = [...selectedNotifications, notifId];
+		}
 	}
 </script>
 
 <svelte:head>
-	<title>Pathfinder Onboarding - Naik Kelas</title>
+	<title>Pengaturan Preferensi - Naik Kelas</title>
 </svelte:head>
 
 <PageWrapper>
-	<div class="mx-auto max-w-5xl">
+	<div class="mx-auto max-w-4xl">
 		<main class="space-y-12 py-12">
-			<!-- Role-Based Pathfinder Header -->
+			<!-- Header -->
 			<header class="space-y-4 text-center">
 				<div
 					class="inline-flex h-7 items-center gap-2 rounded-full border border-blue-500/10 bg-blue-500/10 px-3 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400"
 				>
 					<Icon name="sparkle" size={13} strokeWidth={2.5} />
-					<span class={`${TEXT.small} translate-y-[0.5px] leading-none font-bold`}
-						>{isInvitationFlow ? 'Undangan Diterima' : 'Onboarding Pathfinder'}</span
-					>
+					<span class={`${TEXT.small} translate-y-[0.5px] leading-none font-bold`}>
+						{isInvitationFlow ? 'Undangan Diterima' : 'Pengaturan Awal'}
+					</span>
 				</div>
 
 				{#if data.role === 'mentor'}
@@ -139,8 +130,7 @@
 				{:else}
 					<h1 class={`${TEXT.h1} ${COLOR.textPrimary}`}>Selamat Datang di Naik Kelas! 🚀</h1>
 					<p class={`${TEXT.secondary} mx-auto max-w-2xl`}>
-						Pilih jalur belajar pertama kamu untuk memulai petualangan transformasi digital yang
-						berdampak nyata.
+						Bantu kami memahami preferensi belajar Anda untuk pengalaman yang lebih personal.
 					</p>
 				{/if}
 			</header>
@@ -172,6 +162,26 @@
 									</p>
 								{/if}
 							</div>
+
+							<!-- Invitation-specific welcome message -->
+							{#if isInvitationFlow}
+								<div class={`${RADIUS.card} border border-indigo-200 bg-indigo-50 p-6 dark:border-indigo-800 dark:bg-indigo-900/20`}>
+									<div class="flex items-start gap-4">
+										<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-600">
+											<Icon name="gift" size={24} />
+										</div>
+										<div>
+											<h4 class={`${TEXT.h4} text-indigo-800 dark:text-indigo-200`}>Keuntungan sebagai Mentor</h4>
+											<ul class="mt-2 space-y-1 text-sm text-indigo-700 dark:text-indigo-300">
+												<li>✓ Akses dashboard mentor khusus</li>
+												<li>✓ Komisi affiliate otomatis (25%)</li>
+												<li>✓ Link undangan bisa dibagikan</li>
+												<li>✓ Analisis performa siswa</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							{/if}
 
 							<div class="grid grid-cols-1 gap-6">
 								<div class="flex items-start gap-4 rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-800/50">
@@ -216,7 +226,7 @@
 							</div>
 
 							<form method="POST" action="?/redirectToSettings" use:enhance>
-								<AuthSubmitButton text="Lengkapi Profil di Settings" />
+								<AuthSubmitButton text={isInvitationFlow ? "Lengkapi Profil & Masuk" : "Lengkapi Profil di Settings"} />
 							</form>
 						</div>
 					</div>
@@ -332,172 +342,162 @@
 					</div>
 				</div>
 			{:else}
-				<!-- Student (User) Onboarding Node -->
+				<!-- Student (User) Onboarding - Telemetry/Persona Questions -->
 				<div class="space-y-8">
-					<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-						{#each data.courses as course}
-							<button
-								class={`group text-left ${RADIUS.card} border-2 ${COLOR.card} ${SPACING.cardPadding} ${TRANSITION.all} relative overflow-hidden
-								${selectedCourse?.id === course.id ? 'border-blue-600 ring-4 ring-blue-500/10' : 'border-zinc-200/50 hover:border-blue-500/30 dark:border-zinc-800/50'}`}
-								onclick={() => {
-									selectedCourse = course;
-									finalPrice = course.price;
-									couponValidated = false;
-									couponCode = '';
-									couponError = null;
-									discountAmount = 0;
-								}}
-							>
-								{#if selectedCourse?.id === course.id}
-									<div class="absolute top-4 right-4 rounded-full bg-blue-50 p-1 text-blue-600">
-										<Icon name="check" size={16} />
-									</div>
-								{/if}
+					<div
+						class={`${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding} space-y-8`}
+					>
+						<div class="space-y-2">
+							<h2 class={`${TEXT.h3} ${COLOR.textPrimary}`}>Bantu Kami Mengenali Anda</h2>
+							<p class={TEXT.secondary}>
+								Silakan isi preferensi belajar Anda untuk pengalaman yang lebih personal.
+								Semua pertanyaan bersifat opsional.
+							</p>
+						</div>
 
-								<div class="space-y-4">
-									<div class="space-y-2">
-										<h3
-											class={`${TEXT.h4} ${COLOR.textPrimary} transition-colors group-hover:text-blue-600`}
-										>
-											{course.title}
-										</h3>
-										<p class={`${TEXT.muted} line-clamp-3 text-sm`}>{course.description}</p>
-									</div>
-									<div
-										class="flex items-end justify-between border-t border-zinc-100 pt-4 dark:border-zinc-800"
+						<!-- Goals -->
+						<div class="space-y-4">
+							<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
+								Apa tujuan utama Anda belajar? (Pilih salah satu atau lebih)
+							</p>
+							<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+								{#each goalOptions as goal}
+									<button
+										type="button"
+										class={`flex items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
+											selectedGoals.includes(goal.id)
+												? 'border-blue-500 bg-blue-50 ring-4 ring-blue-500/10 dark:bg-blue-900/20'
+												: 'border-zinc-200 hover:border-blue-500/30 dark:border-zinc-700 dark:hover:border-blue-500/30'
+										}`}
+										onclick={() => toggleGoal(goal.id)}
 									>
-										<div>
-											<p class={TEXT.small}>Mulai dari</p>
-											<p class="text-xl font-black text-blue-600">
-												Rp {course.price.toLocaleString('id-ID')}
-											</p>
-										</div>
-										<Icon
-											name="arrow-right"
-											size={20}
-											class="text-zinc-300 transition-all group-hover:translate-x-1 group-hover:text-blue-500"
-										/>
-									</div>
-								</div>
-							</button>
-						{/each}
-					</div>
-
-					{#if selectedCourse}
-						<div class="animate-in fade-in slide-in-from-bottom-5 duration-700">
-							<div
-								class={`${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding} mx-auto max-w-2xl space-y-8 shadow-2xl`}
-							>
-								<div class="flex items-center gap-4">
-									<div
-										class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white"
-									>
-										<Icon name="cart" size={24} />
-									</div>
-									<div>
-										<h4 class={TEXT.h4}>Checkout Jalur Belajar</h4>
-										<p class={TEXT.muted}>{selectedCourse.title}</p>
-									</div>
-								</div>
-
-								<div class="space-y-6">
-									<!-- Track Selection (only for courses with tracks enabled) -->
-									{#if hasTrackSelection(selectedCourse)}
-										<div class="space-y-3">
-											<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
-												Pilih Jalur Spesialisasi
-											</p>
-											<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-												{#each trackOptions as track}
-													<button
-														type="button"
-														class={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all ${
-															selectedTrack === track.id
-																? 'border-blue-500 bg-blue-50 ring-4 ring-blue-500/10 dark:bg-blue-900/20'
-																: 'border-zinc-200 hover:border-blue-500/30 dark:border-zinc-700 dark:hover:border-blue-500/30'
-														}`}
-														onclick={() => (selectedTrack = track.id)}
-													>
-														<span class="text-2xl">{track.icon}</span>
-														<div>
-															<p class="text-sm font-bold">{track.name}</p>
-															<p class="text-xs text-zinc-500">{track.description}</p>
-														</div>
-														{#if selectedTrack === track.id}
-															<Icon
-																name="check"
-																size={16}
-																class="absolute top-2 right-2 text-blue-500"
-															/>
-														{/if}
-													</button>
-												{/each}
-											</div>
-										</div>
-									{/if}
-									<div class="space-y-3">
-										<label for="couponCode" class={`${TEXT.small} font-black text-zinc-500`}
-											>Punya Kode Kupon? (Opsional)</label
-										>
-										<div class="flex gap-3">
-											<input
-												type="text"
-												id="couponCode"
-												bind:value={couponCode}
-												placeholder="Masukkan kode kupon"
-												class={`flex-1 ${SPACING.input} ${RADIUS.input} border ${COLOR.cardBorder} bg-zinc-50 outline-hidden transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-zinc-800/50`}
-											/>
-											<button
-												type="button"
-												onclick={handleValidateCoupon}
-												class={`px-6 ${RADIUS.button} bg-zinc-900 text-sm font-bold text-white transition-all hover:bg-zinc-800 disabled:opacity-50`}
-												disabled={isApplying || !couponCode}
-											>
-												{isApplying ? '...' : 'Gunakan'}
-											</button>
-										</div>
-										{#if couponError}
-											<p class="text-xs font-semibold text-rose-500">{couponError}</p>
-										{/if}
-									</div>
-
-									<div class={`space-y-4 rounded-2xl bg-zinc-50 p-6 dark:bg-zinc-900/50`}>
-										<div class="flex justify-between text-sm font-medium">
-											<span class={COLOR.textSecondary}>Harga Awal</span>
-											<span class={COLOR.textPrimary}
-												>Rp {selectedCourse.price.toLocaleString('id-ID')}</span
-											>
-										</div>
-
-										{#if couponValidated && discountAmount > 0}
-											<div class="flex justify-between text-sm font-bold text-emerald-600">
-												<span>Potongan Kupon</span>
-												<span>- Rp {discountAmount.toLocaleString('id-ID')}</span>
-											</div>
-										{/if}
-
 										<div
-											class="flex items-center justify-between border-t border-zinc-200 pt-4 dark:border-zinc-800"
+											class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600"
 										>
-											<span class="text-base font-black tracking-tighter uppercase"
-												>Total Investasi</span
-											>
-											<span class="text-2xl font-black text-blue-600"
-												>Rp {finalPrice?.toLocaleString('id-ID')}</span
-											>
+											<Icon name={goal.icon} size={20} />
 										</div>
-									</div>
-
-									<form method="POST" action="?/enroll" use:enhance>
-										<input type="hidden" name="courseId" value={selectedCourse.id} />
-										<input type="hidden" name="couponCode" value={couponCode} />
-										<input type="hidden" name="track" value={selectedTrack ?? ''} />
-										<AuthSubmitButton text="Mulai Belajar Sekarang" />
-									</form>
-								</div>
+										<div class="flex-1">
+											<h4 class="font-bold">{goal.label}</h4>
+										</div>
+										{#if selectedGoals.includes(goal.id)}
+											<Icon name="check" size={20} class="text-blue-500" />
+										{/if}
+									</button>
+								{/each}
 							</div>
 						</div>
-					{/if}
+
+						<!-- Interests -->
+						<div class="space-y-4">
+							<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
+								Bidang apa yang paling menarik bagi Anda? (Pilih satu atau lebih)
+							</p>
+							<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+								{#each interestOptions as interest}
+									<button
+										type="button"
+										class={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all ${
+											selectedInterests.includes(interest.id)
+												? 'border-emerald-500 bg-emerald-50 ring-4 ring-emerald-500/10 dark:bg-emerald-900/20'
+												: 'border-zinc-200 hover:border-emerald-500/30 dark:border-zinc-700 dark:hover:border-emerald-500/30'
+										}`}
+										onclick={() => toggleInterest(interest.id)}
+									>
+										<Icon name={interest.icon} size={24} />
+										<span class="text-sm font-bold">{interest.label}</span>
+										{#if selectedInterests.includes(interest.id)}
+											<Icon name="check" size={16} class="absolute top-2 right-2 text-emerald-500" />
+										{/if}
+									</button>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Experience Level -->
+						<div class="space-y-4">
+							<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
+								Pengalaman Anda di bidang digital?
+							</p>
+							<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+								{#each experienceOptions as exp}
+									<button
+										type="button"
+										class={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all ${
+											experienceLevel === exp.id
+												? 'border-purple-500 bg-purple-50 ring-4 ring-purple-500/10 dark:bg-purple-900/20'
+												: 'border-zinc-200 hover:border-purple-500/30 dark:border-zinc-700 dark:hover:border-purple-500/30'
+										}`}
+										onclick={() => (experienceLevel = exp.id)}
+									>
+										<span class="text-sm font-bold">{exp.label}</span>
+										<span class="text-xs text-zinc-500">{exp.description}</span>
+										{#if experienceLevel === exp.id}
+											<Icon name="check" size={16} class="absolute top-2 right-2 text-purple-500" />
+										{/if}
+									</button>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Learning Schedule -->
+						<div class="space-y-4">
+							<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
+								Kapan waktu belajar yang ideal untuk Anda?
+							</p>
+							<div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
+								{#each scheduleOptions as schedule}
+									<button
+										type="button"
+										class={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all ${
+											learningSchedule === schedule.id
+												? 'border-amber-500 bg-amber-50 ring-4 ring-amber-500/10 dark:bg-amber-900/20'
+												: 'border-zinc-200 hover:border-amber-500/30 dark:border-zinc-700 dark:hover:border-amber-500/30'
+										}`}
+										onclick={() => (learningSchedule = schedule.id)}
+									>
+										<span class="text-sm font-bold">{schedule.label}</span>
+										<span class="text-xs text-zinc-500">{schedule.time}</span>
+										{#if learningSchedule === schedule.id}
+											<Icon name="check" size={16} class="absolute top-2 right-2 text-amber-500" />
+										{/if}
+									</button>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Notification Preferences -->
+						<div class="space-y-4">
+							<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
+								Ingin mendapat notifikasi melalui?
+							</p>
+							<div class="flex flex-wrap gap-3">
+								{#each notificationOptions as notif}
+									<button
+										type="button"
+										class={`flex items-center gap-2 rounded-full border-2 px-4 py-2 transition-all ${
+											selectedNotifications.includes(notif.id)
+												? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20'
+												: 'border-zinc-200 hover:border-rose-500/30 dark:border-zinc-700 dark:hover:border-rose-500/30'
+										}`}
+										onclick={() => toggleNotification(notif.id)}
+									>
+										<Icon name={notif.id === 'email' ? 'mail' : notif.id === 'wa' ? 'message-circle' : 'bell'} size={16} />
+										<span class="text-sm font-medium">{notif.label}</span>
+									</button>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Submit -->
+						<form method="POST" action="?/savePreferences" use:enhance>
+							<input type="hidden" name="goals" value={JSON.stringify(selectedGoals)} />
+							<input type="hidden" name="interests" value={JSON.stringify(selectedInterests)} />
+							<input type="hidden" name="experienceLevel" value={experienceLevel} />
+							<input type="hidden" name="learningSchedule" value={learningSchedule} />
+							<input type="hidden" name="notificationPrefs" value={JSON.stringify(selectedNotifications)} />
+							<AuthSubmitButton text="Selesaikan Pengaturan & Masuk" />
+						</form>
+					</div>
 				</div>
 			{/if}
 		</main>
