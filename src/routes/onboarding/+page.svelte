@@ -7,118 +7,217 @@
 		TEXT,
 		TRANSITION,
 		SPACING,
-		GRADIENT,
-		ELEVATION
+		ELEVATION,
+		GRADIENT
 	} from '$lib/config/design';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
-	import AuthMessage from '$lib/components/AuthMessage.svelte';
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
+	import StepWizard from '$lib/components/ui/StepWizard.svelte';
+	import { toast } from '$lib/stores/toast';
 
 	let { data, form }: { data: PageData; form: any } = $props();
 
-	// Facilitator organization selection - auto-select if invited
+	// Facilitator organization selection
 	let selectedOrganization = $state<string | null>(data.invitedOrgId ?? null);
+
+	// Storage key for persistence
+	const STORAGE_KEY = 'naikkelas_onboarding_v1';
+
+	// Helper function to load state from localStorage
+	function loadPersistedState() {
+		if (typeof window === 'undefined') return null;
+		try {
+			const saved = localStorage.getItem(STORAGE_KEY);
+			if (saved) {
+				return JSON.parse(saved);
+			}
+		} catch (e) {
+			console.warn('Failed to load persisted onboarding state:', e);
+		}
+		return null;
+	}
+
+	// Helper function to save state to localStorage
+	function savePersistedState(state: {
+		currentStep: number;
+		selectedGoal: string;
+		selectedInterests: string[];
+		experienceLevel: string;
+		learningSchedule: string;
+		selectedNotifications: string[];
+	}) {
+		if (typeof window === 'undefined') return;
+		try {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+		} catch (e) {
+			console.warn('Failed to save persisted onboarding state:', e);
+		}
+	}
+
+	// Load persisted state on initialization
+	const persistedState = loadPersistedState();
+
+	// Wizard state
+	let currentStep = $state(persistedState?.currentStep ?? 0);
+	let isSubmitting = $state(false);
+
+	// Telemetry state for students (with persisted values)
+	let selectedGoal = $state(persistedState?.selectedGoal ?? '');
+	let selectedInterests = $state(persistedState?.selectedInterests ?? []);
+	let experienceLevel = $state(persistedState?.experienceLevel ?? '');
+	let learningSchedule = $state(persistedState?.learningSchedule ?? '');
+	let selectedNotifications = $state(persistedState?.selectedNotifications ?? ['email', 'wa']);
+
+	// Watch for changes and auto-save
+	$effect(() => {
+		savePersistedState({
+			currentStep,
+			selectedGoal,
+			selectedInterests,
+			experienceLevel,
+			learningSchedule,
+			selectedNotifications
+		});
+	});
+
+	// Show form errors as toasts
+	$effect(() => {
+		if (form?.error) {
+			toast.error(form.error);
+		}
+	});
 
 	// Check if this is an invitation flow
 	let isInvitationFlow = $derived(!!data.invitedOrgId);
 
-	// Telemetry state for students
-	let selectedGoals = $state<string[]>([]);
-	let selectedInterests = $state<string[]>([]);
-	let experienceLevel = $state<string>('');
-	let learningSchedule = $state<string>('');
-	let selectedNotifications = $state<string[]>(['email', 'wa']);
+	// Calculate which steps are completed based on actual requirements
+	let completedSteps = $derived(() => {
+		const completed: number[] = [];
 
-	// Options for telemetry questions - Expanded to support all platform domains
+		// Step 0: Goals - completed if user has selected a goal
+		if (selectedGoal) {
+			completed.push(0);
+		}
+
+		// Step 1: Interests - completed if user has selected at least 1 interest
+		if (selectedInterests.length > 0) {
+			completed.push(1);
+		}
+
+		// Step 2: Experience & Schedule - completed if user has selected experience OR schedule
+		// (at least one of them indicates engagement)
+		if (experienceLevel || learningSchedule) {
+			completed.push(2);
+		}
+
+		// Step 3: Review - completed only after form submission
+		// (handled separately during submission)
+
+		return completed;
+	});
+
+	// Highest completed step (for progress bar)
+	let maxCompletedStep = $derived(() => {
+		const completed = completedSteps();
+		return completed.length > 0 ? Math.max(...completed) : -1;
+	});
+
+	// Clear persisted state (e.g., after successful submission)
+	function clearPersistedState() {
+		if (typeof window === 'undefined') return;
+		try {
+			localStorage.removeItem(STORAGE_KEY);
+		} catch (e) {
+			console.warn('Failed to clear persisted onboarding state:', e);
+		}
+	}
+
+	// Student onboarding steps
+	const steps = [
+		{ id: 'goals', label: 'Tujuan', icon: 'target' },
+		{ id: 'interests', label: 'Minat', icon: 'heart' },
+		{ id: 'experience', label: 'Pengalaman', icon: 'graduation' },
+		{ id: 'review', label: 'Selesai', icon: 'check' }
+	];
+
+	// Goals options - Single selection
 	const goalOptions = [
-		// Career paths based on platform domains
 		{
 			id: 'career-developer',
 			label: 'Karir di Teknologi & Developer',
+			description: 'Ingin menjadi developer profesional',
 			icon: 'code',
-			domain: 'developer'
+			color: 'blue'
 		},
 		{
 			id: 'career-akademik',
 			label: 'Karir di Bidang Akademik',
+			description: 'Ingin mengajar atau penelitian',
 			icon: 'graduation',
-			domain: 'akademik'
+			color: 'purple'
 		},
 		{
 			id: 'career-bisnis',
 			label: 'Karir di Bisnis & UMKM',
+			description: 'Mengembangkan usaha sendiri',
 			icon: 'shopping-cart',
-			domain: 'bisnis'
+			color: 'amber'
 		},
-		{ id: 'career-design', label: 'Karir di Desain & Kreatif', icon: 'palette', domain: 'design' },
+		{
+			id: 'career-design',
+			label: 'Karir di Desain & Kreatif',
+			description: 'Menjadi designer profesional',
+			icon: 'palette',
+			color: 'pink'
+		},
 		{
 			id: 'career-outdoor',
-			label: 'Karir di Outdoor & Leadership',
+			label: 'Outdoor & Leadership',
+			description: 'Pengembangan leadership & outdoor',
 			icon: 'mountain',
-			domain: 'outdoor'
-		},
-		// Monetization & collaboration paths
-		{
-			id: 'monetize-knowledge',
-			label: 'Monetisasi Pengetahuan',
-			icon: 'dollar',
-			domain: 'general'
-		},
-		{
-			id: 'build-organization',
-			label: 'Membangun Organisasi/Institusi',
-			icon: 'building',
-			domain: 'general'
-		},
-		{ id: 'kolaborasi', label: 'Kolaborasi & Bermitra', icon: 'users', domain: 'general' },
-		{
-			id: 'mentor-facilitator',
-			label: 'Menjadi Mentor/Facilitator',
-			icon: 'star',
-			domain: 'general'
+			color: 'teal'
 		}
 	];
 
+	// Interests options - Max 5 selection
 	const interestOptions = [
-		// Developer interests
+		// Developer
 		{ id: 'web-dev', label: 'Web Development', icon: 'globe', domain: 'developer' },
 		{ id: 'mobile-dev', label: 'Mobile Development', icon: 'smartphone', domain: 'developer' },
 		{ id: 'ai-ml', label: 'AI & Machine Learning', icon: 'brain', domain: 'developer' },
 		{ id: 'blockchain', label: 'Blockchain & Web3', icon: 'link', domain: 'developer' },
 
-		// Akademik interests
+		// Akademik
 		{ id: 'tutoring', label: 'Tutoring & Bimbingan', icon: 'book-open', domain: 'akademik' },
 		{ id: 'course-creation', label: 'Pembuatan Kursus', icon: 'video', domain: 'akademik' },
 		{ id: 'research', label: 'Penelitian & Riset', icon: 'microscope', domain: 'akademik' },
 		{ id: 'academic-mentor', label: 'Mentoring Akademik', icon: 'award', domain: 'akademik' },
 
-		// Bisnis & UMKM interests
+		// Bisnis
 		{ id: 'product-dev', label: 'Pengembangan Produk', icon: 'package', domain: 'bisnis' },
 		{ id: 'marketing', label: 'Marketing & Branding', icon: 'megaphone', domain: 'bisnis' },
 		{ id: 'operations', label: 'Operasional Bisnis', icon: 'settings', domain: 'bisnis' },
 		{ id: 'e-commerce', label: 'E-Commerce', icon: 'shopping-bag', domain: 'bisnis' },
-		{ id: 'affiliate', label: 'Affiliate Marketing', icon: 'link', domain: 'bisnis' },
 
-		// Design interests
+		// Design
 		{ id: 'ui-ux', label: 'UI/UX Design', icon: 'layout', domain: 'design' },
 		{ id: 'graphic-design', label: 'Graphic Design', icon: 'image', domain: 'design' },
 		{ id: 'motion-design', label: 'Motion Design', icon: 'zap', domain: 'design' },
-		{ id: 'design-systems', label: 'Design Systems', icon: 'pen-tool', domain: 'design' },
 
-		// Outdoor interests
+		// Outdoor
 		{ id: 'leadership', label: 'Leadership Training', icon: 'target', domain: 'outdoor' },
-		{ id: 'expedition', label: 'Expedition Planning', icon: 'compass', domain: 'outdoor' },
-		{ id: 'team-building', label: 'Team Building', icon: 'handshake', domain: 'outdoor' },
-		{ id: 'adventure-education', label: 'Adventure Education', icon: 'sun', domain: 'outdoor' }
+		{ id: 'expedition', label: 'Expedition Planning', icon: 'compass', domain: 'outdoor' }
 	];
 
+	// Experience options
 	const experienceOptions = [
 		{ id: 'beginner', label: 'Pemula', description: 'Baru mulai belajar' },
 		{ id: 'intermediate', label: 'Menengah', description: 'Sudah paham dasar' },
 		{ id: 'advanced', label: 'Lanjutan', description: 'Punya pengalaman' }
 	];
 
+	// Schedule options
 	const scheduleOptions = [
 		{ id: 'morning', label: 'Pagi', time: '06:00 - 12:00' },
 		{ id: 'afternoon', label: 'Siang', time: '12:00 - 18:00' },
@@ -126,26 +225,23 @@
 		{ id: 'flexible', label: 'Fleksibel', time: 'Kapan saja' }
 	];
 
+	// Notification options
 	const notificationOptions = [
 		{ id: 'email', label: 'Email' },
 		{ id: 'wa', label: 'WhatsApp' },
 		{ id: 'push', label: 'Push Notification' }
 	];
 
-	// Toggle goal selection
-	function toggleGoal(goalId: string) {
-		if (selectedGoals.includes(goalId)) {
-			selectedGoals = selectedGoals.filter((g) => g !== goalId);
-		} else {
-			selectedGoals = [...selectedGoals, goalId];
-		}
+	// Get interest options by domain
+	function getInterestsByDomain(domain: string) {
+		return interestOptions.filter((i) => i.domain === domain);
 	}
 
-	// Toggle interest selection
+	// Toggle interest selection (max 5)
 	function toggleInterest(interestId: string) {
 		if (selectedInterests.includes(interestId)) {
-			selectedInterests = selectedInterests.filter((i) => i !== interestId);
-		} else {
+			selectedInterests = selectedInterests.filter((i: string) => i !== interestId);
+		} else if (selectedInterests.length < 5) {
 			selectedInterests = [...selectedInterests, interestId];
 		}
 	}
@@ -153,20 +249,132 @@
 	// Toggle notification selection
 	function toggleNotification(notifId: string) {
 		if (selectedNotifications.includes(notifId)) {
-			selectedNotifications = selectedNotifications.filter((n) => n !== notifId);
+			selectedNotifications = selectedNotifications.filter((n: string) => n !== notifId);
 		} else {
 			selectedNotifications = [...selectedNotifications, notifId];
 		}
 	}
+
+	// Navigation functions
+	function nextStep() {
+		if (currentStep < steps.length - 1) {
+			currentStep++;
+		}
+	}
+
+	function prevStep() {
+		if (currentStep > 0) {
+			currentStep--;
+		}
+	}
+
+	// Validation for each step
+	// All fields are optional - users can skip any step
+	function canProceedToNext(): boolean {
+		switch (currentStep) {
+			case 0: // Goals (optional)
+				return true;
+			case 1: // Interests (optional, but at least 1 if they select anything)
+				return true;
+			case 2: // Experience & Schedule (optional)
+				return true;
+			default:
+				return true;
+		}
+	}
+
+	// Get step title based on current step
+	function getStepTitle(): string {
+		switch (currentStep) {
+			case 0:
+				return 'Pilih Tujuan Utama';
+			case 1:
+				return 'Pilih Minat Anda';
+			case 2:
+				return 'Pengalaman & Jadwal';
+			case 3:
+				return 'Konfirmasi Preferensi';
+			default:
+				return '';
+		}
+	}
+
+	// Get step description based on current step
+	function getStepDescription(): string {
+		switch (currentStep) {
+			case 0:
+				return 'Pilih satu tujuan utama yang paling relevan dengan Anda';
+			case 1:
+				return `Pilih hingga 5 bidang minat (${selectedInterests.length}/5 dipilih)`;
+			case 2:
+				return 'Tentukan tingkat pengalaman dan jadwal belajar ideal';
+			case 3:
+				return 'Review preferensi Anda sebelum melanjutkan';
+			default:
+				return '';
+		}
+	}
+
+	// Get goal color class
+	function getGoalColorClass(color: string): string {
+		const colorMap: Record<string, string> = {
+			blue: 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/10 dark:bg-blue-900/20',
+			purple: 'border-purple-500 bg-purple-50 ring-2 ring-purple-500/10 dark:bg-purple-900/20',
+			amber: 'border-amber-500 bg-amber-50 ring-2 ring-amber-500/10 dark:bg-amber-900/20',
+			pink: 'border-pink-500 bg-pink-50 ring-2 ring-pink-500/10 dark:bg-pink-900/20',
+			teal: 'border-teal-500 bg-teal-50 ring-2 ring-teal-500/10 dark:bg-teal-900/20'
+		};
+		return colorMap[color] || colorMap['blue'];
+	}
+
+	function getGoalColorText(color: string): string {
+		const colorMap: Record<string, string> = {
+			blue: 'text-blue-600',
+			purple: 'text-purple-600',
+			amber: 'text-amber-600',
+			pink: 'text-pink-600',
+			teal: 'text-teal-600'
+		};
+		return colorMap[color] || colorMap['blue'];
+	}
+
+	function getGoalColorBg(color: string): string {
+		const colorMap: Record<string, string> = {
+			blue: 'bg-blue-500/10',
+			purple: 'bg-purple-500/10',
+			amber: 'bg-amber-500/10',
+			pink: 'bg-pink-500/10',
+			teal: 'bg-teal-500/10'
+		};
+		return colorMap[color] || colorMap['blue'];
+	}
+
+	// Summary computed values
+	let goalSummary = $derived(
+		goalOptions.find((g) => g.id === selectedGoal)?.label || 'Belum dipilih'
+	);
+	let interestsSummary = $derived(
+		selectedInterests.length > 0
+			? selectedInterests
+					.map((id: string) => interestOptions.find((i) => i.id === id)?.label)
+					.join(', ')
+			: 'Belum dipilih'
+	);
+	let experienceSummary = $derived(
+		experienceOptions.find((e) => e.id === experienceLevel)?.label || 'Belum dipilih'
+	);
+	let scheduleSummary = $derived(
+		scheduleOptions.find((s) => s.id === learningSchedule)?.label || 'Belum dipilih'
+	);
 </script>
 
 <svelte:head>
-	<title>Pengaturan Preferensi - Naik Kelas</title>
+	<title>Onboarding - Naik Kelas</title>
 </svelte:head>
 
 <PageWrapper>
 	<div class="mx-auto max-w-4xl">
-		<main class="space-y-12 py-12">
+		<main class="space-y-8 py-12">
 			<!-- Header -->
 			<header class="space-y-4 text-center">
 				<div
@@ -202,10 +410,6 @@
 				{/if}
 			</header>
 
-			{#if form?.error}
-				<AuthMessage type="error" message={form.error} />
-			{/if}
-
 			{#if data.role === 'mentor'}
 				<!-- Mentor Onboarding Node -->
 				<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -230,7 +434,6 @@
 								{/if}
 							</div>
 
-							<!-- Invitation-specific welcome message -->
 							{#if isInvitationFlow}
 								<div
 									class={`${RADIUS.card} border border-indigo-200 bg-indigo-50 p-6 dark:border-indigo-800 dark:bg-indigo-900/20`}
@@ -348,7 +551,6 @@
 						</div>
 
 						{#if isInvitationFlow}
-							<!-- Invitation Flow: Show selected organization -->
 							<div
 								class={`${RADIUS.card} border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/20`}
 							>
@@ -369,13 +571,11 @@
 								</div>
 							</div>
 						{:else}
-							<!-- Regular Flow: Organization selection -->
 							<p class={`${TEXT.body} ${COLOR.textSecondary} text-center`}>
 								Anda akan membimbing kelompok belajar (batch) melalui materi yang disediakan oleh
 								Expert Mentor. Pilih organisasi yang ingin Anda fasilitasi.
 							</p>
 
-							<!-- Organization Selection -->
 							{#if data.organizations && data.organizations.length > 0}
 								<div class="space-y-3">
 									<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>Pilih Organisasi</p>
@@ -419,215 +619,238 @@
 					</div>
 				</div>
 			{:else}
-				<!-- Student (User) Onboarding - Telemetry/Persona Questions -->
+				<!-- Student (User) Onboarding - Multi-Step Wizard -->
 				<div class="space-y-8">
+					<!-- Progress Bar -->
+					<StepWizard bind:currentStep {steps} maxCompletedStep={maxCompletedStep()} />
+
+					<!-- Step Content -->
 					<div
 						class={`${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} ${SPACING.cardPadding} space-y-8`}
 					>
-						<div class="space-y-2">
-							<h2 class={`${TEXT.h3} ${COLOR.textPrimary}`}>Bantu Kami Mengenali Anda</h2>
-							<p class={TEXT.secondary}>
-								Silakan isi preferensi belajar Anda untuk pengalaman yang lebih personal. Semua
-								pertanyaan bersifat opsional.
-							</p>
+						<!-- Step Header -->
+						<div class="space-y-2 text-center">
+							<h2 class={`${TEXT.h3} ${COLOR.textPrimary}`}>{getStepTitle()}</h2>
+							<p class={TEXT.secondary}>{getStepDescription()}</p>
 						</div>
 
-						<!-- Goals - Multi-domain support -->
-						<div class="space-y-4">
-							<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
-								Apa tujuan utama Anda? (Pilih semua yang relevan)
-							</p>
-
-							<!-- Career Paths Section -->
-							<div class="space-y-2">
-								<p class="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
-									Bidang Karir
-								</p>
-								<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-									{#each goalOptions.filter((g) => g.domain !== 'general') as goal}
+						<!-- Step 1: Goals -->
+						{#if currentStep === 0}
+							<div class="space-y-4">
+								<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+									{#each goalOptions as goal}
 										<button
 											type="button"
-											class={`flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all ${
-												selectedGoals.includes(goal.id)
-													? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/10 dark:bg-blue-900/20'
-													: 'border-zinc-200 hover:border-blue-500/30 dark:border-zinc-700 dark:hover:border-blue-500/30'
+											class={`flex items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
+												selectedGoal === goal.id
+													? getGoalColorClass(goal.color)
+													: 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700 dark:hover:border-zinc-600'
 											}`}
-											onclick={() => toggleGoal(goal.id)}
+											onclick={() => (selectedGoal = goal.id)}
 										>
 											<div
-												class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600"
+												class={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${getGoalColorBg(goal.color)} ${getGoalColorText(goal.color)}`}
 											>
-												<Icon name={goal.icon} size={18} />
+												<Icon name={goal.icon} size={24} />
 											</div>
-											<div class="flex-1">
-												<h4 class="text-sm font-semibold">{goal.label}</h4>
+											<div class="flex-1 space-y-1">
+												<h4 class="font-semibold text-zinc-900 dark:text-zinc-100">
+													{goal.label}
+												</h4>
+												<p class="text-xs text-zinc-500 dark:text-zinc-400">
+													{goal.description}
+												</p>
 											</div>
-											{#if selectedGoals.includes(goal.id)}
-												<Icon name="check" size={18} class="text-blue-500" />
+											{#if selectedGoal === goal.id}
+												<Icon name="check" size={20} class={getGoalColorText(goal.color)} />
 											{/if}
 										</button>
 									{/each}
 								</div>
 							</div>
+						{/if}
 
-							<!-- Monetization & Partnership Section -->
-							<div class="mt-4 space-y-2">
-								<p class="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
-									Monetisasi & Kolaborasi
-								</p>
-								<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-									{#each goalOptions.filter((g) => g.domain === 'general') as goal}
-										<button
-											type="button"
-											class={`flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all ${
-												selectedGoals.includes(goal.id)
-													? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/10 dark:bg-emerald-900/20'
-													: 'border-zinc-200 hover:border-emerald-500/30 dark:border-zinc-700 dark:hover:border-emerald-500/30'
-											}`}
-											onclick={() => toggleGoal(goal.id)}
-										>
-											<div
-												class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600"
-											>
-												<Icon name={goal.icon} size={18} />
-											</div>
-											<div class="flex-1">
-												<h4 class="text-sm font-semibold">{goal.label}</h4>
-											</div>
-											{#if selectedGoals.includes(goal.id)}
-												<Icon name="check" size={18} class="text-emerald-500" />
-											{/if}
-										</button>
-									{/each}
-								</div>
-							</div>
-						</div>
-
-						<!-- Interests - Multi-domain support -->
-						<div class="space-y-4">
-							<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
-								Bidang apa yang paling menarik bagi Anda? (Pilih semua yang relevan)
-							</p>
-
-							<!-- Developer Interests -->
-							<div class="space-y-2">
-								<p
-									class="flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-500 uppercase"
-								>
-									<span class="h-2 w-2 rounded-full bg-blue-500"></span> Developer
-								</p>
-								<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-									{#each interestOptions.filter((i) => i.domain === 'developer') as interest}
-										<button
-											type="button"
-											class={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition-all ${
-												selectedInterests.includes(interest.id)
-													? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/10 dark:bg-blue-900/20'
-													: 'border-zinc-200 hover:border-blue-500/30 dark:border-zinc-700 dark:hover:border-blue-500/30'
-											}`}
-											onclick={() => toggleInterest(interest.id)}
-										>
-											<Icon name={interest.icon} size={18} />
-											<span class="text-xs font-semibold">{interest.label}</span>
-											{#if selectedInterests.includes(interest.id)}
-												<Icon name="check" size={14} class="absolute top-1 right-1 text-blue-500" />
-											{/if}
-										</button>
-									{/each}
-								</div>
-							</div>
-
-							<!-- Akademik Interests -->
-							<div class="space-y-2">
-								<p
-									class="flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-500 uppercase"
-								>
-									<span class="h-2 w-2 rounded-full bg-purple-500"></span> Akademik
-								</p>
-								<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-									{#each interestOptions.filter((i) => i.domain === 'akademik') as interest}
-										<button
-											type="button"
-											class={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition-all ${
-												selectedInterests.includes(interest.id)
-													? 'border-purple-500 bg-purple-50 ring-2 ring-purple-500/10 dark:bg-purple-900/20'
-													: 'border-zinc-200 hover:border-purple-500/30 dark:border-zinc-700 dark:hover:border-purple-500/30'
-											}`}
-											onclick={() => toggleInterest(interest.id)}
-										>
-											<Icon name={interest.icon} size={18} />
-											<span class="text-xs font-semibold">{interest.label}</span>
-											{#if selectedInterests.includes(interest.id)}
-												<Icon
-													name="check"
-													size={14}
-													class="absolute top-1 right-1 text-purple-500"
-												/>
-											{/if}
-										</button>
-									{/each}
-								</div>
-							</div>
-
-							<!-- Bisnis & UMKM Interests -->
-							<div class="space-y-2">
-								<p
-									class="flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-500 uppercase"
-								>
-									<span class="h-2 w-2 rounded-full bg-amber-500"></span> Bisnis & UMKM
-								</p>
-								<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-									{#each interestOptions.filter((i) => i.domain === 'bisnis') as interest}
-										<button
-											type="button"
-											class={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition-all ${
-												selectedInterests.includes(interest.id)
-													? 'border-amber-500 bg-amber-50 ring-2 ring-amber-500/10 dark:bg-amber-900/20'
-													: 'border-zinc-200 hover:border-amber-500/30 dark:border-zinc-700 dark:hover:border-amber-500/30'
-											}`}
-											onclick={() => toggleInterest(interest.id)}
-										>
-											<Icon name={interest.icon} size={18} />
-											<span class="text-xs font-semibold">{interest.label}</span>
-											{#if selectedInterests.includes(interest.id)}
-												<Icon
-													name="check"
-													size={14}
-													class="absolute top-1 right-1 text-amber-500"
-												/>
-											{/if}
-										</button>
-									{/each}
-								</div>
-							</div>
-
-							<!-- Design & Outdoor Interests (Grid) -->
-							<div class="grid grid-cols-2 gap-4">
-								<!-- Design -->
-								<div class="space-y-2">
+						<!-- Step 2: Interests -->
+						{#if currentStep === 1}
+							<div class="space-y-6">
+								<!-- Domain: Developer -->
+								<div class="space-y-3">
 									<p
-										class="flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-500 uppercase"
+										class="flex items-center gap-2 text-sm font-semibold text-zinc-600 dark:text-zinc-400"
 									>
-										<span class="h-2 w-2 rounded-full bg-pink-500"></span> Design
+										<span class="h-2 w-2 rounded-full bg-blue-500"></span> Developer
 									</p>
-									<div class="grid grid-cols-2 gap-2">
-										{#each interestOptions.filter((i) => i.domain === 'design') as interest}
+									<div class="flex flex-wrap gap-2">
+										{#each getInterestsByDomain('developer') as interest}
 											<button
 												type="button"
-												class={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition-all ${
+												class={`flex items-center gap-2 rounded-full border-2 px-4 py-2 text-sm transition-all ${
 													selectedInterests.includes(interest.id)
-														? 'border-pink-500 bg-pink-50 ring-2 ring-pink-500/10 dark:bg-pink-900/20'
-														: 'border-zinc-200 hover:border-pink-500/30 dark:border-zinc-700 dark:hover:border-pink-500/30'
+														? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+														: 'border-zinc-200 hover:border-blue-500/30 dark:border-zinc-700 dark:hover:border-blue-500/30'
 												}`}
 												onclick={() => toggleInterest(interest.id)}
 											>
 												<Icon name={interest.icon} size={16} />
-												<span class="text-xs">{interest.label}</span>
-												{#if selectedInterests.includes(interest.id)}
+												{interest.label}
+											</button>
+										{/each}
+									</div>
+								</div>
+
+								<!-- Domain: Akademik -->
+								<div class="space-y-3">
+									<p
+										class="flex items-center gap-2 text-sm font-semibold text-zinc-600 dark:text-zinc-400"
+									>
+										<span class="h-2 w-2 rounded-full bg-purple-500"></span> Akademik
+									</p>
+									<div class="flex flex-wrap gap-2">
+										{#each getInterestsByDomain('akademik') as interest}
+											<button
+												type="button"
+												class={`flex items-center gap-2 rounded-full border-2 px-4 py-2 text-sm transition-all ${
+													selectedInterests.includes(interest.id)
+														? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+														: 'border-zinc-200 hover:border-purple-500/30 dark:border-zinc-700 dark:hover:border-purple-500/30'
+												}`}
+												onclick={() => toggleInterest(interest.id)}
+											>
+												<Icon name={interest.icon} size={16} />
+												{interest.label}
+											</button>
+										{/each}
+									</div>
+								</div>
+
+								<!-- Domain: Bisnis -->
+								<div class="space-y-3">
+									<p
+										class="flex items-center gap-2 text-sm font-semibold text-zinc-600 dark:text-zinc-400"
+									>
+										<span class="h-2 w-2 rounded-full bg-amber-500"></span> Bisnis & UMKM
+									</p>
+									<div class="flex flex-wrap gap-2">
+										{#each getInterestsByDomain('bisnis') as interest}
+											<button
+												type="button"
+												class={`flex items-center gap-2 rounded-full border-2 px-4 py-2 text-sm transition-all ${
+													selectedInterests.includes(interest.id)
+														? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
+														: 'border-zinc-200 hover:border-amber-500/30 dark:border-zinc-700 dark:hover:border-amber-500/30'
+												}`}
+												onclick={() => toggleInterest(interest.id)}
+											>
+												<Icon name={interest.icon} size={16} />
+												{interest.label}
+											</button>
+										{/each}
+									</div>
+								</div>
+
+								<!-- Domain: Design & Outdoor in grid -->
+								<div class="grid grid-cols-2 gap-6">
+									<!-- Design -->
+									<div class="space-y-3">
+										<p
+											class="flex items-center gap-2 text-sm font-semibold text-zinc-600 dark:text-zinc-400"
+										>
+											<span class="h-2 w-2 rounded-full bg-pink-500"></span> Design
+										</p>
+										<div class="flex flex-wrap gap-2">
+											{#each getInterestsByDomain('design') as interest}
+												<button
+													type="button"
+													class={`flex items-center gap-2 rounded-full border-2 px-3 py-1.5 text-xs transition-all ${
+														selectedInterests.includes(interest.id)
+															? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20'
+															: 'border-zinc-200 hover:border-pink-500/30 dark:border-zinc-700 dark:hover:border-pink-500/30'
+													}`}
+													onclick={() => toggleInterest(interest.id)}
+												>
+													<Icon name={interest.icon} size={14} />
+													{interest.label}
+												</button>
+											{/each}
+										</div>
+									</div>
+
+									<!-- Outdoor -->
+									<div class="space-y-3">
+										<p
+											class="flex items-center gap-2 text-sm font-semibold text-zinc-600 dark:text-zinc-400"
+										>
+											<span class="h-2 w-2 rounded-full bg-teal-500"></span> Outdoor
+										</p>
+										<div class="flex flex-wrap gap-2">
+											{#each getInterestsByDomain('outdoor') as interest}
+												<button
+													type="button"
+													class={`flex items-center gap-2 rounded-full border-2 px-3 py-1.5 text-xs transition-all ${
+														selectedInterests.includes(interest.id)
+															? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20'
+															: 'border-zinc-200 hover:border-teal-500/30 dark:border-zinc-700 dark:hover:border-teal-500/30'
+													}`}
+													onclick={() => toggleInterest(interest.id)}
+												>
+													<Icon name={interest.icon} size={14} />
+													{interest.label}
+												</button>
+											{/each}
+										</div>
+									</div>
+								</div>
+
+								<!-- Progress indicator for interests -->
+								<div class="flex items-center justify-center gap-2 pt-2">
+									<div
+										class={`h-2 rounded-full ${selectedInterests.length >= 1 ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'} w-8 transition-all`}
+									></div>
+									<div
+										class={`h-2 rounded-full ${selectedInterests.length >= 2 ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'} w-8 transition-all`}
+									></div>
+									<div
+										class={`h-2 rounded-full ${selectedInterests.length >= 3 ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'} w-8 transition-all`}
+									></div>
+									<div
+										class={`h-2 rounded-full ${selectedInterests.length >= 4 ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'} w-8 transition-all`}
+									></div>
+									<div
+										class={`h-2 rounded-full ${selectedInterests.length >= 5 ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'} w-8 transition-all`}
+									></div>
+									<p class={`${TEXT.muted} ml-2`}>
+										{selectedInterests.length}/5 dipilih
+									</p>
+								</div>
+							</div>
+						{/if}
+
+						<!-- Step 3: Experience & Schedule -->
+						{#if currentStep === 2}
+							<div class="space-y-8">
+								<!-- Experience Level -->
+								<div class="space-y-4">
+									<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
+										Tingkat pengalaman Anda
+									</p>
+									<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+										{#each experienceOptions as exp}
+											<button
+												type="button"
+												class={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all ${
+													experienceLevel === exp.id
+														? 'border-purple-500 bg-purple-50 ring-4 ring-purple-500/10 dark:bg-purple-900/20'
+														: 'border-zinc-200 hover:border-purple-500/30 dark:border-zinc-700 dark:hover:border-purple-500/30'
+												}`}
+												onclick={() => (experienceLevel = exp.id)}
+											>
+												<span class="text-sm font-bold">{exp.label}</span>
+												<span class="text-xs text-zinc-500">{exp.description}</span>
+												{#if experienceLevel === exp.id}
 													<Icon
 														name="check"
-														size={12}
-														class="absolute top-1 right-1 text-pink-500"
+														size={16}
+														class="absolute top-2 right-2 text-purple-500"
 													/>
 												{/if}
 											</button>
@@ -635,144 +858,240 @@
 									</div>
 								</div>
 
-								<!-- Outdoor -->
-								<div class="space-y-2">
-									<p
-										class="flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-500 uppercase"
-									>
-										<span class="h-2 w-2 rounded-full bg-teal-500"></span> Outdoor
+								<!-- Learning Schedule -->
+								<div class="space-y-4">
+									<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
+										Waktu belajar ideal Anda
 									</p>
-									<div class="grid grid-cols-2 gap-2">
-										{#each interestOptions.filter((i) => i.domain === 'outdoor') as interest}
+									<div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
+										{#each scheduleOptions as schedule}
 											<button
 												type="button"
-												class={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition-all ${
-													selectedInterests.includes(interest.id)
-														? 'border-teal-500 bg-teal-50 ring-2 ring-teal-500/10 dark:bg-teal-900/20'
-														: 'border-zinc-200 hover:border-teal-500/30 dark:border-zinc-700 dark:hover:border-teal-500/30'
+												class={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all ${
+													learningSchedule === schedule.id
+														? 'border-amber-500 bg-amber-50 ring-4 ring-amber-500/10 dark:bg-amber-900/20'
+														: 'border-zinc-200 hover:border-amber-500/30 dark:border-zinc-700 dark:hover:border-amber-500/30'
 												}`}
-												onclick={() => toggleInterest(interest.id)}
+												onclick={() => (learningSchedule = schedule.id)}
 											>
-												<Icon name={interest.icon} size={16} />
-												<span class="text-xs">{interest.label}</span>
-												{#if selectedInterests.includes(interest.id)}
+												<span class="text-sm font-bold">{schedule.label}</span>
+												<span class="text-xs text-zinc-500">{schedule.time}</span>
+												{#if learningSchedule === schedule.id}
 													<Icon
 														name="check"
-														size={12}
-														class="absolute top-1 right-1 text-teal-500"
+														size={16}
+														class="absolute top-2 right-2 text-amber-500"
 													/>
 												{/if}
 											</button>
 										{/each}
 									</div>
 								</div>
-							</div>
-						</div>
 
-						<!-- Experience Level -->
-						<div class="space-y-4">
-							<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
-								Sebutkan tingkat pengalaman Anda secara umum
-							</p>
-							<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-								{#each experienceOptions as exp}
-									<button
-										type="button"
-										class={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all ${
-											experienceLevel === exp.id
-												? 'border-purple-500 bg-purple-50 ring-4 ring-purple-500/10 dark:bg-purple-900/20'
-												: 'border-zinc-200 hover:border-purple-500/30 dark:border-zinc-700 dark:hover:border-purple-500/30'
-										}`}
-										onclick={() => (experienceLevel = exp.id)}
+								<!-- Notification Preferences -->
+								<div class="space-y-4">
+									<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
+										Ingin mendapat notifikasi melalui?
+									</p>
+									<div class="flex flex-wrap gap-3">
+										{#each notificationOptions as notif}
+											<button
+												type="button"
+												class={`flex items-center gap-2 rounded-full border-2 px-4 py-2 transition-all ${
+													selectedNotifications.includes(notif.id)
+														? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20'
+														: 'border-zinc-200 hover:border-rose-500/30 dark:border-zinc-700 dark:hover:border-rose-500/30'
+												}`}
+												onclick={() => toggleNotification(notif.id)}
+											>
+												<Icon
+													name={notif.id === 'email'
+														? 'mail'
+														: notif.id === 'wa'
+															? 'message-circle'
+															: 'bell'}
+													size={16}
+												/>
+												<span class="text-sm font-medium">{notif.label}</span>
+											</button>
+										{/each}
+									</div>
+								</div>
+							</div>
+						{/if}
+
+						<!-- Step 4: Review -->
+						{#if currentStep === 3}
+							<div class="space-y-6">
+								<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+									<!-- Goal Summary -->
+									<div
+										class={`${RADIUS.card} border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50`}
 									>
-										<span class="text-sm font-bold">{exp.label}</span>
-										<span class="text-xs text-zinc-500">{exp.description}</span>
-										{#if experienceLevel === exp.id}
-											<Icon name="check" size={16} class="absolute top-2 right-2 text-purple-500" />
-										{/if}
-									</button>
-								{/each}
-							</div>
-						</div>
+										<div class="mb-3 flex items-center gap-3">
+											<div
+												class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/10 text-blue-600"
+											>
+												<Icon name="target" size={20} />
+											</div>
+											<h4 class={TEXT.h4}>Tujuan Utama</h4>
+										</div>
+										<p class="font-medium text-zinc-900 dark:text-zinc-100">{goalSummary}</p>
+									</div>
 
-						<!-- Learning Schedule -->
-						<div class="space-y-4">
-							<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
-								Kapan waktu belajar yang ideal untuk Anda?
-							</p>
-							<div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
-								{#each scheduleOptions as schedule}
-									<button
-										type="button"
-										class={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all ${
-											learningSchedule === schedule.id
-												? 'border-amber-500 bg-amber-50 ring-4 ring-amber-500/10 dark:bg-amber-900/20'
-												: 'border-zinc-200 hover:border-amber-500/30 dark:border-zinc-700 dark:hover:border-amber-500/30'
-										}`}
-										onclick={() => (learningSchedule = schedule.id)}
+									<!-- Interests Summary -->
+									<div
+										class={`${RADIUS.card} border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50`}
 									>
-										<span class="text-sm font-bold">{schedule.label}</span>
-										<span class="text-xs text-zinc-500">{schedule.time}</span>
-										{#if learningSchedule === schedule.id}
-											<Icon name="check" size={16} class="absolute top-2 right-2 text-amber-500" />
-										{/if}
-									</button>
-								{/each}
-							</div>
-						</div>
+										<div class="mb-3 flex items-center gap-3">
+											<div
+												class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-500/10 text-rose-600"
+											>
+												<Icon name="heart" size={20} />
+											</div>
+											<h4 class={TEXT.h4}>Minat ({selectedInterests.length}/5)</h4>
+										</div>
+										<p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+											{interestsSummary}
+										</p>
+									</div>
 
-						<!-- Notification Preferences -->
-						<div class="space-y-4">
-							<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
-								Ingin mendapat notifikasi melalui?
-							</p>
-							<div class="flex flex-wrap gap-3">
-								{#each notificationOptions as notif}
-									<button
-										type="button"
-										class={`flex items-center gap-2 rounded-full border-2 px-4 py-2 transition-all ${
-											selectedNotifications.includes(notif.id)
-												? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20'
-												: 'border-zinc-200 hover:border-rose-500/30 dark:border-zinc-700 dark:hover:border-rose-500/30'
-										}`}
-										onclick={() => toggleNotification(notif.id)}
+									<!-- Experience Summary -->
+									<div
+										class={`${RADIUS.card} border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50`}
 									>
-										<Icon
-											name={notif.id === 'email'
-												? 'mail'
-												: notif.id === 'wa'
-													? 'message-circle'
-													: 'bell'}
-											size={16}
-										/>
-										<span class="text-sm font-medium">{notif.label}</span>
-									</button>
-								{/each}
-							</div>
-						</div>
+										<div class="mb-3 flex items-center gap-3">
+											<div
+												class="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500/10 text-purple-600"
+											>
+												<Icon name="graduation" size={20} />
+											</div>
+											<h4 class={TEXT.h4}>Pengalaman</h4>
+										</div>
+										<p class="font-medium text-zinc-900 dark:text-zinc-100">{experienceSummary}</p>
+									</div>
 
-						<!-- Submit -->
-						<form method="POST" action="?/savePreferences" use:enhance>
-							<input type="hidden" name="goals" value={JSON.stringify(selectedGoals)} />
-							<input type="hidden" name="interests" value={JSON.stringify(selectedInterests)} />
-							<input type="hidden" name="experienceLevel" value={experienceLevel} />
-							<input type="hidden" name="learningSchedule" value={learningSchedule} />
-							<input
-								type="hidden"
-								name="notificationPrefs"
-								value={JSON.stringify(selectedNotifications)}
-							/>
-							<AuthSubmitButton text="Selesaikan Pengaturan & Masuk" />
-						</form>
+									<!-- Schedule Summary -->
+									<div
+										class={`${RADIUS.card} border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50`}
+									>
+										<div class="mb-3 flex items-center gap-3">
+											<div
+												class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-600"
+											>
+												<Icon name="clock" size={20} />
+											</div>
+											<h4 class={TEXT.h4}>Jadwal Belajar</h4>
+										</div>
+										<p class="font-medium text-zinc-900 dark:text-zinc-100">{scheduleSummary}</p>
+									</div>
+								</div>
+
+								<!-- Notification Summary -->
+								<div
+									class={`${RADIUS.card} border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50`}
+								>
+									<div class="mb-3 flex items-center gap-3">
+										<div
+											class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600"
+										>
+											<Icon name="bell" size={20} />
+										</div>
+										<h4 class={TEXT.h4}>Notifikasi</h4>
+									</div>
+									<div class="flex flex-wrap gap-2">
+										{#each selectedNotifications as notif}
+											<span
+												class="rounded-full bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-700 dark:text-emerald-400"
+											>
+												{notif === 'email' ? 'Email' : notif === 'wa' ? 'WhatsApp' : 'Push'}
+											</span>
+										{/each}
+									</div>
+								</div>
+
+								<p class={`${TEXT.muted} text-center`}>
+									Klik "Selesaikan" untuk menyimpan preferensi Anda. Progress otomatis tersimpan.
+								</p>
+							</div>
+						{/if}
+					</div>
+
+					<!-- Navigation Buttons -->
+					<div class="flex items-center justify-between gap-4">
+						{#if currentStep > 0}
+							<button
+								type="button"
+								class={`flex items-center gap-2 rounded-xl border-2 px-5 py-2.5 font-medium transition-all ${COLOR.accentHover} ${RADIUS.button}`}
+								onclick={prevStep}
+							>
+								<Icon name="arrow-left" size={18} />
+								Kembali
+							</button>
+						{:else}
+							<div></div>
+						{/if}
+
+						{#if currentStep < steps.length - 1}
+							<button
+								type="button"
+								class={`flex items-center gap-2 rounded-xl bg-zinc-900 px-5 py-2.5 font-medium text-white transition-all hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 ${RADIUS.button} ${!canProceedToNext() ? 'cursor-not-allowed opacity-50' : ''}`}
+								disabled={!canProceedToNext()}
+								onclick={nextStep}
+							>
+								Selanjutnya
+								<Icon name="arrow-right" size={18} />
+							</button>
+						{:else}
+							<form
+								method="POST"
+								action="?/savePreferences"
+								use:enhance={() => {
+									isSubmitting = true;
+									return async ({ result, update }) => {
+										isSubmitting = false;
+										if (result.type === 'success') {
+											toast.success('Preferensi berhasil disimpan!');
+										} else if (result.type === 'failure') {
+											const msg = String(result.data?.error || 'Gagal menyimpan preferensi');
+											toast.error(msg);
+										}
+										await update();
+										clearPersistedState();
+									};
+								}}
+							>
+								<input
+									type="hidden"
+									name="goals"
+									value={selectedGoal ? JSON.stringify([selectedGoal]) : '[]'}
+								/>
+								<input type="hidden" name="interests" value={JSON.stringify(selectedInterests)} />
+								<input type="hidden" name="experienceLevel" value={experienceLevel} />
+								<input type="hidden" name="learningSchedule" value={learningSchedule} />
+								<input
+									type="hidden"
+									name="notificationPrefs"
+									value={JSON.stringify(selectedNotifications)}
+								/>
+								<button
+									type="submit"
+									disabled={isSubmitting}
+									class={`${COLOR.accentBg} ${COLOR.accentHover} ${RADIUS.button} ${TEXT.button} ${SPACING.button} flex items-center gap-2 text-white disabled:cursor-not-allowed disabled:opacity-50`}
+								>
+									{#if isSubmitting}
+										<span class="animate-spin">
+											<Icon name="loader" size={18} />
+										</span>
+									{/if}
+									Selesaikan & Mulai
+									<Icon name="check" size={18} />
+								</button>
+							</form>
+						{/if}
 					</div>
 				</div>
 			{/if}
 		</main>
 	</div>
 </PageWrapper>
-
-<style>
-	:global(.onboarding-container) {
-		perspective: 1000px;
-	}
-</style>

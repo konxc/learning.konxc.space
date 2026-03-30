@@ -100,30 +100,35 @@ export const actions: Actions = {
 		const notificationPrefs = formData.get('notificationPrefs') as string; // JSON array string
 
 		try {
-			// Insert or update user preferences
-			await db
-				.insert(schema.userPreferences)
-				.values({
-					userId: user.id,
-					goals: goals || '[]',
-					interests: interests || '[]',
-					experienceLevel,
-					learningSchedule,
-					notificationPrefs: notificationPrefs || '[]',
-					createdAt: new Date(),
-					updatedAt: new Date()
-				})
-				.onConflictDoUpdate({
-					target: schema.userPreferences.userId,
-					set: {
+			// Check if user preferences already exist
+			const existing = await db.query.userPreferences.findFirst({
+				where: eq(schema.userPreferences.userId, user.id)
+			});
+
+			if (existing) {
+				// Update existing preferences
+				await db
+					.update(schema.userPreferences)
+					.set({
 						goals: goals || '[]',
 						interests: interests || '[]',
 						experienceLevel,
 						learningSchedule,
 						notificationPrefs: notificationPrefs || '[]',
 						updatedAt: new Date()
-					}
+					})
+					.where(eq(schema.userPreferences.userId, user.id));
+			} else {
+				// Insert new preferences
+				await db.insert(schema.userPreferences).values({
+					userId: user.id,
+					goals: goals || '[]',
+					interests: interests || '[]',
+					experienceLevel,
+					learningSchedule,
+					notificationPrefs: notificationPrefs || '[]'
 				});
+			}
 
 			// Mark onboarding as complete
 			await db
