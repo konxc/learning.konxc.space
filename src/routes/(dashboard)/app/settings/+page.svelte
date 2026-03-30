@@ -49,7 +49,6 @@
 	function toggleFocus() {
 		focusMode = !focusMode;
 		(document.getElementById('focusModeForm') as HTMLFormElement)?.requestSubmit();
-		toast.success(focusMode ? 'Modus Fokus diaktifkan' : 'Modus Fokus dinonaktifkan');
 	}
 
 	function maskKey(key: string): string {
@@ -448,7 +447,9 @@
 					id="focusModeForm"
 					use:enhance={() => {
 						return async ({ result }) => {
-							if (result.type === 'failure') {
+							if (result.type === 'success') {
+								toast.success(focusMode ? 'Modus Fokus diaktifkan' : 'Modus Fokus dinonaktifkan');
+							} else if (result.type === 'failure') {
 								focusMode = !focusMode;
 								toast.error('Gagal menyimpan preferensi');
 							}
