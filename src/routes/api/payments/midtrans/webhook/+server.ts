@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { verifyMidtransSignature } from '$lib/server/payments/midtrans';
 import * as schema from '$lib/server/db/schema';
 
@@ -45,23 +45,27 @@ export const POST: RequestHandler = async ({ request }) => {
 		return new Response('transaction-not-found', { status: 404 });
 	}
 
+	const tx = transaction[0];
+
 	// Update transaction status
 	await db
 		.update(schema.transaction)
 		.set({ status: newStatus === 'active' ? 'success' : newStatus })
 		.where(eq(schema.transaction.id, order_id));
 
-	// Then update enrollment via the transaction's enrollmentId
+	// Find and update enrollment using userId and courseId from transaction
 	await db
 		.update(schema.enrollment)
 		.set({
 			status: newStatus,
 			activatedAt: newStatus === 'active' ? new Date() : null
 		})
-		.where(eq(schema.enrollment.id, transaction[0].enrollmentId));
+		.where(
+			and(eq(schema.enrollment.userId, tx.userId), eq(schema.enrollment.courseId, tx.courseId))
+		);
 
 	console.log(
-		`[Webhook] Updated enrollment ${transaction[0].enrollmentId} to status: ${newStatus}`
+		`[Webhook] Updated enrollment for user ${tx.userId}, course ${tx.courseId} to status: ${newStatus}`
 	);
 
 	return new Response('ok');

@@ -81,7 +81,7 @@
 	}
 
 	let filteredCourses = $derived.by(() => {
-		let courses = data.courses;
+		let courses = data.courses ?? [];
 
 		// Search filter
 		if (searchQuery) {

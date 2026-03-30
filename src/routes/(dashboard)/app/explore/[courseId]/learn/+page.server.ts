@@ -7,6 +7,16 @@ import { redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
 
+function safeParseJSON<T>(str: string | null | undefined): T | null {
+	if (!str) return null;
+	try {
+		return JSON.parse(str) as T;
+	} catch {
+		console.error(`[Learn] Failed to parse JSON: ${str.substring(0, 50)}...`);
+		return null;
+	}
+}
+
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
 	const courseId = event.params.courseId;
@@ -166,8 +176,8 @@ export const load: PageServerLoad = async (event) => {
 					submission: lessonSubmission
 						? {
 								...lessonSubmission,
-								payload: lessonSubmission.payload ? JSON.parse(lessonSubmission.payload) : null,
-								metadata: lessonSubmission.metadata ? JSON.parse(lessonSubmission.metadata) : null
+								payload: safeParseJSON(lessonSubmission.payload),
+								metadata: safeParseJSON(lessonSubmission.metadata)
 							}
 						: null,
 					isLocked,

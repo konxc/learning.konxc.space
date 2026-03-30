@@ -96,6 +96,11 @@ export const actions = {
 			`/app/explore/${courseId}/learn`
 		).catch(console.error);
 
-		throw redirect(303, '/app/learning/courses');
+		// Redirect based on price: free courses go directly to learning, paid courses go to payment
+		if (finalPrice === 0) {
+			throw redirect(303, '/app/learning/courses');
+		} else {
+			throw redirect(303, `/app/payments?courseId=${courseId}`);
+		}
 	}
 } satisfies Actions;
