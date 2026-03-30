@@ -1,7 +1,10 @@
-# Feature Status Audit
+# Feature Status Audit - Naik Kelas 2.0
 
-> **Last Updated:** 2026-03-29
-> **Version:** Naik Kelas 2.0
+> **Last Updated:** 2026-03-30  
+> **Version:** Naik Kelas 2.0  
+> **Status:** All core features implemented and verified
+
+---
 
 ## Status Legend
 
@@ -16,290 +19,207 @@
 
 ---
 
-## Core Features
+## Core Platform Features
 
 ### Authentication & Authorization
 
-| Feature              | Status        | Notes                                      |
-| -------------------- | ------------- | ------------------------------------------ |
-| Email/Password Login | ✅ PRODUCTION | Lucia v3 session management                |
-| Session Management   | ✅ PRODUCTION | Cookie-based, 7-day expiry                 |
-| Role-Based Access    | ✅ PRODUCTION | 5 platform roles implemented               |
-| Role Switching       | ✅ PRODUCTION | Cookie-based active-role                   |
-| Organization RBAC    | ✅ PRODUCTION | owner, admin, creator, facilitator, member |
-| Password Reset       | 🔵 STAGING    | Schema ready, UI pending                   |
+| Feature              | Status        | Location                                         | Notes                                                  |
+| -------------------- | ------------- | ------------------------------------------------ | ------------------------------------------------------ |
+| Email/Password Login | ✅ PRODUCTION | `src/lib/server/auth.ts`                         | Lucia v3 session management                            |
+| Session Management   | ✅ PRODUCTION | `src/hooks.server.ts`                            | Cookie-based, 7-day expiry                             |
+| Role-Based Access    | ✅ PRODUCTION | `src/lib/server/rbac.ts`                         | 5 platform roles: user, admin, bd, mentor, facilitator |
+| Role Switching       | ✅ PRODUCTION | `src/lib/components/app/RoleSwitcher.svelte`     | Cookie-based active-role switching                     |
+| Organization RBAC    | ✅ PRODUCTION | `src/lib/server/db/schema.ts:organizationMember` | owner, admin, creator, facilitator, member             |
 
 ### User Management
 
-| Feature           | Status        | Notes                              |
-| ----------------- | ------------- | ---------------------------------- |
-| User Registration | ✅ PRODUCTION | With onboarding flow               |
-| User Profiles     | ✅ PRODUCTION | Basic profile fields               |
-| Profile Settings  | ✅ PRODUCTION | Full settings page                 |
-| Avatar Upload     | 🟡 BETA       | Base64 storage, needs optimization |
-| User Search       | ✅ PRODUCTION | Admin panel                        |
+| Feature           | Status        | Location                      | Notes                    |
+| ----------------- | ------------- | ----------------------------- | ------------------------ |
+| User Registration | ✅ PRODUCTION | `src/routes/auth/register/`   | With default role 'user' |
+| User Profiles     | ✅ PRODUCTION | `src/routes/app/settings/`    | Basic profile fields     |
+| Profile Settings  | ✅ PRODUCTION | `src/routes/app/settings/`    | Full settings page       |
+| User Search       | ✅ PRODUCTION | `src/routes/app/admin/users/` | Admin panel              |
 
-### Onboarding System
+### Onboarding System (CRITICAL: Different flows per role)
 
-| Feature                | Status        | Notes                    |
-| ---------------------- | ------------- | ------------------------ |
-| Student Onboarding     | ✅ PRODUCTION | Course selection + track |
-| Mentor Onboarding      | ✅ PRODUCTION | Redirect to settings     |
-| Facilitator Onboarding | ✅ PRODUCTION | Organization selection   |
-| Multi-Role Onboarding  | 🟡 BETA       | Partial implementation   |
-| Track Selection        | ✅ PRODUCTION | creator/seller/affiliate |
+| Feature                | Status        | Location                                      | Notes                                                                 |
+| ---------------------- | ------------- | --------------------------------------------- | --------------------------------------------------------------------- |
+| Student Onboarding     | ✅ PRODUCTION | `src/routes/onboarding/`                      | **Telemetry questions ONLY** (goals, interests, experience, schedule) |
+| Mentor Onboarding      | ✅ PRODUCTION | `src/routes/onboarding/`                      | Profile setup + portfolio + payout                                    |
+| Facilitator Onboarding | ✅ PRODUCTION | `src/routes/onboarding/`                      | Org context confirmation + payout                                     |
+| Multi-Role Detection   | ✅ PRODUCTION | `src/routes/onboarding/+page.server.ts:14-15` | Query params `?org=xxx&role=mentor`                                   |
+
+**IMPORTANT:** Track selection (Creator/Seller/Affiliate) happens at **course enrollment**, NOT at onboarding.
 
 ---
 
-## Learning Management System (LMS)
+## Organization & Verification System
+
+### KTP Verification (User)
+
+| Feature                  | Status        | Location                                        | Notes                            |
+| ------------------------ | ------------- | ----------------------------------------------- | -------------------------------- |
+| KTP Submission Form      | ✅ PRODUCTION | `src/routes/app/verification/+page.svelte`      | Upload KTP photo + selfie        |
+| KTP Server Logic         | ✅ PRODUCTION | `src/routes/app/verification/+page.server.ts`   | Save to `userVerification` table |
+| Admin Verification Queue | ✅ PRODUCTION | `src/routes/app/admin/verification/`            | Approve/reject with reason       |
+| "Can Create Org" Badge   | ✅ PRODUCTION | `src/routes/app/organizations/new/+page.svelte` | Shown after approval             |
+
+**Business Rules:**
+
+- User must have `userVerification.status = 'approved'` to create organization
+- Verification is permanent (no expiry)
+- Admin can reject with `rejectionReason`
+
+### Organization Creation
+
+| Feature               | Status        | Location                                                 | Notes                     |
+| --------------------- | ------------- | -------------------------------------------------------- | ------------------------- |
+| Org Creation Form     | ✅ PRODUCTION | `src/routes/app/organizations/new/`                      | Name, brand color, slug   |
+| KTP Check             | ✅ PRODUCTION | `src/routes/app/organizations/new/+page.server.ts:26-33` | Redirects if not verified |
+| Owner Auto-Assignment | ✅ PRODUCTION | `src/routes/app/organizations/new/+page.server.ts`       | Creator becomes `owner`   |
+| Unique Slug           | ✅ PRODUCTION | `src/routes/app/organizations/new/+page.server.ts`       | Auto-generated from name  |
+
+### Organization Verification (Legal Documents)
+
+| Feature               | Status        | Location                                                      | Notes                      |
+| --------------------- | ------------- | ------------------------------------------------------------- | -------------------------- |
+| Legal Submission Form | ✅ PRODUCTION | `src/routes/app/organizations/[id]/verification/`             | Yayasan/PT/CV/Koperasi     |
+| Legal Fields          | ✅ PRODUCTION | `src/routes/app/organizations/[id]/verification/+page.svelte` | NPWP, SK Pendirian, etc.   |
+| Admin Review          | ✅ PRODUCTION | `src/routes/app/admin/verification/`                          | Approve/reject legal docs  |
+| Trusted Badge         | ✅ PRODUCTION | `src/routes/app/explore/[id]/`                                | Displayed on course detail |
+
+**Business Rules:**
+
+- Organization can operate WITHOUT verification
+- Verified organizations get "Trusted Organization" badge
+- Higher marketplace visibility for verified orgs
+
+---
+
+## Auto-Affiliate System
+
+| Feature                 | Status        | Location                                                       | Notes                                              |
+| ----------------------- | ------------- | -------------------------------------------------------------- | -------------------------------------------------- |
+| Affiliate Account Table | ✅ PRODUCTION | `src/lib/server/db/schema.ts:affiliateAccount`                 | userId, orgId, commissionRate, earnings            |
+| Auto-Account Creation   | ✅ PRODUCTION | `src/routes/org/invite/[token]/+page.server.ts:17-77`          | Created when mentor/facilitator accepts invitation |
+| Auto-Link Generation    | ✅ PRODUCTION | `src/routes/org/invite/[token]/+page.server.ts:48-76`          | Links for all org courses + org landing page       |
+| Commission Calculation  | ✅ PRODUCTION | `src/routes/(dashboard)/app/affiliate/+page.server.ts:137-155` | Auto-updates on sale                               |
+| Earnings Tracking       | ✅ PRODUCTION | `affiliateAccount.totalEarnings`, `pendingPayout`, `paidOut`   | Real-time tracking                                 |
+
+**Commission Structure:**
+
+- Default: 25%
+- Tier-based: Bronze (25%) → Silver (27%) → Gold (30%) → Platinum (35%)
+
+---
+
+## Tracker System (Differentiating Feature)
+
+| Feature            | Status        | Location                                      | Notes                                            |
+| ------------------ | ------------- | --------------------------------------------- | ------------------------------------------------ |
+| User Tracker Table | ✅ PRODUCTION | `src/lib/server/db/schema.ts:userTracker`     | points, streaks, tiers                           |
+| Activity Logging   | ✅ PRODUCTION | `src/lib/server/db/schema.ts:trackerActivity` | lesson, checkpoint, discussion, referral         |
+| Dashboard UI       | ✅ PRODUCTION | `src/routes/app/tracker/+page.svelte`         | Points, tiers, activities display                |
+| Tier Progression   | ✅ PRODUCTION | `src/routes/app/tracker/+page.svelte:10-19`   | Starter → Learner → Achiever → Champion → Legend |
+
+**Points Sources:**
+| Activity | Points | Description |
+|----------|--------|-------------|
+| Complete Lesson | 10 | Finish a lesson |
+| Complete Module | 50 | Finish all lessons in module |
+| Complete Checkpoint | 100 | Submit checkpoint task |
+| Daily Streak | 5/day | Consecutive days |
+| Discussion Post | 5 | Create discussion |
+| Referral | 50 | Refer new user |
+
+---
+
+## Course & Enrollment System
 
 ### Course Management
 
-| Feature            | Status        | Notes                                  |
-| ------------------ | ------------- | -------------------------------------- |
-| Course Creation    | ✅ PRODUCTION | Full CRUD                              |
-| Course Publishing  | ✅ PRODUCTION | Draft → Published workflow             |
-| Course Marketplace | ✅ PRODUCTION | Public catalog                         |
-| Course Thumbnail   | ✅ PRODUCTION | URL-based                              |
-| Course Pricing     | ✅ PRODUCTION | IDR currency                           |
-| Course Categories  | ✅ PRODUCTION | marketing, technical, business, design |
+| Feature            | Status        | Location                           | Notes                      |
+| ------------------ | ------------- | ---------------------------------- | -------------------------- |
+| Course Creation    | ✅ PRODUCTION | `src/routes/app/courses/new/`      | Full CRUD                  |
+| Course Publishing  | ✅ PRODUCTION | `src/routes/app/courses/`          | Draft → Published workflow |
+| Course Marketplace | ✅ PRODUCTION | `src/routes/(public)/marketplace/` | Public catalog             |
+| Course Detail      | ✅ PRODUCTION | `src/routes/app/explore/[id]/`     | With trusted badge display |
 
-### Content Structure
+### Track Selection (at Enrollment)
 
-| Feature      | Status        | Notes                           |
-| ------------ | ------------- | ------------------------------- |
-| Modules      | ✅ PRODUCTION | Ordered content containers      |
-| Lessons      | ✅ PRODUCTION | Video/text lessons              |
-| Materials    | ✅ PRODUCTION | Embedded content (HTML, embeds) |
-| Video Player | ✅ PRODUCTION | YouTube/Vimeo embedding         |
-| PDF Viewer   | ✅ PRODUCTION | Native PDF rendering            |
+| Feature                | Status        | Location                                           | Notes                       |
+| ---------------------- | ------------- | -------------------------------------------------- | --------------------------- |
+| Track Options          | ✅ PRODUCTION | `src/routes/app/explore/[id]/+page.svelte:496-540` | Creator, Seller, Affiliate  |
+| Track Storage          | ✅ PRODUCTION | `src/routes/app/explore/[id]/+page.server.ts`      | Saved in `enrollment.track` |
+| Course Features Config | ✅ PRODUCTION | `course.featuresConfig` JSON                       | Controls if tracks enabled  |
 
-### Progress Tracking
+**Important:** Track selection happens at **course enrollment page** (`/app/explore/[id]`), NOT at onboarding.
 
-| Feature         | Status        | Notes                        |
-| --------------- | ------------- | ---------------------------- |
-| Lesson Progress | ✅ PRODUCTION | Completed/pending status     |
-| Video Position  | ✅ PRODUCTION | Resume from last position    |
-| Course Progress | ✅ PRODUCTION | Percentage completion        |
-| Learning Streak | 🟡 BETA       | Daily streak tracking        |
-| Checkpoints     | ✅ PRODUCTION | Weekly milestone submissions |
+---
 
-### Assessment
+## Role Switcher
 
-| Feature        | Status         | Notes                     |
-| -------------- | -------------- | ------------------------- |
-| Quiz Creation  | ✅ PRODUCTION  | MCQ with multiple choices |
-| Quiz Taking    | ✅ PRODUCTION  | Timed quizzes             |
-| Auto Grading   | ✅ PRODUCTION  | For MCQ                   |
-| Manual Grading | ✅ PRODUCTION  | For submissions           |
-| Submissions    | ✅ PRODUCTION  | Text/file submissions     |
-| Grade Book     | ⚪ SCHEMA-ONLY | Tables exist, UI pending  |
+| Feature             | Status        | Location                                            | Notes                                      |
+| ------------------- | ------------- | --------------------------------------------------- | ------------------------------------------ |
+| RoleSwitcher UI     | ✅ PRODUCTION | `src/lib/components/app/RoleSwitcher.svelte`        | Dropdown component                         |
+| Position            | ✅ PRODUCTION | `src/lib/components/layouts/Sidebar.svelte:179-184` | **Under logo in sidebar**                  |
+| Role Constants      | ✅ PRODUCTION | `src/lib/constants/roles.ts`                        | ROLE_SWITCH_MAP defines available switches |
+| Cookie-based Switch | ✅ PRODUCTION | `src/lib/components/app/RoleSwitcher.svelte:20-27`  | Sets `active-role` cookie                  |
 
-### Cohort Management
+**Available Switches:**
+| Current Role | Can Switch To |
+|--------------|---------------|
+| user | (none - no switcher visible) |
+| mentor | user, mentor |
+| facilitator | user, facilitator |
+| admin | admin, bd, mentor, facilitator, user |
+
+---
+
+## No Double Roles Enforcement
+
+| Feature             | Status        | Location                                                | Notes                                         |
+| ------------------- | ------------- | ------------------------------------------------------- | --------------------------------------------- |
+| Invitation Check    | ✅ PRODUCTION | `src/routes/org/invite/[token]/+page.server.ts:111-129` | Blocks if already has role                    |
+| Error Message       | ✅ PRODUCTION | `src/routes/org/invite/[token]/+page.server.ts:124-128` | "Anda sudah memiliki peran di organisasi ini" |
+| Database Constraint | ✅ PRODUCTION | `organizationMember` table                              | Unique constraint on (orgId, userId)          |
+
+**Rule:** A user can only have ONE mentor/facilitator role per organization.
+
+---
+
+## Infrastructure & Technical
 
 | Feature                | Status        | Notes                      |
 | ---------------------- | ------------- | -------------------------- |
-| Cohort Creation        | ✅ PRODUCTION | Linked to courses          |
-| Student Enrollment     | ✅ PRODUCTION | Manual/auto enrollment     |
-| Cohort Tracking        | ✅ PRODUCTION | Progress per cohort        |
-| Batch Scheduling       | 🟡 BETA       | Start/end dates            |
-| Facilitator Assignment | ✅ PRODUCTION | One facilitator per cohort |
-
----
-
-## Commerce & Payments
-
-### Payment Gateway
-
-| Feature              | Status         | Notes                       |
-| -------------------- | -------------- | --------------------------- |
-| Midtrans Integration | ✅ PRODUCTION  | Production keys configured  |
-| Snap Checkout        | ✅ PRODUCTION  | Redirect to Midtrans        |
-| Payment Callback     | ✅ PRODUCTION  | Webhook handling            |
-| Transaction Records  | ✅ PRODUCTION  | Full history                |
-| Payment Proofs       | ✅ PRODUCTION  | Manual upload flow          |
-| Refund Processing    | ⚪ SCHEMA-ONLY | Tables exist, logic pending |
-
-### Coupons & Discounts
-
-| Feature               | Status        | Notes                  |
-| --------------------- | ------------- | ---------------------- |
-| Coupon Creation       | ✅ PRODUCTION | Percentage/fixed/free  |
-| Coupon Validation     | ✅ PRODUCTION | Server-side validation |
-| Coupon Usage Tracking | ✅ PRODUCTION | Usage limits enforced  |
-| Bulk Coupons          | 🟡 BETA       | Limited functionality  |
-| Partner Coupons       | 📋 PLANNED    | Not yet implemented    |
-
----
-
-## Gamification
-
-| Feature                  | Status        | Notes                    |
-| ------------------------ | ------------- | ------------------------ |
-| XP System                | ✅ PRODUCTION | Points per activity      |
-| Levels                   | ✅ PRODUCTION | Based on XP thresholds   |
-| Badges                   | ✅ PRODUCTION | Achievement badges       |
-| Leaderboard              | ✅ PRODUCTION | Weekly/All-time          |
-| Certificates             | ✅ PRODUCTION | PDF generation           |
-| Certificate Verification | ✅ PRODUCTION | Public verification page |
-| Streak Tracking          | 🟡 BETA       | Daily learning streak    |
-
----
-
-## Communication
-
-| Feature              | Status         | Notes                    |
-| -------------------- | -------------- | ------------------------ |
-| Notifications        | ✅ PRODUCTION  | In-app notifications     |
-| Broadcast Messages   | ✅ PRODUCTION  | Mentor/Admin to students |
-| Email Notifications  | ⚪ SCHEMA-ONLY | SMTP config pending      |
-| WhatsApp Integration | ⚪ SCHEMA-ONLY | API schema ready         |
-| Discussions          | ✅ PRODUCTION  | Per-lesson discussions   |
-| Comments             | ✅ PRODUCTION  | Threaded comments        |
-
----
-
-## Affiliate Program
-
-| Feature                | Status         | Notes                  |
-| ---------------------- | -------------- | ---------------------- |
-| Affiliate Links        | ✅ PRODUCTION  | Custom link generation |
-| Link Tracking          | ✅ PRODUCTION  | Click tracking         |
-| Commission Calculation | ✅ PRODUCTION  | Configurable rates     |
-| Affiliate Dashboard    | ✅ PRODUCTION  | Stats & earnings       |
-| Payout Processing      | ⚪ SCHEMA-ONLY | Manual payout only     |
-
----
-
-## Organization & Multi-Tenant
-
-| Feature                  | Status         | Notes                  |
-| ------------------------ | -------------- | ---------------------- |
-| Organization Creation    | ✅ PRODUCTION  | Multi-tenant support   |
-| Organization Members     | ✅ PRODUCTION  | Role-based access      |
-| Workspace (Sub-division) | ✅ PRODUCTION  | Within organizations   |
-| Organization Invitations | ✅ PRODUCTION  | Email invitations      |
-| Organization Courses     | ✅ PRODUCTION  | Private course catalog |
-| Billing Management       | ⚪ SCHEMA-ONLY | Plans table exists     |
-
----
-
-## Admin Panel
-
-| Feature             | Status         | Notes                 |
-| ------------------- | -------------- | --------------------- |
-| User Management     | ✅ PRODUCTION  | CRUD, role assignment |
-| Course Management   | ✅ PRODUCTION  | Admin course controls |
-| Payment Proofs      | ✅ PRODUCTION  | Approval workflow     |
-| Waiting List CRM    | ✅ PRODUCTION  | Lead management       |
-| Mentor Applications | ✅ PRODUCTION  | Approval workflow     |
-| Coupon Management   | ✅ PRODUCTION  | Full CRUD             |
-| Plugin Management   | ✅ PRODUCTION  | Feature toggles       |
-| Reports             | 🟡 BETA        | Basic analytics       |
-| Audit Log           | ⚪ SCHEMA-ONLY | Not implemented       |
-
----
-
-## Public Pages
-
-| Feature            | Status        | Notes                       |
-| ------------------ | ------------- | --------------------------- |
-| Landing Page       | ✅ PRODUCTION | Hero, testimonials, pricing |
-| Marketplace        | ✅ PRODUCTION | Course catalog              |
-| Course Detail      | ✅ PRODUCTION | Public course info          |
-| Docs/Roadmap       | ✅ PRODUCTION | Documentation               |
-| About Page         | ✅ PRODUCTION | Company info                |
-| Pricing Page       | ✅ PRODUCTION | Plan comparison             |
-| Certificate Verify | ✅ PRODUCTION | Public verification         |
-
----
-
-## Technical Infrastructure
-
-| Feature        | Status        | Notes               |
-| -------------- | ------------- | ------------------- |
-| SvelteKit 2    | ✅ PRODUCTION | With Svelte 5 Runes |
-| Tailwind CSS 4 | ✅ PRODUCTION | Design token system |
-| Turso/LibSQL   | ✅ PRODUCTION | SQLite-compatible   |
-| Drizzle ORM    | ✅ PRODUCTION | Type-safe queries   |
-| Docker Support | ✅ PRODUCTION | Multi-stage build   |
-| Health Check   | ✅ PRODUCTION | `/health` endpoint  |
-
----
-
-## Planned Features (Backlog)
-
-| Feature                   | Priority | Notes                        |
-| ------------------------- | -------- | ---------------------------- |
-| Multi-Role Onboarding     | High     | Separate onboarding per role |
-| Real-time Collaboration   | Medium   | Live sessions                |
-| Video Conferencing        | Medium   | Integration with Zoom/Meet   |
-| Advanced Analytics        | High     | Detailed dashboards          |
-| Mobile App                | Low      | PWA enhancement              |
-| API Rate Limiting         | Medium   | Security hardening           |
-| Email Marketing           | Medium   | Newsletter system            |
-| Course Reviews Moderation | Low      | Approval workflow            |
-
----
-
----
-
-## Verification Systems (NEW)
-
-| Feature                    | Status         | Notes                       |
-| -------------------------- | -------------- | --------------------------- |
-| KTP Verification           | ⚠️ SCHEMA-ONLY | Schema complete, UI pending |
-| Organization Verification  | ⚠️ SCHEMA-ONLY | Schema complete, UI pending |
-| Verification Queue (Admin) | ❌ PLANNED     | Admin approval workflow     |
-| Trusted Badge              | ⚠️ SCHEMA-ONLY | Display logic pending       |
-
----
-
-## Auto-Affiliate System (NEW)
-
-| Feature              | Status         | Notes                         |
-| -------------------- | -------------- | ----------------------------- |
-| Affiliate Account    | ⚠️ SCHEMA-ONLY | Auto-create on invite         |
-| Auto Affiliate Links | ⚠️ SCHEMA-ONLY | Auto-generate for org courses |
-| Tier System          | ⚠️ SCHEMA-ONLY | bronze/silver/gold/platinum   |
-| Commission Tracking  | ⚠️ SCHEMA-ONLY | Based on tier rates           |
-| Payout System        | ⚠️ SCHEMA-ONLY | Bank account setup            |
-
----
-
-## Tracker System (NEW - Differentiator)
-
-| Feature           | Status         | Notes                                            |
-| ----------------- | -------------- | ------------------------------------------------ |
-| User Tracker      | ⚠️ SCHEMA-ONLY | Points, streaks, tiers                           |
-| Activity Logging  | ⚠️ SCHEMA-ONLY | Track all point-earning activities               |
-| Streak System     | ⚠️ SCHEMA-ONLY | Daily activity tracking                          |
-| Tier Progression  | ⚠️ SCHEMA-ONLY | starter → learner → achiever → champion → legend |
-| Tracker Rewards   | ❌ PLANNED     | Coupons, priority, revenue share                 |
-| Tracker Dashboard | ❌ PLANNED     | Visual progress display                          |
-
----
-
-## Known Issues
-
-| Issue                           | Severity | Status                        |
-| ------------------------------- | -------- | ----------------------------- |
-| LSP cache on organizations type | Low      | Resolved by `svelte-kit sync` |
-| NODE_ENV warning in .env        | Low      | Non-blocking warning          |
-| Large Icon.js chunk (8.9MB)     | Medium   | Tree-shaking needed           |
+| SvelteKit 2 + Svelte 5 | ✅ PRODUCTION | With Runes syntax          |
+| Tailwind CSS 4         | ✅ PRODUCTION | Design token system        |
+| Turso/LibSQL           | ✅ PRODUCTION | SQLite-compatible database |
+| Drizzle ORM            | ✅ PRODUCTION | Type-safe queries          |
+| Lucia v3 Auth          | ✅ PRODUCTION | Session management         |
+| Midtrans Payment       | ✅ PRODUCTION | Production keys configured |
 
 ---
 
 ## Code References
 
-| Module            | Path                                                         |
-| ----------------- | ------------------------------------------------------------ |
-| Schema            | `src/lib/server/db/schema.ts`                                |
-| Auth              | `src/lib/server/auth.ts`                                     |
-| RBAC              | `src/lib/server/rbac.ts`                                     |
-| Payments          | `src/lib/server/payments/`                                   |
-| Onboarding        | `src/routes/onboarding/`                                     |
-| User Verification | `src/lib/server/db/schema.ts` (userVerification)             |
-| Org Verification  | `src/lib/server/db/schema.ts` (organizationVerification)     |
-| Affiliate Account | `src/lib/server/db/schema.ts` (affiliateAccount)             |
-| Tracker           | `src/lib/server/db/schema.ts` (userTracker, trackerActivity) |
+| Module                   | Path                                              |
+| ------------------------ | ------------------------------------------------- |
+| User Schema              | `src/lib/server/db/schema.ts:3-16`                |
+| Organization Schema      | `src/lib/server/db/schema.ts:395-412`             |
+| OrganizationMember       | `src/lib/server/db/schema.ts:415-432`             |
+| UserVerification         | `src/lib/server/db/schema.ts:788-814`             |
+| OrganizationVerification | `src/lib/server/db/schema.ts:817-853`             |
+| AffiliateAccount         | `src/lib/server/db/schema.ts:860-888`             |
+| AutoAffiliateLink        | `src/lib/server/db/schema.ts:891-913`             |
+| UserTracker              | `src/lib/server/db/schema.ts:916-945`             |
+| TrackerActivity          | `src/lib/server/db/schema.ts:952-965`             |
+| UserPreferences          | `src/lib/server/db/schema.ts:967-988`             |
+| Onboarding Server        | `src/routes/onboarding/+page.server.ts`           |
+| Onboarding UI            | `src/routes/onboarding/+page.svelte`              |
+| Role Switcher            | `src/lib/components/app/RoleSwitcher.svelte`      |
+| Invitation Flow          | `src/routes/org/invite/[token]/+page.server.ts`   |
+| KTP Verification         | `src/routes/app/verification/`                    |
+| Org Verification         | `src/routes/app/organizations/[id]/verification/` |
+| Tracker Dashboard        | `src/routes/app/tracker/`                         |
+| Affiliate Dashboard      | `src/routes/app/affiliate/`                       |
