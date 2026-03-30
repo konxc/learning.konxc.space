@@ -30,20 +30,87 @@
 	let learningSchedule = $state<string>('');
 	let selectedNotifications = $state<string[]>(['email', 'wa']);
 
-	// Options for telemetry questions
+	// Options for telemetry questions - Expanded to support all platform domains
 	const goalOptions = [
-		{ id: 'career', label: 'Karir di Digital Marketing', icon: 'briefcase' },
-		{ id: 'business', label: 'Bisnis Online Sendiri', icon: 'shopping-cart' },
-		{ id: 'skill', label: 'Skill Tambahan', icon: 'graduation' },
-		{ id: 'hobby', label: 'Hobi & Passion', icon: 'heart' }
+		// Career paths based on platform domains
+		{
+			id: 'career-developer',
+			label: 'Karir di Teknologi & Developer',
+			icon: 'code',
+			domain: 'developer'
+		},
+		{
+			id: 'career-akademik',
+			label: 'Karir di Bidang Akademik',
+			icon: 'graduation',
+			domain: 'akademik'
+		},
+		{
+			id: 'career-bisnis',
+			label: 'Karir di Bisnis & UMKM',
+			icon: 'shopping-cart',
+			domain: 'bisnis'
+		},
+		{ id: 'career-design', label: 'Karir di Desain & Kreatif', icon: 'palette', domain: 'design' },
+		{
+			id: 'career-outdoor',
+			label: 'Karir di Outdoor & Leadership',
+			icon: 'mountain',
+			domain: 'outdoor'
+		},
+		// Monetization & collaboration paths
+		{
+			id: 'monetize-knowledge',
+			label: 'Monetisasi Pengetahuan',
+			icon: 'dollar-sign',
+			domain: 'general'
+		},
+		{
+			id: 'build-organization',
+			label: 'Membangun Organisasi/Institusi',
+			icon: 'building',
+			domain: 'general'
+		},
+		{ id: 'kolaborasi', label: 'Kolaborasi & Bermitra', icon: 'users', domain: 'general' },
+		{
+			id: 'mentor-facilitator',
+			label: 'Menjadi Mentor/Facilitator',
+			icon: 'star',
+			domain: 'general'
+		}
 	];
 
 	const interestOptions = [
-		{ id: 'creator', label: 'Content Creator', icon: 'film' },
-		{ id: 'affiliate', label: 'Affiliate Marketing', icon: 'link' },
-		{ id: 'seller', label: 'E-Commerce', icon: 'shopping-bag' },
-		{ id: 'smm', label: 'Social Media Manager', icon: 'share-2' },
-		{ id: 'seo', label: 'SEO & SEM', icon: 'search' }
+		// Developer interests
+		{ id: 'web-dev', label: 'Web Development', icon: 'globe', domain: 'developer' },
+		{ id: 'mobile-dev', label: 'Mobile Development', icon: 'smartphone', domain: 'developer' },
+		{ id: 'ai-ml', label: 'AI & Machine Learning', icon: 'brain', domain: 'developer' },
+		{ id: 'blockchain', label: 'Blockchain & Web3', icon: 'link', domain: 'developer' },
+
+		// Akademik interests
+		{ id: 'tutoring', label: 'Tutoring & Bimbingan', icon: 'book-open', domain: 'akademik' },
+		{ id: 'course-creation', label: 'Pembuatan Kursus', icon: 'video', domain: 'akademik' },
+		{ id: 'research', label: 'Penelitian & Riset', icon: 'microscope', domain: 'akademik' },
+		{ id: 'academic-mentor', label: 'Mentoring Akademik', icon: 'award', domain: 'akademik' },
+
+		// Bisnis & UMKM interests
+		{ id: 'product-dev', label: 'Pengembangan Produk', icon: 'package', domain: 'bisnis' },
+		{ id: 'marketing', label: 'Marketing & Branding', icon: 'megaphone', domain: 'bisnis' },
+		{ id: 'operations', label: 'Operasional Bisnis', icon: 'settings', domain: 'bisnis' },
+		{ id: 'e-commerce', label: 'E-Commerce', icon: 'shopping-bag', domain: 'bisnis' },
+		{ id: 'affiliate', label: 'Affiliate Marketing', icon: 'link', domain: 'bisnis' },
+
+		// Design interests
+		{ id: 'ui-ux', label: 'UI/UX Design', icon: 'layout', domain: 'design' },
+		{ id: 'graphic-design', label: 'Graphic Design', icon: 'image', domain: 'design' },
+		{ id: 'motion-design', label: 'Motion Design', icon: 'zap', domain: 'design' },
+		{ id: 'design-systems', label: 'Design Systems', icon: 'figma', domain: 'design' },
+
+		// Outdoor interests
+		{ id: 'leadership', label: 'Leadership Training', icon: 'target', domain: 'outdoor' },
+		{ id: 'expedition', label: 'Expedition Planning', icon: 'compass', domain: 'outdoor' },
+		{ id: 'team-building', label: 'Team Building', icon: 'handshake', domain: 'outdoor' },
+		{ id: 'adventure-education', label: 'Adventure Education', icon: 'sun', domain: 'outdoor' }
 	];
 
 	const experienceOptions = [
@@ -165,13 +232,19 @@
 
 							<!-- Invitation-specific welcome message -->
 							{#if isInvitationFlow}
-								<div class={`${RADIUS.card} border border-indigo-200 bg-indigo-50 p-6 dark:border-indigo-800 dark:bg-indigo-900/20`}>
+								<div
+									class={`${RADIUS.card} border border-indigo-200 bg-indigo-50 p-6 dark:border-indigo-800 dark:bg-indigo-900/20`}
+								>
 									<div class="flex items-start gap-4">
-										<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-600">
+										<div
+											class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-600"
+										>
 											<Icon name="gift" size={24} />
 										</div>
 										<div>
-											<h4 class={`${TEXT.h4} text-indigo-800 dark:text-indigo-200`}>Keuntungan sebagai Mentor</h4>
+											<h4 class={`${TEXT.h4} text-indigo-800 dark:text-indigo-200`}>
+												Keuntungan sebagai Mentor
+											</h4>
 											<ul class="mt-2 space-y-1 text-sm text-indigo-700 dark:text-indigo-300">
 												<li>✓ Akses dashboard mentor khusus</li>
 												<li>✓ Komisi affiliate otomatis (25%)</li>
@@ -226,7 +299,11 @@
 							</div>
 
 							<form method="POST" action="?/redirectToSettings" use:enhance>
-								<AuthSubmitButton text={isInvitationFlow ? "Lengkapi Profil & Masuk" : "Lengkapi Profil di Settings"} />
+								<AuthSubmitButton
+									text={isInvitationFlow
+										? 'Lengkapi Profil & Masuk'
+										: 'Lengkapi Profil di Settings'}
+								/>
 							</form>
 						</div>
 					</div>
@@ -350,73 +427,252 @@
 						<div class="space-y-2">
 							<h2 class={`${TEXT.h3} ${COLOR.textPrimary}`}>Bantu Kami Mengenali Anda</h2>
 							<p class={TEXT.secondary}>
-								Silakan isi preferensi belajar Anda untuk pengalaman yang lebih personal.
-								Semua pertanyaan bersifat opsional.
+								Silakan isi preferensi belajar Anda untuk pengalaman yang lebih personal. Semua
+								pertanyaan bersifat opsional.
 							</p>
 						</div>
 
-						<!-- Goals -->
+						<!-- Goals - Multi-domain support -->
 						<div class="space-y-4">
 							<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
-								Apa tujuan utama Anda belajar? (Pilih salah satu atau lebih)
+								Apa tujuan utama Anda? (Pilih semua yang relevan)
 							</p>
-							<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-								{#each goalOptions as goal}
-									<button
-										type="button"
-										class={`flex items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
-											selectedGoals.includes(goal.id)
-												? 'border-blue-500 bg-blue-50 ring-4 ring-blue-500/10 dark:bg-blue-900/20'
-												: 'border-zinc-200 hover:border-blue-500/30 dark:border-zinc-700 dark:hover:border-blue-500/30'
-										}`}
-										onclick={() => toggleGoal(goal.id)}
-									>
-										<div
-											class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600"
+
+							<!-- Career Paths Section -->
+							<div class="space-y-2">
+								<p class="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
+									Bidang Karir
+								</p>
+								<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+									{#each goalOptions.filter((g) => g.domain !== 'general') as goal}
+										<button
+											type="button"
+											class={`flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all ${
+												selectedGoals.includes(goal.id)
+													? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/10 dark:bg-blue-900/20'
+													: 'border-zinc-200 hover:border-blue-500/30 dark:border-zinc-700 dark:hover:border-blue-500/30'
+											}`}
+											onclick={() => toggleGoal(goal.id)}
 										>
-											<Icon name={goal.icon} size={20} />
-										</div>
-										<div class="flex-1">
-											<h4 class="font-bold">{goal.label}</h4>
-										</div>
-										{#if selectedGoals.includes(goal.id)}
-											<Icon name="check" size={20} class="text-blue-500" />
-										{/if}
-									</button>
-								{/each}
+											<div
+												class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600"
+											>
+												<Icon name={goal.icon} size={18} />
+											</div>
+											<div class="flex-1">
+												<h4 class="text-sm font-semibold">{goal.label}</h4>
+											</div>
+											{#if selectedGoals.includes(goal.id)}
+												<Icon name="check" size={18} class="text-blue-500" />
+											{/if}
+										</button>
+									{/each}
+								</div>
+							</div>
+
+							<!-- Monetization & Partnership Section -->
+							<div class="mt-4 space-y-2">
+								<p class="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
+									Monetisasi & Kolaborasi
+								</p>
+								<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+									{#each goalOptions.filter((g) => g.domain === 'general') as goal}
+										<button
+											type="button"
+											class={`flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all ${
+												selectedGoals.includes(goal.id)
+													? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/10 dark:bg-emerald-900/20'
+													: 'border-zinc-200 hover:border-emerald-500/30 dark:border-zinc-700 dark:hover:border-emerald-500/30'
+											}`}
+											onclick={() => toggleGoal(goal.id)}
+										>
+											<div
+												class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600"
+											>
+												<Icon name={goal.icon} size={18} />
+											</div>
+											<div class="flex-1">
+												<h4 class="text-sm font-semibold">{goal.label}</h4>
+											</div>
+											{#if selectedGoals.includes(goal.id)}
+												<Icon name="check" size={18} class="text-emerald-500" />
+											{/if}
+										</button>
+									{/each}
+								</div>
 							</div>
 						</div>
 
-						<!-- Interests -->
+						<!-- Interests - Multi-domain support -->
 						<div class="space-y-4">
 							<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
-								Bidang apa yang paling menarik bagi Anda? (Pilih satu atau lebih)
+								Bidang apa yang paling menarik bagi Anda? (Pilih semua yang relevan)
 							</p>
-							<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-								{#each interestOptions as interest}
-									<button
-										type="button"
-										class={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all ${
-											selectedInterests.includes(interest.id)
-												? 'border-emerald-500 bg-emerald-50 ring-4 ring-emerald-500/10 dark:bg-emerald-900/20'
-												: 'border-zinc-200 hover:border-emerald-500/30 dark:border-zinc-700 dark:hover:border-emerald-500/30'
-										}`}
-										onclick={() => toggleInterest(interest.id)}
+
+							<!-- Developer Interests -->
+							<div class="space-y-2">
+								<p
+									class="flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-500 uppercase"
+								>
+									<span class="h-2 w-2 rounded-full bg-blue-500"></span> Developer
+								</p>
+								<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+									{#each interestOptions.filter((i) => i.domain === 'developer') as interest}
+										<button
+											type="button"
+											class={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition-all ${
+												selectedInterests.includes(interest.id)
+													? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/10 dark:bg-blue-900/20'
+													: 'border-zinc-200 hover:border-blue-500/30 dark:border-zinc-700 dark:hover:border-blue-500/30'
+											}`}
+											onclick={() => toggleInterest(interest.id)}
+										>
+											<Icon name={interest.icon} size={18} />
+											<span class="text-xs font-semibold">{interest.label}</span>
+											{#if selectedInterests.includes(interest.id)}
+												<Icon name="check" size={14} class="absolute top-1 right-1 text-blue-500" />
+											{/if}
+										</button>
+									{/each}
+								</div>
+							</div>
+
+							<!-- Akademik Interests -->
+							<div class="space-y-2">
+								<p
+									class="flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-500 uppercase"
+								>
+									<span class="h-2 w-2 rounded-full bg-purple-500"></span> Akademik
+								</p>
+								<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+									{#each interestOptions.filter((i) => i.domain === 'akademik') as interest}
+										<button
+											type="button"
+											class={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition-all ${
+												selectedInterests.includes(interest.id)
+													? 'border-purple-500 bg-purple-50 ring-2 ring-purple-500/10 dark:bg-purple-900/20'
+													: 'border-zinc-200 hover:border-purple-500/30 dark:border-zinc-700 dark:hover:border-purple-500/30'
+											}`}
+											onclick={() => toggleInterest(interest.id)}
+										>
+											<Icon name={interest.icon} size={18} />
+											<span class="text-xs font-semibold">{interest.label}</span>
+											{#if selectedInterests.includes(interest.id)}
+												<Icon
+													name="check"
+													size={14}
+													class="absolute top-1 right-1 text-purple-500"
+												/>
+											{/if}
+										</button>
+									{/each}
+								</div>
+							</div>
+
+							<!-- Bisnis & UMKM Interests -->
+							<div class="space-y-2">
+								<p
+									class="flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-500 uppercase"
+								>
+									<span class="h-2 w-2 rounded-full bg-amber-500"></span> Bisnis & UMKM
+								</p>
+								<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+									{#each interestOptions.filter((i) => i.domain === 'bisnis') as interest}
+										<button
+											type="button"
+											class={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition-all ${
+												selectedInterests.includes(interest.id)
+													? 'border-amber-500 bg-amber-50 ring-2 ring-amber-500/10 dark:bg-amber-900/20'
+													: 'border-zinc-200 hover:border-amber-500/30 dark:border-zinc-700 dark:hover:border-amber-500/30'
+											}`}
+											onclick={() => toggleInterest(interest.id)}
+										>
+											<Icon name={interest.icon} size={18} />
+											<span class="text-xs font-semibold">{interest.label}</span>
+											{#if selectedInterests.includes(interest.id)}
+												<Icon
+													name="check"
+													size={14}
+													class="absolute top-1 right-1 text-amber-500"
+												/>
+											{/if}
+										</button>
+									{/each}
+								</div>
+							</div>
+
+							<!-- Design & Outdoor Interests (Grid) -->
+							<div class="grid grid-cols-2 gap-4">
+								<!-- Design -->
+								<div class="space-y-2">
+									<p
+										class="flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-500 uppercase"
 									>
-										<Icon name={interest.icon} size={24} />
-										<span class="text-sm font-bold">{interest.label}</span>
-										{#if selectedInterests.includes(interest.id)}
-											<Icon name="check" size={16} class="absolute top-2 right-2 text-emerald-500" />
-										{/if}
-									</button>
-								{/each}
+										<span class="h-2 w-2 rounded-full bg-pink-500"></span> Design
+									</p>
+									<div class="grid grid-cols-2 gap-2">
+										{#each interestOptions.filter((i) => i.domain === 'design') as interest}
+											<button
+												type="button"
+												class={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition-all ${
+													selectedInterests.includes(interest.id)
+														? 'border-pink-500 bg-pink-50 ring-2 ring-pink-500/10 dark:bg-pink-900/20'
+														: 'border-zinc-200 hover:border-pink-500/30 dark:border-zinc-700 dark:hover:border-pink-500/30'
+												}`}
+												onclick={() => toggleInterest(interest.id)}
+											>
+												<Icon name={interest.icon} size={16} />
+												<span class="text-xs">{interest.label}</span>
+												{#if selectedInterests.includes(interest.id)}
+													<Icon
+														name="check"
+														size={12}
+														class="absolute top-1 right-1 text-pink-500"
+													/>
+												{/if}
+											</button>
+										{/each}
+									</div>
+								</div>
+
+								<!-- Outdoor -->
+								<div class="space-y-2">
+									<p
+										class="flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-500 uppercase"
+									>
+										<span class="h-2 w-2 rounded-full bg-teal-500"></span> Outdoor
+									</p>
+									<div class="grid grid-cols-2 gap-2">
+										{#each interestOptions.filter((i) => i.domain === 'outdoor') as interest}
+											<button
+												type="button"
+												class={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition-all ${
+													selectedInterests.includes(interest.id)
+														? 'border-teal-500 bg-teal-50 ring-2 ring-teal-500/10 dark:bg-teal-900/20'
+														: 'border-zinc-200 hover:border-teal-500/30 dark:border-zinc-700 dark:hover:border-teal-500/30'
+												}`}
+												onclick={() => toggleInterest(interest.id)}
+											>
+												<Icon name={interest.icon} size={16} />
+												<span class="text-xs">{interest.label}</span>
+												{#if selectedInterests.includes(interest.id)}
+													<Icon
+														name="check"
+														size={12}
+														class="absolute top-1 right-1 text-teal-500"
+													/>
+												{/if}
+											</button>
+										{/each}
+									</div>
+								</div>
 							</div>
 						</div>
 
 						<!-- Experience Level -->
 						<div class="space-y-4">
 							<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
-								Pengalaman Anda di bidang digital?
+								Sebutkan tingkat pengalaman Anda secara umum
 							</p>
 							<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
 								{#each experienceOptions as exp}
@@ -481,7 +737,14 @@
 										}`}
 										onclick={() => toggleNotification(notif.id)}
 									>
-										<Icon name={notif.id === 'email' ? 'mail' : notif.id === 'wa' ? 'message-circle' : 'bell'} size={16} />
+										<Icon
+											name={notif.id === 'email'
+												? 'mail'
+												: notif.id === 'wa'
+													? 'message-circle'
+													: 'bell'}
+											size={16}
+										/>
 										<span class="text-sm font-medium">{notif.label}</span>
 									</button>
 								{/each}
@@ -494,7 +757,11 @@
 							<input type="hidden" name="interests" value={JSON.stringify(selectedInterests)} />
 							<input type="hidden" name="experienceLevel" value={experienceLevel} />
 							<input type="hidden" name="learningSchedule" value={learningSchedule} />
-							<input type="hidden" name="notificationPrefs" value={JSON.stringify(selectedNotifications)} />
+							<input
+								type="hidden"
+								name="notificationPrefs"
+								value={JSON.stringify(selectedNotifications)}
+							/>
 							<AuthSubmitButton text="Selesaikan Pengaturan & Masuk" />
 						</form>
 					</div>

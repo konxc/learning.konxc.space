@@ -40,14 +40,29 @@
 | Profile Settings  | ✅ PRODUCTION | `src/routes/app/settings/`    | Full settings page       |
 | User Search       | ✅ PRODUCTION | `src/routes/app/admin/users/` | Admin panel              |
 
-### Onboarding System (CRITICAL: Different flows per role)
+### Onboarding System (Multi-Domain Support)
 
-| Feature                | Status        | Location                                      | Notes                                                                 |
-| ---------------------- | ------------- | --------------------------------------------- | --------------------------------------------------------------------- |
-| Student Onboarding     | ✅ PRODUCTION | `src/routes/onboarding/`                      | **Telemetry questions ONLY** (goals, interests, experience, schedule) |
-| Mentor Onboarding      | ✅ PRODUCTION | `src/routes/onboarding/`                      | Profile setup + portfolio + payout                                    |
-| Facilitator Onboarding | ✅ PRODUCTION | `src/routes/onboarding/`                      | Org context confirmation + payout                                     |
-| Multi-Role Detection   | ✅ PRODUCTION | `src/routes/onboarding/+page.server.ts:14-15` | Query params `?org=xxx&role=mentor`                                   |
+| Feature                | Status        | Location                                      | Notes                                     |
+| ---------------------- | ------------- | --------------------------------------------- | ----------------------------------------- |
+| Student Onboarding     | ✅ PRODUCTION | `src/routes/onboarding/`                      | **Telemetry with multi-domain support**   |
+| Multi-Domain Goals     | ✅ PRODUCTION | `src/routes/onboarding/+page.svelte`          | 5 career domains + 4 monetization options |
+| Multi-Domain Interests | ✅ PRODUCTION | `src/routes/onboarding/+page.svelte`          | 20+ interest options across all domains   |
+| Mentor Onboarding      | ✅ PRODUCTION | `src/routes/onboarding/`                      | Profile setup + portfolio + payout        |
+| Facilitator Onboarding | ✅ PRODUCTION | `src/routes/onboarding/`                      | Org context confirmation + payout         |
+| Multi-Role Detection   | ✅ PRODUCTION | `src/routes/onboarding/+page.server.ts:14-15` | Query params `?org=xxx&role=mentor`       |
+
+**Multi-Domain Goals Supported:**
+
+- **Bidang Karir:** Developer, Akademik, Bisnis & UMKM, UI/UX Design, Outdoor Adventure
+- **Monetisasi & Kolaborasi:** Monetisasi Pengetahuan, Membangun Organisasi, Kolaborasi, Mentor/Facilitator
+
+**Multi-Domain Interests Supported:**
+
+- **Developer:** Web Dev, Mobile, AI/ML, Blockchain
+- **Akademik:** Tutoring, Course Creation, Research
+- **Bisnis & UMKM:** Marketing, E-Commerce, Operations
+- **Design:** UI/UX, Graphic, Motion, Design Systems
+- **Outdoor:** Leadership, Expedition, Team Building
 
 **IMPORTANT:** Track selection (Creator/Seller/Affiliate) happens at **course enrollment**, NOT at onboarding.
 

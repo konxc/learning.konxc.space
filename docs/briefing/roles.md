@@ -366,17 +366,32 @@ The Tracker is Naik Kelas's **unique gamification system**.
 
 ## Onboarding Flows
 
-### Flow 1: New Student Registration
+### Flow 1: New Student Registration (Multi-Domain Onboarding)
 
 ```
 Register (role: 'user')
     │
     ▼
-Onboarding: Collect Telemetry
-    ├─ Goals (career, business, skill, hobby)
-    ├─ Interests (creator, affiliate, seller, smm, seo)
-    ├─ Experience (beginner, intermediate, advanced)
-    └─ Schedule (morning, afternoon, evening, flexible)
+Onboarding: Collect Telemetry (Multi-Domain Support)
+    ├─ Goals (Bidang Karir)
+    │   ├─ Developer (Teknologi)
+    │   ├─ Akademik (Pendidikan)
+    │   ├─ Bisnis & UMKM
+    │   ├─ UI/UX Design
+    │   └─ Outdoor Adventure
+    ├─ Goals (Monetisasi & Kolaborasi)
+    │   ├─ Monetisasi Pengetahuan
+    │   ├─ Membangun Organisasi/Institusi
+    │   ├─ Kolaborasi & Bermitra
+    │   └─ Menjadi Mentor/Facilitator
+    ├─ Interests (Multi-Domain)
+    │   ├─ Developer: Web Dev, Mobile, AI/ML, Blockchain
+    │   ├─ Akademik: Tutoring, Course Creation, Research
+    │   ├─ Bisnis & UMKM: Marketing, E-Commerce, Operations
+    │   ├─ Design: UI/UX, Graphic, Motion, Design Systems
+    │   └─ Outdoor: Leadership, Expedition, Team Building
+    ├─ Experience (Pemula, Menengah, Lanjutan)
+    └─ Schedule (Pagi, Siang, Malam, Fleksibel)
     │
     ▼
 Dashboard (Student View)
