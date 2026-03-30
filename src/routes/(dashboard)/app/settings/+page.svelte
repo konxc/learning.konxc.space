@@ -1,17 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { page } from '$app/state';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
-	import {
-		COLOR,
-		TEXT,
-		RADIUS,
-		ELEVATION,
-		TRANSITION,
-		SPACING,
-		GRADIENT
-	} from '$lib/config/design';
+	import { COLOR, TEXT, RADIUS, TRANSITION, SPACING } from '$lib/config/design';
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import AuthFormField from '$lib/components/AuthFormField.svelte';
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
@@ -33,12 +24,37 @@
 	let newOrgName = $state('');
 	let newOrgSlug = $state('');
 
+	// Preferences toggles state
+	let emailNotif = $state(true);
+	let waNotif = $state(false);
+	let focusMode = $state(true);
+
 	$effect(() => {
 		if (form?.success && form?.data?.key) {
 			generatedKey = form.data.key;
 			showApiKeyModal = true;
 		}
 	});
+
+	function toggleEmail() {
+		emailNotif = !emailNotif;
+		toast.success(emailNotif ? 'Notifikasi email diaktifkan' : 'Notifikasi email dinonaktifkan');
+	}
+
+	function toggleWA() {
+		waNotif = !waNotif;
+		toast.success(waNotif ? 'Notifikasi WhatsApp diaktifkan' : 'Notifikasi WhatsApp dinonaktifkan');
+	}
+
+	function toggleFocus() {
+		focusMode = !focusMode;
+		toast.success(focusMode ? 'Modus Fokus diaktifkan' : 'Modus Fokus dinonaktifkan');
+	}
+
+	function maskKey(key: string): string {
+		if (!key || key.length < 12) return key;
+		return key.substring(0, 8) + '••••••••••••' + key.substring(key.length - 4);
+	}
 </script>
 
 <PageWrapper>
@@ -296,10 +312,21 @@
 										required
 									/>
 									<div class="space-y-2">
-										<label for="brand-color" class="text-xs font-bold uppercase tracking-widest text-zinc-400">Branding Color</label>
+										<label
+											for="brand-color"
+											class="text-xs font-bold tracking-widest text-zinc-400 uppercase"
+											>Branding Color</label
+										>
 										<div class="flex items-center gap-4">
-											<input id="brand-color" type="color" name="brandColor" value={data.organization.brandColor} class="h-12 w-12 cursor-pointer rounded-xl border-none bg-transparent" />
-											<span class="font-mono text-sm uppercase">{data.organization.brandColor}</span>
+											<input
+												id="brand-color"
+												type="color"
+												name="brandColor"
+												value={data.organization.brandColor}
+												class="h-12 w-12 cursor-pointer rounded-xl border-none bg-transparent"
+											/>
+											<span class="font-mono text-sm uppercase">{data.organization.brandColor}</span
+											>
 										</div>
 									</div>
 									{#if isOrgAdmin}
@@ -402,13 +429,17 @@
 											Terima laporan mingguan progres belajar peserta.
 										</p>
 									</div>
-									<div
-										class="relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full bg-blue-600"
+									<button
+										onclick={toggleEmail}
+										aria-label={emailNotif
+											? 'Nonaktifkan notifikasi email'
+											: 'Aktifkan notifikasi email'}
+										class={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors ${emailNotif ? 'bg-blue-600' : 'bg-zinc-200 dark:bg-zinc-700'}`}
 									>
 										<span
-											class="inline-block h-4 w-4 translate-x-6 rounded-full bg-white transition"
+											class={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${emailNotif ? 'translate-x-6' : 'translate-x-1'}`}
 										></span>
-									</div>
+									</button>
 								</div>
 
 								<div
@@ -420,13 +451,17 @@
 											Terima alert instan saat ada tugas baru dikirim.
 										</p>
 									</div>
-									<div
-										class="relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full bg-zinc-200 dark:bg-zinc-700"
+									<button
+										onclick={toggleWA}
+										aria-label={waNotif
+											? 'Nonaktifkan notifikasi WhatsApp'
+											: 'Aktifkan notifikasi WhatsApp'}
+										class={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors ${waNotif ? 'bg-blue-600' : 'bg-zinc-200 dark:bg-zinc-700'}`}
 									>
 										<span
-											class="inline-block h-4 w-4 translate-x-1 rounded-full bg-white transition"
+											class={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${waNotif ? 'translate-x-6' : 'translate-x-1'}`}
 										></span>
-									</div>
+									</button>
 								</div>
 
 								<div class="flex items-center justify-between py-4">
@@ -436,13 +471,15 @@
 											Sembunyikan sidebar otomatis saat sedang belajar.
 										</p>
 									</div>
-									<div
-										class="relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full bg-blue-600"
+									<button
+										onclick={toggleFocus}
+										aria-label={focusMode ? 'Nonaktifkan modus fokus' : 'Aktifkan modus fokus'}
+										class={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors ${focusMode ? 'bg-blue-600' : 'bg-zinc-200 dark:bg-zinc-700'}`}
 									>
 										<span
-											class="inline-block h-4 w-4 translate-x-6 rounded-full bg-white transition"
+											class={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${focusMode ? 'translate-x-6' : 'translate-x-1'}`}
 										></span>
-									</div>
+									</button>
 								</div>
 							</div>
 						</section>
@@ -592,7 +629,9 @@
 						<div
 							class="group relative flex items-center gap-4 rounded-xl border-2 border-zinc-200 bg-zinc-50 p-6 font-mono text-lg dark:border-zinc-700 dark:bg-zinc-800"
 						>
-							<span class="flex-1 truncate tracking-tighter">{generatedKey}</span>
+							<span class="flex-1 truncate tracking-tighter select-all"
+								>{maskKey(generatedKey)}</span
+							>
 							<button
 								onclick={() => {
 									navigator.clipboard.writeText(generatedKey);

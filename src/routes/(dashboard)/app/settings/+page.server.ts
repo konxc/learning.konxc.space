@@ -59,7 +59,7 @@ export const load: PageServerLoad = async ({ locals, url, cookies }) => {
 
 			if (membership) {
 				isOrgAdmin = ['owner', 'admin'].includes(membership.role);
-				
+
 				// Fetch members
 				orgMembers = await db
 					.select({
@@ -135,11 +135,13 @@ export const actions: Actions = {
 		const email = formData.get('email')?.toString() || '';
 		const phoneValue = formData.get('phone')?.toString();
 
-		if (fullName && fullName.length > 100) return actionFailure(400, 'Nama lengkap maksimal 100 karakter');
+		if (fullName && fullName.length > 100)
+			return actionFailure(400, 'Nama lengkap maksimal 100 karakter');
 		if (email && !validateEmail(email)) return actionFailure(400, 'Email tidak valid');
 
 		try {
-			await db.update(schema.user)
+			await db
+				.update(schema.user)
 				.set({ fullName: fullName || null, email: email || null, phone: phoneValue || null })
 				.where(eq(schema.user.id, locals.user.id));
 			return actionSuccess({ message: 'Profil berhasil diperbarui!' });
@@ -155,10 +157,13 @@ export const actions: Actions = {
 		const newPassword = formData.get('newPassword')?.toString() || '';
 		const confirmPassword = formData.get('confirmPassword')?.toString() || '';
 
-		if (!validatePassword(newPassword)) return actionFailure(400, 'Password baru minimal 8 karakter');
+		if (!validatePassword(newPassword))
+			return actionFailure(400, 'Password baru minimal 8 karakter');
 		if (newPassword !== confirmPassword) return actionFailure(400, 'Password tidak cocok');
 
-		const currentUser = await db.query.user.findFirst({ where: eq(schema.user.id, locals.user.id) });
+		const currentUser = await db.query.user.findFirst({
+			where: eq(schema.user.id, locals.user.id)
+		});
 		if (!currentUser) return actionFailure(404, 'User tidak ditemukan');
 
 		if (!(await verifyPassword(currentUser.passwordHash, currentPassword))) {
@@ -167,7 +172,10 @@ export const actions: Actions = {
 
 		try {
 			const newPasswordHash = await hashPassword(newPassword);
-			await db.update(schema.user).set({ passwordHash: newPasswordHash }).where(eq(schema.user.id, locals.user.id));
+			await db
+				.update(schema.user)
+				.set({ passwordHash: newPasswordHash })
+				.where(eq(schema.user.id, locals.user.id));
 			return actionSuccess({ message: 'Password berhasil diubah!' });
 		} catch (e) {
 			return actionFailure(500, 'Terjadi kesalahan saat mengubah password');
@@ -176,38 +184,48 @@ export const actions: Actions = {
 
 	createOrganization: async ({ request, locals, cookies }) => {
 		if (!locals.user) throw redirect(302, '/auth/signin');
-		
+
 		// KTP Verification Check
 		const verification = await db.query.userVerification.findFirst({
 			where: eq(schema.userVerification.userId, locals.user.id)
 		});
 
 		if (verification?.status !== 'approved' && locals.user.role !== 'admin') {
-			return actionFailure(403, 'Anda harus verifikasi KTP terlebih dahulu untuk membuat organisasi.');
+			return actionFailure(
+				403,
+				'Anda harus verifikasi KTP terlebih dahulu untuk membuat organisasi.'
+			);
 		}
 
 		const formData = await request.formData();
 		const name = formData.get('name') as string;
 		const slug = formData.get('slug') as string;
-		const brandColor = formData.get('brandColor') as string || '#4f46e5';
+		const brandColor = (formData.get('brandColor') as string) || '#4f46e5';
 
 		if (!name || !slug) return actionFailure(400, 'Nama dan Slug wajib diisi');
-		if (!/^[a-z0-9-]+$/.test(slug)) return actionFailure(400, 'Slug hanya boleh huruf kecil, angka, dan tanda hubung');
+		if (!/^[a-z0-9-]+$/.test(slug))
+			return actionFailure(400, 'Slug hanya boleh huruf kecil, angka, dan tanda hubung');
 
-		const existingOrg = await db.query.organization.findFirst({ where: eq(schema.organization.slug, slug) });
+		const existingOrg = await db.query.organization.findFirst({
+			where: eq(schema.organization.slug, slug)
+		});
 		if (existingOrg) return actionFailure(400, 'URL ini sudah digunakan');
 
 		try {
 			const orgId = 'org-' + crypto.randomUUID().substring(0, 8);
 			await db.insert(schema.organization).values({ id: orgId, slug, name, brandColor });
-			await db.insert(schema.organizationMember).values({ 
-				id: 'mem-' + crypto.randomUUID().substring(0, 8), 
-				orgId, 
-				userId: locals.user.id, 
-				role: 'owner' 
+			await db.insert(schema.organizationMember).values({
+				id: 'mem-' + crypto.randomUUID().substring(0, 8),
+				orgId,
+				userId: locals.user.id,
+				role: 'owner'
 			});
 
-			cookies.set('active-workspace', orgId, { path: '/', maxAge: 60 * 60 * 24 * 7, sameSite: 'lax' });
+			cookies.set('active-workspace', orgId, {
+				path: '/',
+				maxAge: 60 * 60 * 24 * 7,
+				sameSite: 'lax'
+			});
 			return actionSuccess({ message: 'Organisasi berhasil dibuat!' });
 		} catch (e) {
 			return actionFailure(500, 'Gagal membuat organisasi');
@@ -217,13 +235,27 @@ export const actions: Actions = {
 	updateOrgSettings: async ({ request, locals, cookies }) => {
 		if (!locals.user) throw redirect(302, '/auth/signin');
 		const activeWorkspaceId = cookies.get('active-workspace');
-		if (!activeWorkspaceId || activeWorkspaceId === 'personal') return actionFailure(400, 'Workspace tidak valid');
+		if (!activeWorkspaceId || activeWorkspaceId === 'personal')
+			return actionFailure(400, 'Workspace tidak valid');
+
+		// Verify user is org admin/owner
+		const membership = await db.query.organizationMember.findFirst({
+			where: and(
+				eq(schema.organizationMember.orgId, activeWorkspaceId),
+				eq(schema.organizationMember.userId, locals.user.id)
+			)
+		});
+
+		if (!membership || !['owner', 'admin'].includes(membership.role)) {
+			return actionFailure(403, 'Anda tidak memiliki akses untuk mengubah pengaturan organisasi');
+		}
 
 		const formData = await request.formData();
 		const name = formData.get('name') as string;
 		const brandColor = formData.get('brandColor') as string;
 
-		await db.update(schema.organization)
+		await db
+			.update(schema.organization)
 			.set({ name, brandColor, updatedAt: new Date() })
 			.where(eq(schema.organization.id, activeWorkspaceId));
 
@@ -253,28 +285,91 @@ export const actions: Actions = {
 		}
 	},
 
-	revokeApiKey: async ({ request, locals }) => {
+	revokeApiKey: async ({ request, locals, cookies }) => {
+		if (!locals.user) throw redirect(302, '/auth/signin');
+
+		const activeWorkspaceId = cookies.get('active-workspace');
+		if (!activeWorkspaceId || activeWorkspaceId === 'personal') {
+			return actionFailure(400, 'Workspace tidak valid');
+		}
+
+		// Verify user is org admin/owner
+		const membership = await db.query.organizationMember.findFirst({
+			where: and(
+				eq(schema.organizationMember.orgId, activeWorkspaceId),
+				eq(schema.organizationMember.userId, locals.user.id)
+			)
+		});
+
+		if (!membership || !['owner', 'admin'].includes(membership.role)) {
+			return actionFailure(403, 'Anda tidak memiliki akses untuk mencabut API Key');
+		}
+
 		const formData = await request.formData();
 		const keyId = formData.get('keyId')?.toString();
 		if (!keyId) return actionFailure(400, 'Key ID required');
 
-		await db.update(schema.organizationApiKey)
+		// Verify the key belongs to this organization
+		const apiKey = await db.query.organizationApiKey.findFirst({
+			where: eq(schema.organizationApiKey.id, keyId)
+		});
+
+		if (!apiKey || apiKey.orgId !== activeWorkspaceId) {
+			return actionFailure(404, 'API Key tidak ditemukan');
+		}
+
+		await db
+			.update(schema.organizationApiKey)
 			.set({ status: 'revoked' })
 			.where(eq(schema.organizationApiKey.id, keyId));
 
 		return actionSuccess({ message: 'API Key berhasil dicabut' });
 	},
 
-	deleteAccount: async ({ request, locals }) => {
+	deleteAccount: async ({ request, locals, cookies }) => {
 		if (!locals.user) throw redirect(302, '/auth/signin');
+
 		const formData = await request.formData();
-		if (formData.get('confirmText') !== 'HAPUS') return actionFailure(400, 'Konfirmasi tidak valid');
-		if (locals.user.role === 'admin') return actionFailure(400, 'Admin tidak dapat dihapus');
+		if (formData.get('confirmText') !== 'HAPUS') {
+			return actionFailure(400, 'Konfirmasi tidak valid');
+		}
+		if (locals.user.role === 'admin') {
+			return actionFailure(400, 'Admin tidak dapat dihapus');
+		}
 
 		try {
-			await db.update(schema.user).set({ deletedAt: new Date() }).where(eq(schema.user.id, locals.user.id));
+			// Get user email before deletion
+			const user = await db.query.user.findFirst({
+				where: eq(schema.user.id, locals.user.id)
+			});
+
+			// Soft delete user
+			await db
+				.update(schema.user)
+				.set({ deletedAt: new Date() })
+				.where(eq(schema.user.id, locals.user.id));
+
+			// Send deletion confirmation email
+			if (user?.email) {
+				sendEmail(user.email, 'account_deleted', {
+					name: user.fullName || user.username,
+					deletedAt: new Date().toLocaleDateString('id-ID', {
+						day: '2-digit',
+						month: 'long',
+						year: 'numeric'
+					})
+				}).catch(console.error);
+			}
+
+			// Delete all sessions
+			await db.delete(schema.session).where(eq(schema.session.userId, locals.user.id));
+
+			// Clear session cookie
+			cookies.delete('session', { path: '/' });
+
 			return actionSuccess({ message: 'Akun dihapus' });
 		} catch (e) {
+			console.error('Delete account error:', e);
 			return actionFailure(500, 'Gagal menghapus akun');
 		}
 	}
