@@ -14,7 +14,7 @@
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import StepWizard from '$lib/components/ui/StepWizard.svelte';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 
 	let { data, form }: { data: PageData; form: any } = $props();
 

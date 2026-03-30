@@ -4,7 +4,7 @@
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import PageQuick from '$lib/components/layouts/PageQuick.svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, TRANSITION, ELEVATION } from '$lib/config/design';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';

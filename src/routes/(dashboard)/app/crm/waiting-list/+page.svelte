@@ -3,7 +3,7 @@
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import PageQuick from '$lib/components/layouts/PageQuick.svelte';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 	import NotesModal from '$lib/components/crm/NotesModal.svelte';
 	import WaitingListFilters from '$lib/components/crm/WaitingListFilters.svelte';
 	import WaitingListTable from '$lib/components/crm/WaitingListTable.svelte';

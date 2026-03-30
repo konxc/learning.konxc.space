@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 	import type { ActionData } from './$types';
 	import AuthContainer from '$lib/components/AuthContainer.svelte';
 	import AuthFormField from '$lib/components/AuthFormField.svelte';

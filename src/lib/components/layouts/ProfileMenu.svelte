@@ -8,7 +8,7 @@
 	import type { Theme } from '$lib/stores/theme';
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 	import type { User as DbUser } from '$lib/server/db/schema';
 
 	type ProfileMenuUser = Partial<DbUser> & {

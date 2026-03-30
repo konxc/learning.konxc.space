@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 	import AuthContainer from '$lib/components/AuthContainer.svelte';
 	import AuthFormField from '$lib/components/AuthFormField.svelte';
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';

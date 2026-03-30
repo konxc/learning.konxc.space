@@ -4,7 +4,7 @@
 	import type { TableColumn } from '$lib/types/table';
 	import { COLOR, RADIUS, TEXT, TRANSITION } from '$lib/config/design';
 	import { formatDateTime } from '$lib/utils/format';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 	import { goto } from '$app/navigation';
 
 	interface CouponEntry {

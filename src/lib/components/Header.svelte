@@ -14,7 +14,7 @@
 	import GlowOrbs from '$lib/components/decor/GlowOrbs.svelte';
 	import { brandMode } from '$lib/stores/brandMode';
 	import { enhance } from '$app/forms';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 </script>
 
 <header

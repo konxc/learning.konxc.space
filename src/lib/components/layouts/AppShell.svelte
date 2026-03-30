@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Toaster from '$lib/components/Toaster.svelte';
-	import { toasts } from '$lib/stores/toast';
+	import { toasts } from '$lib/stores/toastStore';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
 	import Sidebar from './Sidebar.svelte';
 	import DashboardHeader from './DashboardHeader.svelte';

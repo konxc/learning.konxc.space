@@ -5,7 +5,7 @@
 	import PageQuick from '$lib/components/layouts/PageQuick.svelte';
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
 	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';

@@ -6,7 +6,7 @@
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 

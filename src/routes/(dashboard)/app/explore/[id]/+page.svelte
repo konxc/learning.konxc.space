@@ -4,7 +4,7 @@
 	import { fly, fade } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import Icon from '$lib/components/ui/Icon.svelte';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 
 	let { data }: { data: PageData } = $props();
 	let expandedModules = $state<Set<string>>(new Set([data.modules?.[0]?.id || '']));

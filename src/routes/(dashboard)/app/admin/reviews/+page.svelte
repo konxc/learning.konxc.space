@@ -4,7 +4,7 @@
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import { COLOR, RADIUS, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 

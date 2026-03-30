@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { RADIUS, COLOR, SPACING, TEXT, TRANSITION } from '$lib/config/design';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 
 	export interface StatusSelectProps {
 		entryId: string;

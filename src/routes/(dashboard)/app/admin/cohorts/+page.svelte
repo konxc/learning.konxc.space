@@ -5,7 +5,7 @@
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 

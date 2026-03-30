@@ -5,7 +5,7 @@
 	import { COLOR, RADIUS, TEXT, TRANSITION } from '$lib/config/design';
 	import { formatDateTime } from '$lib/utils/format';
 	import { goto } from '$app/navigation';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 
 	interface CourseEntry {
 		id: string;

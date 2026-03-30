@@ -4,7 +4,7 @@
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
 	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 	import { goto } from '$app/navigation';
 	import { formatDateTime } from '$lib/utils/format';
 

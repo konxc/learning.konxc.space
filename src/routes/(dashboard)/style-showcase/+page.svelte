@@ -5,7 +5,7 @@
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
 	import ThemeTest from '$lib/components/ThemeTest.svelte';
 	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 
 	const columns = [
 		{ key: 'name', label: 'Name', width: '40%' },

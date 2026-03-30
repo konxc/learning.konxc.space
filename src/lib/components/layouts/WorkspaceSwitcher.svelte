@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { RADIUS, TEXT, COLOR, TRANSITION, ELEVATION } from '$lib/config/design';
 	import { invalidateAll, goto } from '$app/navigation';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 
 	let {
 		workspaces,

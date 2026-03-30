@@ -1,4 +1,4 @@
-import { toast, toasts } from '$lib/stores/toast';
+import { toast, toasts } from '$lib/stores/toastStore';
 
 export async function withToast<T>(
 	action: () => Promise<T>,

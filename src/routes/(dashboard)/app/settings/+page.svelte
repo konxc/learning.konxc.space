@@ -7,7 +7,7 @@
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import AuthFormField from '$lib/components/AuthFormField.svelte';
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
-	import { toast } from '$lib/stores/toast';
+	import { toast } from '$lib/stores/toastStore';
 
 	interface SettingsPreferences {
 		emailNotif: boolean;
