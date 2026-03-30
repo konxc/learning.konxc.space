@@ -2,7 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, desc, sum } from 'drizzle-orm';
+import { eq, desc, sum, sql } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async (event) => {
@@ -29,36 +29,31 @@ export const load: PageServerLoad = async (event) => {
 	]);
 
 	const [allLinks, allSales] = await Promise.all([
-		db
-			.select()
-			.from(schema.affiliateLink)
-			.where(eq(schema.affiliateLink.userId, user.id)),
-		db
-			.select()
-			.from(schema.affiliateSale)
-			.where(eq(schema.affiliateSale.userId, user.id))
+		db.select().from(schema.affiliateLink).where(eq(schema.affiliateLink.userId, user.id)),
+		db.select().from(schema.affiliateSale).where(eq(schema.affiliateSale.userId, user.id))
 	]);
 
-	const [links, sales] = tab === 'links'
-		? [
-				await db
-					.select()
-					.from(schema.affiliateLink)
-					.where(eq(schema.affiliateLink.userId, user.id))
-					.orderBy(desc(schema.affiliateLink.createdAt)),
-				[]
-			]
-		: tab === 'sales'
+	const [links, sales] =
+		tab === 'links'
 			? [
-				[],
-				await db
-					.select()
-					.from(schema.affiliateSale)
-					.where(eq(schema.affiliateSale.userId, user.id))
-					.orderBy(desc(schema.affiliateSale.createdAt))
-					.limit(20)
-			]
-			: [[], []];
+					await db
+						.select()
+						.from(schema.affiliateLink)
+						.where(eq(schema.affiliateLink.userId, user.id))
+						.orderBy(desc(schema.affiliateLink.createdAt)),
+					[]
+				]
+			: tab === 'sales'
+				? [
+						[],
+						await db
+							.select()
+							.from(schema.affiliateSale)
+							.where(eq(schema.affiliateSale.userId, user.id))
+							.orderBy(desc(schema.affiliateSale.createdAt))
+							.limit(20)
+					]
+				: [[], []];
 
 	return {
 		links,
@@ -138,6 +133,26 @@ export const actions: Actions = {
 			status: 'confirmed',
 			recordedAt: new Date()
 		});
+
+		// Update affiliate account totals
+		if (affiliateLinkId) {
+			// Find the affiliate link to get the account ID
+			const affiliateLink = await db.query.affiliateLink.findFirst({
+				where: eq(schema.affiliateLink.id, affiliateLinkId)
+			});
+
+			if (affiliateLink) {
+				// Update the affiliate account totals
+				await db
+					.update(schema.affiliateAccount)
+					.set({
+						totalEarnings: sql`${schema.affiliateAccount.totalEarnings} + ${commission}`,
+						pendingPayout: sql`${schema.affiliateAccount.pendingPayout} + ${commission}`,
+						updatedAt: new Date()
+					})
+					.where(eq(schema.affiliateAccount.userId, user.id));
+			}
+		}
 
 		return { success: true };
 	},
