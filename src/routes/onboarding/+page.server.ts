@@ -1,10 +1,9 @@
-import { fail, isRedirect, redirect } from '@sveltejs/kit';
+import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { eq } from 'drizzle-orm';
-import { validateCoupon, applyCoupon } from '$lib/server/coupon';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.user) {
@@ -13,6 +12,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	const user = locals.user;
 	const invitedOrgId = url.searchParams.get('org');
+	const invitedRole = url.searchParams.get('role');
 
 	// Bridge logic for students with existing enrollments
 	if (user.role === 'user' && !user.onboardingCompleted) {
@@ -34,25 +34,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		throw redirect(303, '/app');
 	}
 
-	// For Students (User role) - Load available courses with track config
-	const courses = await db
-		.select()
-		.from(schema.course)
-		.where(eq(schema.course.status, 'published'));
-
-	// Parse featuresConfig for each course
-	const coursesWithTracks = courses.map((course) => {
-		let featuresConfig = { tracks: false, affiliate: false, performance: false };
-		try {
-			if (course.featuresConfig) {
-				featuresConfig = JSON.parse(course.featuresConfig);
-			}
-		} catch {
-			// Keep default
-		}
-		return { ...course, featuresConfig };
-	});
-
 	// For Mentors - Load application status
 	let mentorData = null;
 	if (user.role === 'mentor') {
@@ -61,9 +42,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		});
 	}
 
-	// For Facilitators & Mentors (invitation) - Load organizations
+	// For Facilitators - Load available organizations
 	let organizations: Array<{ id: string; name: string; slug: string }> = [];
-	if (user.role === 'facilitator' || (user.role === 'mentor' && invitedOrgId)) {
+	if (user.role === 'facilitator') {
 		// If invited to a specific org, only load that org
 		if (invitedOrgId) {
 			const invitedOrg = await db
@@ -96,149 +77,69 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	return {
 		role: user.role,
-		courses: coursesWithTracks,
 		mentorData,
 		organizations,
-		invitedOrgId
+		invitedOrgId,
+		invitedRole
 	};
 };
 
 export const actions: Actions = {
-	validateCoupon: async ({ request, locals }) => {
-		if (!locals.user) {
-			return fail(401, { error: 'Not authenticated' });
-		}
-
-		const formData = await request.formData();
-		const couponCode = formData.get('couponCode') as string;
-		const courseId = formData.get('courseId') as string;
-
-		if (!couponCode) {
-			return fail(400, { error: 'Coupon code is required' });
-		}
-
-		// Get course to get price
-		const courses = await db
-			.select()
-			.from(schema.course)
-			.where(eq(schema.course.id, courseId))
-			.limit(1);
-
-		if (courses.length === 0) {
-			return fail(404, { error: 'Course not found' });
-		}
-
-		const course = courses[0];
-
-		// Validate coupon
-		const validation = await validateCoupon(couponCode, course.price, courseId);
-
-		if (!validation.isValid) {
-			return fail(400, {
-				error: validation.error || 'Invalid coupon',
-				isValid: false,
-				finalPrice: course.price,
-				discountAmount: 0
-			});
-		}
-
-		return {
-			isValid: true,
-			finalPrice: validation.finalPrice,
-			discountAmount: validation.discountAmount,
-			coupon: validation.coupon
-		};
-	},
-
-	enroll: async ({ request, locals }) => {
+	// Save user preferences (telemetry data)
+	savePreferences: async ({ request, locals }) => {
 		const user = locals.user;
 		if (!user) {
 			return fail(401, { error: 'Not authenticated' });
 		}
 
 		const formData = await request.formData();
-		const courseId = formData.get('courseId') as string;
-		const couponCode = formData.get('couponCode') as string | null;
-		const track = formData.get('track') as string | null;
-
-		// Validate track if provided
-		const validTracks = ['creator', 'seller', 'affiliate'];
-		const validatedTrack = track && validTracks.includes(track) ? track : null;
-
-		// Get course
-		const courses = await db
-			.select()
-			.from(schema.course)
-			.where(eq(schema.course.id, courseId))
-			.limit(1);
-
-		if (courses.length === 0) {
-			return fail(404, { error: 'Course not found' });
-		}
-
-		const course = courses[0];
-
-		// Check if already enrolled
-		const existingEnrollment = await db
-			.select()
-			.from(schema.enrollment)
-			.where(eq(schema.enrollment.userId, user.id))
-			.limit(1);
-
-		// Filter in-memory to check specific course enrollment
-		const alreadyEnrolled = existingEnrollment.some((e) => e.courseId === courseId);
-		if (alreadyEnrolled) {
-			return fail(400, { error: 'You are already enrolled in this course' });
-		}
+		const goals = formData.get('goals') as string; // JSON array string
+		const interests = formData.get('interests') as string; // JSON array string
+		const experienceLevel = formData.get('experienceLevel') as string;
+		const learningSchedule = formData.get('learningSchedule') as string;
+		const notificationPrefs = formData.get('notificationPrefs') as string; // JSON array string
 
 		try {
-			// Validate and apply coupon if provided
-			let finalPrice = course.price;
-			let couponId = null;
-			let discountAmount = 0;
-
-			if (couponCode) {
-				const validation = await validateCoupon(couponCode, course.price, courseId);
-				if (!validation.isValid) {
-					return fail(400, { error: validation.error || 'Invalid coupon code' });
-				}
-				finalPrice = validation.finalPrice;
-				discountAmount = validation.discountAmount;
-				couponId = validation.coupon!.id;
-			}
-
-			// Create enrollment with track and mark onboarding as complete
-			const enrollmentId = generateId();
-			await db.transaction(async (tx) => {
-				await tx.insert(schema.enrollment).values({
-					id: enrollmentId,
+			// Insert or update user preferences
+			await db
+				.insert(schema.userPreferences)
+				.values({
 					userId: user.id,
-					courseId: courseId,
-					couponId,
-					track: validatedTrack,
-					status: finalPrice === 0 ? 'active' : 'pending'
+					goals: goals || '[]',
+					interests: interests || '[]',
+					experienceLevel,
+					learningSchedule,
+					notificationPrefs: notificationPrefs || '[]',
+					createdAt: new Date(),
+					updatedAt: new Date()
+				})
+				.onConflictDoUpdate({
+					target: schema.userPreferences.userId,
+					set: {
+						goals: goals || '[]',
+						interests: interests || '[]',
+						experienceLevel,
+						learningSchedule,
+						notificationPrefs: notificationPrefs || '[]',
+						updatedAt: new Date()
+					}
 				});
 
-				await tx
-					.update(schema.user)
-					.set({ onboardingCompleted: true })
-					.where(eq(schema.user.id, user.id));
-			});
+			// Mark onboarding as complete
+			await db
+				.update(schema.user)
+				.set({ onboardingCompleted: true })
+				.where(eq(schema.user.id, user.id));
 
-			// Apply coupon if used
-			if (couponCode && couponId) {
-				await applyCoupon(couponId, user.id, courseId, course.price, discountAmount);
-			}
-
-			// Redirect to dashboard
 			throw redirect(303, '/app');
 		} catch (error) {
 			if (isRedirect(error)) throw error;
-			console.error('Failed to enroll:', error);
-			return fail(500, { error: 'Failed to enroll' });
+			console.error('Failed to save preferences:', error);
+			return fail(500, { error: 'Gagal menyimpan preferensi' });
 		}
 	},
 
+	// Complete onboarding for facilitators (organization selection)
 	completeOnboarding: async ({ request, locals }) => {
 		const user = locals.user;
 		if (!user) {
