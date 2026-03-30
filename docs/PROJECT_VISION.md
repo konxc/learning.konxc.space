@@ -2,89 +2,125 @@
 
 ## 🎯 Tujuan Utama
 
-Membangun platform edukasi teknologi untuk program **"Naik Kelas by Koneksi"** yang berfokus pada:
+**Naik Kelas** adalah platform edukasi dan pengembangan sumber daya masyarakat yang memungkinkan **siapapun untuk monetize pengetahuannya** dan **berkolaborasi dengan berbagai pihak** (instansi, institusi, pengusaha, atau individu) sesuai dengan minat dan bidang masing-masing.
 
-- **Programming**: Pelajaran pemrograman modern
-- **AI Tools**: Integrasi AI untuk efisiensi coding
-- **Project-Based Learning**: Fokus pada output nyata
+Platform ini bukan hanya untuk digital marketing, tetapi untuk **semua bidang dan minat** - mulai dari teknologi, akademik, bisnis, desain, hingga outdoor adventure.
+
+---
+
+## 🌐 Visi Platform
+
+### Mission Statement
+
+> "Memungkinkan siapapun untuk berbagi pengetahuan, mengembangkan kemampuan, dan membangun dampak positif bagi masyarakat melalui pembelajaran kolaboratif."
+
+### Pilar Platform
+
+1. **Monetisasi Pengetahuan**
+   - Semua orang memiliki pengetahuan yang berharga
+   - Platform memungkinkan monetisasi melalui kursus, mentoring, dan affiliate
+
+2. **Pengembangan Sumber Daya Masyarakat**
+   - Membangun talenta dan kapasitas masyarakat
+   - Kolaborasi dengan berbagai stakeholder
+
+3. **Koneksi & Kolaborasi**
+   - Menghubungkan individu dengan institusi, pengusaha, dan komunitas
+   - Memfasilitasi kemitraan yang saling menguntungkan
+
+4. **Inklusivitas**
+   - Terbuka untuk semua latar belakang
+   - Fleksibel sesuai minat dan kemampuan masing-masing
+
+---
 
 ## 🎓 Sasaran Platform
 
-### Target Peserta
+### Target Pengguna
 
-- Pelajar SMA/SMK
-- Mahasiswa
-- Lulusan sederajat yang tertarik pemrograman dan teknologi
+- **Profesional** yang ingin berbagi keahlian
+- **Entrepreneur** yang ingin mengembangkan bisnis
+- **Akademisi** yang ingin menyebarkan pengetahuan
+- **Pelajar & Mahasiswa** yang ingin belajar
+- **Komunitas** yang ingin membangun kapasitas
+- **Institusi & Organisasi** yang ingin mengembangkan anggotanya
 
-### Output Platform (Target)
+### Output Platform
 
-- Sistem manajemen kelas & batch
+- Sistem manajemen kursus & batch
 - Showcase portofolio peserta
 - Learning progress tracking
 - Certificate generation
+- Affiliate & commission system
 - Collaborative project spaces
+
+---
 
 ## 🚀 Konsep Pembelajaran
 
-### 1. Fundamental Stage
+### Multi-Domain Support
 
-- Dasar teori pemrograman
-- Algoritma & logic
-- Version control (Git & GitHub)
-- Workflow kolaboratif
+Platform mendukung berbagai domain pembelajaran:
 
-### 2. Praktik & Eksperimen
+1. **Developer (Teknologi)**
+   - Web Development, Mobile, AI/ML, Blockchain
+   - Fokus pada kemampuan teknis dan inovasi
 
-- Proyek individu & tim
-- Integration dengan Replit, Codespaces, GitHub
-- Development dengan IDE berbasis web
+2. **Akademik (Pendidikan)**
+   - Tutoring, Course Creation, Research
+   - Fokus pada pengembangan kurikulum dan penelitian
 
-### 3. AI-Enhanced Learning
+3. **Bisnis & UMKM**
+   - Marketing, E-Commerce, Operations
+   - Fokus pada pengembangan usaha dan bisnis
 
-- Penggunaan AI Agent (Emergent.ai, Bolt, Lovable)
-- Efisiensi melalui AI assistance
-- Prompt engineering untuk developer
+4. **Design (Kreatif)**
+   - UI/UX, Graphic Design, Motion Design
+   - Fokus pada kreativitas dan design thinking
 
-### 4. Output Showcase
+5. **Outdoor Adventure**
+   - Leadership, Expedition, Team Building
+   - Fokus pada pengembangan karakter dan ketahanan
 
-- Minimal 1 deployable project per peserta
-- Portfolio display di platform
-- Dokumentasi dan presentasi
+---
+
+## 💰 Model Monetisasi
+
+### Untuk Pengguna (Affiliate System)
+
+- **Mentor**: Buat dan jual kursus (komisi 25%+)
+- **Facilitator**: Kelola batch dan dapat komisi
+- **Affiliate**: Promosi kursus dan dapat komisi
+
+### Untuk Organisasi
+
+- **Organization Creation**: Buat lembaga kursus
+- **Verified Organization**: Badge "Trusted" untuk kredibilitas
+- **Multi-Tenant**: Kelola banyak workspace
+
+---
 
 ## 🏗️ Arsitektur Platform
 
-### Phase 1: Foundation (Current)
+### Core Features (Sudah Diimplementasi)
 
-- Authentication system
-- Database setup
-- Basic UI framework
-- Development infrastructure
+- Authentication system (Lucia v3)
+- Database setup (Turso/LibSQL)
+- Role-Based Access Control
+- Organization system (Multi-tenant)
+- Course & Enrollment management
+- Affiliate system
+- Tracker/Gamification system
+- Verification system (KTP & Organization)
 
-### Phase 2: Learning Management System
+### Phase Roadmap
 
-- Course management
-- Module/lesson system
-- Content organization
-- Video/PDF/Document support
-- Progress tracking
-- Completion certificates
+1. **Foundation**: Auth, Database, UI
+2. **LMS**: Course, Module, Lesson, Progress
+3. **Collaboration**: Projects, Discussions, Forums
+4. **Analytics**: Dashboards, Recommendations
 
-### Phase 3: Collaboration Features
-
-- Project spaces
-- Code collaboration
-- Discussion forums
-- Q&A system
-- Peer review
-- Mentorship matching
-
-### Phase 4: Analytics & Insights
-
-- Learning analytics
-- Progress dashboards
-- Performance metrics
-- Personal learning paths
-- AI-based recommendations
+---
 
 ## 🎨 Identitas Visual
 
@@ -92,88 +128,75 @@ Membangun platform edukasi teknologi untuk program **"Naik Kelas by Koneksi"** y
 
 - **Nama**: Naik Kelas
 - **Sub-brand**: by Koneksi
-- **Tone**: Edukatif, modern, AI-friendly, praktis, inspiratif, kolaboratif
+- **Tone**: Edukatif, modern, kolaboratif, inklusif
 
 ### Design Direction
 
 - Dominasi warna: Biru & Putih (clean aesthetic)
 - Style: Minimalis, fokus pada konten
 - Layout: Showcase dan dokumentasi
-- Inspirasi: [Kodacademy.id](https://www.kodacademy.id)
-
-## 🔄 Workflow Platform
-
-```
-Peserta Register → Login → Browse Courses → Enroll
-    ↓
-Learning Modules → Practice Projects → Code Submission
-    ↓
-Peer Review → Mentor Feedback → Iteration
-    ↓
-Project Deployment → Portfolio Showcase → Certificate
-```
-
-## 📊 Success Metrics
-
-### Engagement Metrics
-
-- Active users per batch
-- Module completion rate
-- Project submission rate
-- Average session duration
-
-### Learning Outcomes
-
-- Deployable projects created
-- Skills progression
-- GitHub activity
-- Certification rate
-
-### Community Health
-
-- Forum participation
-- Peer interactions
-- Mentor engagement
-- Content creation
-
-## 🌐 Future Integration
-
-### Planned Integrations
-
-- GitHub API (project sync)
-- Replit API (coding environment)
-- AI Tools (coding assistance)
-- Video hosting (lesson videos)
-- Certificate templates
-- Email notifications
-
-### External Services
-
-- Replit deployment
-- Netlify hosting
-- Discord integration
-- Zoom/Slack (virtual classes)
-- Payment gateway (future)
-
-## 🎯 Unique Value Proposition
-
-1. **AI-First Approach**: Platform edukasi yang fully integrated dengan AI tools
-2. **Real Projects**: Focus pada output nyata, bukan hanya teori
-3. **Collaborative Learning**: Environment yang mendorong kolaborasi
-4. **Portfolio Driven**: Setiap peserta punya showcase yang bisa dipublikasikan
-5. **Modern Stack**: Menggunakan teknologi terkini (SvelteKit, AI, etc.)
-
-## 🔮 Long-term Vision
-
-Menjadi platform edukasi teknologi terdepan di Indonesia yang:
-
-- Mencetak talenta digital berkualitas
-- Menyediakan learning ecosystem yang inklusif
-- Terintegrasi dengan industri tech
-- Menggunakan AI untuk enhanced learning experience
-- Membangun komunitas developer muda
 
 ---
 
-**Last Updated**: 2025-01-23  
-**Status**: Development Phase 1 - Foundation
+## 🔄 User Journey
+
+```
+Registrasi → Onboarding (Goals & Interests)
+    ↓
+Dashboard (sesuai role)
+    ↓
+[KTP Verified] → Buat Organisasi
+    ↓
+[Invite] → Mentor/Facilitator
+    ↓
+Auto-Affiliate Account
+```
+
+---
+
+## 📊 Success Metrics
+
+### Engagement
+
+- Active users per batch
+- Course completion rate
+- Average session duration
+
+### Business
+
+- Total course sales
+- Affiliate commissions
+- Organization growth
+
+### Community
+
+- Forum participation
+- Partner/institution collaborations
+- Content creation
+
+---
+
+## 🎯 Unique Value Proposition
+
+1. **Multi-Domain Platform**: Tidak hanya satu bidang, tapi semua bidang
+2. **Monetization-First**: Setiap orang bisa monetize pengetahuan
+3. **Kolaborasi Terbuka**: Kemitraan dengan berbagai pihak
+4. **Verified Credentials**: Sertifikat dan verifikasi untuk kredibilitas
+5. **Community-Driven**: Gotong royong education ecosystem
+
+---
+
+## 🌟 Long-term Vision
+
+Menjadi platform edukasi dan pengembangan masyarakat terdepan di Indonesia yang:
+
+- Memungkinkan siapapun untuk monetize pengetahuan
+- Menghubungkan individu dengan peluang kolaborasi
+- Mengembangkan sumber daya manusia secara inklusif
+- Membangun ekosistem pembelajaran kolaboratif
+- Memberikan dampak positif bagi masyarakat
+
+---
+
+**Last Updated**: 2026-03-30  
+**Status**: Production - Naik Kelas 2.0

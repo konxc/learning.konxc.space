@@ -142,43 +142,88 @@
 	];
 
 	// Goals options - Single selection
+	// Reflects platform vision: anyone can monetize knowledge, collaborate, build organizations/institutions
 	const goalOptions = [
+		// Section 1: Bidang Karir (Career Paths)
 		{
 			id: 'career-developer',
 			label: 'Karir di Teknologi & Developer',
 			description: 'Ingin menjadi developer profesional',
 			icon: 'code',
-			color: 'blue'
+			color: 'blue',
+			section: 'career'
 		},
 		{
 			id: 'career-akademik',
 			label: 'Karir di Bidang Akademik',
-			description: 'Ingin mengajar atau penelitian',
+			description: 'Ingin mengajar atau meneliti',
 			icon: 'graduation',
-			color: 'purple'
+			color: 'purple',
+			section: 'career'
 		},
 		{
 			id: 'career-bisnis',
 			label: 'Karir di Bisnis & UMKM',
 			description: 'Mengembangkan usaha sendiri',
 			icon: 'shopping-cart',
-			color: 'amber'
+			color: 'amber',
+			section: 'career'
 		},
 		{
 			id: 'career-design',
 			label: 'Karir di Desain & Kreatif',
 			description: 'Menjadi designer profesional',
 			icon: 'palette',
-			color: 'pink'
+			color: 'pink',
+			section: 'career'
 		},
 		{
 			id: 'career-outdoor',
-			label: 'Outdoor & Leadership',
-			description: 'Pengembangan leadership & outdoor',
+			label: 'Karir di Outdoor & Leadership',
+			description: 'Pengembangan leadership di lapangan',
 			icon: 'mountain',
-			color: 'teal'
+			color: 'teal',
+			section: 'career'
+		},
+		// Section 2: Monetisasi & Kolaborasi (Monetization & Collaboration)
+		{
+			id: 'monetize-knowledge',
+			label: 'Monetisasi Pengetahuan',
+			description: 'Mengubah pengetahuan menjadi sumber income',
+			icon: 'dollar',
+			color: 'emerald',
+			section: 'monetize'
+		},
+		{
+			id: 'build-organization',
+			label: 'Membangun Organisasi/Institusi',
+			description: 'Membentuk lembaga atau organisasi baru',
+			icon: 'building',
+			color: 'indigo',
+			section: 'monetize'
+		},
+		{
+			id: 'kolaborasi',
+			label: 'Kolaborasi & Bermitra',
+			description: 'Bekerja sama dengan pihak lain',
+			icon: 'users',
+			color: 'cyan',
+			section: 'monetize'
+		},
+		{
+			id: 'mentor-facilitator',
+			label: 'Menjadi Mentor/Facilitator',
+			description: 'Membimbing dan mendampingi orang lain',
+			icon: 'star',
+			color: 'orange',
+			section: 'monetize'
 		}
 	];
+
+	// Helper to filter goals by section
+	function getGoalsBySection(section: string) {
+		return goalOptions.filter((g) => g.section === section);
+	}
 
 	// Interests options - Max 5 selection
 	const interestOptions = [
@@ -303,7 +348,7 @@
 	function getStepDescription(): string {
 		switch (currentStep) {
 			case 0:
-				return 'Pilih satu tujuan utama yang paling relevan dengan Anda';
+				return 'Pilih tujuan utama Anda - mulai dari pengembangan karir hingga monetisasi pengetahuan';
 			case 1:
 				return `Pilih hingga 5 bidang minat (${selectedInterests.length}/5 dipilih)`;
 			case 2:
@@ -322,7 +367,11 @@
 			purple: 'border-purple-500 bg-purple-50 ring-2 ring-purple-500/10 dark:bg-purple-900/20',
 			amber: 'border-amber-500 bg-amber-50 ring-2 ring-amber-500/10 dark:bg-amber-900/20',
 			pink: 'border-pink-500 bg-pink-50 ring-2 ring-pink-500/10 dark:bg-pink-900/20',
-			teal: 'border-teal-500 bg-teal-50 ring-2 ring-teal-500/10 dark:bg-teal-900/20'
+			teal: 'border-teal-500 bg-teal-50 ring-2 ring-teal-500/10 dark:bg-teal-900/20',
+			emerald: 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/10 dark:bg-emerald-900/20',
+			indigo: 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500/10 dark:bg-indigo-900/20',
+			cyan: 'border-cyan-500 bg-cyan-50 ring-2 ring-cyan-500/10 dark:bg-cyan-900/20',
+			orange: 'border-orange-500 bg-orange-50 ring-2 ring-orange-500/10 dark:bg-orange-900/20'
 		};
 		return colorMap[color] || colorMap['blue'];
 	}
@@ -333,7 +382,11 @@
 			purple: 'text-purple-600',
 			amber: 'text-amber-600',
 			pink: 'text-pink-600',
-			teal: 'text-teal-600'
+			teal: 'text-teal-600',
+			emerald: 'text-emerald-600',
+			indigo: 'text-indigo-600',
+			cyan: 'text-cyan-600',
+			orange: 'text-orange-600'
 		};
 		return colorMap[color] || colorMap['blue'];
 	}
@@ -344,7 +397,11 @@
 			purple: 'bg-purple-500/10',
 			amber: 'bg-amber-500/10',
 			pink: 'bg-pink-500/10',
-			teal: 'bg-teal-500/10'
+			teal: 'bg-teal-500/10',
+			emerald: 'bg-emerald-500/10',
+			indigo: 'bg-indigo-500/10',
+			cyan: 'bg-cyan-500/10',
+			orange: 'bg-orange-500/10'
 		};
 		return colorMap[color] || colorMap['blue'];
 	}
@@ -636,36 +693,79 @@
 
 						<!-- Step 1: Goals -->
 						{#if currentStep === 0}
-							<div class="space-y-4">
-								<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-									{#each goalOptions as goal}
-										<button
-											type="button"
-											class={`flex items-center gap-4 rounded-xl border-2 p-4 text-left transition-all ${
-												selectedGoal === goal.id
-													? getGoalColorClass(goal.color)
-													: 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700 dark:hover:border-zinc-600'
-											}`}
-											onclick={() => (selectedGoal = goal.id)}
-										>
-											<div
-												class={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${getGoalColorBg(goal.color)} ${getGoalColorText(goal.color)}`}
+							<div class="space-y-6">
+								<!-- Section: Bidang Karir -->
+								<div class="space-y-3">
+									<p class="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
+										Bidang Karir
+									</p>
+									<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+										{#each getGoalsBySection('career') as goal}
+											<button
+												type="button"
+												class={`flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all ${
+													selectedGoal === goal.id
+														? getGoalColorClass(goal.color)
+														: 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700 dark:hover:border-zinc-600'
+												}`}
+												onclick={() => (selectedGoal = goal.id)}
 											>
-												<Icon name={goal.icon} size={24} />
-											</div>
-											<div class="flex-1 space-y-1">
-												<h4 class="font-semibold text-zinc-900 dark:text-zinc-100">
-													{goal.label}
-												</h4>
-												<p class="text-xs text-zinc-500 dark:text-zinc-400">
-													{goal.description}
-												</p>
-											</div>
-											{#if selectedGoal === goal.id}
-												<Icon name="check" size={20} class={getGoalColorText(goal.color)} />
-											{/if}
-										</button>
-									{/each}
+												<div
+													class={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${getGoalColorBg(goal.color)} ${getGoalColorText(goal.color)}`}
+												>
+													<Icon name={goal.icon} size={20} />
+												</div>
+												<div class="flex-1 space-y-0.5">
+													<h4 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+														{goal.label}
+													</h4>
+													<p class="text-xs text-zinc-500 dark:text-zinc-400">
+														{goal.description}
+													</p>
+												</div>
+												{#if selectedGoal === goal.id}
+													<Icon name="check" size={18} class={getGoalColorText(goal.color)} />
+												{/if}
+											</button>
+										{/each}
+									</div>
+								</div>
+
+								<!-- Section: Monetisasi & Kolaborasi -->
+								<div class="space-y-3">
+									<p class="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
+										Monetisasi & Kolaborasi
+									</p>
+									<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+										{#each getGoalsBySection('monetize') as goal}
+											<button
+												type="button"
+												class={`flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all ${
+													selectedGoal === goal.id
+														? getGoalColorClass(goal.color)
+														: 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700 dark:hover:border-zinc-600'
+												}`}
+												onclick={() => (selectedGoal = goal.id)}
+											>
+												<div
+													class={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${getGoalColorBg(goal.color)} ${getGoalColorText(goal.color)}`}
+												>
+													<Icon name={goal.icon} size={20} />
+												</div>
+												<div class="flex-1 space-y-0.5">
+													<h4 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+														{goal.label}
+													</h4>
+													<p class="text-xs text-zinc-500 dark:text-zinc-400">
+														{goal.description}
+													</p>
+												</div>
+												{#if selectedGoal === goal.id}
+													<Icon name="check" size={18} class={getGoalColorText(goal.color)} />
+												{/if}
+											</button>
+										{/each}
+									</div>
 								</div>
 							</div>
 						{/if}
