@@ -85,10 +85,10 @@
 			method: 'POST'
 		});
 		if (response.ok) {
-			toast.success('Course deleted');
+			toast.success('Kursus berhasil dihapus');
 			await goto('/app/admin/courses', { invalidateAll: true });
 		} else {
-			toast.error('Failed to delete course');
+			toast.error('Gagal menghapus kursus');
 		}
 	}
 </script>

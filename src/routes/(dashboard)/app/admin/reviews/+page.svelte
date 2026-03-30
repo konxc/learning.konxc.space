@@ -121,7 +121,7 @@
 									use:enhance={() => {
 										return async ({ result }) => {
 											if (result.type === 'success') {
-												toast.success('Review approved!');
+												toast.success('Review disetujui!');
 											} else if (result.type === 'failure') {
 												const errorMsg = (result.data as any)?.error || 'Failed to approve review';
 												toast.error(errorMsg);
@@ -143,7 +143,7 @@
 									use:enhance={() => {
 										return async ({ result }) => {
 											if (result.type === 'success') {
-												toast.success('Review rejected!');
+												toast.success('Review ditolak!');
 											} else if (result.type === 'failure') {
 												const errorMsg = (result.data as any)?.error || 'Failed to reject review';
 												toast.error(errorMsg);

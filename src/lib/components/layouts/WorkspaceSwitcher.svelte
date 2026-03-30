@@ -34,10 +34,10 @@
 				toast.success(`Switched to ${id === 'personal' ? 'Personal' : 'Organization'} workspace`);
 				await invalidateAll();
 			} else {
-				toast.error('Failed to switch workspace');
+				toast.error('Gagal beralih ruang kerja');
 			}
 		} catch (e) {
-			toast.error('An error occurred');
+			toast.error('Terjadi kesalahan');
 		}
 	}
 

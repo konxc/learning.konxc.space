@@ -81,12 +81,12 @@
 	// Action handlers (placeholder for now, can be extended later)
 	function handleEdit(userId: string) {
 		// TODO: Navigate to edit page or open modal
-		toast.info('Edit user feature coming soon');
+		toast.info('Fitur edit pengguna segera hadir');
 	}
 
 	function handleChangeRole(userId: string) {
 		// TODO: Open role change modal
-		toast.info('Change role feature coming soon');
+		toast.info('Fitur ubah peran segera hadir');
 	}
 </script>
 

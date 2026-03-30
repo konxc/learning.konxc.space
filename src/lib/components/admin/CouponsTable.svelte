@@ -63,11 +63,11 @@
 		if (!confirm('Duplicate this coupon? A new code will be generated.')) return;
 		try {
 			await onDuplicate(couponId);
-			toast.success('Coupon duplicated successfully');
+			toast.success('Kupon berhasil diduplikasi');
 			await goto('/app/admin/coupons', { invalidateAll: true });
 		} catch (error) {
 			console.error('Failed to duplicate:', error);
-			toast.error('Failed to duplicate coupon');
+			toast.error('Gagal menduplikasi kupon');
 		}
 	}
 

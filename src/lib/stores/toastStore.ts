@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 
-export type ToastType = 'success' | 'error' | 'info';
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 export interface Toast {
 	id: string;
@@ -38,5 +38,6 @@ export const toast = {
 	success: (text: string, id?: string) => toasts.push({ type: 'success', text, id }),
 	error: (text: string, id?: string) => toasts.push({ type: 'error', text, id }),
 	info: (text: string, id?: string) => toasts.push({ type: 'info', text, id }),
+	warning: (text: string, id?: string) => toasts.push({ type: 'warning', text, id }),
 	clear: () => toasts.clear()
 };

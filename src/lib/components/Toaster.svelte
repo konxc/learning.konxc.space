@@ -28,7 +28,9 @@
 						? 'border-red-200/80 bg-red-50/95 dark:border-red-900/50 dark:bg-red-950/90'
 						: toast.type === 'success'
 							? 'border-green-200/80 bg-green-50/95 dark:border-green-900/50 dark:bg-green-950/90'
-							: 'border-blue-200/80 bg-blue-50/95 dark:border-blue-900/50 dark:bg-blue-950/90'
+							: toast.type === 'warning'
+								? 'border-amber-200/80 bg-amber-50/95 dark:border-amber-900/50 dark:bg-amber-950/90'
+								: 'border-blue-200/80 bg-blue-50/95 dark:border-blue-900/50 dark:bg-blue-950/90'
 				}`}
 			>
 				<div class="min-w-0 flex-1">
@@ -39,14 +41,18 @@
 								? 'text-red-800 dark:text-red-300'
 								: toast.type === 'success'
 									? 'text-green-800 dark:text-green-300'
-									: 'text-blue-800 dark:text-blue-300'
+									: toast.type === 'warning'
+										? 'text-amber-800 dark:text-amber-300'
+										: 'text-blue-800 dark:text-blue-300'
 						}`}
 					>
 						{toast.type === 'error'
 							? 'Kesalahan Sistem'
 							: toast.type === 'success'
 								? 'Berhasil'
-								: 'Informasi'}
+								: toast.type === 'warning'
+									? 'Peringatan'
+									: 'Informasi'}
 					</p>
 					<p
 						class={`text-sm leading-relaxed
@@ -55,7 +61,9 @@
 								? 'text-red-700/90 dark:text-red-400/90'
 								: toast.type === 'success'
 									? 'text-green-700/90 dark:text-green-400/90'
-									: 'text-blue-700/90 dark:text-blue-400/90'
+									: toast.type === 'warning'
+										? 'text-amber-700/90 dark:text-amber-400/90'
+										: 'text-blue-700/90 dark:text-blue-400/90'
 						}`}
 					>
 						{toast.text}

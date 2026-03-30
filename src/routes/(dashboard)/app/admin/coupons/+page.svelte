@@ -93,10 +93,10 @@
 			setTimeout(() => {
 				copiedCode = null;
 			}, 2000);
-			toast.success('Code copied to clipboard');
+			toast.success('Kode berhasil disalin ke clipboard');
 		} catch (err) {
 			console.error('Failed to copy:', err);
-			toast.error('Failed to copy code');
+			toast.error('Gagal menyalin kode');
 		}
 	}
 
@@ -110,14 +110,14 @@
 			});
 
 			if (response.ok) {
-				toast.success('Coupon duplicated successfully');
+				toast.success('Kupon berhasil diduplikasi');
 				await goto('/app/admin/coupons', { invalidateAll: true });
 			} else {
-				toast.error('Failed to duplicate coupon');
+				toast.error('Gagal menduplikasi kupon');
 			}
 		} catch (err) {
 			console.error('Failed to duplicate:', err);
-			toast.error('Failed to duplicate coupon');
+			toast.error('Gagal menduplikasi kupon');
 		}
 	}
 

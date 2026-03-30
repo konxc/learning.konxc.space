@@ -44,10 +44,10 @@
 		});
 
 		if (response.ok) {
-			toast.success('Payment approved');
+			toast.success('Pembayaran disetujui');
 			await goto('/app/admin/payments', { invalidateAll: true });
 		} else {
-			toast.error('Failed to approve');
+			toast.error('Gagal menyetujui');
 		}
 	}
 
@@ -62,10 +62,10 @@
 		});
 
 		if (response.ok) {
-			toast.info('Payment rejected');
+			toast.info('Pembayaran ditolak');
 			await goto('/app/admin/payments', { invalidateAll: true });
 		} else {
-			toast.error('Failed to reject');
+			toast.error('Gagal menolak');
 		}
 	}
 </script>
