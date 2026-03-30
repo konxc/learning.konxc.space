@@ -184,7 +184,7 @@
 
 					<!-- KTP Photo -->
 					<div class="space-y-2">
-						<label class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>Foto KTP</label>
+						<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>Foto KTP</p>
 						<div
 							class="rounded-xl border-2 border-dashed {COLOR.cardBorder} p-6 text-center transition-colors hover:border-blue-400"
 						>
@@ -209,7 +209,7 @@
 
 					<!-- Selfie with KTP -->
 					<div class="space-y-2">
-						<label class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>Selfie dengan KTP</label>
+						<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>Selfie dengan KTP</p>
 						<div
 							class="rounded-xl border-2 border-dashed {COLOR.cardBorder} p-6 text-center transition-colors hover:border-blue-400"
 						>

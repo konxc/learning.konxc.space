@@ -100,10 +100,8 @@
 
 				<!-- Brand Color -->
 				<div class="space-y-3">
-					<label class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>
-						Warna Brand Organisasi
-					</label>
-					<div class="flex flex-wrap gap-2">
+					<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>Warna Brand Organisasi</p>
+					<div class="flex flex-wrap gap-2" role="group" aria-label="Pilih warna brand">
 						{#each colorPresets as color}
 							<button
 								type="button"
@@ -112,6 +110,8 @@
 									? 'scale-110 border-zinc-900'
 									: 'border-transparent'}"
 								style="background-color: {color}"
+								aria-label="Pilih warna {color}"
+								aria-pressed={brandColor === color}
 								onclick={() => (brandColor = color)}
 							></button>
 						{/each}
@@ -129,7 +129,7 @@
 
 				<!-- Preview -->
 				<div class="space-y-3">
-					<label class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>Preview</label>
+					<p class={`${TEXT.small} font-bold ${COLOR.textPrimary}`}>Preview</p>
 					<div class="rounded-xl border p-4" style="border-color: {brandColor}30">
 						<div class="flex items-center gap-3">
 							<div
