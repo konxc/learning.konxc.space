@@ -46,14 +46,14 @@
 				>
 			</div>
 			<h1
-				class="text-4xl leading-none font-black tracking-tighter text-zinc-900 md:text-5xl dark:text-white"
+				class={`${TEXT.h1} leading-tight text-zinc-900 md:text-5xl dark:text-white pl-1`}
 			>
 				Ready to excel, <span
 					class="bg-linear-to-r from-blue-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent"
 					>{data.user.fullName || data.user.username}?</span
 				>
 			</h1>
-			<p class={`${TEXT.secondary} max-w-xl leading-relaxed font-medium`}>
+			<p class={`${TEXT.secondary} max-w-2xl leading-relaxed font-medium`}>
 				Track your professional growth, manage certifications, and continue your specialized
 				learning tracks in one unified space.
 			</p>

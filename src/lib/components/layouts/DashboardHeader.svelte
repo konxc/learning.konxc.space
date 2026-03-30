@@ -107,7 +107,7 @@
 </script>
 
 <header
-	class={`cubic-bezier(0.32, 0.72, 0, 1) sticky top-0 z-30 border-b-[0.5px] border-zinc-200/50 bg-white/70 backdrop-blur-xl transition-[padding] duration-500 dark:border-zinc-800/50 dark:bg-zinc-900/70 ${sidebarCollapsed ? 'pl-16' : 'pl-64'}`}
+	class={`cubic-bezier(0.32, 0.72, 0, 1) sticky top-0 z-30 border-b-[0.5px] border-zinc-200/50 bg-white/70 backdrop-blur-xl transition-[padding] duration-500 dark:border-zinc-800/50 dark:bg-zinc-900/70 ${sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'}`}
 >
 	<div class="flex min-h-[56px] items-center px-4 py-3 md:px-6">
 		<!-- Left Side: Toggle + Breadcrumb -->

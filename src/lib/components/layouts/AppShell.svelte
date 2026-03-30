@@ -132,7 +132,7 @@
 
 		<main
 			id="main-content"
-			class={`min-w-0 flex-1 overflow-x-hidden scroll-smooth ${sidebarCollapsed ? 'md:ml-16' : 'md:ml-64'} ${TRANSITION.spring}`}
+			class={`min-w-0 flex-1 overflow-x-hidden scroll-smooth ${sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'} ${TRANSITION.spring}`}
 		>
 			<!-- Skip to content link for accessibility -->
 			<a
