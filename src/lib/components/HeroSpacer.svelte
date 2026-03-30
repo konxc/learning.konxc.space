@@ -66,7 +66,7 @@
 	{:else if variant === 'line'}
 		<!-- Variant: Simple Animated Line -->
 		<div
-			class="spacer-line rounded-full bg-gradient-to-r from-transparent via-(--color-primary-soft-blue) to-transparent opacity-50 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:opacity-90 {sizeClasses[
+			class="spacer-line rounded-full bg-linear-to-r from-transparent via-(--color-primary-soft-blue) to-transparent opacity-50 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:opacity-90 {sizeClasses[
 				size
 			]} {animated ? 'animate-pulse' : ''}"
 		></div>

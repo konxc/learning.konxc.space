@@ -539,7 +539,7 @@
 
 					<div class="space-y-6">
 						<div
-							class={`p-8 ${RADIUS.card} group relative overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xl`}
+							class={`p-8 ${RADIUS.card} group relative overflow-hidden bg-linear-to-br from-blue-600 to-indigo-700 text-white shadow-xl`}
 						>
 							<Icon
 								name="zap"

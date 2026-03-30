@@ -123,7 +123,7 @@
 						</div>
 						<div class="h-3 overflow-hidden rounded-full bg-white/50">
 							<div
-								class="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
+								class="h-full rounded-full bg-linear-to-r from-blue-500 to-purple-500 transition-all duration-500"
 								style="width: {progressPercent()}%"
 							></div>
 						</div>

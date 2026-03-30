@@ -90,7 +90,7 @@
 	>
 		<!-- Avatar -->
 		<div
-			class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-700 text-2xl font-black text-white shadow-lg"
+			class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-700 text-2xl font-black text-white shadow-lg"
 		>
 			{(student.fullName || student.username)?.[0]?.toUpperCase() ?? 'S'}
 		</div>
@@ -146,7 +146,7 @@
 		</div>
 		<div class="h-3 w-full overflow-hidden rounded-full bg-gray-100">
 			<div
-				class={`h-full rounded-full transition-all duration-700 ${overallPercent >= 100 ? 'bg-green-500' : 'bg-gradient-to-r from-blue-500 to-indigo-600'}`}
+				class={`h-full rounded-full transition-all duration-700 ${overallPercent >= 100 ? 'bg-green-500' : 'bg-linear-to-r from-blue-500 to-indigo-600'}`}
 				style="width: {overallPercent}%"
 			></div>
 		</div>
@@ -175,7 +175,7 @@
 							/>
 						{:else}
 							<div
-								class="flex h-12 w-16 items-center justify-center rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100 text-2xl"
+								class="flex h-12 w-16 items-center justify-center rounded-lg bg-linear-to-br from-blue-50 to-indigo-100 text-2xl"
 							>
 								📚
 							</div>
@@ -220,7 +220,7 @@
 							</div>
 							<div class="h-2 w-full overflow-hidden rounded-full bg-gray-100">
 								<div
-									class={`h-full rounded-full ${cp.progressPercent >= 100 ? 'bg-green-500' : 'bg-gradient-to-r from-blue-500 to-indigo-600'}`}
+									class={`h-full rounded-full ${cp.progressPercent >= 100 ? 'bg-green-500' : 'bg-linear-to-r from-blue-500 to-indigo-600'}`}
 									style="width: {cp.progressPercent}%"
 								></div>
 							</div>
