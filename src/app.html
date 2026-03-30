@@ -40,15 +40,24 @@
 		<meta name="msapplication-TileImage" content="/ms-icon-144x144.png" />
 		<meta name="msapplication-config" content="/browserconfig.xml" />
 
-		<!-- PWA Manifest -->
-		<link rel="manifest" href="/manifest.json" />
+		<!-- PWA Manifest (conditionally loaded) -->
+		<script>
+			window.__PWA_ENABLED__ = __PWA_ENABLED__;
+			window.__ANALYTICS_ENABLED__ = __ANALYTICS_ENABLED__;
+			window.__SW_ENABLED__ = __SW_ENABLED__;
+		</script>
 
-		<!-- Mobile Web App -->
-		<meta name="mobile-web-app-capable" content="yes" />
-
-		<!-- Apple Mobile Web App -->
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-		<meta name="apple-mobile-web-app-title" content="Naik Kelas" />
+		<!-- PWA - Only include if enabled -->
+		<script>
+			if (window.__PWA_ENABLED__) {
+				document.write('<link rel="manifest" href="/manifest.json" />');
+				document.write('<meta name="mobile-web-app-capable" content="yes" />');
+				document.write(
+					'<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />'
+				);
+				document.write('<meta name="apple-mobile-web-app-title" content="Naik Kelas" />');
+			}
+		</script>
 
 		<!-- Structured Data -->
 		<script type="application/ld+json">
@@ -66,11 +75,17 @@
 				}
 			}
 		</script>
-		<script
-			defer
-			src="https://cloud.umami.is/script.js"
-			data-website-id="7af81a1a-5d3d-4355-af3b-31d9076f74ae"
-		></script>
+
+		<!-- Analytics - Conditionally loaded -->
+		<script>
+			if (window.__ANALYTICS_ENABLED__) {
+				var umamiScript = document.createElement('script');
+				umamiScript.defer = true;
+				umamiScript.src = 'https://cloud.umami.is/script.js';
+				umamiScript.setAttribute('data-website-id', '7af81a1a-5d3d-4355-af3b-31d9076f74ae');
+				document.head.appendChild(umamiScript);
+			}
+		</script>
 
 		<!-- Blocking theme script - prevents FOUC by running before any rendering -->
 		<script>
@@ -131,9 +146,9 @@
 
 		%sveltekit.head%
 
-		<!-- Service Worker Registration -->
+		<!-- Service Worker Registration (conditionally loaded) -->
 		<script>
-			if ('serviceWorker' in navigator) {
+			if (window.__SW_ENABLED__ && 'serviceWorker' in navigator) {
 				window.addEventListener('load', () => {
 					navigator.serviceWorker
 						.register('/sw.js')
@@ -163,8 +178,8 @@
 
 		<!-- Cleanup script to prevent stale service worker issues -->
 		<script>
-			// Clear any corrupted caches on page load
-			if ('caches' in window) {
+			// Clear any corrupted caches on page load (only if SW is enabled)
+			if (window.__SW_ENABLED__ && 'caches' in window) {
 				window.addEventListener('load', () => {
 					// Clear old caches that might cause issues
 					caches.keys().then((cacheNames) => {

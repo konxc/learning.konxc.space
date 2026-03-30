@@ -14,6 +14,11 @@ export default defineConfig({
 			outdir: './src/lib/paraglide'
 		})
 	],
+	define: {
+		__PWA_ENABLED__: JSON.stringify(process.env.PWA_ENABLED !== 'true'),
+		__ANALYTICS_ENABLED__: JSON.stringify(process.env.ANALYTICS_ENABLED !== 'false'),
+		__SW_ENABLED__: JSON.stringify(process.env.SW_ENABLED !== 'true')
+	},
 	build: {
 		rollupOptions: {
 			external: ['html2canvas', 'jspdf']
