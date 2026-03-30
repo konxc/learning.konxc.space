@@ -148,6 +148,10 @@
 		megaphone: 'Megaphone',
 		hammer: 'Hammer',
 		'refresh-ccw': 'RefreshCcw',
+		'alert-triangle': 'TriangleAlert',
+		'alert-circle': 'CircleAlert',
+		'trash-2': 'Trash2',
+		key: 'Key',
 		// Onboarding icons
 		code: 'Code',
 		'shopping-cart': 'ShoppingCart',

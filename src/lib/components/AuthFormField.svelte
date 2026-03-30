@@ -16,6 +16,9 @@
 		minlength?: number;
 		maxlength?: number;
 		hint?: string;
+		readonly?: boolean;
+		disabled?: boolean;
+		class?: string;
 	}
 
 	let {
@@ -29,7 +32,10 @@
 		pattern,
 		minlength,
 		maxlength,
-		hint
+		hint,
+		readonly = false,
+		disabled = false,
+		class: className = ''
 	}: Props = $props();
 </script>
 
@@ -53,8 +59,10 @@
 			{pattern}
 			{minlength}
 			{maxlength}
+			{readonly}
+			{disabled}
 			bind:value
-			class={`w-full ${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary} outline-none border ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:border-blue-500 dark:focus:ring-blue-900/50`}
+			class={`w-full ${RADIUS.input} ${COLOR.cardBorder} ${COLOR.card} ${SPACING.input} ${TEXT.body} ${COLOR.textPrimary} outline-none border ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:border-blue-50 dark:focus:ring-blue-900/50 ${className}`}
 		/>
 	</div>
 	
