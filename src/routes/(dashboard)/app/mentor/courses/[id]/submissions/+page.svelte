@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
+	import { formToast } from '$lib/utils/formEnhance';
 	import { page } from '$app/stores';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
@@ -300,7 +301,16 @@
 								{/if}
 							</div>
 						{:else if selectedSubmission.submission.type === 'assignment' && selectedSubmission.isPending}
-							<form method="post" action="?/gradeAssignment" use:enhance class="space-y-4">
+							<form
+								method="post"
+								action="?/gradeAssignment"
+								use:enhance={formToast({
+									success: 'Penilaian berhasil disimpan',
+									error: 'Gagal menyimpan penilaian',
+									onSuccess: () => (selectedSubmission = null)
+								})}
+								class="space-y-4"
+							>
 								<input type="hidden" name="submissionId" value={selectedSubmission.submission.id} />
 
 								<div>

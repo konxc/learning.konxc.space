@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
+	import { formToast } from '$lib/utils/formEnhance';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
@@ -52,7 +53,16 @@
 
 				{#if showModuleForm}
 					<div class={`mb-6 ${RADIUS.small} ${COLOR.neutral} ${SPACING.cardPadding}`}>
-						<form method="post" action="?/createModule" use:enhance class="space-y-4">
+						<form
+							method="post"
+							action="?/createModule"
+							use:enhance={formToast({
+								success: 'Modul berhasil dibuat',
+								error: 'Gagal membuat modul',
+								onSuccess: () => (showModuleForm = false)
+							})}
+							class="space-y-4"
+						>
 							<input
 								type="text"
 								name="title"

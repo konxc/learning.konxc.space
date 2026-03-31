@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
+	import { formToast } from '$lib/utils/formEnhance';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
@@ -52,7 +53,16 @@
 			{#if showCreateQuizForm}
 				<div class={`mb-6 ${RADIUS.small} ${COLOR.neutral} ${SPACING.cardPadding}`}>
 					<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-4 font-semibold`}>Create New Quiz</h3>
-					<form method="post" action="?/createQuiz" use:enhance class="space-y-4">
+					<form
+						method="post"
+						action="?/createQuiz"
+						use:enhance={formToast({
+							success: 'Kuis berhasil dibuat',
+							error: 'Gagal membuat kuis',
+							onSuccess: () => (showCreateQuizForm = false)
+						})}
+						class="space-y-4"
+					>
 						<div class="flex flex-col gap-2">
 							<label
 								for="create-quiz-lesson"
@@ -171,7 +181,20 @@
 							{#if showAddQuestionForm === quiz.id}
 								<div class={`mt-4 ${RADIUS.small} ${COLOR.neutral} ${SPACING.cardPadding}`}>
 									<h4 class={`${TEXT.h4} ${COLOR.textPrimary} mb-4 font-semibold`}>Add Question</h4>
-									<form method="post" action="?/addQuestion" use:enhance class="space-y-4">
+									<form
+										method="post"
+										action="?/addQuestion"
+										use:enhance={formToast({
+											success: 'Pertanyaan berhasil ditambahkan',
+											error: 'Gagal menambahkan pertanyaan',
+											onSuccess: () => {
+												questionText = '';
+												choicesText = '';
+												correctChoice = '';
+											}
+										})}
+										class="space-y-4"
+									>
 										<input type="hidden" name="quizId" value={quiz.id} />
 										<div class="flex flex-col gap-2">
 											<label

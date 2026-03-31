@@ -5,6 +5,7 @@ import * as schema from '$lib/server/db/schema';
 import { eq, and, desc, inArray } from 'drizzle-orm';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
+import { awardXP, checkAndAwardBadges } from '$lib/server/gamification';
 
 type SubmissionRecord = typeof schema.submission.$inferSelect;
 type CourseRecord = typeof schema.course.$inferSelect;
@@ -162,6 +163,12 @@ export const actions: Actions = {
 			score,
 			feedback: feedback.length > 0 ? feedback : null
 		});
+
+		// Award XP (50 XP for approval) and check for badges
+		if (score >= 70) {
+			await awardXP(submission.userId, 50, `Submission approved for ${submission.course?.title}`);
+			await checkAndAwardBadges(submission.userId, 'submission');
+		}
 
 		return actionSuccess();
 	}
