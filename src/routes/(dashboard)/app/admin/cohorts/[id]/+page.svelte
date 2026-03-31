@@ -6,7 +6,7 @@
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
-	import { toast } from '$lib/stores/toastStore';
+	import { formToast } from '$lib/utils/formEnhance';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
@@ -100,16 +100,11 @@
 			<form
 				method="POST"
 				action="?/assignFacilitator"
-				use:enhance={() => {
-					return async ({ result }) => {
-						if (result.type === 'success') {
-							toast.success('Fasilitator berhasil ditugaskan!');
-						} else if (result.type === 'failure') {
-							const errorMsg = (result.data as any)?.error || 'Failed to assign facilitator';
-							toast.error(errorMsg);
-						}
-					};
-				}}
+				use:enhance={formToast({
+					success: 'Fasilitator berhasil ditugaskan!',
+					error: 'Gagal menugaskan fasilitator',
+					withUpdate: false
+				})}
 				class="mt-6 space-y-3"
 			>
 				<div>

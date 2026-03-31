@@ -4,7 +4,7 @@
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import { COLOR, RADIUS, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
-	import { toast } from '$lib/stores/toastStore';
+	import { formToast } from '$lib/utils/formEnhance';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
@@ -118,16 +118,11 @@
 								<form
 									method="POST"
 									action="?/approve"
-									use:enhance={() => {
-										return async ({ result }) => {
-											if (result.type === 'success') {
-												toast.success('Review disetujui!');
-											} else if (result.type === 'failure') {
-												const errorMsg = (result.data as any)?.error || 'Failed to approve review';
-												toast.error(errorMsg);
-											}
-										};
-									}}
+									use:enhance={formToast({
+										success: 'Review disetujui!',
+										error: 'Gagal menyetujui review',
+										withUpdate: false
+									})}
 								>
 									<input type="hidden" name="reviewId" value={review.id} />
 									<button
@@ -140,16 +135,12 @@
 								<form
 									method="POST"
 									action="?/reject"
-									use:enhance={() => {
-										return async ({ result }) => {
-											if (result.type === 'success') {
-												toast.success('Review ditolak!');
-											} else if (result.type === 'failure') {
-												const errorMsg = (result.data as any)?.error || 'Failed to reject review';
-												toast.error(errorMsg);
-											}
-										};
-									}}
+									use:enhance={formToast({
+										success: 'Review ditolak!',
+										error: 'Gagal menolak review',
+										successType: 'info',
+										withUpdate: false
+									})}
 								>
 									<input type="hidden" name="reviewId" value={review.id} />
 									<button

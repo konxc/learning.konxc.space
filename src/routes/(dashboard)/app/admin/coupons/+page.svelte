@@ -131,14 +131,18 @@
 			});
 
 			if (response.ok) {
-				toast.success(`Coupon ${currentStatus ? 'deactivated' : 'activated'}`);
+				if (currentStatus) {
+					toast.info('Kupon berhasil dinonaktifkan');
+				} else {
+					toast.success('Kupon berhasil diaktifkan');
+				}
 				await goto('/app/admin/coupons', { invalidateAll: true });
 			} else {
-				toast.error('Failed to update coupon status');
+				toast.error('Gagal mengubah status kupon');
 			}
 		} catch (err) {
 			console.error('Failed to toggle:', err);
-			toast.error('Failed to update coupon status');
+			toast.error('Gagal mengubah status kupon');
 		}
 	}
 </script>

@@ -5,7 +5,7 @@
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
-	import { toast } from '$lib/stores/toastStore';
+	import { formToast } from '$lib/utils/formEnhance';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
@@ -44,20 +44,13 @@
 				method="POST"
 				action="?/create"
 				class="grid grid-cols-1 gap-5 sm:grid-cols-2"
-				use:enhance={() => {
-					creating = true;
-					return async ({ result, update }) => {
-						await update();
-						creating = false;
-						if (result.type === 'success') {
-							toast.success('Batch berhasil dibuat!');
-							showCreateForm = false;
-						} else if (result.type === 'failure') {
-							const errorMsg = (result.data as any)?.error || 'Gagal membuat batch';
-							toast.error(errorMsg);
-						}
-					};
-				}}
+				use:enhance={formToast({
+					success: 'Batch berhasil dibuat!',
+					error: 'Gagal membuat batch',
+					onStart: () => (creating = true),
+					onSuccess: () => (showCreateForm = false),
+					onEnd: () => (creating = false)
+				})}
 			>
 				<div class="sm:col-span-2">
 					<label

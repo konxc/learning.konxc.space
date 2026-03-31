@@ -5,7 +5,7 @@
 	import StatCard from '$lib/components/ui/StatCard.svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
-	import { toast } from '$lib/stores/toastStore';
+	import { formToast } from '$lib/utils/formEnhance';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
@@ -41,20 +41,13 @@
 				method="POST"
 				action="?/create"
 				class="grid grid-cols-1 gap-5"
-				use:enhance={() => {
-					creating = true;
-					return async ({ result, update }) => {
-						await update();
-						creating = false;
-						if (result.type === 'success') {
-							toast.success('Partner berhasil ditambahkan!');
-							showCreateForm = false;
-						} else if (result.type === 'failure') {
-							const errorMsg = (result.data as any)?.error || 'Gagal menambahkan partner';
-							toast.error(errorMsg);
-						}
-					};
-				}}
+				use:enhance={formToast({
+					success: 'Partner berhasil ditambahkan!',
+					error: 'Gagal menambahkan partner',
+					onStart: () => (creating = true),
+					onSuccess: () => (showCreateForm = false),
+					onEnd: () => (creating = false)
+				})}
 			>
 				<div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
 					<div>
@@ -274,17 +267,11 @@
 									<form
 										method="POST"
 										action="?/updateStatus"
-										use:enhance={() => {
-											return async ({ result }) => {
-												if (result.type === 'success') {
-													toast.success('Status partner diperbarui!');
-												} else if (result.type === 'failure') {
-													const errorMsg =
-														(result.data as any)?.error || 'Gagal memperbarui status';
-													toast.error(errorMsg);
-												}
-											};
-										}}
+										use:enhance={formToast({
+											success: 'Status partner diperbarui!',
+											error: 'Gagal memperbarui status',
+											withUpdate: false
+										})}
 									>
 										<input type="hidden" name="partnerId" value={partner.id} />
 										<input
