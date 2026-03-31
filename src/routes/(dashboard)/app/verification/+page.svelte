@@ -47,8 +47,12 @@
 		}
 	}
 
-	// Show form errors/success as toasts
+	// Show form errors/success as toasts (with guard to prevent re-trigger on navigation)
+	let processedFormKey = $state('');
 	$effect(() => {
+		const key = `${form?.error ?? ''}${form?.success ?? ''}${form?.message ?? ''}`;
+		if (!key || key === processedFormKey) return;
+		processedFormKey = key;
 		if (form?.error) {
 			toast.error(form.error);
 		}

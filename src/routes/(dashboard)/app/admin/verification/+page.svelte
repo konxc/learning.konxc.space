@@ -14,14 +14,23 @@
 	let showRejectModal = $state(false);
 	let rejectTargetId = $state('');
 	let rejectType = $state<'ktp' | 'org'>('ktp');
+	let processedFormKey = $state('');
 
-	// Show form errors/success as toasts
+	// Show form errors/success as toasts (with guard to prevent re-trigger on navigation)
 	$effect(() => {
+		const key = `${form?.error ?? ''}${form?.success ?? ''}${form?.message ?? ''}`;
+		if (!key || key === processedFormKey) return;
+		processedFormKey = key;
 		if (form?.error) {
 			toast.error(form.error);
 		}
 		if (form?.success && form?.message) {
-			toast.success(form.message);
+			const type = (form as any).toastType;
+			if (type === 'info') {
+				toast.info(form.message);
+			} else {
+				toast.success(form.message);
+			}
 		}
 	});
 

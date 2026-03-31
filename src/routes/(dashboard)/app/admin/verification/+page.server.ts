@@ -94,7 +94,7 @@ export const actions: Actions = {
 				})
 				.where(eq(schema.userVerification.id, verificationId));
 
-			return { success: true, message: 'KTP ditolak' };
+			return { success: true, message: 'KTP ditolak', toastType: 'info' };
 		} catch (error) {
 			console.error('Reject KTP error:', error);
 			return fail(500, { error: 'Gagal menolak KTP' });
@@ -145,7 +145,7 @@ export const actions: Actions = {
 				})
 				.where(eq(schema.organizationVerification.id, verificationId));
 
-			return { success: true, message: 'Verifikasi organisasi ditolak' };
+			return { success: true, message: 'Verifikasi organisasi ditolak', toastType: 'info' };
 		} catch (error) {
 			console.error('Reject Org error:', error);
 			return fail(500, { error: 'Gagal menolak verifikasi organisasi' });
