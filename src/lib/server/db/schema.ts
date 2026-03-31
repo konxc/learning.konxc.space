@@ -263,9 +263,13 @@ export const quizQuestion = sqliteTable('quiz_question', {
 	quizId: text('quiz_id')
 		.notNull()
 		.references(() => quiz.id),
-	type: text('type').notNull(), // 'mcq'
+	type: text('type').notNull(), // 'mcq' | 'multi-select' | 'free-text'
 	question: text('question').notNull(),
-	order: integer('order_index').notNull()
+	order: integer('order_index').notNull(),
+	// For free-text questions: keywords for auto-grading (comma-separated)
+	expectedKeywords: text('expected_keywords'),
+	// For free-text: max score for this question
+	maxScore: integer('max_score').default(10)
 });
 
 export const quizChoice = sqliteTable('quiz_choice', {
@@ -350,9 +354,8 @@ export const transaction = sqliteTable('transaction', {
 	userId: text('user_id')
 		.notNull()
 		.references(() => user.id),
-	courseId: text('course_id')
-		.notNull()
-		.references(() => course.id),
+	courseId: text('course_id').references(() => course.id), // Made nullable for org plan purchases
+	orgId: text('org_id').references(() => organization.id), // For organization plan purchases
 	amount: integer('amount').notNull(),
 	status: text('status').notNull().default('pending'), // 'pending', 'settlement', 'expire', 'cancel', 'deny'
 	paymentType: text('payment_type'),
@@ -1008,3 +1011,63 @@ export const organizationApiKey = sqliteTable('organization_api_key', {
 });
 
 export type OrganizationApiKey = typeof organizationApiKey.$inferSelect;
+
+// ============================================================
+// JOB BOARD SYSTEM
+// ============================================================
+
+// Job Postings
+export const jobPosting = sqliteTable('job_posting', {
+	id: text('id').primaryKey(),
+	orgId: text('org_id')
+		.notNull()
+		.references(() => organization.id),
+	title: text('title').notNull(),
+	description: text('description').notNull(),
+	requirements: text('requirements'), // JSON array of requirements
+	responsibilities: text('responsibilities'), // JSON array
+	salaryMin: integer('salary_min'),
+	salaryMax: integer('salary_max'),
+	jobType: text('job_type').notNull().default('full-time'), // 'full-time', 'part-time', 'contract', 'internship'
+	location: text('location'),
+	isRemote: integer('is_remote', { mode: 'boolean' }).default(false),
+	visibility: text('visibility').notNull().default('internal'), // 'internal' | 'public'
+	status: text('status').notNull().default('active'), // 'active', 'closed', 'draft'
+	createdBy: text('created_by')
+		.notNull()
+		.references(() => user.id),
+	expiresAt: integer('expires_at', { mode: 'timestamp' }),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Job Applications
+export const jobApplication = sqliteTable('job_application', {
+	id: text('id').primaryKey(),
+	jobId: text('job_id')
+		.notNull()
+		.references(() => jobPosting.id),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	resumeUrl: text('resume_url'),
+	coverLetter: text('cover_letter'),
+	portfolioUrl: text('portfolio_url'),
+	proposedRole: text('proposed_role'), // Role they're applying for
+	status: text('status').notNull().default('pending'), // 'pending', 'reviewed', 'interview', 'accepted', 'rejected'
+	notes: text('notes'), // Internal notes from org
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// Export types
+export type JobPosting = typeof jobPosting.$inferSelect;
+export type JobApplication = typeof jobApplication.$inferSelect;
