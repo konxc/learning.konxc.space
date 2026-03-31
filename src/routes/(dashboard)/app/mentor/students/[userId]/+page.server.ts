@@ -6,6 +6,7 @@ import { eq, and, isNotNull, count, or } from 'drizzle-orm';
 import { error, fail } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { sendEmail, createNotification } from '$lib/server/email';
+import { awardXP, checkAndAwardBadges } from '$lib/server/gamification';
 
 export const load: PageServerLoad = async (event) => {
 	const mentor = await requireMentor(event);
@@ -243,6 +244,12 @@ export const actions: Actions = {
 				feedback: feedback || null,
 				gradedAt: new Date()
 			});
+		}
+
+		// Award XP (50 XP for approval) and check for badges
+		if (score >= 70) {
+			await awardXP(userId, 50, `Submission approved for ${course[0].title}`);
+			await checkAndAwardBadges(userId, 'submission');
 		}
 
 		// Notify student

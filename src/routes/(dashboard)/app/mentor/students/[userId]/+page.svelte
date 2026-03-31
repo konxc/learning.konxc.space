@@ -4,6 +4,7 @@
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
+	import { formToast } from '$lib/utils/formEnhance';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
@@ -310,13 +311,14 @@
 							<form
 								method="POST"
 								action="?/grade"
-								use:enhance={() => {
-									return async ({ update }) => {
-										await update();
+								use:enhance={formToast({
+									success: 'Penilaian berhasil disimpan',
+									error: 'Gagal menyimpan penilaian',
+									onEnd: () => {
 										gradingSubmission = null;
 										gradingFeedback = '';
-									};
-								}}
+									}
+								})}
 								class="space-y-4"
 							>
 								<input type="hidden" name="submissionId" value={sub.id} />

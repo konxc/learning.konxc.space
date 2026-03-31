@@ -99,8 +99,12 @@
 		showNotesModal = null;
 	}
 
-	// Show toast messages for form results
+	// Show toast messages for form results (with guard to prevent re-trigger on navigation)
+	let processedFormKey = $state('');
 	$effect(() => {
+		const key = `${form?.error ?? ''}${form?.success ?? ''}${form?.message ?? ''}`;
+		if (!key || key === processedFormKey) return;
+		processedFormKey = key;
 		if (form?.error && form?.success === false) {
 			toast.error(form.error);
 		} else if (form?.success && form?.message) {
