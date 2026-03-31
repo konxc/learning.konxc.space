@@ -81,8 +81,12 @@
 		});
 	});
 
-	// Show form errors as toasts
+	// Show form errors as toasts (with guard to prevent re-trigger on navigation)
+	let processedFormKey = $state('');
 	$effect(() => {
+		const key = form?.error ?? '';
+		if (!key || key === processedFormKey) return;
+		processedFormKey = key;
 		if (form?.error) {
 			toast.error(form.error);
 		}
