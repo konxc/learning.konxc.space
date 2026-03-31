@@ -6,6 +6,7 @@ import { eq, and, asc } from 'drizzle-orm';
 import { redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
+import { uploadFile, BUCKET_NAME, PUBLIC_S3_URL } from '$lib/server/s3';
 
 function safeParseJSON<T>(str: string | null | undefined): T | null {
 	if (!str) return null;
@@ -232,15 +233,71 @@ export const actions: Actions = {
 		const courseId = formData.get('courseId') as string;
 		const urlString = formData.get('url') as string;
 		const note = formData.get('note') as string;
+		const file = formData.get('file') as File | null;
 
-		if (!lessonId || !courseId || !urlString) {
-			return actionFailure(400, 'Link (URL) wajib diisi.');
+		if (!lessonId || !courseId) {
+			return actionFailure(400, 'Lesson ID and Course ID are required.');
 		}
 
-		try {
-			new URL(urlString);
-		} catch (e) {
-			return actionFailure(400, 'Format URL tidak valid.');
+		// Validate that either URL or file is provided
+		if (!urlString && !file) {
+			return actionFailure(400, 'Please provide either a URL or upload a file.');
+		}
+
+		// Validate URL if provided
+		if (urlString) {
+			try {
+				new URL(urlString);
+			} catch (e) {
+				return actionFailure(400, 'Invalid URL format.');
+			}
+		}
+
+		// Handle file upload if provided
+		let fileUrl: string | null = null;
+		let fileName: string | null = null;
+		let fileSize: number | null = null;
+
+		if (file && file.size > 0) {
+			// Validate file size (max 10MB)
+			const maxSize = 10 * 1024 * 1024;
+			if (file.size > maxSize) {
+				return actionFailure(400, 'File size exceeds 10MB limit.');
+			}
+
+			// Validate file type
+			const allowedTypes = [
+				'application/pdf',
+				'image/jpeg',
+				'image/png',
+				'image/webp',
+				'application/zip',
+				'text/plain'
+			];
+			if (!allowedTypes.includes(file.type)) {
+				return actionFailure(
+					400,
+					'File type not allowed. Please upload PDF, images, ZIP, or text files.'
+				);
+			}
+
+			// Upload to S3
+			const bytes = await file.arrayBuffer();
+			const buffer = Buffer.from(bytes);
+
+			// Generate unique file key
+			const timestamp = Date.now();
+			const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+			const key = `assignments/${courseId}/${lessonId}/${user.id}_${timestamp}_${sanitizedFileName}`;
+
+			try {
+				fileUrl = await uploadFile(buffer, key, file.type);
+				fileName = file.name;
+				fileSize = file.size;
+			} catch (error) {
+				console.error('File upload error:', error);
+				return actionFailure(500, 'Failed to upload file. Please try again.');
+			}
 		}
 
 		const submissionId = encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(10)));
@@ -258,7 +315,13 @@ export const actions: Actions = {
 			)
 			.limit(1);
 
-		const payload = JSON.stringify({ url: urlString, note });
+		const payload = JSON.stringify({
+			url: urlString || null,
+			fileUrl,
+			fileName,
+			fileSize,
+			note
+		});
 		const metadata = JSON.stringify({ submitted_at: new Date().toISOString() });
 
 		if (existing.length > 0) {
