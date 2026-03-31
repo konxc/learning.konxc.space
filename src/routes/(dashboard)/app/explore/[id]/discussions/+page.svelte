@@ -4,6 +4,7 @@
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import { enhance } from '$app/forms';
+	import { formToast } from '$lib/utils/formEnhance';
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
@@ -26,22 +27,6 @@
 		</a>
 	</PageHeader>
 
-	{#if form?.error}
-		<div
-			class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700"
-		>
-			⚠️ {form.error}
-		</div>
-	{/if}
-
-	{#if form?.success}
-		<div
-			class="animate-in fade-in mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-bold text-green-700"
-		>
-			✅ Discussion posted successfully!
-		</div>
-	{/if}
-
 	<!-- Create Discussion -->
 	<div class="mb-6">
 		<button
@@ -56,12 +41,11 @@
 		<form
 			method="POST"
 			action="?/create"
-			use:enhance={() => {
-				return async ({ update }) => {
-					await update();
-					if (form?.success) showCreateForm = false;
-				};
-			}}
+			use:enhance={formToast({
+				success: 'Diskusi berhasil dibuat!',
+				error: 'Gagal membuat diskusi',
+				onSuccess: () => (showCreateForm = false)
+			})}
 			class={`mb-8 ${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-6`}
 		>
 			<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-4`}>Start a New Discussion</h3>
@@ -145,7 +129,15 @@
 						</div>
 
 						<div class="flex items-center gap-3">
-							<form method="POST" action="?/upvote" use:enhance>
+							<form
+								method="POST"
+								action="?/upvote"
+								use:enhance={formToast({
+									success: 'Upvote berhasil!',
+									error: 'Gagal melakukan upvote',
+									withUpdate: false
+								})}
+							>
 								<input type="hidden" name="discussionId" value={discussion.id} />
 								<button
 									type="submit"
@@ -169,15 +161,14 @@
 						<form
 							method="POST"
 							action="?/reply"
-							use:enhance={() => {
-								return async ({ update }) => {
-									await update();
-									if (form?.success) {
-										replyingTo = null;
-										replyContent = '';
-									}
-								};
-							}}
+							use:enhance={formToast({
+								success: 'Balasan berhasil dikirim!',
+								error: 'Gagal mengirim balasan',
+								onSuccess: () => {
+									replyingTo = null;
+									replyContent = '';
+								}
+							})}
 							class="mt-4 border-t border-gray-100 pt-4"
 						>
 							<input type="hidden" name="parentId" value={discussion.id} />

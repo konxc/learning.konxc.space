@@ -7,6 +7,7 @@
 	import { page } from '$app/stores';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { toast } from '$lib/stores/toastStore';
 	import { updateQueryParam } from '$lib/utils/url-params';
 	import Icon from '$lib/components/ui/Icon.svelte';
 
@@ -805,6 +806,9 @@
 															submitting = null;
 															if (result.type === 'success') {
 																window.location.reload();
+															} else if (result.type === 'failure') {
+																const data = (result.data ?? {}) as Record<string, unknown>;
+																toast.error((data.error as string) || 'Gagal mengirim checkpoint');
 															}
 														};
 													}}

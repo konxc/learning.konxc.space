@@ -4,7 +4,7 @@
 	import { fly, fade } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import Icon from '$lib/components/ui/Icon.svelte';
-	import { toast } from '$lib/stores/toastStore';
+	import { formToast } from '$lib/utils/formEnhance';
 
 	let { data }: { data: PageData } = $props();
 	let expandedModules = $state<Set<string>>(new Set([data.modules?.[0]?.id || '']));
@@ -486,19 +486,12 @@
 								action="/app/explore/{data.course.id}/enroll"
 								method="POST"
 								class="space-y-10"
-								use:enhance={() => {
-									submitting = true;
-									return async ({ result, update }) => {
-										submitting = false;
-										if (result.type === 'success') {
-											toast.success('Berhasil mendaftar! Mengarahkan ke halaman pembayaran...');
-										} else if (result.type === 'failure') {
-											const errorMsg = (result.data as any)?.error || 'Gagal mendaftar kursus';
-											toast.error(errorMsg);
-										}
-										update();
-									};
-								}}
+								use:enhance={formToast({
+									success: 'Berhasil mendaftar! Mengarahkan ke halaman pembayaran...',
+									error: 'Gagal mendaftar kursus',
+									onStart: () => (submitting = true),
+									onEnd: () => (submitting = false)
+								})}
 							>
 								{#if features.tracks}
 									<!-- Track Initialization -->
