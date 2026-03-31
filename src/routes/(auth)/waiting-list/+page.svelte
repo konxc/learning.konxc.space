@@ -2,19 +2,13 @@
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
 	import { onMount, onDestroy } from 'svelte';
-	import Toast from 'svelte-toast';
+	import { toast } from '$lib/stores/toastStore';
 
 	let { form }: { form?: ActionData | null } = $props();
 
 	let mouseX = $state(0);
 	let mouseY = $state(0);
 	let mounted = $state(false);
-
-	// Initialize toast instance
-	const toast = new Toast({
-		position: 'bottom-right',
-		duration: 5000
-	});
 
 	// Rotating professions for animated text
 	const professions = [
@@ -1887,30 +1881,6 @@
 		.form-card {
 			animation: none;
 			transition: none;
-		}
-	}
-
-	/* Toaster Custom Positioning - svelte-toast uses body append */
-	#toast-container {
-		position: fixed;
-		z-index: 9999;
-	}
-
-	/* Mobile positioning - above content, not overlapping mobile header */
-	@media (max-width: 768px) {
-		#toast-container {
-			bottom: 20px !important;
-			right: 12px !important;
-			left: auto !important;
-		}
-	}
-
-	/* Desktop and tablet positioning */
-	@media (min-width: 769px) {
-		#toast-container {
-			bottom: 24px !important;
-			right: 24px !important;
-			left: auto !important;
 		}
 	}
 </style>

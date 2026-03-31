@@ -16,11 +16,13 @@
 	let confirmPassword = $state('');
 	let isLoading = $state(false);
 
-	// Show toast when form error message changes
+	// Show toast when form error message changes (with guard to prevent re-trigger)
+	let processedFormKey = $state('');
 	$effect(() => {
-		if (form?.message) {
-			toast.error(form.message);
-		}
+		const key = form?.message ?? '';
+		if (!key || key === processedFormKey) return;
+		processedFormKey = key;
+		if (form?.message) toast.error(form.message);
 	});
 
 	function validatePasswordStrength(password: string): { valid: boolean; message: string } {
