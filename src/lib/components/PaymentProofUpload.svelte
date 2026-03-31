@@ -3,6 +3,7 @@
 	import { browser } from '$app/environment';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { toast } from '$lib/stores/toastStore';
 	import type { SubmitFunction } from '@sveltejs/kit';
 
 	interface Props {
@@ -91,6 +92,7 @@
 
 			if (result.type === 'success') {
 				await update();
+				toast.success('Bukti pembayaran berhasil diunggah');
 			} else if (result.type === 'redirect') {
 				await goto(result.location);
 			} else if (result.type === 'failure') {
@@ -98,9 +100,9 @@
 				error =
 					typeof data?.message === 'object'
 						? JSON.stringify(data.message)
-						: data?.message || 'Failed to upload payment proof';
+						: data?.message || 'Gagal mengunggah bukti pembayaran';
 			} else if (result.type === 'error') {
-				error = 'System error occurred. Please try again.';
+				error = 'Terjadi kesalahan sistem. Silakan coba lagi.';
 			}
 		};
 	};

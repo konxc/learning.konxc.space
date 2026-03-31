@@ -17,10 +17,36 @@
 	let showSuccess = $state(false);
 	let errorMessage = $state('');
 
+	// Validation logic for Cloud Submissions (Pondasi Pelajaran 4.4)
+	const isCloudSubmission = $derived(url.includes('drive.google.com') || url.includes('docs.google.com'));
+	const needsCloudValidation = $derived(lessonId.includes('cloud') || note.toLowerCase().includes('drive')); // Heuristic or can be prop-based
+
 	const trackLabels: Record<string, string> = {
 		creator: 'Video/Konten URL',
 		seller: 'Link Toko/Produk',
 		affiliate: 'Link Affiliate'
+	};
+
+	const handleEnhance = ({ cancel }: { cancel: () => void }) => {
+		// Validation link Google Drive/Docs (Pondasi 4.4)
+		if (url.includes('google.com') && !url.includes('drive.google.com') && !url.includes('docs.google.com')) {
+			errorMessage = 'Harap gunakan link Google Drive/Docs yang valid.';
+			cancel();
+			return;
+		}
+
+		submitting = true;
+		errorMessage = '';
+		return async ({ result }: { result: any }) => {
+			submitting = false;
+			if (result.type === 'success') {
+				showSuccess = true;
+				if (onSuccess) onSuccess();
+			} else if (result.type === 'failure') {
+				const data = result.data as { error?: string } | undefined;
+				errorMessage = data?.error || 'An error occurred. Please try again.';
+			}
+		};
 	};
 </script>
 
@@ -53,20 +79,7 @@
 		<form
 			method="POST"
 			action="?/submitAction"
-			use:enhance={() => {
-				submitting = true;
-				errorMessage = '';
-				return async ({ result }) => {
-					submitting = false;
-					if (result.type === 'success') {
-						showSuccess = true;
-						if (onSuccess) onSuccess();
-					} else if (result.type === 'failure') {
-						const data = result.data as { error?: string } | undefined;
-						errorMessage = data?.error || 'An error occurred. Please try again.';
-					}
-				};
-			}}
+			use:enhance={handleEnhance}
 			class="space-y-4"
 		>
 			<input type="hidden" name="lessonId" value={lessonId} />

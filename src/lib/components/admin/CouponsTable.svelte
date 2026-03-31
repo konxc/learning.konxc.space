@@ -4,7 +4,6 @@
 	import type { TableColumn } from '$lib/types/table';
 	import { COLOR, RADIUS, TEXT, TRANSITION } from '$lib/config/design';
 	import { formatDateTime } from '$lib/utils/format';
-	import { toast } from '$lib/stores/toastStore';
 	import { goto } from '$app/navigation';
 
 	interface CouponEntry {
@@ -63,22 +62,18 @@
 		if (!confirm('Duplicate this coupon? A new code will be generated.')) return;
 		try {
 			await onDuplicate(couponId);
-			toast.success('Kupon berhasil diduplikasi');
 			await goto('/app/admin/coupons', { invalidateAll: true });
 		} catch (error) {
 			console.error('Failed to duplicate:', error);
-			toast.error('Gagal menduplikasi kupon');
 		}
 	}
 
 	async function handleToggleStatus(couponId: string, currentStatus: boolean) {
 		try {
 			await onToggleStatus(couponId, currentStatus);
-			toast.success(`Coupon ${currentStatus ? 'deactivated' : 'activated'}`);
 			await goto('/app/admin/coupons', { invalidateAll: true });
 		} catch (error) {
 			console.error('Failed to toggle:', error);
-			toast.error('Failed to update coupon status');
 		}
 	}
 </script>
