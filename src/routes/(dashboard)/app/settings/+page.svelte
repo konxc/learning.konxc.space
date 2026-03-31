@@ -8,6 +8,7 @@
 	import AuthFormField from '$lib/components/AuthFormField.svelte';
 	import AuthSubmitButton from '$lib/components/AuthSubmitButton.svelte';
 	import { toast } from '$lib/stores/toastStore';
+	import { formToast } from '$lib/utils/formEnhance';
 
 	interface SettingsPreferences {
 		emailNotif: boolean;
@@ -38,10 +39,12 @@
 			fullName: string | null;
 			email: string | null;
 			phone: string | null;
+			avatarUrl: string | null;
 			role: string;
 			createdAt: Date;
 			isVerified: boolean;
 		};
+		verification: any; // Using any or specific type for simplicity
 		organization: Organization | null;
 		orgMembers: unknown[];
 		orgApiKeys: OrganizationApiKey[];
@@ -75,9 +78,18 @@
 	let focusMode = $state(data.preferences?.focusMode ?? true);
 	let submittingPref = $state<string | null>(null);
 
+	// Avatar uploader
+	let avatarForm: HTMLFormElement | undefined = $state();
+	let avatarInput: HTMLInputElement | undefined = $state();
+	let isUploadingAvatar = $state(false);
+
+	// KYC UI State
+	let ktpFileName = $state<string | null>(null);
+	let selfieFileName = $state<string | null>(null);
+
 	$effect(() => {
-		if (form?.success && form?.data?.key) {
-			generatedKey = form.data.key;
+		if (form?.success && form?.data && 'key' in form.data) {
+			generatedKey = (form.data as { key: string }).key;
 			showApiKeyModal = true;
 		}
 	});
@@ -118,17 +130,84 @@
 				<div class="animate-in grid gap-10 md:grid-cols-3">
 					<div class="space-y-6 md:col-span-1">
 						<div
-							class={`p-8 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} flex flex-col items-center text-center shadow-2xl transition-all hover:scale-[1.02]`}
+							class={`p-8 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} flex flex-col items-center text-center transition-all hover:scale-[1.02]`}
 						>
 							<div class="relative mb-6">
-								<div
-									class="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-blue-500/20 bg-blue-100 p-1 dark:bg-zinc-800"
+								<form
+									method="POST"
+									action="?/uploadAvatar"
+									enctype="multipart/form-data"
+									bind:this={avatarForm}
+									use:enhance={() => {
+										isUploadingAvatar = true;
+										return async ({ result, update }) => {
+											isUploadingAvatar = false;
+											if (result.type === 'success') {
+												toast.success(
+													(result.data as any)?.message || 'Avatar berhasil diperbarui!'
+												);
+												await update();
+											} else if (result.type === 'failure') {
+												toast.error((result.data as any)?.error || 'Gagal mengunggah avatar');
+											}
+										};
+									}}
 								>
-									<Icon name="user" size={80} class="text-blue-600 opacity-40 dark:text-blue-400" />
-								</div>
+									<input
+										type="file"
+										name="avatar"
+										accept="image/png, image/jpeg, image/webp"
+										class="hidden"
+										bind:this={avatarInput}
+										onchange={() => avatarForm?.requestSubmit()}
+									/>
+									<button
+										type="button"
+										onclick={() => avatarInput?.click()}
+										disabled={isUploadingAvatar}
+										class="group relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-blue-500/20 bg-blue-100 p-1 text-blue-600 transition-colors hover:border-blue-500 dark:bg-zinc-800 dark:text-blue-400"
+									>
+										{#if data.user.avatarUrl}
+											<img
+												src={data.user.avatarUrl}
+												alt="Avatar"
+												class={`h-full w-full rounded-full object-cover transition-all duration-500 ${isUploadingAvatar ? 'scale-110 opacity-20 blur-sm' : 'opacity-100'}`}
+											/>
+										{:else}
+											<Icon
+												name="user"
+												size={80}
+												class={`opacity-40 transition-all ${isUploadingAvatar ? 'scale-50 opacity-0' : ''}`}
+											/>
+										{/if}
+
+										{#if isUploadingAvatar}
+											<div
+												class="absolute inset-0 flex items-center justify-center bg-black/10 backdrop-blur-sm"
+											>
+												<Icon
+													name="loader-2"
+													size={32}
+													class="animate-spin text-blue-600 dark:text-blue-400"
+												/>
+											</div>
+										{:else}
+											<div
+												class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-[2px] transition-opacity group-hover:opacity-100"
+											>
+												<Icon
+													name="camera"
+													size={32}
+													class="scale-75 text-white transition-transform group-hover:scale-100"
+												/>
+											</div>
+										{/if}
+									</button>
+								</form>
+
 								{#if data.user.isVerified}
 									<div
-										class="absolute -right-1 -bottom-1 flex h-10 w-10 items-center justify-center rounded-full border-4 border-white bg-blue-600 text-white shadow-xl dark:border-zinc-900"
+										class="pointer-events-none absolute -right-1 -bottom-1 flex h-10 w-10 items-center justify-center rounded-full border-4 border-white bg-blue-600 text-white shadow-xl dark:border-zinc-900"
 										title="Terverifikasi"
 									>
 										<Icon name="check" size={18} />
@@ -176,16 +255,11 @@
 						<form
 							method="POST"
 							action="?/updateProfile"
-							use:enhance={() => {
-								return async ({ result }) => {
-									if (result.type === 'success') {
-										toast.success('Profil berhasil diperbarui!');
-									} else if (result.type === 'failure') {
-										const errorMsg = (result.data as any)?.error || 'Gagal memperbarui profil';
-										toast.error(errorMsg);
-									}
-								};
-							}}
+							use:enhance={formToast({
+								success: 'Profil berhasil diperbarui!',
+								error: 'Gagal memperbarui profil',
+								withUpdate: false
+							})}
 							class={`p-10 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} relative space-y-8 overflow-hidden shadow-sm`}
 						>
 							<div class="pointer-events-none absolute top-0 right-0 p-4 opacity-5">
@@ -225,22 +299,244 @@
 				</div>
 			{/if}
 
+			<!-- Verification (Trust & Safety) Tab -->
+			{#if activeTab === 'verification'}
+				<div class="animate-in mx-auto max-w-3xl space-y-8">
+					{#if data.user.isVerified}
+						<div
+							class={`p-10 ${RADIUS.card} ${COLOR.card} flex flex-col items-center border-2 border-green-200 text-center shadow-xl dark:border-green-900/50`}
+						>
+							<div
+								class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30"
+							>
+								<Icon name="shield-check" size={48} />
+							</div>
+							<h3
+								class="mb-2 text-2xl font-black tracking-tighter text-green-700 uppercase italic dark:text-green-400"
+							>
+								Identitas Terverifikasi
+							</h3>
+							<p class="mb-6 max-w-md text-sm font-medium text-zinc-500">
+								Terima kasih! Akun Anda telah lolos standar KYC institusional platform Naik Kelas.
+								Anda sekarang memiliki akses penuh untuk menjadi Mentor, Fasilitator, dan mengelola
+								agen organisasi.
+							</p>
+							<div class="grid w-full max-w-sm grid-cols-2 gap-4 text-left">
+								<div
+									class="rounded-xl border border-zinc-100 bg-zinc-50 p-4 dark:border-zinc-800/50 dark:bg-zinc-800/50"
+								>
+									<p class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">
+										Nama Sesuai KTP
+									</p>
+									<p class="mt-1 text-sm font-bold">{data.verification?.ktpName || '-'}</p>
+								</div>
+								<div
+									class="rounded-xl border border-zinc-100 bg-zinc-50 p-4 dark:border-zinc-800/50 dark:bg-zinc-800/50"
+								>
+									<p class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">
+										Tanggal Disetujui
+									</p>
+									<p class="mt-1 text-sm font-bold">
+										{data.verification?.verifiedAt
+											? new Date(data.verification.verifiedAt).toLocaleDateString('id-ID')
+											: '-'}
+									</p>
+								</div>
+							</div>
+						</div>
+					{:else if data.verification?.status === 'pending'}
+						<div
+							class={`p-10 ${RADIUS.card} ${COLOR.card} flex flex-col items-center border-2 border-blue-200 text-center shadow-xl dark:border-blue-900/50`}
+						>
+							<div
+								class="mb-6 flex h-24 w-24 animate-pulse items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30"
+							>
+								<Icon name="clock" size={48} />
+							</div>
+							<h3
+								class="mb-2 text-2xl font-black tracking-tighter text-blue-700 uppercase italic dark:text-blue-400"
+							>
+								Menunggu Peninjauan
+							</h3>
+							<p class="max-w-md text-sm font-medium text-zinc-500">
+								Data KYC Anda telah kami terima dan sedang diproses oleh Tim Kepatuhan. Proses
+								verifikasi biasanya memakan waktu 1x24 jam kerja.
+							</p>
+						</div>
+					{:else}
+						<form
+							method="POST"
+							action="?/submitVerification"
+							enctype="multipart/form-data"
+							use:enhance={formToast({
+								success: 'Data verifikasi berhasil dikirim!',
+								error: 'Gagal mengirim verifikasi',
+								withUpdate: false
+							})}
+							class={`p-10 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} relative space-y-8 shadow-sm`}
+						>
+							<div class="pointer-events-none absolute top-0 right-0 p-4 opacity-5">
+								<Icon name="shield-check" size={120} />
+							</div>
+
+							<div>
+								<h3
+									class="mb-2 border-l-4 border-blue-600 pl-4 text-xl font-black tracking-widest uppercase italic"
+								>
+									Verifikasi KTP (KYC)
+								</h3>
+								<p class="mb-6 max-w-lg text-sm text-zinc-500">
+									Informasi ini wajib dilengkapi untuk standar kepatuhan platform SaaS. Data Anda
+									dienkripsi dan diproses sesuai kebijakan privasi kami.
+								</p>
+
+								{#if data.verification?.status === 'rejected'}
+									<div
+										class="mb-8 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700 dark:border-red-900/50 dark:bg-red-950/30"
+									>
+										<p class="mb-1 flex items-center gap-2 font-bold">
+											<Icon name="alert-triangle" size={16} /> Verifikasi Ditolak
+										</p>
+										<p class="text-xs opacity-90">
+											{data.verification?.rejectionReason ||
+												'Data KTP tidak valid atau foto buram. Silakan gunakan kartu identitas fisik asli dan coba kembali.'}
+										</p>
+									</div>
+								{/if}
+							</div>
+
+							<div class="grid gap-6 md:grid-cols-2">
+								<AuthFormField
+									label="Nomor Induk Kependudukan (NIK)"
+									name="ktpNumber"
+									placeholder="16 Digit Angka"
+									value={data.verification?.ktpNumber}
+									required
+								/>
+								<AuthFormField
+									label="Nama Sesuai KTP"
+									name="ktpName"
+									placeholder="HURUF KAPITAL"
+									value={data.verification?.ktpName}
+									required
+								/>
+							</div>
+
+							<div class="grid gap-6 md:grid-cols-2">
+								<AuthFormField
+									label="Tanggal Lahir"
+									name="ktpDob"
+									type="date"
+									value={data.verification?.ktpDob
+										? new Date(data.verification.ktpDob).toISOString().split('T')[0]
+										: ''}
+									required
+								/>
+								<div class="col-span-1 md:col-span-2">
+									<AuthFormField
+										label="Alamat Sesuai KTP"
+										name="ktpAddress"
+										placeholder="Jl. Merdeka No. 1..."
+										value={data.verification?.ktpAddress}
+										required
+									/>
+								</div>
+							</div>
+
+							<div
+								class="grid gap-6 border-t border-zinc-100 pt-4 md:grid-cols-2 dark:border-zinc-800"
+							>
+								<!-- Real Upload Dropzones -->
+								<div class="space-y-2">
+									<label for="ktpPhoto" class="block text-xs font-black tracking-widest text-zinc-400 uppercase"
+										>Foto KTP Asli</label
+									>
+									<div
+										class="group relative flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50 transition-colors hover:border-blue-500 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800/50"
+									>
+										<Icon
+											name="upload"
+											class="mb-2 text-zinc-400 transition-colors group-hover:text-blue-500"
+										/>
+										<span
+											class="text-xs font-bold transition-colors {ktpFileName ? 'text-blue-600' : 'text-zinc-500 group-hover:text-blue-600'}"
+											>{ktpFileName || 'Pilih File KTP'}</span
+										>
+										<input
+											id="ktpPhoto"
+											type="file"
+											name="ktpPhoto"
+											accept="image/png, image/jpeg, image/jpg"
+											required
+											class="absolute inset-0 cursor-pointer opacity-0"
+											onchange={(e) => {
+												const files = (e.target as HTMLInputElement).files;
+												ktpFileName = files && files.length > 0 ? files[0].name : null;
+											}}
+										/>
+									</div>
+									<p class="text-[10px] text-zinc-400">Maks. 5MB, format JPG/PNG/JPEG.</p>
+								</div>
+
+								<div class="space-y-2">
+									<label for="selfiePhoto" class="block text-xs font-black tracking-widest text-zinc-400 uppercase"
+										>Selfie dengan KTP</label
+									>
+									<div
+										class="group relative flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50 transition-colors hover:border-blue-500 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800/50"
+									>
+										<Icon
+											name="upload"
+											class="mb-2 text-zinc-400 transition-colors group-hover:text-blue-500"
+										/>
+										<span
+											class="text-xs font-bold transition-colors {selfieFileName ? 'text-blue-600' : 'text-zinc-500 group-hover:text-blue-600'}"
+											>{selfieFileName || 'Pilih File Selfie'}</span
+										>
+										<input
+											id="selfiePhoto"
+											type="file"
+											name="selfiePhoto"
+											accept="image/png, image/jpeg, image/jpg"
+											required
+											class="absolute inset-0 cursor-pointer opacity-0"
+											onchange={(e) => {
+												const files = (e.target as HTMLInputElement).files;
+												selfieFileName = files && files.length > 0 ? files[0].name : null;
+											}}
+										/>
+									</div>
+									<p class="text-[10px] text-zinc-400">Pastikan wajah dan KTP terlihat jelas.</p>
+								</div>
+							</div>
+
+							<div
+								class="flex items-center justify-end gap-4 border-t border-zinc-100 pt-6 dark:border-zinc-800"
+							>
+								<p
+									class="mr-4 max-w-xs text-right text-xs leading-relaxed tracking-tight text-zinc-500 italic"
+								>
+									Dengan menekan tombol submit, Anda menyetujui validasi identitas dan ketentuan
+									layanan kami.
+								</p>
+								<AuthSubmitButton text="Submit Dokumen" />
+							</div>
+						</form>
+					{/if}
+				</div>
+			{/if}
+
 			<!-- Security Tab -->
 			{#if activeTab === 'security'}
 				<div class="animate-in mx-auto max-w-2xl">
 					<form
 						method="POST"
 						action="?/changePassword"
-						use:enhance={() => {
-							return async ({ result }) => {
-								if (result.type === 'success') {
-									toast.success('Password berhasil diubah!');
-								} else if (result.type === 'failure') {
-									const errorMsg = (result.data as any)?.error || 'Gagal mengubah password';
-									toast.error(errorMsg);
-								}
-							};
-						}}
+						use:enhance={formToast({
+							success: 'Password berhasil diubah!',
+							error: 'Gagal mengubah password',
+							withUpdate: false
+						})}
 						class={`p-10 ${RADIUS.card} ${COLOR.card} border-2 ${COLOR.cardBorder} relative space-y-8 shadow-sm`}
 					>
 						<div class="pointer-events-none absolute top-0 right-0 p-4 opacity-5">
@@ -305,16 +601,11 @@
 								<form
 									method="POST"
 									action="?/createOrganization"
-									use:enhance={() => {
-										return async ({ result }) => {
-											if (result.type === 'success') {
-												toast.success('Organisasi berhasil dibuat!');
-											} else if (result.type === 'failure') {
-												const errorMsg = (result.data as any)?.error || 'Gagal membuat organisasi';
-												toast.error(errorMsg);
-											}
-										};
-									}}
+									use:enhance={formToast({
+										success: 'Organisasi berhasil dibuat!',
+										error: 'Gagal membuat organisasi',
+										withUpdate: false
+									})}
 									class="mx-auto max-w-lg space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-8 text-left dark:border-zinc-800 dark:bg-zinc-900/50"
 								>
 									<AuthFormField
@@ -350,18 +641,42 @@
 								</form>
 							{:else}
 								<div
-									class="rounded-2xl border border-orange-200 bg-orange-50 p-6 dark:border-orange-900 dark:bg-orange-950/20"
+									class="animate-pulse-slow relative mx-auto max-w-lg overflow-hidden rounded-2xl border-2 border-dashed border-zinc-200 bg-white/50 p-10 text-center dark:border-zinc-800 dark:bg-zinc-900/30"
 								>
-									<Icon name="alert-triangle" class="mx-auto mb-2 text-orange-600" />
-									<p
-										class="text-sm font-bold tracking-widest text-orange-800 uppercase italic dark:text-orange-300"
-									>
-										Verifikasi Diperlukan
-									</p>
-									<p class="mt-2 text-xs text-orange-700">
-										Silakan hubungi administrator untuk melakukan verifikasi KTP sebelum Anda dapat
-										membuat organisasi.
-									</p>
+									<div
+										class="pointer-events-none absolute inset-0 z-0 bg-blue-500/5 backdrop-blur-3xl"
+									></div>
+									<div class="relative z-10">
+										<div
+											class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-50 text-blue-600 shadow-inner dark:bg-blue-900/30"
+										>
+											<Icon name="lock" size={32} />
+										</div>
+										<h4
+											class="mb-3 text-2xl font-black tracking-tight text-zinc-900 uppercase italic dark:text-white"
+										>
+											Akses Terkunci
+										</h4>
+										<p
+											class="mx-auto mb-8 max-w-xs text-sm leading-relaxed font-medium text-zinc-500"
+										>
+											Demi kepatuhan standar <span
+												class="font-bold text-zinc-800 dark:text-zinc-200"
+												>Naik Kelas Enterprise</span
+											>, manajemen Workspace diwajibkan melakukan validasi *Know Your Customer*
+											(KYC).
+										</p>
+										<a
+											href="?tab=verification"
+											class={`inline-block ${RADIUS.button} bg-black px-10 py-4 text-xs font-black tracking-widest text-white uppercase shadow-xl transition-all hover:scale-105 hover:bg-blue-600 active:scale-95 dark:bg-white dark:text-black dark:hover:bg-blue-500 dark:hover:text-white`}
+										>
+											Verifikasi Akun Sekarang <Icon
+												name="arrow-right"
+												size={14}
+												class="ml-1 inline"
+											/>
+										</a>
+									</div>
 								</div>
 							{/if}
 						</div>
@@ -386,17 +701,11 @@
 								<form
 									method="POST"
 									action="?/updateOrgSettings"
-									use:enhance={() => {
-										return async ({ result }) => {
-											if (result.type === 'success') {
-												toast.success('Pengaturan organisasi diperbarui!');
-											} else if (result.type === 'failure') {
-												const errorMsg =
-													(result.data as any)?.error || 'Gagal memperbarui pengaturan';
-												toast.error(errorMsg);
-											}
-										};
-									}}
+									use:enhance={formToast({
+										success: 'Pengaturan organisasi diperbarui!',
+										error: 'Gagal memperbarui pengaturan',
+										withUpdate: false
+									})}
 									class="space-y-6"
 								>
 									<AuthFormField

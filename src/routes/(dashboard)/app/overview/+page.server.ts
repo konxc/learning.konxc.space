@@ -2,7 +2,7 @@ import type { PageServerLoad } from './$types';
 import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
@@ -232,6 +232,26 @@ export const load: PageServerLoad = async (event) => {
 			}
 		}
 
+		// Get Mid-Term Review Candidates (Week 6)
+		let midTermReviews = 0;
+		if (courseIds.length > 0) {
+			const activeEnrollmentsByMentor = await db
+				.select()
+				.from(schema.enrollment)
+				.where(and(
+					inArray(schema.enrollment.courseId, courseIds),
+					eq(schema.enrollment.status, 'active')
+				));
+			
+			for (const enrollment of activeEnrollmentsByMentor) {
+				const diffDays = Math.floor((new Date().getTime() - new Date(enrollment.enrolledAt).getTime()) / (1000 * 60 * 60 * 24));
+				const weekNumber = Math.ceil(diffDays / 7);
+				if (weekNumber === 6) {
+					midTermReviews++;
+				}
+			}
+		}
+
 		// Get active cohorts filtered by workspace if in org
 		let cohortsQuery = db.select().from(schema.cohort).where(eq(schema.cohort.status, 'active'));
 		
@@ -243,6 +263,7 @@ export const load: PageServerLoad = async (event) => {
 				totalStudents: totalStudents,
 				pendingSubmissions: pendingSubmissions,
 				totalActionSubmissions: totalActionSubmissions,
+				midTermReviews: midTermReviews,
 				trackCounts: trackCounts,
 				activeCohorts: cohorts.length
 			},

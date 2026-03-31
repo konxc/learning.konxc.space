@@ -7,6 +7,7 @@ import { hashPassword, verifyPassword, hashApiKey } from '$lib/server/password';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
 import { sendEmail } from '$lib/server/email';
 import { timingSafeEqual } from 'crypto';
+import { uploadFile } from '$lib/server/s3';
 
 function validateEmail(email: unknown): email is string {
 	if (typeof email !== 'string') return false;
@@ -121,6 +122,7 @@ export const load: PageServerLoad = async ({ locals, url, cookies }) => {
 
 	const tabs = [
 		{ label: 'Profil', id: 'profile', icon: 'user' },
+		{ label: 'Trust & Safety', id: 'verification', icon: 'shield-check' },
 		{ label: 'Keamanan', id: 'security', icon: 'shield' },
 		{ label: 'Organisasi', id: 'organization', icon: 'layout' },
 		{ label: 'Preferensi', id: 'preferences', icon: 'settings' },
@@ -154,10 +156,12 @@ export const load: PageServerLoad = async ({ locals, url, cookies }) => {
 			fullName: currentUser.fullName,
 			email: currentUser.email,
 			phone: currentUser.phone,
+			avatarUrl: currentUser.avatarUrl,
 			role: currentUser.role,
 			createdAt: currentUser.createdAt,
 			isVerified: verification?.status === 'approved'
 		},
+		verification,
 		organization,
 		orgMembers,
 		orgApiKeys,
@@ -229,6 +233,132 @@ export const actions: Actions = {
 		}
 	},
 
+	uploadAvatar: async ({ request, locals }) => {
+		if (!locals.user) throw redirect(302, '/auth/signin');
+		
+		const formData = await request.formData();
+		const file = formData.get('avatar') as File;
+		
+		if (!file || file.size === 0) {
+			return actionFailure(400, 'Pilih gambar terlebih dahulu');
+		}
+
+		if (file.size > 5 * 1024 * 1024) {
+			return actionFailure(400, 'Ukuran file maksimal 5MB');
+		}
+
+		if (!file.type.startsWith('image/')) {
+			return actionFailure(400, 'Format file harus berupa gambar (JPG, PNG)');
+		}
+
+		try {
+			const buffer = Buffer.from(await file.arrayBuffer());
+			// Create a unique key e.g. avatars/123_1623...png
+			const extension = file.name.split('.').pop() || 'png';
+			const key = `avatars/${locals.user.id}_${Date.now()}.${extension}`;
+			
+			const avatarUrl = await uploadFile(buffer, key, file.type);
+			
+			await db.update(schema.user)
+				.set({ avatarUrl })
+				.where(eq(schema.user.id, locals.user.id));
+				
+			return actionSuccess({ message: 'Avatar berhasil diunggah!', data: { avatarUrl } });
+		} catch (error) {
+			console.error('S3 Avatar Upload Error:', error);
+			return actionFailure(500, 'Gagal mengunggah avatar ke server');
+		}
+	},
+
+	submitVerification: async ({ request, locals }) => {
+		if (!locals.user) throw redirect(302, '/auth/signin');
+
+		const formData = await request.formData();
+		const ktpNumber = formData.get('ktpNumber')?.toString() || '';
+		const ktpName = formData.get('ktpName')?.toString() || '';
+		const ktpAddress = formData.get('ktpAddress')?.toString() || '';
+		const ktpDobStr = formData.get('ktpDob')?.toString() || '';
+
+		const ktpPhoto = formData.get('ktpPhoto') as File | null;
+		const selfiePhoto = formData.get('selfiePhoto') as File | null;
+
+		if (!ktpNumber || ktpNumber.length < 16) {
+			return actionFailure(400, 'Nomor KTP harus terdiri dari minimal 16 digit');
+		}
+		if (!ktpName || !ktpAddress || !ktpDobStr) {
+			return actionFailure(400, 'Semua kolom wajib diisi');
+		}
+
+		let ktpPhotoUrl = '';
+		let selfieWithKtpUrl = '';
+
+		// Real S3 Uploads
+		if (!ktpPhoto || ktpPhoto.size === 0) {
+			return actionFailure(400, 'Foto KTP wajib diunggah');
+		}
+		if (!selfiePhoto || selfiePhoto.size === 0) {
+			return actionFailure(400, 'Selfie dengan KTP wajib diunggah');
+		}
+
+		if (ktpPhoto.size > 5 * 1024 * 1024 || selfiePhoto.size > 5 * 1024 * 1024) {
+			return actionFailure(400, 'Ukuran maksimal untuk setiap foto adalah 5MB');
+		}
+
+		try {
+			const ktpExt = ktpPhoto.name.split('.').pop() || 'png';
+			const rawKtpUrl = await uploadFile(
+				Buffer.from(await ktpPhoto.arrayBuffer()),
+				`kyc/${locals.user.id}_ktp_${Date.now()}.${ktpExt}`,
+				ktpPhoto.type
+			);
+			ktpPhotoUrl = rawKtpUrl;
+
+			const selfieExt = selfiePhoto.name.split('.').pop() || 'png';
+			const rawSelfieUrl = await uploadFile(
+				Buffer.from(await selfiePhoto.arrayBuffer()),
+				`kyc/${locals.user.id}_selfie_${Date.now()}.${selfieExt}`,
+				selfiePhoto.type
+			);
+			selfieWithKtpUrl = rawSelfieUrl;
+		} catch (uploadError) {
+			console.error('KYC Upload S3 Error:', uploadError);
+			return actionFailure(500, 'Gagal mengunggah foto KYC ke server');
+		}
+
+		try {
+			await db
+				.insert(schema.userVerification)
+				.values({
+					id: 'verif-' + crypto.randomUUID().substring(0, 8),
+					userId: locals.user.id,
+					ktpNumber,
+					ktpName,
+					ktpAddress,
+					ktpDob: new Date(ktpDobStr),
+					ktpPhotoUrl,
+					selfieWithKtpUrl,
+					status: 'pending'
+				})
+				.onConflictDoUpdate({
+					target: schema.userVerification.userId,
+					set: {
+						ktpNumber,
+						ktpName,
+						ktpAddress,
+						ktpDob: new Date(ktpDobStr),
+						ktpPhotoUrl,
+						selfieWithKtpUrl,
+						status: 'pending',
+						updatedAt: new Date()
+					}
+				});
+			return actionSuccess({ message: 'Data KYC berhasil disubmit. Menunggu review admin.' });
+		} catch (e) {
+			console.error('Submit verification error:', e);
+			return actionFailure(500, 'Gagal mengirim data verifikasi');
+		}
+	},
+
 	createOrganization: async ({ request, locals, cookies }) => {
 		if (!locals.user) throw redirect(302, '/auth/signin');
 
@@ -285,6 +415,14 @@ export const actions: Actions = {
 		if (!activeWorkspaceId || activeWorkspaceId === 'personal')
 			return actionFailure(400, 'Workspace tidak valid');
 
+		// KTP Verification Check
+		const verification = await db.query.userVerification.findFirst({
+			where: eq(schema.userVerification.userId, locals.user.id)
+		});
+		if (verification?.status !== 'approved' && locals.user.role !== 'admin') {
+			return actionFailure(403, 'Akses ditolak: Anda wajib memverifikasi KTP terlebih dahulu.');
+		}
+
 		const authCheck = await requireOrgAdmin(locals.user.id, activeWorkspaceId!);
 		if (authCheck.error) {
 			return actionFailure(403, authCheck.message);
@@ -308,6 +446,14 @@ export const actions: Actions = {
 		const activeWorkspaceId = cookies.get('active-workspace');
 		if (!activeWorkspaceId || activeWorkspaceId === 'personal') {
 			return actionFailure(400, 'Workspace tidak valid');
+		}
+
+		// KTP Verification Check
+		const verification = await db.query.userVerification.findFirst({
+			where: eq(schema.userVerification.userId, locals.user.id)
+		});
+		if (verification?.status !== 'approved' && locals.user.role !== 'admin') {
+			return actionFailure(403, 'Akses ditolak: Anda wajib memverifikasi KTP terlebih dahulu.');
 		}
 
 		const authCheck = await requireOrgAdmin(locals.user.id, activeWorkspaceId);
@@ -349,6 +495,14 @@ export const actions: Actions = {
 		const activeWorkspaceId = cookies.get('active-workspace');
 		if (!activeWorkspaceId || activeWorkspaceId === 'personal') {
 			return actionFailure(400, 'Workspace tidak valid');
+		}
+
+		// KTP Verification Check
+		const verification = await db.query.userVerification.findFirst({
+			where: eq(schema.userVerification.userId, locals.user.id)
+		});
+		if (verification?.status !== 'approved' && locals.user.role !== 'admin') {
+			return actionFailure(403, 'Akses ditolak: Anda wajib memverifikasi KTP terlebih dahulu.');
 		}
 
 		const authCheck = await requireOrgAdmin(locals.user.id, activeWorkspaceId);
