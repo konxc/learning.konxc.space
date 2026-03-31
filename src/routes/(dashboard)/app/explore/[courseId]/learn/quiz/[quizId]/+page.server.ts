@@ -12,13 +12,15 @@ type QuizChoiceWithAnswer = typeof schema.quizChoice.$inferSelect;
 
 type QuizQuestionWithChoices<TChoice> = typeof schema.quizQuestion.$inferSelect & {
 	choices: TChoice[];
+	expectedKeywords: string | null;
+	maxScore: number | null;
 };
 
 type QuizWithQuestions<TChoice> = typeof schema.quiz.$inferSelect & {
 	questions: QuizQuestionWithChoices<TChoice>[];
 };
 
-type QuizSubmissionAnswers = Record<string, string>;
+type QuizSubmissionAnswers = Record<string, string | string[]>;
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
@@ -137,7 +139,8 @@ export const actions: Actions = {
 		}
 
 		// Grade the quiz
-		let correctCount = 0;
+		let totalScore = 0;
+		let maxPossibleScore = 0;
 		const questions: QuizQuestionWithChoices<QuizChoiceWithAnswer>[] =
 			quiz.questions ?? ([] as QuizQuestionWithChoices<QuizChoiceWithAnswer>[]);
 		const totalQuestions = questions.length;
@@ -148,16 +151,69 @@ export const actions: Actions = {
 
 		for (const question of questions) {
 			const userAnswer = answers[question.id];
+			const questionType = question.type || 'mcq';
+			const questionMaxScore = question.maxScore || 10;
+			maxPossibleScore += questionMaxScore;
+
 			if (!userAnswer) continue;
 
-			const choices = question.choices ?? [];
-			const correctChoice = choices.find((choice) => choice.isCorrect);
-			if (correctChoice && userAnswer === correctChoice.id) {
-				correctCount++;
+			if (questionType === 'mcq') {
+				// Single choice question
+				const choices = question.choices ?? [];
+				const correctChoice = choices.find((choice) => choice.isCorrect);
+				if (correctChoice && userAnswer === correctChoice.id) {
+					totalScore += questionMaxScore;
+				}
+			} else if (questionType === 'multi-select') {
+				// Multi-select question - userAnswer is an array of choice IDs
+				const selectedIds = Array.isArray(userAnswer) ? userAnswer : [];
+				const choices = question.choices ?? [];
+				const correctChoiceIds = choices.filter((c) => c.isCorrect).map((c) => c.id);
+				const incorrectChoiceIds = choices.filter((c) => !c.isCorrect).map((c) => c.id);
+
+				// Check if all correct answers are selected AND no incorrect answers
+				const allCorrectSelected = correctChoiceIds.every((id) => selectedIds.includes(id));
+				const noIncorrectSelected = !selectedIds.some((id) => incorrectChoiceIds.includes(id));
+
+				if (allCorrectSelected && noIncorrectSelected && selectedIds.length > 0) {
+					totalScore += questionMaxScore;
+				} else {
+					// Partial credit: give points for each correct selection, minus penalties for incorrect
+					let partialScore = 0;
+					const pointsPerCorrect = questionMaxScore / (correctChoiceIds.length || 1);
+					const penaltyPerIncorrect = pointsPerCorrect; // Same penalty as reward
+
+					for (const id of selectedIds) {
+						if (correctChoiceIds.includes(id)) {
+							partialScore += pointsPerCorrect;
+						} else {
+							partialScore -= penaltyPerIncorrect;
+						}
+					}
+					totalScore += Math.max(0, Math.min(questionMaxScore, partialScore));
+				}
+			} else if (questionType === 'free-text') {
+				// Free-text question - check for keyword matches
+				const expectedKeywords =
+					question.expectedKeywords?.split(',').map((k) => k.trim().toLowerCase()) || [];
+				const answerText = (userAnswer as string).toLowerCase();
+
+				if (expectedKeywords.length === 0) {
+					// No keywords defined, needs manual grading - give 0 for now
+					// TODO: Flag for manual review
+				} else {
+					// Count how many keywords are found
+					const matchedKeywords = expectedKeywords.filter((keyword) =>
+						answerText.includes(keyword)
+					);
+					const matchRatio = matchedKeywords.length / expectedKeywords.length;
+					totalScore += Math.round(questionMaxScore * matchRatio);
+				}
 			}
 		}
 
-		const score = Math.round((correctCount / totalQuestions) * 100);
+		// Convert to percentage
+		const score = maxPossibleScore > 0 ? Math.round((totalScore / maxPossibleScore) * 100) : 0;
 
 		// Save submission
 		const submissionId = encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(10)));
@@ -168,7 +224,7 @@ export const actions: Actions = {
 			courseId: courseId,
 			quizId: quizId,
 			type: 'quiz',
-			payload: JSON.stringify({ answers, correctCount, totalQuestions }),
+			payload: JSON.stringify({ answers, totalScore, maxPossibleScore, totalQuestions }),
 			score: score
 		});
 

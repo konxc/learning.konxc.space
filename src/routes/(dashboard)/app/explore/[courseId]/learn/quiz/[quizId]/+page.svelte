@@ -13,7 +13,9 @@
 	type QuizQuestion = PageData['quiz']['questions'][number];
 	const quizQuestions = $derived<QuizQuestion[]>(data.quiz.questions ?? []);
 
-	let answers: Record<string, string> = $state({});
+	// For MCQ and free-text: single answer per question
+	// For multi-select: array of choice IDs
+	let answers: Record<string, string | string[]> = $state({});
 	let isSubmitting = $state(false);
 	let showResult = $state(false);
 	let result: { score: number; passingScore: number; passed: boolean } | null = $state(null);
@@ -51,6 +53,22 @@
 	function getResultStatus() {
 		if (!result) return '';
 		return result.passed ? 'passed' : 'failed';
+	}
+
+	// Handle multi-select checkbox changes
+	function handleMultiSelectChange(questionId: string, choiceId: string, checked: boolean) {
+		const current = (answers[questionId] as string[]) || [];
+		if (checked) {
+			answers[questionId] = [...current, choiceId];
+		} else {
+			answers[questionId] = current.filter((id) => id !== choiceId);
+		}
+	}
+
+	// Check if a choice is selected in multi-select
+	function isChoiceSelected(questionId: string, choiceId: string): boolean {
+		const current = answers[questionId] as string[];
+		return current?.includes(choiceId) || false;
 	}
 </script>
 
@@ -138,26 +156,72 @@
 								<span class={`${TEXT.button} ${COLOR.accent} font-semibold`}>
 									Question {idx + 1}
 								</span>
+								<span
+									class={`${TEXT.small} ${COLOR.textMuted} rounded-full bg-gray-100 px-2 py-1 dark:bg-neutral-800`}
+								>
+									{question.type === 'mcq'
+										? 'Single Choice'
+										: question.type === 'multi-select'
+											? 'Multiple Choice'
+											: 'Free Text'}
+								</span>
 							</div>
 							<p class={`${TEXT.body} text-lg ${COLOR.textPrimary} mb-4 leading-relaxed`}>
 								{question.question}
 							</p>
-							<div class="flex flex-col gap-3">
-								{#each question.choices as choice}
-									<label
-										class={`flex items-center gap-3 px-3 py-3 ${RADIUS.small} ${COLOR.card} ${COLOR.cardBorder} cursor-pointer border ${TRANSITION.all} focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-100 hover:border-blue-600 hover:bg-blue-50/50 dark:focus-within:ring-blue-900/50 dark:hover:bg-blue-950/20`}
-									>
-										<input
-											type="radio"
-											name="question_{question.id}"
-											value={choice.id}
-											bind:group={answers[question.id]}
-											class="h-5 w-5 cursor-pointer accent-blue-600"
-										/>
-										<span class={`flex-1 ${TEXT.body} ${COLOR.textPrimary}`}>{choice.text}</span>
-									</label>
-								{/each}
-							</div>
+
+							{#if question.type === 'mcq'}
+								<!-- Single Choice (Radio) -->
+								<div class="flex flex-col gap-3">
+									{#each question.choices as choice}
+										<label
+											class={`flex items-center gap-3 px-3 py-3 ${RADIUS.small} ${COLOR.card} ${COLOR.cardBorder} cursor-pointer border ${TRANSITION.all} focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-100 hover:border-blue-600 hover:bg-blue-50/50 dark:focus-within:ring-blue-900/50 dark:hover:bg-blue-950/20`}
+										>
+											<input
+												type="radio"
+												name="question_{question.id}"
+												value={choice.id}
+												bind:group={answers[question.id]}
+												class="h-5 w-5 cursor-pointer accent-blue-600"
+											/>
+											<span class={`flex-1 ${TEXT.body} ${COLOR.textPrimary}`}>{choice.text}</span>
+										</label>
+									{/each}
+								</div>
+							{:else if question.type === 'multi-select'}
+								<!-- Multiple Choice (Checkbox) -->
+								<p class={`${TEXT.small} ${COLOR.textMuted} mb-3`}>Select all that apply</p>
+								<div class="flex flex-col gap-3">
+									{#each question.choices as choice}
+										<label
+											class={`flex items-center gap-3 px-3 py-3 ${RADIUS.small} ${COLOR.card} ${COLOR.cardBorder} cursor-pointer border ${TRANSITION.all} focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-100 hover:border-blue-600 hover:bg-blue-50/50 dark:focus-within:ring-blue-900/50 dark:hover:bg-blue-950/20`}
+										>
+											<input
+												type="checkbox"
+												name="question_{question.id}_{choice.id}"
+												checked={isChoiceSelected(question.id, choice.id)}
+												onchange={(e) =>
+													handleMultiSelectChange(
+														question.id,
+														choice.id,
+														(e.target as HTMLInputElement).checked
+													)}
+												class="h-5 w-5 cursor-pointer accent-blue-600"
+											/>
+											<span class={`flex-1 ${TEXT.body} ${COLOR.textPrimary}`}>{choice.text}</span>
+										</label>
+									{/each}
+								</div>
+							{:else if question.type === 'free-text'}
+								<!-- Free Text (Textarea) -->
+								<textarea
+									name="question_{question.id}"
+									bind:value={answers[question.id]}
+									rows="4"
+									placeholder="Type your answer here..."
+									class={`w-full px-4 py-3 ${RADIUS.small} border ${COLOR.cardBorder} ${COLOR.card} ${TEXT.body} focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50`}
+								></textarea>
+							{/if}
 						</PageSection>
 					{/each}
 				</div>
