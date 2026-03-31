@@ -1,15 +1,132 @@
+# ============================================================
+# Naik Kelas 2.0 - Docker Compose LOCAL DEVELOPMENT (Portless)
+# ============================================================
+# Use this for local development with Hot Module Reload (HMR).
+# Traefik proxy handles dynamic host-routing via localhost:8080.
+# No ports are exposed publicly. Safe for Remote Dev Servers.
+# ============================================================
+
 services:
-  naikkelas-app:
+  # ============================================================
+  # Dev Proxy (Traefik) - Only Binds to 127.0.0.1:8080!
+  # ============================================================
+  dev-proxy:
+    image: traefik:v3.0
+    container_name: naikkelas-dev-proxy
+    restart: unless-stopped
+    command:
+      - '--api.insecure=false'
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--entrypoints.web.address=:80'
+    ports:
+      # Expose only to LOCALHOST on the remote server
+      # Route your SSH tunnel: ssh -L 80:127.0.0.1:8080 user@host
+      - '127.0.0.1:8080:80'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - nginx-net
+      - dev-network
+
+  # ============================================================
+  # Application Service (SvelteKit DEV mode)
+  # ============================================================
+  app:
+    image: naikkelas-dev:latest
     build:
       context: .
       dockerfile: Dockerfile.dev
+      args:
+        USER_ID: 1000
+        GROUP_ID: 1000
+    container_name: naikkelas-app-dev
+    restart: unless-stopped
     volumes:
+      # Bind-mount the entire repo → HMR + live-edit via SSH
       - ./:/app:cached
-      - /app/node_modules
+      # Named volume preserves node_modules across container restarts
+      # (prevents Docker from overwriting the bind mount)
+      - node-modules-dev:/app/node_modules
     environment:
       - NODE_ENV=development
       - PORT=3000
+      - HOST=0.0.0.0
     command: ['pnpm', 'dev', '--host', '0.0.0.0', '--port', '3000']
-    ports: [] # no host ports - proxying via nginx-proxy only
     networks:
       - nginx-net
+      - dev-network
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.app-dev.rule=Host(`naikkelas-app-dev.localhost`)'
+      - 'traefik.http.services.app-dev.loadbalancer.server.port=3000'
+
+  redis:
+    image: redis:7-alpine
+    container_name: naikkelas-redis-dev
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data-dev:/data
+    networks:
+      - dev-network
+
+  # ============================================================
+  # S3/R2 Local Emulator (MinIO)
+  # ============================================================
+  minio:
+    image: minio/minio:latest
+    container_name: naikkelas-minio
+    restart: unless-stopped
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=password123
+      - MINIO_DOMAIN=s3-dev.naikkelas.local
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - dev-network
+      - nginx-net
+    labels:
+      - 'traefik.enable=true'
+      # Dashboard Route
+      - 'traefik.http.routers.minio-console.rule=Host(`naikkelas-minio.localhost`)'
+      - 'traefik.http.routers.minio-console.service=minio-console'
+      - 'traefik.http.services.minio-console.loadbalancer.server.port=9001'
+      # API Route (S3 endpoint)
+      - 'traefik.http.routers.minio-api.rule=Host(`s3.localhost`)'
+      - 'traefik.http.routers.minio-api.service=minio-api'
+      - 'traefik.http.services.minio-api.loadbalancer.server.port=9000'
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: naikkelas-minio-init
+    depends_on:
+      - minio
+    networks:
+      - dev-network
+    entrypoint: >
+      /bin/sh -c "
+      echo '⏳ Menunggu MinIO siap...';
+      sleep 5;
+      mc alias set dev http://minio:9000 admin password123;
+      echo '📦 Membuat bucket naikkelas-assets...';
+      mc mb dev/naikkelas-assets || true;
+      mc anonymous set public dev/naikkelas-assets;
+      echo '✅ MinIO Bucket siap!';
+      "
+
+volumes:
+  node-modules-dev:
+    driver: local
+  redis-data-dev:
+    driver: local
+  minio-data:
+    driver: local
+
+networks:
+  dev-network:
+    driver: bridge
+  nginx-net:
+    external: true

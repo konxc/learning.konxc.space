@@ -1,14 +1,14 @@
 # ============================================================
-# Naik Kelas 2.0 - Multi-stage Docker Build
+# Naik Kelas 2.0 - Docker Build (Host-Built Artifacts)
 # ============================================================
-# Build: docker build -t naikkelas:latest .
-# Run:   docker compose up -d
+# We use pre-built artifacts because VPS Docker limits
+# cause Rollup to OOM on `pnpm run build`
 # ============================================================
 
 # ============================================================
 # Stage 1: Dependencies
 # ============================================================
-FROM node:22-alpine AS deps
+FROM node:22-slim AS deps
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -22,44 +22,27 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --prod=false
 
 # ============================================================
-# Stage 2: Build
+# Stage 2: Production
 # ============================================================
-FROM node:22-alpine AS build
+FROM node:22-slim AS production
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
-WORKDIR /app
-
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/.pnpm-store /.pnpm-store
-
-# Copy source code
-COPY . .
-
-# Build the application
-RUN pnpm run build
-
-# ============================================================
-# Stage 3: Production
-# ============================================================
-FROM node:22-alpine AS production
-
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install dumb-init and wget for proper signal handling and health checks
+RUN apt-get update && apt-get install -y dumb-init wget && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN addgroup -g 1001 -S naikkelas && \
-    adduser -S naikkelas -u 1001 -G naikkelas
+RUN addgroup --system --gid 1001 naikkelas && \
+    adduser --system --uid 1001 --ingroup naikkelas naikkelas
 
 WORKDIR /app
 
-# Copy built output from build stage
-COPY --from=build --chown=naikkelas:naikkelas /app/build ./build
-COPY --from=build --chown=naikkelas:naikkelas /app/.svelte-kit ./.svelte-kit
-COPY --from=build --chown=naikkelas:naikkelas /app/node_modules ./node_modules
-COPY --from=build --chown=naikkelas:naikkelas /app/package.json ./
-COPY --from=build --chown=naikkelas:naikkelas /app/scripts ./scripts
+# Copy built output from host system (.svelte-kit and build)
+COPY --chown=naikkelas:naikkelas build ./build
+COPY --chown=naikkelas:naikkelas .svelte-kit ./.svelte-kit
+# Copy dependencies from deps stage
+COPY --from=deps --chown=naikkelas:naikkelas /app/node_modules ./node_modules
+# Copy other essential files
+COPY --chown=naikkelas:naikkelas package.json ./
+COPY --chown=naikkelas:naikkelas scripts ./scripts
 
 # Create data directory for SQLite (if needed)
 RUN mkdir -p /data && chown -R naikkelas:naikkelas /data

@@ -1,29 +1,37 @@
 # ============================================================
-# Naik Kelas 2.0 - Docker Compose Production Configuration
+# Naik Kelas 2.0 - Docker Compose PRODUCTION & PREVIEW 
 # ============================================================
 # Usage:
 #   1. Copy .env.production to .env and configure values
-#   2. docker compose up -d
-#   3. docker compose exec app pnpm run db:push (first time only)
-#   4. docker compose exec app pnpm run db:seed:remote (optional)
+#   2. docker network create nginx-net (if not exists)
+#   3. docker compose up -d --build
+#   4. Use Nginx Proxy Manager / Host Nginx to route to naikkelas-app:3000
+#      (Or use Traefik Dev Proxy if testing SSH Port Forwarding)
 # ============================================================
 
 services:
   # ============================================================
-  # Application Service
+  # Application Service (Production Build)
   # ============================================================
   app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: naikkelas:latest
     container_name: naikkelas-app
     restart: unless-stopped
-    ports:
-      - "${PORT:-3000}:3000"
+    # PORT BINDINGS REMOVED FOR SECURITY 
+    # Must be routed via proxy on nginx-net network
     env_file:
-      - .env
+      - .env.production
     environment:
       - NODE_ENV=production
       - PORT=3000
       - HOST=0.0.0.0
+      - VIRTUAL_HOST=naikkelas.konxc.space
+      - VIRTUAL_PORT=3000
+      - LETSENCRYPT_HOST=naikkelas.konxc.space
+      - LETSENCRYPT_EMAIL=admin@konxc.space
     volumes:
       # Persist SQLite database (if using file-based DB)
       - app-data:/data
@@ -37,11 +45,14 @@ services:
       start_period: 40s
     networks:
       - naikkelas-network
+      - nginx-net
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+    labels:
+      - "nginx.proxy.enable=true"
 
   # ============================================================
   # Redis Cache (for session store & caching)
@@ -61,26 +72,6 @@ services:
         max-size: "5m"
         max-file: "2"
 
-  # ============================================================
-  # Nginx Reverse Proxy (Optional - for SSL termination)
-  # Uncomment below and create docker/nginx/ directory
-  # ============================================================
-  # nginx:
-  #   image: nginx:alpine
-  #   container_name: naikkelas-nginx
-  #   restart: unless-stopped
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-  #     - ./docker/nginx/ssl:/etc/nginx/ssl:ro
-  #   depends_on:
-  #     app:
-  #       condition: service_healthy
-  #   networks:
-  #     - naikkelas-network
-
 volumes:
   app-data:
     driver: local
@@ -93,3 +84,5 @@ networks:
   naikkelas-network:
     driver: bridge
     name: naikkelas-network
+  nginx-net:
+    external: true
