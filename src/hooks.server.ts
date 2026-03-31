@@ -13,6 +13,13 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 		});
 	});
 
+const handleHealth: Handle = async ({ event, resolve }) => {
+	if (event.url.pathname === '/health') {
+		return new Response('OK', { status: 200 });
+	}
+	return resolve(event);
+};
+
 const handleAuth: Handle = async ({ event, resolve }) => {
 	const sessionToken = event.cookies.get(auth.sessionCookieName);
 
@@ -65,4 +72,4 @@ const handleTheme: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handle: Handle = sequence(handleParaglide, handleAuth, handleTheme);
+export const handle: Handle = sequence(handleHealth, handleParaglide, handleAuth, handleTheme);

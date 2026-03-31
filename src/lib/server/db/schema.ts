@@ -8,6 +8,7 @@ export const user = sqliteTable('user', {
 	fullName: text('full_name'),
 	email: text('email'),
 	phone: text('phone'),
+	avatarUrl: text('avatar_url'),
 	onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' }).default(false),
 	lastWorkspaceId: text('last_workspace_id'), // To remember user's last active workspace
 	createdAt: integer('created_at', { mode: 'timestamp' })

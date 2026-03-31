@@ -38,6 +38,7 @@ export async function validateSessionToken(token: string) {
 				fullName: table.user.fullName,
 				email: table.user.email,
 				lastWorkspaceId: table.user.lastWorkspaceId,
+				avatarUrl: table.user.avatarUrl,
 				onboardingCompleted: table.user.onboardingCompleted,
 				deletedAt: table.user.deletedAt
 			},
