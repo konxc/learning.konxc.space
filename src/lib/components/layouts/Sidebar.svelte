@@ -50,6 +50,9 @@
 			activeId: string;
 			activeOrg: any;
 		};
+		workspaceSwitcherOpen?: boolean;
+		onWorkspaceSwitcherToggle?: (open: boolean) => void;
+		triggerRect?: DOMRect | null;
 	}
 
 	let {
@@ -60,7 +63,10 @@
 		config = {},
 		isCollapsed = $bindable(false),
 		onToggle,
-		workspaces
+		workspaces,
+		workspaceSwitcherOpen = $bindable(false),
+		onWorkspaceSwitcherToggle,
+		triggerRect = $bindable(null)
 	}: SidebarProps = $props();
 	const { collapsible = true, grouped = true, searchable = true, showBadges = true } = config;
 
@@ -301,7 +307,13 @@
 			<div
 				class={`border-t border-gray-100 px-3 pt-2 pb-4 dark:border-neutral-800 ${isCollapsed ? 'px-2' : ''}`}
 			>
-				<WorkspaceSwitcher {workspaces} fullWidth={true} {isCollapsed} />
+				<WorkspaceSwitcher
+					{workspaces}
+					fullWidth={true}
+					{isCollapsed}
+					bind:isOpen={workspaceSwitcherOpen}
+					bind:triggerRect
+				/>
 			</div>
 		{/if}
 	</div>

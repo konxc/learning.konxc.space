@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import Toaster from '$lib/components/Toaster.svelte';
-	import { toasts } from '$lib/stores/toastStore';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
 	import Sidebar from './Sidebar.svelte';
 	import DashboardHeader from './DashboardHeader.svelte';
 	import DashboardBreadcrumb from './DashboardBreadcrumb.svelte';
 	import { onMount, type Snippet } from 'svelte';
 	import { initTheme, setTheme, getStoredTheme, applyTheme, type Theme } from '$lib/stores/theme';
+	import WorkspaceDropdown from './WorkspaceDropdown.svelte';
 	import { COLOR, RADIUS, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
 	import type { NavItem } from '$lib/server/rbac';
 	import { createPageMetadata } from '$lib/stores/pageMetadata';
@@ -38,6 +37,8 @@
 
 	let theme = $state<Theme>('system');
 	let sidebarCollapsed = $state(false);
+	let workspaceSwitcherOpen = $state(false);
+	let triggerRect = $state<DOMRect | null>(null);
 
 	// Create page metadata context for children components
 	createPageMetadata();
@@ -95,7 +96,6 @@
 </svelte:head>
 
 <div class={`min-h-screen ${COLOR.bg} ${COLOR.textPrimary} antialiased`}>
-	<Toaster messages={$toasts} />
 	<DashboardHeader
 		user={data.user ?? null}
 		{theme}
@@ -107,7 +107,10 @@
 		{profileDetailsRef}
 		{themeAccordionRef}
 		{sidebarCollapsed}
-		onSidebarToggle={() => (sidebarCollapsed = !sidebarCollapsed)}
+		onSidebarToggle={() => {
+			sidebarCollapsed = !sidebarCollapsed;
+			if (workspaceSwitcherOpen) workspaceSwitcherOpen = false;
+		}}
 		notifications={data.user?.notifications}
 		unreadCount={data.user?.unreadCount}
 		workspaces={data.workspaces}
@@ -128,11 +131,13 @@
 			}}
 			bind:isCollapsed={sidebarCollapsed}
 			workspaces={data.workspaces}
+			bind:workspaceSwitcherOpen
+			bind:triggerRect
 		/>
 
 		<main
 			id="main-content"
-			class={`min-w-0 flex-1 overflow-x-hidden scroll-smooth ${sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'} ${TRANSITION.spring}`}
+			class={`min-w-0 flex-1 overflow-x-hidden scroll-smooth transition-opacity duration-300 ${sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'} ${TRANSITION.spring}`}
 		>
 			<!-- Skip to content link for accessibility -->
 			<a
@@ -143,7 +148,7 @@
 
 			<div class="min-h-[calc(100vh-56px)] w-full">
 				<!-- Page Content with Smooth Transition -->
-				<div class="min-h-[calc(100vh-116px)] w-full pb-10 px-4 sm:px-6 lg:px-8 pt-6 md:pt-8">
+				<div class="min-h-[calc(100vh-116px)] w-full px-4 pt-6 pb-10 sm:px-6 md:pt-8 lg:px-8">
 					<div class="relative w-full">
 						{#key $page.url.pathname}
 							<div
@@ -159,6 +164,38 @@
 			</div>
 		</main>
 	</div>
+
+	{#if workspaceSwitcherOpen && triggerRect && data.workspaces}
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- Backdrop above header (z-30) and sidebar (z-40) to blur them -->
+		<div
+			class="fixed inset-0 z-50 bg-black/10 backdrop-blur-sm"
+			transition:fade={{ duration: 200 }}
+			onclick={() => (workspaceSwitcherOpen = false)}
+			role="button"
+			tabindex="-1"
+		></div>
+
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- Trigger spacer: covers trigger button area, above backdrop, keeps it clear and clickable -->
+		<div
+			class="fixed z-[51] cursor-pointer"
+			style="left: {triggerRect.left}px; top: {triggerRect.top}px; width: {triggerRect.width}px; height: {triggerRect.height}px;"
+			onclick={() => (workspaceSwitcherOpen = !workspaceSwitcherOpen)}
+			role="button"
+			tabindex="-1"
+			aria-label="Tutup pemilih ruang kerja"
+		></div>
+
+		<WorkspaceDropdown
+			workspaces={data.workspaces}
+			{triggerRect}
+			bind:isOpen={workspaceSwitcherOpen}
+			isCollapsed={sidebarCollapsed}
+		/>
+	{/if}
 
 	<CommandPalette items={data.navItems} />
 </div>
