@@ -88,11 +88,12 @@ export const actions: Actions = {
 			})
 			.where(eq(schema.mentorApplication.id, applicationId));
 
-		// Update user role to mentor
+		// Update user role to mentor and trigger re-onboarding
 		await db
 			.update(schema.user)
 			.set({
-				role: 'mentor'
+				role: 'mentor',
+				onboardingCompleted: false // Trigger role-specific onboarding
 			})
 			.where(eq(schema.user.id, application.userId));
 

@@ -118,9 +118,11 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 
 		if (existingMember) {
 			// Check if trying to invite as mentor/facilitator when already has a role
-			const isMentorOrFacilitatorInvite = invitation.role === 'mentor' || invitation.role === 'facilitator';
-			const isExistingMentorOrFacilitator = existingMember.role === 'mentor' || existingMember.role === 'facilitator';
-			
+			const isMentorOrFacilitatorInvite =
+				invitation.role === 'mentor' || invitation.role === 'facilitator';
+			const isExistingMentorOrFacilitator =
+				existingMember.role === 'mentor' || existingMember.role === 'facilitator';
+
 			if (isMentorOrFacilitatorInvite && isExistingMentorOrFacilitator) {
 				throw error(
 					403,
@@ -179,10 +181,19 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 			sameSite: 'lax'
 		});
 
-		// Update user's last workspace
+		// Update user's last workspace and role (for mentor/facilitator invitations)
+		const needsRoleUpdate =
+			(invitation.role === 'mentor' || invitation.role === 'facilitator') &&
+			user.role !== 'mentor' &&
+			user.role !== 'facilitator' &&
+			user.role !== 'admin';
+
 		await db
 			.update(schema.user)
-			.set({ lastWorkspaceId: invitation.orgId })
+			.set({
+				lastWorkspaceId: invitation.orgId,
+				...(needsRoleUpdate ? { role: invitation.role, onboardingCompleted: false } : {})
+			})
 			.where(eq(schema.user.id, user.id));
 
 		// Redirect to appropriate onboarding based on role
