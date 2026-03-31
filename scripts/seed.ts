@@ -25,6 +25,7 @@ import {
 import { seedAffiliateLinks, seedAffiliateSales } from './seed/affiliates.js';
 import { seedOrganizations, assignCoursesToOrganizations, seedWorkspaces } from './seed/organizations.js';
 import { seedPlugins } from './seed/plugins.js';
+import { seedKoneksiDigital } from './seed/koneksi-digital.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -201,6 +202,10 @@ async function main() {
 		// ===== STEP 11: Plugins =====
 		console.log('\n📋 STEP 11: Creating plugins...');
 		await seedPlugins(db);
+
+		// ===== STEP 11.5: Koneksi Digital (Drafting Sync) =====
+		console.log('\n📋 STEP 11.5: Syncing Koneksi Digital curriculum...');
+		await seedKoneksiDigital(db, adminId);
 
 		// ===== STEP 12: Checkpoints =====
 		console.log('\n📋 STEP 12: Creating checkpoints...');
