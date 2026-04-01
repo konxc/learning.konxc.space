@@ -1,27 +1,22 @@
 <script lang="ts">
 	import { RADIUS, COLOR, TEXT, ELEVATION } from '$lib/config/design';
 
-	export interface Notification {
+	interface Notification {
 		title: string;
 		message: string;
-		link?: string;
-		read?: boolean;
+		link?: string | null;
+		read?: boolean | null;
 		createdAt: string | Date;
 	}
 
-	export interface NotificationsDropdownProps {
+	interface NotificationsDropdownProps {
 		notifications?: Notification[];
 		unreadCount?: number;
 		show: boolean;
 		onClose: () => void;
 	}
 
-	let {
-		notifications = [],
-		unreadCount = 0,
-		show,
-		onClose
-	}: NotificationsDropdownProps = $props();
+	let { notifications = [], unreadCount = 0, show, onClose }: NotificationsDropdownProps = $props();
 
 	function formatDate(date: string | Date): string {
 		return new Date(date).toLocaleDateString('id-ID', {
@@ -42,45 +37,69 @@
 <svelte:window onkeydown={handleKeyDown} />
 
 {#if show}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		class={`absolute right-0 z-50 mt-2 w-80 ${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} ${ELEVATION.card} overflow-hidden`}
+		class="fixed inset-0 z-40"
+		onclick={onClose}
+		onkeydown={(e) => e.key === 'Escape' && onClose()}
+		role="button"
+		tabindex="-1"
+		aria-label="Tutup notifikasi"
+	></div>
+
+	<div
+		class={`absolute top-full right-0 z-50 mt-2 w-80 ${RADIUS.card} border ${COLOR.cardBorder} ${COLOR.card} ${ELEVATION.card} overflow-hidden`}
 	>
-		<div class="border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
-			<h3 class="font-bold text-zinc-900 dark:text-zinc-100">Notifications</h3>
+		<div class={`flex items-center justify-between border-b ${COLOR.cardBorder} px-4 py-3`}>
+			<h3 class={`font-bold ${COLOR.textPrimary}`}>Notifikasi</h3>
+			{#if unreadCount > 0}
+				<span class="rounded-full bg-blue-500 px-2 py-0.5 text-xs font-bold text-white">
+					{unreadCount > 99 ? '99+' : unreadCount}
+				</span>
+			{/if}
 		</div>
+
 		<div class="relative max-h-96 overflow-y-auto">
 			{#if notifications && notifications.length > 0}
 				{#each notifications as notif}
 					<a
-						href={notif.link || '#'}
-						class="block border-b border-zinc-50 px-4 py-3 transition-colors hover:bg-zinc-50/50 dark:border-zinc-800/50 dark:hover:bg-zinc-800/50 {!notif.read
-							? 'bg-blue-50/50 dark:bg-blue-900/10'
-							: ''}"
+						href={notif.link || '/app/notifications'}
+						onclick={onClose}
+						class={`block border-b px-4 py-3 transition-colors hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50 ${COLOR.cardBorder} ${!notif.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
 					>
-						<p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-							{notif.title}
-						</p>
-						<p class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-							{notif.message}
-						</p>
-						<p class="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-							{formatDate(notif.createdAt)}
-						</p>
+						<div class="flex items-start gap-2">
+							{#if !notif.read}
+								<div class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500"></div>
+							{:else}
+								<div class="mt-1.5 h-2 w-2 shrink-0"></div>
+							{/if}
+							<div class="min-w-0 flex-1">
+								<p class={`text-sm font-medium ${COLOR.textPrimary} truncate`}>
+									{notif.title}
+								</p>
+								<p class={`mt-0.5 text-xs ${COLOR.textMuted} line-clamp-2`}>
+									{notif.message}
+								</p>
+								<p class={`mt-1 text-xs ${COLOR.textMuted}`}>
+									{formatDate(notif.createdAt)}
+								</p>
+							</div>
+						</div>
 					</a>
 				{/each}
 			{:else}
-				<div class="px-4 py-10 text-center text-sm font-medium text-zinc-500">
-					No notifications
+				<div class={`px-4 py-10 text-center text-sm font-medium ${COLOR.textMuted}`}>
+					Tidak ada notifikasi
 				</div>
 			{/if}
 		</div>
-		{#if notifications && notifications.length > 0}
-			<a
-				href="/app/notifications"
-				class="block rounded-b-xl border-t border-zinc-100 bg-zinc-50/50 px-4 py-3 text-center text-sm font-bold text-blue-600 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/50 dark:hover:bg-zinc-800"
-			>
-				View All Notifications
-			</a>
-		{/if}
+
+		<a
+			href="/app/notifications"
+			onclick={onClose}
+			class={`block border-t ${COLOR.cardBorder} bg-zinc-50/50 px-4 py-3 text-center text-sm font-bold ${COLOR.accent} transition-colors hover:bg-zinc-50 dark:bg-zinc-900/50 dark:hover:bg-zinc-800`}
+		>
+			Lihat Semua Notifikasi →
+		</a>
 	</div>
 {/if}

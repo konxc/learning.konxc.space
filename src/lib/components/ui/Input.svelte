@@ -5,6 +5,7 @@
 
 	interface InputProps {
 		id?: string;
+		name?: string;
 		label?: string;
 		type?: string;
 		value?: string | number;
@@ -17,6 +18,7 @@
 
 	let {
 		id,
+		name,
 		label,
 		type = 'text',
 		value = $bindable(),
@@ -34,6 +36,7 @@
 <input
 	class={`w-full ${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} text-sm outline-none ${TRANSITION.all} ${INPUT.focus} focus:ring-2 ${FOCUS.accent} disabled:cursor-not-allowed disabled:opacity-60`}
 	{id}
+	{name}
 	{type}
 	bind:value
 	{placeholder}

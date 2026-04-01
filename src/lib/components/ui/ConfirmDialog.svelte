@@ -54,17 +54,20 @@
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+		class="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4"
 		transition:fade={{ duration: 150 }}
 		onclick={onCancel}
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="confirm-dialog-title"
+		tabindex="-1"
 	>
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div
 			class={`w-full max-w-md ${RADIUS.card} ${COLOR.card} ${ELEVATION.card} overflow-hidden`}
 			transition:scale={{ duration: 200, start: 0.95 }}
 			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
 			role="document"
 		>
 			<div class="flex flex-col gap-4 p-6">

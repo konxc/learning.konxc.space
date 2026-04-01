@@ -158,43 +158,79 @@
 	}
 </script>
 
-<span
-	class={`inline-flex items-center gap-1 font-semibold capitalize ${RADIUS.badge} ${config().bgColor} ${config().textColor} border ${config().borderColor} ${sizeClasses[size]} ${clickable ? 'cursor-pointer hover:opacity-80' : ''}`}
-	role={clickable ? 'button' : undefined}
-	tabindex={clickable ? 0 : undefined}
-	onclick={clickable ? handleClick : undefined}
->
-	{#if config().icon === 'check-circle'}
-		<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-			/>
-		</svg>
-	{:else if config().icon === 'clock'}
-		<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-			/>
-		</svg>
-	{:else if config().icon === 'x-circle'}
-		<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-			/>
-		</svg>
-	{:else if config().icon === 'minus-circle'}
-		<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-			<path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
-		</svg>
-	{/if}
-	{config().text}
-</span>
+{#if clickable}
+	<button
+		type="button"
+		class={`inline-flex items-center gap-1 font-semibold capitalize ${RADIUS.badge} ${config().bgColor} ${config().textColor} border ${config().borderColor} ${sizeClasses[size]} cursor-pointer hover:opacity-80`}
+		onclick={handleClick}
+	>
+		{#if config().icon === 'check-circle'}
+			<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+		{:else if config().icon === 'clock'}
+			<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+		{:else if config().icon === 'x-circle'}
+			<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+		{:else if config().icon === 'minus-circle'}
+			<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+			</svg>
+		{/if}
+		{config().text}
+	</button>
+{:else}
+	<span
+		class={`inline-flex items-center gap-1 font-semibold capitalize ${RADIUS.badge} ${config().bgColor} ${config().textColor} border ${config().borderColor} ${sizeClasses[size]}`}
+	>
+		{#if config().icon === 'check-circle'}
+			<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+		{:else if config().icon === 'clock'}
+			<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+		{:else if config().icon === 'x-circle'}
+			<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+		{:else if config().icon === 'minus-circle'}
+			<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+			</svg>
+		{/if}
+		{config().text}
+	</span>
+{/if}
 
 <style>
 	.capitalize {

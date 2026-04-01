@@ -3,18 +3,20 @@
 	import type { Snippet } from 'svelte';
 
 	interface ModalProps {
-		isOpen: boolean;
+		show?: boolean;
+		isOpen?: boolean;
 		title?: string;
 		size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 		closeOnOverlayClick?: boolean;
 		closeOnEscape?: boolean;
-		onClose: () => void;
+		onClose?: () => void;
 		children: Snippet;
 		header?: Snippet;
 		footer?: Snippet;
 	}
 
 	let {
+		show = $bindable(false),
 		isOpen,
 		title,
 		size = 'md',
@@ -26,15 +28,22 @@
 		footer
 	}: ModalProps = $props();
 
+	const modalOpen = $derived(isOpen ?? show);
+
+	function handleClose() {
+		show = false;
+		onClose?.();
+	}
+
 	let contentRef: HTMLDivElement | undefined = $state(undefined);
 
 	// Handle escape key
 	$effect(() => {
-		if (!isOpen || !closeOnEscape) return;
+		if (!modalOpen || !closeOnEscape) return;
 
 		function handleEscape(e: KeyboardEvent) {
 			if (e.key === 'Escape') {
-				onClose();
+				handleClose();
 			}
 		}
 
@@ -59,14 +68,14 @@
 	};
 </script>
 
-{#if isOpen}
+{#if modalOpen}
 	<!-- Modal Overlay -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm transition-opacity"
 		role="presentation"
 		onclick={() => {
 			if (closeOnOverlayClick) {
-				onClose();
+				handleClose();
 			}
 		}}
 	>
@@ -82,7 +91,7 @@
 			onkeydown={(e) => {
 				if (e.key === 'Escape') {
 					e.stopPropagation();
-					onClose();
+					handleClose();
 				}
 			}}
 		>
@@ -100,7 +109,7 @@
 						type="button"
 						class={`inline-flex h-8 w-8 items-center justify-center ${RADIUS.badge} ${COLOR.textSecondary} ${TRANSITION.all} ${COLOR.surfaceHover} ${COLOR.textPrimary} focus:outline-none focus-visible:ring-2 ${FOCUS.accent} focus-visible:ring-offset-1 dark:focus-visible:ring-offset-neutral-900`}
 						aria-label="Close modal"
-						onclick={onClose}
+						onclick={handleClose}
 					>
 						<svg
 							class="h-5 w-5"
