@@ -40,6 +40,9 @@
 	let workspaceSwitcherOpen = $state(false);
 	let triggerRect = $state<DOMRect | null>(null);
 
+	// SSE-driven reactive unread count — starts from server-loaded value
+	let liveUnreadCount = $state<number>(data.user?.unreadCount ?? 0);
+
 	// Create page metadata context for children components
 	createPageMetadata();
 
@@ -67,6 +70,44 @@
 				}
 			};
 			m.addEventListener('change', handler);
+		}
+
+		// SSE: real-time notification count updates
+		if (data.user) {
+			let es: EventSource | null = null;
+			let retryTimeout: ReturnType<typeof setTimeout> | null = null;
+
+			function connect() {
+				es = new EventSource('/api/notifications/stream');
+
+				es.onmessage = (event) => {
+					try {
+						const payload = JSON.parse(event.data) as {
+							unreadCount?: number;
+							newNotifications?: { id: string; type: string; title: string; message: string }[];
+						};
+						if (typeof payload.unreadCount === 'number') {
+							liveUnreadCount = payload.unreadCount;
+						}
+					} catch {
+						// malformed event — ignore
+					}
+				};
+
+				es.onerror = () => {
+					es?.close();
+					es = null;
+					// Reconnect after 10 seconds
+					retryTimeout = setTimeout(connect, 10000);
+				};
+			}
+
+			connect();
+
+			return () => {
+				es?.close();
+				if (retryTimeout) clearTimeout(retryTimeout);
+			};
 		}
 	});
 
@@ -100,7 +141,7 @@
 			if (workspaceSwitcherOpen) workspaceSwitcherOpen = false;
 		}}
 		notifications={data.user?.notifications}
-		unreadCount={data.user?.unreadCount}
+		unreadCount={liveUnreadCount}
 		workspaces={data.workspaces}
 	/>
 
@@ -169,7 +210,7 @@
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<!-- Trigger spacer: covers trigger button area, above backdrop, keeps it clear and clickable -->
 		<div
-			class="fixed z-[51] cursor-pointer"
+			class="fixed z-51 cursor-pointer"
 			style="left: {triggerRect.left}px; top: {triggerRect.top}px; width: {triggerRect.width}px; height: {triggerRect.height}px;"
 			onclick={() => (workspaceSwitcherOpen = !workspaceSwitcherOpen)}
 			role="button"
