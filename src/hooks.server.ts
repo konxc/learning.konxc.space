@@ -3,6 +3,7 @@ import { redirect } from '@sveltejs/kit';
 import * as auth from '$lib/server/auth';
 import type { Handle } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
+import { checkRateLimit, RATE_LIMITS } from '$lib/server/rate-limit';
 
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
@@ -72,4 +73,43 @@ const handleTheme: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handle: Handle = sequence(handleHealth, handleParaglide, handleAuth, handleTheme);
+const handleRateLimit: Handle = async ({ event, resolve }) => {
+	const path = event.url.pathname;
+	const ip = event.getClientAddress();
+
+	// Login rate limiting
+	if (path === '/auth/signin' && event.request.method === 'POST') {
+		const result = checkRateLimit(`login:${ip}`, RATE_LIMITS.login);
+		if (!result.success) {
+			return new Response('Terlalu banyak percobaan. Coba lagi dalam 15 menit.', {
+				status: 429,
+				headers: {
+					'Retry-After': Math.ceil((result.resetAt.getTime() - Date.now()) / 1000).toString()
+				}
+			});
+		}
+	}
+
+	// Register rate limiting
+	if (path === '/auth/signup' && event.request.method === 'POST') {
+		const result = checkRateLimit(`register:${ip}`, RATE_LIMITS.register);
+		if (!result.success) {
+			return new Response('Terlalu banyak pendaftaran. Coba lagi dalam 1 jam.', {
+				status: 429,
+				headers: {
+					'Retry-After': Math.ceil((result.resetAt.getTime() - Date.now()) / 1000).toString()
+				}
+			});
+		}
+	}
+
+	return resolve(event);
+};
+
+export const handle: Handle = sequence(
+	handleHealth,
+	handleParaglide,
+	handleRateLimit,
+	handleAuth,
+	handleTheme
+);
