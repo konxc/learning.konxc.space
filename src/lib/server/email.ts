@@ -235,6 +235,7 @@ export async function sendEmail(
 ): Promise<{ success: boolean; error?: string }> {
 	const template = templates[type](data);
 	const emailId = encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(10)));
+	const apiKey = process.env.RESEND_API_KEY;
 
 	try {
 		// Log the email attempt
@@ -247,14 +248,35 @@ export async function sendEmail(
 			createdAt: new Date()
 		});
 
-		// In production, you would integrate with an email service here
-		// For now, we'll just log it as "sent" (simulating successful delivery)
-		// Examples: SendGrid, Resend, AWS SES, Postmark, etc.
+		if (!apiKey) {
+			console.warn(`[EMAIL] RESEND_API_KEY missing. Mocking ${type} email to ${to}`);
+			await db
+				.update(schema.emailLog)
+				.set({ status: 'sent', sentAt: new Date(), error: 'RESEND_API_KEY_MISSING_FALLBACK' })
+				.where(eq(schema.emailLog.id, emailId));
+			return { success: true };
+		}
 
-		// TODO: Replace with actual email service integration
-		// const response = await fetch('https://api.sendgrid.com/v3/mail/send', { ... });
+		const response = await fetch('https://api.resend.com/emails', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${apiKey}`
+			},
+			body: JSON.stringify({
+				from: `${FROM_NAME} <${FROM_EMAIL}>`,
+				to: [to],
+				subject: template.subject,
+				html: template.html,
+				text: template.text
+			})
+		});
 
-		console.log(`[EMAIL] Sending ${type} email to ${to}: ${template.subject}`);
+		const result = await response.json();
+
+		if (!response.ok) {
+			throw new Error(result.message || 'Failed to send via Resend');
+		}
 
 		// Update status to sent
 		await db

@@ -28,6 +28,17 @@ export async function requireRole(
 	return user;
 }
 
+/** Require user to have one of the specified roles */
+export async function requireAnyRole(eventOrLocals: RequestEvent | { user: any }, roles: string[]) {
+	const user = await requireAuth(eventOrLocals);
+
+	if (!roles.includes(user.role)) {
+		throw redirect(303, '/app');
+	}
+
+	return user;
+}
+
 export async function requireAdmin(eventOrLocals: RequestEvent | { user: any }) {
 	return requireRole(eventOrLocals, 'admin');
 }

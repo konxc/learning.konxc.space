@@ -23,19 +23,33 @@ export async function awardXP(userId: string, points: number, reason: string) {
 		});
 	} else {
 		const newPoints = existingXP.points + points;
-		const newLevel = Math.floor(Math.sqrt(newPoints / 100)) + 1; // Simple progression logic
+		const newLevel = Math.floor(Math.sqrt(newPoints / 100)) + 1; // Square-root scaling for progression
 
 		await db.update(schema.userXP)
 			.set({
 				points: newPoints,
 				level: newLevel,
-				updatedAt: new Date()
+				updatedAt: new Date(),
+				streakDays: existingXP.streakDays // preserve
 			})
 			.where(eq(schema.userXP.userId, userId));
 		
 		if (newLevel > existingXP.level) {
 			console.log(`User ${userId} leveled up to ${newLevel}!`);
-			// TODO: Trigger level-up notification
+			
+			// Trigger level-up notification
+			try {
+				const { sendNotification } = await import('./notifications');
+				await sendNotification({
+					userId,
+					type: 'broadcast', // Use broadcast type for level up aesthetic
+					title: `🚀 Level Up! You're now Level ${newLevel}`,
+					message: `Incredible work! You've unlocked Level ${newLevel}. Keep pushing those boundaries.`,
+					channel: 'both' // Send email and notification for level ups
+				});
+			} catch (e) {
+				console.error('Failed to send level-up notification:', e);
+			}
 		}
 	}
 }
