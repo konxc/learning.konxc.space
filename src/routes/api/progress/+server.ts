@@ -14,6 +14,23 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Missing IDs' }, { status: 400 });
 	}
 
+	// Validate enrollment - user must be enrolled in the course
+	const enrollment = await db
+		.select({ id: schema.enrollment.id })
+		.from(schema.enrollment)
+		.where(
+			and(
+				eq(schema.enrollment.userId, locals.user.id),
+				eq(schema.enrollment.courseId, courseId),
+				eq(schema.enrollment.status, 'active')
+			)
+		)
+		.limit(1);
+
+	if (enrollment.length === 0) {
+		return json({ error: 'Not enrolled in this course' }, { status: 403 });
+	}
+
 	try {
 		const existing = await db.query.lessonProgress.findFirst({
 			where: and(
