@@ -1,12 +1,18 @@
 import { json, error } from '@sveltejs/kit';
+import type { RequestEvent } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
+import { requireAdmin } from '$lib/server/middleware';
 
-export const GET = async () => {
+export const GET = async (requestEvent: RequestEvent) => {
+	// Only accessible in dev mode AND requires admin auth
 	if (!dev) {
 		throw error(404, 'Not found');
 	}
+
+	// Verify admin even in dev mode
+	await requireAdmin(requestEvent);
 
 	const users = await db
 		.select({

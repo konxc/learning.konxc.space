@@ -89,14 +89,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			});
 
 			if (parentDiscussion && parentDiscussion.userId !== locals.user.id) {
-				await sendNotification({
-					userId: parentDiscussion.userId,
-					type: 'system',
-					title: 'Balasan Diskusi Baru',
-					message: `${locals.user.fullName ?? locals.user.username} membalas diskusi kamu`,
-					link: lessonId ? `/app/discussion/${lessonId}` : `/app/discussion`,
-					channel: 'notification'
-				}).catch(() => {});
+				try {
+					await sendNotification({
+						userId: parentDiscussion.userId,
+						type: 'system',
+						title: 'Balasan Diskusi Baru',
+						message: `${locals.user.fullName ?? locals.user.username} membalas diskusi kamu`,
+						link: lessonId ? `/app/discussion/${lessonId}` : `/app/discussion`,
+						channel: 'notification'
+					});
+				} catch (e) {
+					console.warn('Failed to send discussion reply notification:', e);
+				}
 			}
 		}
 
@@ -108,14 +112,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			});
 
 			if (course?.mentorId && course.mentorId !== locals.user.id) {
-				await sendNotification({
-					userId: course.mentorId,
-					type: 'system',
-					title: 'Diskusi Baru di Kursus',
-					message: `${locals.user.fullName ?? locals.user.username} memulai diskusi baru di "${course.title}"`,
-					link: lessonId ? `/app/discussion/${lessonId}` : `/app/discussion`,
-					channel: 'notification'
-				}).catch(() => {});
+				try {
+					await sendNotification({
+						userId: course.mentorId,
+						type: 'system',
+						title: 'Diskusi Baru di Kursus',
+						message: `${locals.user.fullName ?? locals.user.username} memulai diskusi baru di "${course.title}"`,
+						link: lessonId ? `/app/discussion/${lessonId}` : `/app/discussion`,
+						channel: 'notification'
+					});
+				} catch (e) {
+					console.warn('Failed to send new discussion notification to mentor:', e);
+				}
 			}
 		}
 

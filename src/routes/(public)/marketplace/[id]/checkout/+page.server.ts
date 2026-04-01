@@ -49,7 +49,9 @@ export const actions: Actions = {
 		try {
 			const form = await request.formData();
 			couponCode = (form.get('couponCode') as string) || undefined;
-		} catch {}
+		} catch (e) {
+			console.warn('Failed to parse coupon code form:', e);
+		}
 
 		const res = await fetch('/api/payments/midtrans/transaction', {
 			method: 'POST',

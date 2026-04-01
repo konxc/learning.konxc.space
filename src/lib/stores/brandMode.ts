@@ -18,7 +18,9 @@ if (typeof window !== 'undefined') {
 	brandMode.subscribe((value) => {
 		try {
 			window.localStorage.setItem('brandMode', value);
-		} catch {}
+		} catch (e) {
+			console.warn('Failed to save brandMode to localStorage:', e);
+		}
 	});
 
 	const scheduleMidnightCheck = () => {

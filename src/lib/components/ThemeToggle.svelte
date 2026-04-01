@@ -11,14 +11,18 @@
 	function saveTheme(t: 'light' | 'dark') {
 		try {
 			localStorage.setItem('theme', t);
-		} catch {}
+		} catch (e) {
+			console.warn('Failed to save theme to localStorage:', e);
+		}
 	}
 
 	function loadInitial() {
 		try {
 			const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
 			if (saved) return saved;
-		} catch {}
+		} catch (e) {
+			console.warn('Failed to load theme from localStorage:', e);
+		}
 		const prefersDark = globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches;
 		return prefersDark ? 'dark' : 'light';
 	}
