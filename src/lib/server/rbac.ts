@@ -1,5 +1,11 @@
 import type { User } from './db/schema';
-import { type UserRole, type OrgRole, type WorkspaceRole, ORG_ROLES, WORKSPACE_ROLES } from '$lib/constants/roles';
+import {
+	type UserRole,
+	type OrgRole,
+	type WorkspaceRole,
+	ORG_ROLES,
+	WORKSPACE_ROLES
+} from '$lib/constants/roles';
 
 export { type UserRole, type OrgRole, type WorkspaceRole, ORG_ROLES, WORKSPACE_ROLES };
 
@@ -60,101 +66,218 @@ export function getNavItemsForRole(role: string, context?: WorkspaceContext): Na
 
 	const workspaceNav: NavItem[] = [
 		{ label: 'Explore', href: '/app/explore', icon: 'search', category: 'workspace' },
-		{ label: 'My Learning', href: '/app/learning/courses', icon: 'book-open', category: 'workspace' },
-		{ label: 'Leaderboard', href: '/app/leaderboard', icon: 'trophy', category: 'workspace' }
+		{
+			label: 'My Learning',
+			href: '/app/learning/courses',
+			icon: 'book-open',
+			category: 'workspace'
+		},
+		{ label: 'Forum', href: '/app/discussion', icon: 'message-square', category: 'workspace' },
+		{ label: 'Achievements', href: '/app/achievements', icon: 'award', category: 'workspace' },
+		{ label: 'Leaderboard', href: '/app/leaderboard', icon: 'trophy', category: 'workspace' },
+		{ label: 'Organizations', href: '/app/organizations', icon: 'building', category: 'workspace' },
+		{ label: 'Notifications', href: '/app/notifications', icon: 'bell', category: 'workspace' }
 	];
 
 	if (role === 'admin') {
 		return [
-			...baseNav, ...workspaceNav,
+			...baseNav,
+			...workspaceNav,
 			{ label: 'Course Builder', href: '/app/admin/courses', icon: 'hammer', category: 'platform' },
 			{ label: 'Cohorts', href: '/app/admin/cohorts', icon: 'calendar', category: 'platform' },
 			{ label: 'Users & Roles', href: '/app/admin/users', icon: 'users', category: 'platform' },
 			{ label: 'Coupons', href: '/app/admin/coupons', icon: 'coupon', category: 'platform' },
-			{ label: 'Mentor Apps', href: '/app/admin/mentor-applications', icon: 'file-text', badgeColor: 'yellow', category: 'platform' },
+			{
+				label: 'Mentor Apps',
+				href: '/app/admin/mentor-applications',
+				icon: 'file-text',
+				badgeColor: 'yellow',
+				category: 'platform'
+			},
 			{ label: 'Payments', href: '/app/admin/payments', icon: 'credit-card', category: 'platform' },
 			{ label: 'Partners', href: '/app/admin/partner', icon: 'building', category: 'platform' },
 			{ label: 'Reports', href: '/app/admin/reports', icon: 'chart', category: 'platform' },
 			{ label: 'Reviews', href: '/app/admin/reviews', icon: 'star', category: 'platform' },
-			{ label: 'Broadcast', href: '/app/mentor/broadcast', icon: 'megaphone', category: 'platform' },
+			{
+				label: 'Broadcast',
+				href: '/app/mentor/broadcast',
+				icon: 'megaphone',
+				category: 'platform'
+			},
 			{ label: 'Plugins', href: '/app/admin/plugins', icon: 'puzzle', category: 'platform' },
 			{ label: 'Waiting List', href: '/app/crm/waiting-list', icon: 'clock', category: 'crm' }
 		];
 	}
 
 	if (role === 'bd') {
-		return [...baseNav, { label: 'Waiting List', href: '/app/crm/waiting-list', icon: 'clock', category: 'crm' }];
+		return [
+			...baseNav,
+			{ label: 'Waiting List', href: '/app/crm/waiting-list', icon: 'clock', category: 'crm' }
+		];
 	}
 
 	if (role === 'mentor') {
 		return [
-			...baseNav, ...workspaceNav,
-			{ label: 'My Courses', href: '/app/mentor/courses', icon: 'graduation', category: 'management' },
+			...baseNav,
+			...workspaceNav,
+			{
+				label: 'My Courses',
+				href: '/app/mentor/courses',
+				icon: 'graduation',
+				category: 'management'
+			},
 			{ label: 'Students', href: '/app/mentor/students', icon: 'users', category: 'management' },
-			{ label: 'Broadcast', href: '/app/mentor/broadcast', icon: 'megaphone', category: 'management' }
+			{
+				label: 'Broadcast',
+				href: '/app/mentor/broadcast',
+				icon: 'megaphone',
+				category: 'management'
+			}
 		];
 	}
 
 	if (role === 'facilitator') {
 		return [
-			...baseNav, ...workspaceNav,
-			{ label: 'My Batches', href: '/app/facilitator/cohorts', icon: 'calendar', category: 'management' }
+			...baseNav,
+			...workspaceNav,
+			{
+				label: 'My Batches',
+				href: '/app/facilitator/cohorts',
+				icon: 'calendar',
+				category: 'management'
+			}
 		];
 	}
 
 	return [
-		...baseNav, ...workspaceNav,
+		...baseNav,
+		...workspaceNav,
 		{ label: 'Affiliate', href: '/app/affiliate', icon: 'wallet', category: 'workspace' }
 	];
 }
 
 // Organization-specific navigation based on org role
 function getOrgNavItems(orgRole: string, context: WorkspaceContext): NavItem[] {
+	const orgId = context.orgId || '';
+
 	const baseOrgNav: NavItem[] = [
-		{ label: 'Org Overview', href: '/app/overview', icon: 'building', category: 'dashboard' }
+		{
+			label: 'Overview',
+			href: `/app/organizations/${orgId}`,
+			icon: 'building',
+			category: 'dashboard'
+		}
 	];
 
 	const learningNav: NavItem[] = [
 		{ label: 'Explore', href: '/app/explore', icon: 'search', category: 'workspace' },
-		{ label: 'My Learning', href: '/app/learning/courses', icon: 'book-open', category: 'workspace' }
+		{
+			label: 'My Learning',
+			href: '/app/learning/courses',
+			icon: 'book-open',
+			category: 'workspace'
+		},
+		{ label: 'Forum', href: '/app/discussion', icon: 'message-square', category: 'workspace' }
 	];
 
 	if (orgRole === 'owner' || orgRole === 'admin') {
 		return [
-			...baseOrgNav, ...learningNav,
-			{ label: 'Settings', href: '/app/settings?tab=organization', icon: 'settings', category: 'management' },
-			{ label: 'Members', href: '/app/settings?tab=organization', icon: 'users', category: 'management' },
-			{ label: 'Billing', href: '/app/settings?tab=payments', icon: 'credit-card', category: 'management' },
-			{ label: 'Course Builder', href: '/app/mentor/courses', icon: 'hammer', category: 'platform' },
+			...baseOrgNav,
+			...learningNav,
+			{
+				label: 'Members',
+				href: `/app/organizations/${orgId}/members`,
+				icon: 'users',
+				category: 'management'
+			},
+			{
+				label: 'Invite',
+				href: `/app/organizations/${orgId}/invite`,
+				icon: 'user-plus',
+				category: 'management'
+			},
+			{
+				label: 'Billing',
+				href: `/app/organizations/${orgId}/billing`,
+				icon: 'credit-card',
+				category: 'management'
+			},
+			{
+				label: 'Analytics',
+				href: `/app/organizations/${orgId}/analytics`,
+				icon: 'chart',
+				category: 'management'
+			},
+			{
+				label: 'Course Builder',
+				href: '/app/mentor/courses',
+				icon: 'hammer',
+				category: 'platform'
+			},
 			{ label: 'Reviews', href: '/app/admin/reviews', icon: 'star', category: 'platform' },
 			{ label: 'Cohorts', href: '/app/admin/cohorts', icon: 'calendar', category: 'platform' },
 			{ label: 'Reports', href: '/app/admin/reports', icon: 'chart', category: 'platform' },
-			{ label: 'Broadcast', href: '/app/mentor/broadcast', icon: 'megaphone', category: 'platform' }
+			{
+				label: 'Broadcast',
+				href: '/app/mentor/broadcast',
+				icon: 'megaphone',
+				category: 'platform'
+			},
+			{ label: 'Job Board', href: '/app/jobs/new', icon: 'briefcase', category: 'platform' }
 		];
 	}
 
 	if (orgRole === 'creator') {
 		return [
-			...baseOrgNav, ...learningNav,
-			{ label: 'Course Builder', href: '/app/mentor/courses', icon: 'hammer', category: 'management' },
+			...baseOrgNav,
+			...learningNav,
+			{
+				label: 'Course Builder',
+				href: '/app/mentor/courses',
+				icon: 'hammer',
+				category: 'management'
+			},
 			{ label: 'Students', href: '/app/mentor/students', icon: 'users', category: 'management' },
-			{ label: 'Broadcast', href: '/app/mentor/broadcast', icon: 'megaphone', category: 'management' },
-			{ label: 'Analytics', href: '/app/admin/reports', icon: 'chart', category: 'platform' }
+			{
+				label: 'Broadcast',
+				href: '/app/mentor/broadcast',
+				icon: 'megaphone',
+				category: 'management'
+			},
+			{
+				label: 'Analytics',
+				href: `/app/organizations/${orgId}/analytics`,
+				icon: 'chart',
+				category: 'platform'
+			}
 		];
 	}
 
 	if (orgRole === 'facilitator') {
 		return [
-			...baseOrgNav, ...learningNav,
-			{ label: 'My Batches', href: '/app/admin/cohorts', icon: 'calendar', category: 'management' },
+			...baseOrgNav,
+			...learningNav,
+			{
+				label: 'My Batches',
+				href: '/app/facilitator/cohorts',
+				icon: 'calendar',
+				category: 'management'
+			},
 			{ label: 'Students', href: '/app/mentor/students', icon: 'users', category: 'management' },
-			{ label: 'Broadcast', href: '/app/mentor/broadcast', icon: 'megaphone', category: 'management' }
+			{
+				label: 'Broadcast',
+				href: '/app/mentor/broadcast',
+				icon: 'megaphone',
+				category: 'management'
+			}
 		];
 	}
 
 	return [
-		...baseOrgNav, ...learningNav,
-		{ label: 'Leaderboard', href: '/app/leaderboard', icon: 'trophy', category: 'workspace' }
+		...baseOrgNav,
+		...learningNav,
+		{ label: 'Leaderboard', href: '/app/leaderboard', icon: 'trophy', category: 'workspace' },
+		{ label: 'Job Board', href: '/app/jobs', icon: 'briefcase', category: 'workspace' }
 	];
 }
 
@@ -187,58 +310,69 @@ export function groupNavItems(items: NavItem[]): NavGroup[] {
 }
 
 // Organization-specific permission types
-export type OrgPermission = 
-	| 'org:read'           // View org settings
-	| 'org:update'         // Update org settings
-	| 'org:delete'         // Delete org (owner only)
-	| 'org:billing'        // Manage billing
-	| 'member:read'        // View members
-	| 'member:create'      // Add/invite members
-	| 'member:update'      // Update member roles
-	| 'member:delete'      // Remove members
-	| 'course:create'      // Create courses
-	| 'course:update'      // Update any course
-	| 'course:delete'      // Delete courses
-	| 'course:publish'     // Publish courses
-	| 'cohort:create'      // Create cohorts
-	| 'cohort:update'      // Update cohorts
-	| 'analytics:view'     // View analytics
-	| 'billing:manage';    // Manage billing
+export type OrgPermission =
+	| 'org:read' // View org settings
+	| 'org:update' // Update org settings
+	| 'org:delete' // Delete org (owner only)
+	| 'org:billing' // Manage billing
+	| 'member:read' // View members
+	| 'member:create' // Add/invite members
+	| 'member:update' // Update member roles
+	| 'member:delete' // Remove members
+	| 'course:create' // Create courses
+	| 'course:update' // Update any course
+	| 'course:delete' // Delete courses
+	| 'course:publish' // Publish courses
+	| 'cohort:create' // Create cohorts
+	| 'cohort:update' // Update cohorts
+	| 'analytics:view' // View analytics
+	| 'billing:manage'; // Manage billing
 
 // Permission matrix for organization roles
 const orgPermissions: Record<string, OrgPermission[]> = {
 	owner: [
-		'org:read', 'org:update', 'org:delete',
+		'org:read',
+		'org:update',
+		'org:delete',
 		'org:billing',
-		'member:read', 'member:create', 'member:update', 'member:delete',
-		'course:create', 'course:update', 'course:delete', 'course:publish',
-		'cohort:create', 'cohort:update',
+		'member:read',
+		'member:create',
+		'member:update',
+		'member:delete',
+		'course:create',
+		'course:update',
+		'course:delete',
+		'course:publish',
+		'cohort:create',
+		'cohort:update',
 		'analytics:view',
 		'billing:manage'
 	],
 	admin: [
-		'org:read', 'org:update',
-		'member:read', 'member:create', 'member:update', 'member:delete',
-		'course:create', 'course:update', 'course:delete', 'course:publish',
-		'cohort:create', 'cohort:update',
+		'org:read',
+		'org:update',
+		'member:read',
+		'member:create',
+		'member:update',
+		'member:delete',
+		'course:create',
+		'course:update',
+		'course:delete',
+		'course:publish',
+		'cohort:create',
+		'cohort:update',
 		'analytics:view'
 	],
 	creator: [
 		'org:read',
 		'member:read',
-		'course:create', 'course:update', 'course:publish',
+		'course:create',
+		'course:update',
+		'course:publish',
 		'analytics:view'
 	],
-	facilitator: [
-		'org:read',
-		'member:read',
-		'cohort:create', 'cohort:update',
-		'analytics:view'
-	],
-	member: [
-		'org:read',
-		'member:read'
-	]
+	facilitator: ['org:read', 'member:read', 'cohort:create', 'cohort:update', 'analytics:view'],
+	member: ['org:read', 'member:read']
 };
 
 export function hasOrgPermission(orgRole: string | null, permission: OrgPermission): boolean {
