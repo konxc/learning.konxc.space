@@ -7,6 +7,7 @@
 	import RoleSegmentedControl from './RoleSegmentedControl.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
 
+	// Client-side version of groupNavItems (rbac.ts is server-only)
 	function groupNavItems(items: NavItem[]): NavGroup[] {
 		const groups: Record<string, NavItem[]> = {};
 		items.forEach((item) => {
@@ -27,7 +28,7 @@
 		};
 
 		return Object.entries(groups).map(([category, items]) => ({
-			label: categoryLabels[category] ?? category, // Use ?? instead of || so '' is preserved
+			label: categoryLabels[category] ?? category,
 			items
 		}));
 	}
@@ -45,11 +46,7 @@
 		};
 		isCollapsed?: boolean;
 		onToggle?: () => void;
-		workspaces?: {
-			organizations: any[];
-			activeId: string;
-			activeOrg: any;
-		};
+		workspaces?: import('$lib/types/layout').Workspace;
 		workspaceSwitcherOpen?: boolean;
 		onWorkspaceSwitcherToggle?: (open: boolean) => void;
 		triggerRect?: DOMRect | null;
@@ -83,31 +80,7 @@
 		onToggle?.();
 	}
 
-	const mockItems: NavItem[] = [
-		{ label: 'Dashboard', href: '/app', icon: 'dashboard', category: 'dashboard' },
-		{ label: 'My Courses', href: '/app/my-courses', icon: 'book-open', category: 'learning' },
-		{ label: 'Certificates', href: '/app/certificates', icon: 'graduation', category: 'learning' },
-		{ label: 'Manage Courses', href: '/app/admin/courses', icon: 'book', category: 'admin' },
-		{ label: 'Users', href: '/app/admin/users', icon: 'users', category: 'admin' },
-		{
-			label: 'Mentor Applications',
-			href: '/app/admin/mentor-applications',
-			icon: 'file-text',
-			category: 'admin',
-			badge: '2',
-			badgeColor: 'yellow'
-		},
-		{ label: 'Coupons', href: '/app/admin/coupons', icon: 'coupon', category: 'admin' },
-		{
-			label: 'Payment Proofs',
-			href: '/app/admin/payments',
-			icon: 'credit-card',
-			category: 'admin'
-		},
-		{ label: 'CRM: Waiting List', href: '/app/crm/waiting-list', icon: 'clock', category: 'crm' }
-	];
-
-	const allItems = items.length > 0 ? items : mockItems;
+	const allItems = items;
 	let searchQuery = $state('');
 	let searchInputValue = $state('');
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;

@@ -1,0 +1,17 @@
+
+> learning.konxc.space@0.0.1 build /home/dev/web/instances/clients/services/naikkelas.id
+> vite build
+
+error during build:
+Error: EACCES: permission denied, open '/home/dev/web/instances/clients/services/naikkelas.id/.svelte-kit/types/src/routes/health/$types.d.ts'
+    at Object.writeFileSync (node:fs:2425:20)
+    at update_types (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/@sveltejs+kit@2.47.3_@sveltejs+vite-plugin-svelte@6.2.1_svelte@5.42.2_vite@7.1.12_@type_a4da6f71c38bd5d7f7cae25041478ff5/node_modules/@sveltejs/kit/src/core/sync/write_types/index.js:369:5)
+    at write_all_types (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/@sveltejs+kit@2.47.3_@sveltejs+vite-plugin-svelte@6.2.1_svelte@5.42.2_vite@7.1.12_@type_a4da6f71c38bd5d7f7cae25041478ff5/node_modules/@sveltejs/kit/src/core/sync/write_types/index.js:127:4)
+    at create (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/@sveltejs+kit@2.47.3_@sveltejs+vite-plugin-svelte@6.2.1_svelte@5.42.2_vite@7.1.12_@type_a4da6f71c38bd5d7f7cae25041478ff5/node_modules/@sveltejs/kit/src/core/sync/sync.js:33:2)
+    at Module.all (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/@sveltejs+kit@2.47.3_@sveltejs+vite-plugin-svelte@6.2.1_svelte@5.42.2_vite@7.1.12_@type_a4da6f71c38bd5d7f7cae25041478ff5/node_modules/@sveltejs/kit/src/core/sync/sync.js:58:9)
+    at BasicMinimalPluginContext.config (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/@sveltejs+kit@2.47.3_@sveltejs+vite-plugin-svelte@6.2.1_svelte@5.42.2_vite@7.1.12_@type_a4da6f71c38bd5d7f7cae25041478ff5/node_modules/@sveltejs/kit/src/exports/vite/index.js:371:27)
+    at runConfigHook (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/vite@7.1.12_@types+node@22.18.12_jiti@2.6.1_lightningcss@1.30.2_tsx@4.20.6/node_modules/vite/dist/node/chunks/config.js:36155:42)
+    at async resolveConfig (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/vite@7.1.12_@types+node@22.18.12_jiti@2.6.1_lightningcss@1.30.2_tsx@4.20.6/node_modules/vite/dist/node/chunks/config.js:35657:13)
+    at async createBuilder (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/vite@7.1.12_@types+node@22.18.12_jiti@2.6.1_lightningcss@1.30.2_tsx@4.20.6/node_modules/vite/dist/node/chunks/config.js:34104:19)
+    at async CAC.<anonymous> (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/vite@7.1.12_@types+node@22.18.12_jiti@2.6.1_lightningcss@1.30.2_tsx@4.20.6/node_modules/vite/dist/node/cli.js:629:10)
+ ELIFECYCLE  Command failed with exit code 1.

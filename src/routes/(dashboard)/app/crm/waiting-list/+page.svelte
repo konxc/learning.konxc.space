@@ -19,7 +19,7 @@
 		WAITING_LIST_COLUMNS,
 		getDefaultColumnVisibility
 	} from '$lib/constants/waiting-list-columns';
-	import { filterEntries, countEntriesByStatus } from '$lib/utils/waiting-list-filters';
+	import { filterEntities, countByStatus } from '$lib/utils/filter';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -27,7 +27,7 @@
 	import {
 		setToVisibilityRecord,
 		isColumnVisible as checkColumnVisible
-	} from '$lib/utils/column-visibility';
+	} from '$lib/utils/useColumnVisibility';
 	import ExportButton from '$lib/components/crm/ExportButton.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -85,10 +85,15 @@
 	}
 
 	// Filtered entries based on search and status
-	const filteredEntries = $derived(filterEntries(data.entries, searchQuery, statusFilter));
+	const filteredEntries = $derived(
+		filterEntities(data.entries, searchQuery, statusFilter || 'all', {
+			searchFields: ['fullName', 'email', 'phone'],
+			statusField: 'status'
+		})
+	);
 
 	// Count entries by status
-	const statusCounts = $derived(countEntriesByStatus(data.entries, WAITING_LIST_STATUSES));
+	const statusCounts = $derived(countByStatus(data.entries, 'status'));
 
 	// Modal handlers
 	function openNotesModal(entry: { id: string; notes?: string | null }) {

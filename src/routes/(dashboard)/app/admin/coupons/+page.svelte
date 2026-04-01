@@ -12,8 +12,8 @@
 	import {
 		setToVisibilityRecord,
 		isColumnVisible as checkColumnVisible
-	} from '$lib/utils/column-visibility';
-	import { filterCoupons, countCouponsByFilter } from '$lib/utils/coupon-filters';
+	} from '$lib/utils/useColumnVisibility';
+	import { matchesSearch, filterByActiveStatus, isActive, isExpired } from '$lib/utils/filter';
 	import { COUPON_COLUMNS, getDefaultCouponColumnVisibility } from '$lib/constants/coupon-columns';
 	import { COUPON_FILTER_TYPES, type CouponFilterType } from '$lib/constants/coupons';
 	import CouponFilters from '$lib/components/admin/CouponFilters.svelte';
@@ -75,14 +75,28 @@
 	}
 
 	// Filtered coupons based on search and filter
-	const filteredCoupons = $derived(filterCoupons(data.coupons, searchQuery, filter));
+	const filteredCoupons = $derived(
+		data.coupons
+			.filter((c) => matchesSearch(c, searchQuery, ['code']))
+			.filter((c) => filterByActiveStatus([c], filter)[0] !== undefined || filter === 'all')
+			.filter((c) => {
+				if (filter === 'all') return true;
+				if (filter === 'active') return isActive(c);
+				if (filter === 'expired') return isExpired(c);
+				return true;
+			})
+	);
 
 	// Count coupons by filter (need to count based on search too for accurate counts)
 	const filterCounts = $derived.by(() => {
 		const searchFiltered = data.coupons.filter(
 			(c) => searchQuery === '' || c.code.toLowerCase().includes(searchQuery.toLowerCase())
 		);
-		return countCouponsByFilter(searchFiltered);
+		return {
+			all: searchFiltered.length,
+			active: searchFiltered.filter((c) => isActive(c)).length,
+			expired: searchFiltered.filter((c) => isExpired(c)).length
+		};
 	});
 
 	// Copy code handler

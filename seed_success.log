@@ -1,0 +1,188 @@
+
+> learning.konxc.space@0.0.1 db:seed:reset /home/dev/web/instances/clients/services/naikkelas.id
+> tsx scripts/seed.ts --reset --yes
+
+
+📊 Seed Target: LOCAL (file:./local.db)
+
+🗑️  Resetting tables...
+  ✓ Cleared affiliateSale
+  ✓ Cleared affiliateLink
+  ✓ Cleared courseReview
+  ✓ Cleared notification
+  ✓ Cleared broadcastMessage
+  ✓ Cleared discussion
+  ✓ Cleared lessonNote
+  ✓ Cleared lessonProgress
+  ✓ Cleared checkpointSubmission
+  ✓ Cleared checkpoint
+  ✓ Cleared userBadge
+  ✓ Cleared badge
+  ✓ Cleared userXP
+  ✓ Cleared couponUsage
+  ✓ Cleared mentorApplication
+  ✓ Cleared waitingList
+  ✓ Cleared paymentProof
+  ✓ Cleared transaction
+  ✓ Cleared certificate
+  ✓ Cleared coursePlugin
+  ✓ Cleared submissionGrade
+  ✓ Cleared submission
+  ✓ Cleared quizChoice
+  ✓ Cleared quizQuestion
+  ✓ Cleared quiz
+  ✓ Cleared enrollment
+  ✓ Cleared material
+  ✓ Cleared lesson
+  ✓ Cleared module
+  ✓ Cleared cohort
+  ✓ Cleared course
+  ✓ Cleared coupon
+  ✓ Cleared pluginRegistry
+  ✓ Cleared organizationMember
+  ✓ Cleared organizationInvitation
+  ✓ Cleared workspaceMember
+  ✓ Cleared workspace
+  ✓ Cleared organization
+  ✓ Cleared partner
+  ✓ Cleared session
+  ✓ Cleared user
+✅ Tables reset complete
+
+📋 STEP 1: Creating core users...
+
+📦 Seeding core users (admin, bd, mentors, facilitators)...
+ ✅ Seeded 11 core users
+
+📋 STEP 2: Creating students...
+
+📦 Seeding students (60 users)...
+ ✅ Seeded 60 students
+
+📋 STEP 3: Creating organizations...
+🏢 Seeding organizations...
+✅ Seeded 4 organizations
+👥 Seeding organization members...
+✅ Seeded 7 organization members
+
+📋 STEP 4: Creating courses...
+
+📦 Seeding courses (15 courses)...
+ ✅ Seeded 15 courses
+
+📋 STEP 5: Creating partners and cohorts...
+
+📦 Seeding partners...
+ ✅ Seeded 5 partners
+
+📦 Seeding cohorts (6 cohorts)...
+ ✅ Seeded 6 cohorts
+
+📋 STEP 6: Creating coupons...
+
+📦 Seeding coupons...
+ ✅ Seeded 5 coupons
+
+📋 STEP 7: Creating enrollments with tracks...
+
+📦 Seeding enrollments with tracks (80 enrollments)...
+ ✅ Seeded 80 enrollments
+
+📋 STEP 8: Creating course content...
+
+📦 Seeding course content...
+ ✅ Seeded modules, lessons, and materials
+
+📋 STEP 9: Creating mentor applications and waiting list...
+
+📦 Seeding mentor applications...
+ ✅ Seeded 1 mentor applications
+
+📦 Seeding waiting list...
+ ✅ Seeded 12 waiting list entries
+
+📋 STEP 10: Creating workspaces...
+🏢 Seeding workspaces...
+✅ Seeded 5 workspaces
+👥 Seeding workspace members...
+✅ Seeded 10 workspace members
+
+📋 STEP 11: Creating plugins...
+🧩 Seeding plugins...
+✅ Seeded 8 plugins
+📚 Enabling plugins for existing courses...
+✅ Enabled plugins for 15 courses
+
+📋 STEP 11.5: Syncing Koneksi Digital curriculum...
+
+📦 Seeding Koneksi Digital Curriculum (3 Pillars)...
+ ✅ Successfully synced Koneksi Digital curriculum from Markdown files.
+
+📋 STEP 12: Creating checkpoints...
+
+📦 Seeding checkpoints...
+ ✅ Seeded 3 checkpoints
+
+📋 STEP 13: Creating gamification data...
+
+📦 Seeding badges...
+ ✅ Seeded 8 badges
+
+📦 Seeding user XP...
+ ✅ Seeded user XP for 3 users
+
+📦 Seeding user badges...
+ ✅ Seeded 8 user badges
+
+📋 STEP 14: Creating checkpoint submissions...
+
+📦 Seeding checkpoint submissions...
+ ✅ Seeded 3 checkpoint submissions
+
+📋 STEP 15: Creating discussions and notes...
+
+📦 Seeding discussions...
+ ✅ Seeded 4 discussions
+
+📦 Seeding lesson notes...
+ ✅ Seeded 3 lesson notes
+
+📋 STEP 16: Creating notifications...
+
+📦 Seeding notifications...
+ ✅ Seeded 6 notifications
+
+📦 Seeding broadcast messages...
+ ✅ Seeded 3 broadcast messages
+
+📋 STEP 17: Creating affiliate data...
+
+📦 Seeding affiliate links (15 links)...
+ ✅ Seeded 15 affiliate links
+
+📦 Seeding affiliate sales (20 sales)...
+ ✅ Seeded 20 affiliate sales
+
+📋 STEP 18: Creating course reviews...
+
+📦 Seeding course reviews...
+ ✅ Seeded 2 course reviews
+
+============================================================
+✨ SEEDING COMPLETED SUCCESSFULLY!
+============================================================
+📊 Summary:
+   - Core Users: 11 (admin, bd, mentors, facilitators)
+   - Students: 60
+   - Courses: 15
+   - Cohorts: 6
+   - Coupons: 5
+   - Enrollments: ~80 (with tracks)
+
+🔑 Login Credentials:
+   Admin: admin / naikkelas2024
+   BD: bd_salsabila / naikkelas2024
+   Mentor: mentor_budi / naikkelas2024
+   Facilitator: facil_irwan / naikkelas2024
+   Student: ahmad_rizki / naikkelas2024
+============================================================

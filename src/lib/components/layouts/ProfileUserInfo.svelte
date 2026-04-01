@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { TEXT, COLOR, RADIUS } from '$lib/config/design';
+	import { useRoleColor } from '$lib/utils/useRoleColor';
+	import { getRoleLabel } from '$lib/utils/role';
 
 	interface User {
 		fullName?: string | null;
@@ -8,50 +10,14 @@
 		role?: string | null;
 	}
 
-	let { user, activeRole }: { user: User | null; activeRole?: string | null } = $props();
-
-	let currentRoleColor = $state<{
-		text: string;
-		bg: string;
-		bgMuted: string;
-		border: string;
-	} | null>(null);
-
-	$effect(() => {
-		switch (activeRole) {
-			case 'admin':
-				currentRoleColor = COLOR.roleAdmin;
-				break;
-			case 'mentor':
-				currentRoleColor = COLOR.roleMentor;
-				break;
-			case 'bd':
-				currentRoleColor = COLOR.roleBd;
-				break;
-			case 'user':
-				currentRoleColor = COLOR.roleUser;
-				break;
-			default:
-				currentRoleColor = {
-					text: COLOR.textMuted,
-					bg: 'bg-zinc-100 dark:bg-zinc-800',
-					bgMuted: 'bg-zinc-50/50 dark:bg-zinc-900/30',
-					border: 'border-zinc-200/50 dark:border-zinc-700/50'
-				};
-		}
-	});
-
-	function getRoleLabel(role: string | null | undefined): string {
-		if (!role) return '';
-		const roleMap: Record<string, string> = {
-			admin: 'Admin',
-			mentor: 'Mentor',
-			siswa: 'Siswa',
-			user: 'Siswa',
-			bd: 'Business Dev'
-		};
-		return roleMap[role] || role.charAt(0).toUpperCase() + role.slice(1);
+	interface Props {
+		user: User | null;
+		activeRole?: string | null;
 	}
+
+	let { user, activeRole }: Props = $props();
+
+	let currentRoleColor = $derived(useRoleColor(activeRole));
 
 	// Check if emulation mode is active
 	const isEmulating = $derived(

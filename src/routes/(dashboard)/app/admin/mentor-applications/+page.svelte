@@ -11,17 +11,13 @@
 	import {
 		setToVisibilityRecord,
 		isColumnVisible as checkColumnVisible
-	} from '$lib/utils/column-visibility';
-	import {
-		filterMentorApplications,
-		countMentorApplicationsByStatus
-	} from '$lib/utils/mentor-application-filters';
+	} from '$lib/utils/useColumnVisibility';
+	import { filterEntities, countByStatus } from '$lib/utils/filter';
 	import {
 		MENTOR_APPLICATION_COLUMNS,
 		getDefaultMentorApplicationColumnVisibility
 	} from '$lib/constants/mentor-application-columns';
 	import {
-		MENTOR_APPLICATION_STATUSES,
 		MENTOR_APPLICATION_STATUS_LABELS,
 		type MentorApplicationFilterType
 	} from '$lib/constants/mentor-applications';
@@ -96,13 +92,14 @@
 
 	// Filtered applications based on search and status filter
 	const filteredApplications = $derived(
-		filterMentorApplications(data.applications, searchQuery, statusFilter)
+		filterEntities(data.applications, searchQuery, statusFilter, {
+			searchFields: ['fullName', 'email', 'expertise', 'user.username'],
+			statusField: 'status'
+		})
 	);
 
 	// Count applications by status
-	const statusCounts = $derived(
-		countMentorApplicationsByStatus(data.applications, MENTOR_APPLICATION_STATUSES)
-	);
+	const statusCounts = $derived(countByStatus(data.applications, 'status'));
 </script>
 
 <svelte:head>

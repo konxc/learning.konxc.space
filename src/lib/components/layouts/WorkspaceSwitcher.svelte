@@ -1,5 +1,14 @@
 <script lang="ts">
 	import { RADIUS, COLOR, TRANSITION } from '$lib/config/design';
+	import type { Workspace } from '$lib/types/layout';
+
+	interface Props {
+		workspaces: Workspace;
+		fullWidth?: boolean;
+		isCollapsed?: boolean;
+		isOpen?: boolean;
+		triggerRect?: DOMRect | null;
+	}
 
 	let {
 		workspaces,
@@ -7,17 +16,7 @@
 		isCollapsed = false,
 		isOpen = $bindable(false),
 		triggerRect = $bindable(null)
-	}: {
-		workspaces: {
-			organizations: any[];
-			activeId: string;
-			activeOrg: any;
-		};
-		fullWidth?: boolean;
-		isCollapsed?: boolean;
-		isOpen?: boolean;
-		triggerRect?: DOMRect | null;
-	} = $props();
+	}: Props = $props();
 </script>
 
 <div class={`relative ${fullWidth ? 'w-full' : ''}`}>

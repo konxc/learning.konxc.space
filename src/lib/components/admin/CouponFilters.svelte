@@ -1,5 +1,5 @@
 <script lang="ts">
-	import FilterButtonGroup from '$lib/components/ui/FilterButtonGroup.svelte';
+	import StatusFilter from '$lib/components/ui/StatusFilter.svelte';
 
 	interface CouponFiltersProps {
 		filter?: string;
@@ -9,11 +9,11 @@
 
 	let { filter = $bindable('all'), filterCounts, onFilterChange }: CouponFiltersProps = $props();
 
-	const filters = [
+	const options = [
 		{ value: 'all', label: 'All', count: filterCounts.all },
 		{ value: 'active', label: 'Active', count: filterCounts.active },
 		{ value: 'expired', label: 'Expired', count: filterCounts.expired }
 	];
 </script>
 
-<FilterButtonGroup {filters} bind:active={filter} onChange={onFilterChange} />
+<StatusFilter {options} bind:active={filter} onChange={onFilterChange} />

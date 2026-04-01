@@ -12,8 +12,8 @@
 	import {
 		setToVisibilityRecord,
 		isColumnVisible as checkColumnVisible
-	} from '$lib/utils/column-visibility';
-	import { filterUsers, countUsersByRole } from '$lib/utils/user-filters';
+	} from '$lib/utils/useColumnVisibility';
+	import { filterEntities, countByField, createFilterUtils } from '$lib/utils/filter';
 	import { USER_COLUMNS, getDefaultUserColumnVisibility } from '$lib/constants/user-columns';
 	import UserFilters from '$lib/components/admin/UserFilters.svelte';
 	import UsersTable from '$lib/components/admin/UsersTable.svelte';
@@ -73,10 +73,15 @@
 	}
 
 	// Filtered users based on search and role filter
-	const filteredUsers = $derived(filterUsers(data.users, searchQuery, roleFilter));
+	const filteredUsers = $derived(
+		filterEntities(data.users, searchQuery, roleFilter, {
+			searchFields: ['username', 'fullName', 'email'],
+			statusField: 'role'
+		})
+	);
 
 	// Count users by role
-	const roleCounts = $derived(countUsersByRole(data.users, ['admin', 'mentor', 'user']));
+	const roleCounts = $derived(countByField(data.users, 'role'));
 
 	// Action handlers (placeholder for now, can be extended later)
 	function handleEdit(userId: string) {

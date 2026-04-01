@@ -77,16 +77,6 @@
 		setTheme(newTheme);
 	}
 
-	// Handle accordion toggle - handler kosong, tidak ada action khusus
-	function handleAccordionToggle(accordionType: 'theme' | 'role', e: Event) {
-		// Tidak ada action khusus yang diperlukan
-	}
-
-	// Handle profile menu toggle - handler kosong, tidak ada action khusus
-	function handleProfileToggle(e: Event) {
-		// Tidak ada action khusus yang diperlukan
-	}
-
 	// Computed color-scheme meta value based on theme
 	const colorScheme = $derived(theme === 'system' ? 'light dark' : theme);
 </script>
@@ -102,8 +92,6 @@
 		activeRole={data.activeRole ?? null}
 		availableRoles={data.availableRoles ?? []}
 		onThemeChange={handleThemeChange}
-		onProfileToggle={handleProfileToggle}
-		onAccordionToggle={handleAccordionToggle}
 		{profileDetailsRef}
 		{themeAccordionRef}
 		{sidebarCollapsed}

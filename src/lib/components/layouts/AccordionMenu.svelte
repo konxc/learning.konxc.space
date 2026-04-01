@@ -11,6 +11,16 @@
 		onClick?: (value: string, e: MouseEvent) => void;
 	}
 
+	interface Props {
+		title: string;
+		icon?: string;
+		items: AccordionMenuItem[];
+		activeValue: string;
+		accordionRef?: HTMLDetailsElement;
+		onToggle?: (e: Event) => void;
+		groupName?: string;
+	}
+
 	let {
 		title,
 		icon: titleIcon,
@@ -19,15 +29,7 @@
 		accordionRef,
 		onToggle,
 		groupName = 'accordion'
-	}: {
-		title: string;
-		icon?: string;
-		items: AccordionMenuItem[];
-		activeValue: string;
-		accordionRef?: HTMLDetailsElement;
-		onToggle?: (e: Event) => void;
-		groupName?: string;
-	} = $props();
+	}: Props = $props();
 
 	function handleItemClick(item: AccordionMenuItem, e: MouseEvent) {
 		if (item.onClick) {

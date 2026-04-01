@@ -1,5 +1,5 @@
 <script lang="ts">
-	import FilterButtonGroup from '$lib/components/ui/FilterButtonGroup.svelte';
+	import StatusFilter from '$lib/components/ui/StatusFilter.svelte';
 	import type { PaymentProofStatus } from '$lib/constants/payment-proofs';
 
 	interface PaymentProofFiltersProps {
@@ -14,7 +14,7 @@
 		onStatusFilterChange
 	}: PaymentProofFiltersProps = $props();
 
-	const filters = [
+	const options = [
 		{ value: 'all', label: 'All', count: statusCounts.all ?? 0 },
 		{ value: 'pending', label: 'Pending', count: statusCounts.pending ?? 0 },
 		{ value: 'approved', label: 'Approved', count: statusCounts.approved ?? 0 },
@@ -26,4 +26,4 @@
 	}
 </script>
 
-<FilterButtonGroup {filters} bind:active={statusFilter} onChange={handleChange} />
+<StatusFilter {options} bind:active={statusFilter} onChange={handleChange} />

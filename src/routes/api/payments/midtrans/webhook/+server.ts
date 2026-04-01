@@ -53,36 +53,51 @@ export const POST: RequestHandler = async ({ request }) => {
 		.set({ status: newStatus === 'active' ? 'success' : newStatus })
 		.where(eq(schema.transaction.id, order_id));
 
-	// Find and update enrollment using userId and courseId from transaction
-	// Only update enrollment if courseId exists (course purchase)
-	if (tx.courseId) {
-		const courseId = tx.courseId as string;
-		await db
-			.update(schema.enrollment)
-			.set({
-				status: newStatus,
-				activatedAt: newStatus === 'active' ? new Date() : null
-			})
-			.where(
-				and(eq(schema.enrollment.userId, tx.userId), eq(schema.enrollment.courseId, courseId))
-			);
-
-		console.log(
-			`[Webhook] Updated enrollment for user ${tx.userId}, course ${courseId} to status: ${newStatus}`
-		);
-	} else if (tx.orgId) {
-		// Organization plan upgrade - update org planType
+	// Find and update enrollment
+	// Only update if payment is successful
+	if (newStatus === 'active') {
+		// Parse payload to get enrollmentId
 		const payload = tx.payload ? JSON.parse(tx.payload) : null;
-		if (payload?.planType && newStatus === 'active') {
-			await db
-				.update(schema.organization)
-				.set({
-					planType: payload.planType,
-					updatedAt: new Date()
-				})
-				.where(eq(schema.organization.id, tx.orgId));
 
-			console.log(`[Webhook] Updated organization ${tx.orgId} plan to: ${payload.planType}`);
+		if (tx.courseId && payload?.enrollmentId) {
+			// Course purchase - activate by enrollment ID
+			await db
+				.update(schema.enrollment)
+				.set({
+					status: 'active',
+					activatedAt: new Date()
+				})
+				.where(eq(schema.enrollment.id, payload.enrollmentId));
+
+			console.log(
+				`[Webhook] Activated enrollment ${payload.enrollmentId} for course ${tx.courseId}`
+			);
+		} else if (tx.orgId) {
+			// Organization plan upgrade - update org planType
+			if (payload?.planType) {
+				await db
+					.update(schema.organization)
+					.set({
+						planType: payload.planType,
+						updatedAt: new Date()
+					})
+					.where(eq(schema.organization.id, tx.orgId));
+
+				console.log(`[Webhook] Updated organization ${tx.orgId} plan to: ${payload.planType}`);
+			}
+		}
+	}
+
+	// Log failed payments
+	if (newStatus === 'cancelled' && tx.courseId) {
+		const payload = tx.payload ? JSON.parse(tx.payload) : null;
+		if (payload?.enrollmentId) {
+			await db
+				.update(schema.enrollment)
+				.set({ status: 'failed' })
+				.where(eq(schema.enrollment.id, payload.enrollmentId));
+
+			console.log(`[Webhook] Marked enrollment ${payload.enrollmentId} as failed`);
 		}
 	}
 

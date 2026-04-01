@@ -12,8 +12,8 @@
 	import {
 		setToVisibilityRecord,
 		isColumnVisible as checkColumnVisible
-	} from '$lib/utils/column-visibility';
-	import { filterCourses, countCoursesByStatus } from '$lib/utils/course-filters';
+	} from '$lib/utils/useColumnVisibility';
+	import { filterEntities, countByField } from '$lib/utils/filter';
 	import { COURSE_COLUMNS, getDefaultCourseColumnVisibility } from '$lib/constants/course-columns';
 	import { COURSE_STATUSES } from '$lib/constants/courses';
 	import CourseFilters from '$lib/components/admin/CourseFilters.svelte';
@@ -74,10 +74,15 @@
 	}
 
 	// Filtered courses based on search and status
-	const filteredCourses = $derived(filterCourses(data.courses, searchQuery, statusFilter));
+	const filteredCourses = $derived(
+		filterEntities(data.courses, searchQuery, statusFilter, {
+			searchFields: ['title', 'description', 'category'],
+			statusField: 'status'
+		})
+	);
 
 	// Count courses by status
-	const statusCounts = $derived(countCoursesByStatus(data.courses, COURSE_STATUSES));
+	const statusCounts = $derived(countByField(data.courses, 'status'));
 
 	// Delete handler
 	async function handleDelete(courseId: string) {

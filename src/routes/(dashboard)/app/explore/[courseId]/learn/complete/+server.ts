@@ -74,13 +74,18 @@ export const POST: RequestHandler = async (event) => {
 		serial
 	});
 
-	// Update enrollment completion date
+	// Update enrollment completion date AND status (for badge system)
 	await db
 		.update(schema.enrollment)
 		.set({
+			status: 'completed',
 			completedAt: new Date()
 		})
 		.where(and(eq(schema.enrollment.userId, user.id), eq(schema.enrollment.courseId, courseId)));
+
+	// Trigger badge checking for course completion
+	const { checkAndAwardBadges } = await import('$lib/server/badge');
+	await checkAndAwardBadges(user.id);
 
 	return json({
 		success: true,

@@ -82,9 +82,20 @@ export const POST: RequestHandler = async (event) => {
 		});
 	}
 
+	// Create transaction record in database FIRST (before Midtrans)
+	const transactionId = `TRX-${enrollmentId}-${Date.now()}`;
+	await db.insert(schema.transaction).values({
+		id: transactionId,
+		userId: user.id,
+		courseId: course.id,
+		amount: finalPrice,
+		status: 'pending',
+		payload: JSON.stringify({ enrollmentId, couponId, discountAmount })
+	});
+
 	// Create transaction in Midtrans
 	const snap = await createSnapTransaction({
-		orderId: enrollmentId,
+		orderId: transactionId,
 		amount: finalPrice,
 		customer: {
 			firstName: user.fullName || user.username,
@@ -95,9 +106,16 @@ export const POST: RequestHandler = async (event) => {
 		expiryMinutes: 60
 	});
 
+	// Update transaction with snap token
+	await db
+		.update(schema.transaction)
+		.set({ snapToken: snap.token, snapUrl: snap.redirect_url })
+		.where(eq(schema.transaction.id, transactionId));
+
 	return new Response(
 		JSON.stringify({
 			enrollmentId,
+			transactionId,
 			snapToken: snap.token,
 			redirect_url: snap.redirect_url
 		}),

@@ -1,0 +1,98 @@
+
+> learning.konxc.space@0.0.1 db:seed:reset /home/dev/web/instances/clients/services/naikkelas.id
+> tsx scripts/seed.ts --reset --yes
+
+
+📊 Seed Target: LOCAL (file:./local.db)
+
+🗑️  Resetting tables...
+  ✓ Cleared affiliateSale
+  ✓ Cleared affiliateLink
+  ✓ Cleared courseReview
+  ✓ Cleared notification
+  ✓ Cleared broadcastMessage
+  ✓ Cleared discussion
+  ✓ Cleared lessonNote
+  ✓ Cleared lessonProgress
+  ✓ Cleared checkpointSubmission
+  ✓ Cleared checkpoint
+  ✓ Cleared userBadge
+  ✓ Cleared badge
+  ✓ Cleared userXP
+  ✓ Cleared couponUsage
+  ✓ Cleared mentorApplication
+  ✓ Cleared waitingList
+  ✓ Cleared paymentProof
+  ✓ Cleared transaction
+  ✓ Cleared certificate
+  ✓ Cleared coursePlugin
+  ✓ Cleared submissionGrade
+  ✓ Cleared submission
+  ✓ Cleared quizChoice
+  ✓ Cleared quizQuestion
+  ✓ Cleared quiz
+  ✓ Cleared enrollment
+  ✓ Cleared material
+  ✓ Cleared lesson
+  ✓ Cleared module
+  ✓ Cleared cohort
+  ✓ Cleared course
+  ✓ Cleared coupon
+  ✓ Cleared pluginRegistry
+  ✓ Cleared organizationMember
+  ✓ Cleared organizationInvitation
+  ✓ Cleared workspaceMember
+  ✓ Cleared workspace
+  ✓ Cleared organization
+  ✓ Cleared partner
+  ✓ Cleared session
+  ✓ Cleared user
+✅ Tables reset complete
+
+📋 STEP 1: Creating core users...
+
+📦 Seeding core users (admin, bd, mentors, facilitators)...
+
+❌ Seeding failed: DrizzleQueryError: Failed query: insert into "user" ("id", "username", "password_hash", "role", "full_name", "email", "phone", "onboarding_completed", "last_workspace_id", "created_at", "deleted_at") values (?, ?, ?, ?, ?, ?, ?, ?, null, ?, null) on conflict do nothing
+params: admin-001,admin,IkVT8Q6NvrYZBBwq4VF4kMlHmGMZniwN1Z9CP0+4kCBn6nNZJnb5XMkU40NptPf/,admin,Aditya Pratama,admin@naikkelas.id,081234567890,1,1704067200
+    at LibSQLPreparedQuery.queryWithCache (/home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/drizzle-orm@0.44.7_@cloudflare+workers-types@4.20251014.0_@libsql+client@0.15.15_kysely@0.27.6/node_modules/src/sqlite-core/session.ts:80:11)
+    at async LibSQLPreparedQuery.run (/home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/drizzle-orm@0.44.7_@cloudflare+workers-types@4.20251014.0_@libsql+client@0.15.15_kysely@0.27.6/node_modules/src/libsql/session.ts:197:10)
+    at async seedUsers (/home/dev/web/instances/clients/services/naikkelas.id/scripts/seed/users.ts:140:3)
+    at async main (/home/dev/web/instances/clients/services/naikkelas.id/scripts/seed.ts:152:21) {
+  query: 'insert into "user" ("id", "username", "password_hash", "role", "full_name", "email", "phone", "onboarding_completed", "last_workspace_id", "created_at", "deleted_at") values (?, ?, ?, ?, ?, ?, ?, ?, null, ?, null) on conflict do nothing',
+  params: [
+    'admin-001',
+    'admin',
+    'IkVT8Q6NvrYZBBwq4VF4kMlHmGMZniwN1Z9CP0+4kCBn6nNZJnb5XMkU40NptPf/',
+    'admin',
+    'Aditya Pratama',
+    'admin@naikkelas.id',
+    '081234567890',
+    1,
+    1704067200
+  ],
+  cause: LibsqlError: SQLITE_ERROR: table user has no column named deleted_at
+      at mapSqliteError (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/@libsql+client@0.15.15/node_modules/@libsql/client/lib-esm/sqlite3.js:392:16)
+      at executeStmt (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/@libsql+client@0.15.15/node_modules/@libsql/client/lib-esm/sqlite3.js:297:15)
+      at Sqlite3Client.execute (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/@libsql+client@0.15.15/node_modules/@libsql/client/lib-esm/sqlite3.js:81:16)
+      ... 5 lines matching cause stack trace ...
+      at QueryPromise.then (/home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/drizzle-orm@0.44.7_@cloudflare+workers-types@4.20251014.0_@libsql+client@0.15.15_kysely@0.27.6/node_modules/src/query-promise.ts:31:15) {
+    code: 'SQLITE_ERROR',
+    rawCode: 1,
+    [cause]: SqliteError: table user has no column named deleted_at
+        at convertError (/home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/libsql@0.5.22/node_modules/libsql/index.js:59:12)
+        at Database.prepare (/home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/libsql@0.5.22/node_modules/libsql/index.js:131:13)
+        at executeStmt (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/@libsql+client@0.15.15/node_modules/@libsql/client/lib-esm/sqlite3.js:268:28)
+        at Sqlite3Client.execute (file:///home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/@libsql+client@0.15.15/node_modules/@libsql/client/lib-esm/sqlite3.js:81:16)
+        at <anonymous> (/home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/drizzle-orm@0.44.7_@cloudflare+workers-types@4.20251014.0_@libsql+client@0.15.15_kysely@0.27.6/node_modules/src/libsql/session.ts:199:57)
+        at LibSQLPreparedQuery.queryWithCache (/home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/drizzle-orm@0.44.7_@cloudflare+workers-types@4.20251014.0_@libsql+client@0.15.15_kysely@0.27.6/node_modules/src/sqlite-core/session.ts:78:18)
+        at LibSQLPreparedQuery.run (/home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/drizzle-orm@0.44.7_@cloudflare+workers-types@4.20251014.0_@libsql+client@0.15.15_kysely@0.27.6/node_modules/src/libsql/session.ts:197:21)
+        at QueryPromise.run (/home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/drizzle-orm@0.44.7_@cloudflare+workers-types@4.20251014.0_@libsql+client@0.15.15_kysely@0.27.6/node_modules/src/sqlite-core/query-builders/insert.ts:398:26)
+        at QueryPromise.execute (/home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/drizzle-orm@0.44.7_@cloudflare+workers-types@4.20251014.0_@libsql+client@0.15.15_kysely@0.27.6/node_modules/src/sqlite-core/query-builders/insert.ts:414:53)
+        at QueryPromise.then (/home/dev/web/instances/clients/services/naikkelas.id/node_modules/.pnpm/drizzle-orm@0.44.7_@cloudflare+workers-types@4.20251014.0_@libsql+client@0.15.15_kysely@0.27.6/node_modules/src/query-promise.ts:31:15) {
+      code: 'SQLITE_ERROR',
+      rawCode: 1
+    }
+  }
+}
+ ELIFECYCLE  Command failed with exit code 1.

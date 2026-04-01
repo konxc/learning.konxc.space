@@ -1,23 +1,13 @@
 <script lang="ts">
 	import { RADIUS, TEXT, COLOR, TRANSITION } from '$lib/config/design';
 	import { m } from '$lib/paraglide/messages.js';
+	import { getRoleLabel } from '$lib/utils/role';
 
 	interface User {
 		fullName?: string | null;
 		username?: string | null;
 		avatarUrl?: string | null;
 		role?: string | null;
-	}
-
-	function getRoleLabel(role: string | null | undefined): string {
-		if (!role) return '';
-		const roleMap: Record<string, string> = {
-			admin: 'Admin',
-			mentor: 'Mentor',
-			siswa: 'Siswa',
-			user: 'Siswa'
-		};
-		return roleMap[role] || role.charAt(0).toUpperCase() + role.slice(1);
 	}
 
 	let { user, activeRole }: { user: User | null; activeRole?: string | null } = $props();

@@ -13,11 +13,8 @@
 	import {
 		setToVisibilityRecord,
 		isColumnVisible as checkColumnVisible
-	} from '$lib/utils/column-visibility';
-	import {
-		filterPaymentProofs,
-		countPaymentProofsByStatus
-	} from '$lib/utils/payment-proof-filters';
+	} from '$lib/utils/useColumnVisibility';
+	import { filterEntities, countByStatus } from '$lib/utils/filter';
 	import {
 		PAYMENT_PROOF_COLUMNS,
 		getDefaultPaymentProofColumnVisibility
@@ -84,12 +81,15 @@
 	const allProofs = $derived([...data.pending, ...data.approved, ...data.rejected]);
 
 	// Filtered proofs based on search and status
-	const filteredProofs = $derived(filterPaymentProofs(allProofs, searchQuery, statusFilter));
+	const filteredProofs = $derived(
+		filterEntities(allProofs, searchQuery, statusFilter, {
+			searchFields: ['user.fullName', 'user.username', 'user.email', 'course.title'],
+			statusField: 'status'
+		})
+	);
 
 	// Count proofs by status
-	const statusCounts = $derived.by(() =>
-		countPaymentProofsByStatus(allProofs, PAYMENT_PROOF_STATUSES)
-	);
+	const statusCounts = $derived(countByStatus(allProofs, 'status'));
 </script>
 
 <svelte:head>

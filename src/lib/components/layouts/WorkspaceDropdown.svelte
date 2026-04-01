@@ -1,30 +1,27 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { RADIUS, TEXT, COLOR, ELEVATION } from '$lib/config/design';
 	import { invalidateAll, goto } from '$app/navigation';
 	import { toast } from '$lib/stores/toastStore';
 	import { fly } from 'svelte/transition';
+	import type { Workspace } from '$lib/types/layout';
 
-	let {
-		workspaces,
-		triggerRect,
-		isCollapsed = false,
-		isOpen = $bindable(false)
-	}: {
-		workspaces: {
-			organizations: any[];
-			activeId: string;
-			activeOrg: any;
-		};
+	interface Props {
+		workspaces: Workspace;
 		triggerRect: DOMRect;
 		isCollapsed?: boolean;
 		isOpen?: boolean;
-	} = $props();
+	}
 
-	const dropdownStyle = $derived(
-		isCollapsed
-			? `left: ${triggerRect.right + 8}px; bottom: ${window.innerHeight - triggerRect.bottom}px;`
-			: `left: ${triggerRect.left}px; bottom: ${window.innerHeight - triggerRect.top + 8}px; width: ${triggerRect.width}px;`
-	);
+	let { workspaces, triggerRect, isCollapsed = false, isOpen = $bindable(false) }: Props = $props();
+
+	const dropdownStyle = $derived(() => {
+		if (!browser || !triggerRect) return '';
+		const h = typeof window !== 'undefined' ? window.innerHeight : 0;
+		return isCollapsed
+			? `left: ${triggerRect.right + 8}px; bottom: ${h - triggerRect.bottom}px;`
+			: `left: ${triggerRect.left}px; bottom: ${h - triggerRect.top + 8}px; width: ${triggerRect.width}px;`;
+	});
 
 	async function switchWorkspace(id: string) {
 		isOpen = false;
@@ -57,7 +54,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class={`fixed z-[52] ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} border ${ELEVATION.card} overflow-hidden bg-white/95 backdrop-blur-xl dark:bg-zinc-900/95`}
-	style={dropdownStyle}
+	style={dropdownStyle()}
 	in:fly={{ y: 8, duration: 200, opacity: 0 }}
 	out:fly={{ y: 8, duration: 150, opacity: 0 }}
 >

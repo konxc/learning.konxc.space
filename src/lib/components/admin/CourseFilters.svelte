@@ -1,5 +1,5 @@
 <script lang="ts">
-	import FilterButtonGroup from '$lib/components/ui/FilterButtonGroup.svelte';
+	import StatusFilter from '$lib/components/ui/StatusFilter.svelte';
 
 	interface CourseFiltersProps {
 		statusFilter?: string;
@@ -13,11 +13,11 @@
 		onStatusFilterChange
 	}: CourseFiltersProps = $props();
 
-	const filters = [
+	const options = [
 		{ value: 'all', label: 'All', count: statusCounts.all ?? 0 },
 		{ value: 'published', label: 'Published', count: statusCounts.published ?? 0 },
 		{ value: 'draft', label: 'Draft', count: statusCounts.draft ?? 0 }
 	];
 </script>
 
-<FilterButtonGroup {filters} bind:active={statusFilter} onChange={onStatusFilterChange} />
+<StatusFilter {options} bind:active={statusFilter} onChange={onStatusFilterChange} />
