@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { COLOR, RADIUS, SPACING, TEXT, TRANSITION, ELEVATION } from '$lib/config/design';
 	import { toast } from '$lib/stores/toastStore';
 	import { goto } from '$app/navigation';
 	import { useDashboardListState } from '$lib/utils/useDashboardListState';
@@ -10,6 +9,7 @@
 	import DashboardTablePage from '$lib/components/layouts/DashboardTablePage.svelte';
 	import StatusFilter from '$lib/components/ui/StatusFilter.svelte';
 	import CouponsTable from '$lib/components/admin/CouponsTable.svelte';
+	import CreateActionButton from '$lib/components/ui/CreateActionButton.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -76,10 +76,11 @@
 	// Duplicate handler
 	async function duplicateCoupon(couponId: string) {
 		try {
-			const response = await fetch(`/app/admin/coupons?action=duplicate`, {
+			const formData = new FormData();
+			formData.set('couponId', couponId);
+			const response = await fetch(`/app/admin/coupons?/duplicate`, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ couponId })
+				body: formData
 			});
 
 			if (response.ok) {
@@ -97,10 +98,11 @@
 	// Toggle status handler
 	async function toggleStatus(couponId: string, currentStatus: boolean) {
 		try {
-			const response = await fetch(`/app/admin/coupons?action=toggle`, {
+			const formData = new FormData();
+			formData.set('couponId', couponId);
+			const response = await fetch(`/app/admin/coupons?/toggle`, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ couponId })
+				body: formData
 			});
 
 			if (response.ok) {
@@ -139,12 +141,7 @@
 				bind:active={listState.filter}
 				onChange={listState.setFilter}
 			/>
-			<a
-				href="/app/admin/coupons/create"
-				class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
-			>
-				+ Create Coupon
-			</a>
+			<CreateActionButton href="/app/admin/coupons/create" label="Create Coupon" />
 		</div>
 	{/snippet}
 

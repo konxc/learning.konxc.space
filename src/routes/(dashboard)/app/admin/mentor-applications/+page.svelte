@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { useDashboardListState } from '$lib/utils/useDashboardListState';
-	import { filterEntities, countByStatus } from '$lib/utils/filter';
+	import { filterEntities, countByStatus, buildFilterOptions } from '$lib/utils/filter';
 	import { MENTOR_APPLICATION_COLUMNS } from '$lib/constants/mentor-application-columns';
 	import { MENTOR_APPLICATION_STATUS_LABELS } from '$lib/constants/mentor-applications';
 	import DashboardTablePage from '$lib/components/layouts/DashboardTablePage.svelte';
@@ -32,24 +32,14 @@
 	const statusCounts = $derived(countByStatus(data.applications, 'status'));
 
 	// Filter options for StatusFilter component
-	const filterOptions = $derived([
-		{ value: 'all', label: MENTOR_APPLICATION_STATUS_LABELS.all, count: statusCounts.all ?? 0 },
-		{
-			value: 'pending',
-			label: MENTOR_APPLICATION_STATUS_LABELS.pending,
-			count: statusCounts.pending ?? 0
-		},
-		{
-			value: 'approved',
-			label: MENTOR_APPLICATION_STATUS_LABELS.approved,
-			count: statusCounts.approved ?? 0
-		},
-		{
-			value: 'rejected',
-			label: MENTOR_APPLICATION_STATUS_LABELS.rejected,
-			count: statusCounts.rejected ?? 0
-		}
-	]);
+	const filterOptions = $derived(
+		buildFilterOptions(statusCounts, {
+			all: MENTOR_APPLICATION_STATUS_LABELS.all,
+			pending: MENTOR_APPLICATION_STATUS_LABELS.pending,
+			approved: MENTOR_APPLICATION_STATUS_LABELS.approved,
+			rejected: MENTOR_APPLICATION_STATUS_LABELS.rejected
+		})
+	);
 </script>
 
 <DashboardTablePage

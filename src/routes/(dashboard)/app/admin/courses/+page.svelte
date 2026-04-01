@@ -1,16 +1,22 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { COLOR, RADIUS, SPACING, TEXT, TRANSITION, ELEVATION } from '$lib/config/design';
+	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
+	import Modal from '$lib/components/ui/Modal.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import Input from '$lib/components/ui/Input.svelte';
+	import Icon from '$lib/components/ui/Icon.svelte';
 	import { toast } from '$lib/stores/toastStore';
-	import { goto } from '$app/navigation';
 	import { useDashboardListState } from '$lib/utils/useDashboardListState';
-	import { filterEntities, countByField } from '$lib/utils/filter';
+	import { filterEntities, countByField, buildFilterOptions } from '$lib/utils/filter';
 	import { COURSE_COLUMNS } from '$lib/constants/course-columns';
 	import DashboardTablePage from '$lib/components/layouts/DashboardTablePage.svelte';
 	import StatusFilter from '$lib/components/ui/StatusFilter.svelte';
 	import CoursesTable from '$lib/components/admin/CoursesTable.svelte';
 
 	let { data }: { data: PageData } = $props();
+
+	let showCreateModal = $state(false);
 
 	// Dashboard list state management
 	const listState = useDashboardListState({
@@ -34,22 +40,19 @@
 	const statusCounts = $derived(countByField(data.courses, 'status'));
 
 	// Filter options for StatusFilter component
-	const filterOptions = $derived([
-		{ value: 'all', label: 'All', count: statusCounts.all ?? 0 },
-		{ value: 'published', label: 'Published', count: statusCounts.published ?? 0 },
-		{ value: 'draft', label: 'Draft', count: statusCounts.draft ?? 0 }
-	]);
+	const filterOptions = $derived(
+		buildFilterOptions(statusCounts, { all: 'All', published: 'Published', draft: 'Draft' })
+	);
 
-	// Delete handler
-	async function handleDelete(courseId: string) {
-		const response = await fetch(`/app/admin/courses/delete/${courseId}`, {
-			method: 'POST'
-		});
-		if (response.ok) {
-			toast.success('Kursus berhasil dihapus');
-			await goto('/app/admin/courses', { invalidateAll: true });
-		} else {
-			toast.error('Gagal menghapus kursus');
+	// Delete handler using form element for use:enhance
+	let deleteForm: HTMLFormElement;
+	let courseIdToDelete = $state('');
+
+	async function handleDeleteRequest(id: string): Promise<void> {
+		if (confirm('Are you sure you want to delete this course and all its content?')) {
+			courseIdToDelete = id;
+			// Trigger the hidden form
+			setTimeout(() => deleteForm.requestSubmit(), 0);
 		}
 	}
 </script>
@@ -73,12 +76,9 @@
 				bind:active={listState.filter}
 				onChange={listState.setFilter}
 			/>
-			<a
-				href="/app/admin/courses/create"
-				class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
-			>
-				+ Create Course
-			</a>
+			<Button variant="primary" onclick={() => (showCreateModal = true)}>
+				<Icon name="plus" size={16} class="mr-2" /> Create Course
+			</Button>
 		</div>
 	{/snippet}
 
@@ -88,7 +88,51 @@
 			columns={COURSE_COLUMNS}
 			columnVisibility={listState.columnVisibility}
 			isColumnVisible={listState.isColumnVisible}
-			onDelete={handleDelete}
+			onDelete={handleDeleteRequest}
 		/>
+
+		<!-- Hidden form for deletion -->
+		<form
+			method="POST"
+			action="?/deleteCourse"
+			use:enhance={() => {
+				return async ({ result }) => {
+					if (result.type === 'success') {
+						toast.success('Course deleted');
+						await invalidateAll();
+					} else {
+						toast.error('Failed to delete course');
+					}
+				};
+			}}
+			bind:this={deleteForm}
+			class="hidden"
+		>
+			<input type="hidden" name="courseId" value={courseIdToDelete} />
+		</form>
 	{/snippet}
 </DashboardTablePage>
+
+<!-- Create Course Modal -->
+<Modal isOpen={showCreateModal} title="Create New Course" onClose={() => (showCreateModal = false)}>
+	<form
+		method="POST"
+		action="?/createCourse"
+		use:enhance={() => {
+			return async ({ result }) => {
+				if (result.type === 'failure' && result.data?.error) {
+					toast.error(String(result.data.error));
+				} else if (result.type === 'error') {
+					toast.error('An unexpected error occurred');
+				}
+			};
+		}}
+		class="space-y-4"
+	>
+		<Input label="Course Title" name="title" required placeholder="e.g. Masterclass Web Dev" />
+		<div class="flex justify-end gap-3 pt-4">
+			<Button variant="ghost" onclick={() => (showCreateModal = false)}>Cancel</Button>
+			<Button type="submit" variant="primary">Create & Edit</Button>
+		</div>
+	</form>
+</Modal>

@@ -3,7 +3,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
-import { json } from '@sveltejs/kit';
+import { actionFailure, actionSuccess } from '$lib/server/actions';
 
 export const load: PageServerLoad = async (event) => {
 	await requireAdmin(event);
@@ -51,8 +51,12 @@ function generateCouponCode(): string {
 export const actions: Actions = {
 	toggle: async (event) => {
 		const user = await requireAdmin(event);
-		const body = await event.request.json();
-		const { couponId } = body;
+		const formData = await event.request.formData();
+		const couponId = formData.get('couponId') as string;
+
+		if (!couponId) {
+			return actionFailure(400, 'Missing coupon ID');
+		}
 
 		// Get current coupon
 		const coupons = await db
@@ -62,7 +66,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (coupons.length === 0) {
-			return json({ error: 'Coupon not found' }, { status: 404 });
+			return actionFailure(404, 'Coupon not found');
 		}
 
 		const coupon = coupons[0];
@@ -73,13 +77,17 @@ export const actions: Actions = {
 			.set({ isActive: !coupon.isActive })
 			.where(eq(schema.coupon.id, couponId));
 
-		return json({ success: true });
+		return actionSuccess({ message: 'Coupon status toggled' });
 	},
 
 	duplicate: async (event) => {
 		const user = await requireAdmin(event);
-		const body = await event.request.json();
-		const { couponId } = body;
+		const formData = await event.request.formData();
+		const couponId = formData.get('couponId') as string;
+
+		if (!couponId) {
+			return actionFailure(400, 'Missing coupon ID');
+		}
 
 		// Get original coupon
 		const coupons = await db
@@ -89,7 +97,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (coupons.length === 0) {
-			return json({ error: 'Coupon not found' }, { status: 404 });
+			return actionFailure(404, 'Coupon not found');
 		}
 
 		const original = coupons[0];
@@ -129,6 +137,6 @@ export const actions: Actions = {
 			isActive: original.isActive
 		});
 
-		return json({ success: true });
+		return actionSuccess({ message: 'Coupon duplicated' });
 	}
 };

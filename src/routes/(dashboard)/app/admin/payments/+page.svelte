@@ -1,9 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { useDashboardListState } from '$lib/utils/useDashboardListState';
-	import { filterEntities, countByStatus } from '$lib/utils/filter';
+	import { filterEntities, countByStatus, buildFilterOptions } from '$lib/utils/filter';
 	import { PAYMENT_PROOF_COLUMNS } from '$lib/constants/payment-proof-columns';
-	import { type PaymentProofStatus } from '$lib/constants/payment-proofs';
 	import DashboardTablePage from '$lib/components/layouts/DashboardTablePage.svelte';
 	import StatusFilter from '$lib/components/ui/StatusFilter.svelte';
 	import PaymentProofsTable from '$lib/components/admin/PaymentProofsTable.svelte';
@@ -20,27 +19,26 @@
 		searchFields: ['user.fullName', 'user.username', 'user.email', 'course.title']
 	});
 
-	// Combine all proofs for filtering
-	const allProofs = $derived([...data.pending, ...data.approved, ...data.rejected]);
-
 	// Filtered proofs based on search and status
 	const filteredProofs = $derived(
-		filterEntities(allProofs, listState.searchQuery, listState.filter, {
+		filterEntities(data.proofs, listState.searchQuery, listState.filter, {
 			searchFields: ['user.fullName', 'user.username', 'user.email', 'course.title'],
 			statusField: 'status'
 		})
 	);
 
 	// Count proofs by status
-	const statusCounts = $derived(countByStatus(allProofs, 'status'));
+	const statusCounts = $derived(countByStatus(data.proofs, 'status'));
 
 	// Filter options for StatusFilter component
-	const filterOptions = $derived([
-		{ value: 'all', label: 'All', count: statusCounts.all ?? 0 },
-		{ value: 'pending', label: 'Pending', count: statusCounts.pending ?? 0 },
-		{ value: 'approved', label: 'Approved', count: statusCounts.approved ?? 0 },
-		{ value: 'rejected', label: 'Rejected', count: statusCounts.rejected ?? 0 }
-	]);
+	const filterOptions = $derived(
+		buildFilterOptions(statusCounts, {
+			all: 'All',
+			pending: 'Pending',
+			approved: 'Approved',
+			rejected: 'Rejected'
+		})
+	);
 </script>
 
 <DashboardTablePage
@@ -52,7 +50,7 @@
 	onVisibilityChange={listState.handleVisibilityChange}
 	storageKey="admin-payment-proofs"
 	filteredCount={filteredProofs.length}
-	totalCount={allProofs.length}
+	totalCount={data.proofs.length}
 	searchPlaceholder="Cari berdasarkan user, email, atau course..."
 >
 	{#snippet filters()}

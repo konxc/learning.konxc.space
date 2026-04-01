@@ -32,15 +32,8 @@ export const load: PageServerLoad = async (event) => {
 		.innerJoin(schema.course, eq(schema.paymentProof.courseId, schema.course.id))
 		.orderBy(schema.paymentProof.createdAt);
 
-	// Separate by status
-	const pending = proofs.filter((p) => p.status === 'pending');
-	const approved = proofs.filter((p) => p.status === 'approved');
-	const rejected = proofs.filter((p) => p.status === 'rejected');
-
 	return {
-		pending,
-		approved,
-		rejected
+		proofs
 	};
 };
 

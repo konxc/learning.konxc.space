@@ -3,7 +3,18 @@
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
-	import { COLOR, RADIUS, SPACING, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
+	import {
+		COLOR,
+		RADIUS,
+		SPACING,
+		TEXT,
+		ELEVATION,
+		TRANSITION,
+		STATUS,
+		INPUT,
+		TABLE,
+		ACTION
+	} from '$lib/config/design';
 	import { enhance } from '$app/forms';
 	import { formToast } from '$lib/utils/formEnhance';
 
@@ -13,9 +24,9 @@
 	let creating = $state(false);
 
 	const statusColors: Record<string, string> = {
-		upcoming: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-		active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-		completed: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+		upcoming: `${STATUS.warning.bg} ${STATUS.warning.text}`,
+		active: `${STATUS.success.bg} ${STATUS.success.text}`,
+		completed: `${STATUS.neutral.bg} ${STATUS.neutral.text}`
 	};
 </script>
 
@@ -55,9 +66,9 @@
 				<div class="sm:col-span-2">
 					<label
 						for="name"
-						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+						class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
 					>
-						Nama Batch <span class="text-red-500">*</span>
+						Nama Batch <span class={COLOR.error}>*</span>
 					</label>
 					<input
 						type="text"
@@ -65,22 +76,22 @@
 						name="name"
 						required
 						placeholder="contoh: Batch Digital Marketing – April 2026"
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} ${INPUT.focus}`}
 					/>
 				</div>
 
 				<div class="sm:col-span-2">
 					<label
 						for="courseId"
-						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+						class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
 					>
-						Kursus <span class="text-red-500">*</span>
+						Kursus <span class={COLOR.error}>*</span>
 					</label>
 					<select
 						id="courseId"
 						name="courseId"
 						required
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} cursor-pointer focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} cursor-pointer ${INPUT.focus}`}
 					>
 						<option value="">-- Pilih Kursus --</option>
 						{#each data.courses as course}
@@ -92,31 +103,31 @@
 				<div>
 					<label
 						for="startDate"
-						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+						class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
 					>
-						Tanggal Mulai <span class="text-red-500">*</span>
+						Tanggal Mulai <span class={COLOR.error}>*</span>
 					</label>
 					<input
 						type="date"
 						id="startDate"
 						name="startDate"
 						required
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} ${INPUT.focus}`}
 					/>
 				</div>
 
 				<div>
 					<label
 						for="endDate"
-						class="mb-1.5 block text-xs font-black tracking-widest text-gray-500 uppercase"
+						class={`mb-1.5 block text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}
 					>
-						Tanggal Selesai <span class="text-gray-400">(Opsional)</span>
+						Tanggal Selesai <span class={COLOR.textMuted}>(Opsional)</span>
 					</label>
 					<input
 						type="date"
 						id="endDate"
 						name="endDate"
-						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100`}
+						class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} ${SPACING.input} ${TEXT.body} outline-none ${TRANSITION.all} ${INPUT.focus}`}
 					/>
 				</div>
 
@@ -131,7 +142,7 @@
 					<button
 						type="button"
 						onclick={() => (showCreateForm = false)}
-						class={`${RADIUS.button} border ${COLOR.cardBorder} px-6 py-3 text-sm font-semibold ${COLOR.textSecondary} ${TRANSITION.all} hover:bg-gray-50`}
+						class={`${RADIUS.button} border ${COLOR.cardBorder} px-6 py-3 text-sm font-semibold ${COLOR.textSecondary} 						${TRANSITION.all} ${COLOR.neutralHover}`}
 					>
 						Batal
 					</button>
@@ -155,13 +166,17 @@
 				<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
 					Active Students
 				</p>
-				<p class="mt-1 text-3xl font-black text-green-600">{data.adminStats.activeStudents}</p>
+				<p class={`mt-1 text-3xl font-black ${TABLE.accentTextGreen}`}>
+					{data.adminStats.activeStudents}
+				</p>
 			</div>
 			<div class={`${RADIUS.card} ${COLOR.card} ${ELEVATION.base} border ${COLOR.cardBorder} p-5`}>
 				<p class={`text-xs font-black tracking-widest uppercase ${COLOR.textMuted}`}>
 					Pending Payments
 				</p>
-				<p class="mt-1 text-3xl font-black text-amber-600">{data.adminStats.pendingPayments}</p>
+				<p class={`mt-1 text-3xl font-black ${TABLE.accentTextAmber}`}>
+					{data.adminStats.pendingPayments}
+				</p>
 			</div>
 		</div>
 	{/if}
@@ -182,7 +197,7 @@
 			<div class="overflow-x-auto">
 				<table class="w-full text-left">
 					<thead>
-						<tr class="border-b border-gray-100 bg-gray-50/70">
+						<tr class={`${TABLE.theadBorder} border-b ${TABLE.thead}`}>
 							<th
 								class={`px-5 py-4 ${TEXT.small} font-black tracking-widest uppercase ${COLOR.textMuted}`}
 								>Nama Batch</th
@@ -209,12 +224,12 @@
 							>
 						</tr>
 					</thead>
-					<tbody class="divide-y divide-gray-50">
+					<tbody class={`${TABLE.divider} divide-y`}>
 						{#each data.cohorts as cohort}
-							<tr class="transition-colors hover:bg-blue-50/20">
+							<tr class={`${TABLE.rowHover} transition-colors`}>
 								<td class="px-5 py-4">
 									<p class={`text-sm font-bold ${COLOR.textPrimary}`}>{cohort.name}</p>
-									<p class="mt-0.5 text-[10px] text-gray-400">#{cohort.id.slice(0, 8)}</p>
+									<p class={`mt-0.5 text-[10px] ${COLOR.textMuted}`}>#{cohort.id.slice(0, 8)}</p>
 								</td>
 								<td class="hidden px-5 py-4 md:table-cell">
 									<p class={`text-sm ${COLOR.textSecondary} max-w-[200px] truncate`}>
@@ -241,7 +256,9 @@
 								<td class="px-5 py-4">
 									<div class="flex flex-col gap-1">
 										<div class="flex items-center gap-2">
-											<span class="text-lg font-black text-blue-600">{cohort.enrollmentCount}</span>
+											<span class={`text-lg font-black ${TABLE.accentText}`}
+												>{cohort.enrollmentCount}</span
+											>
 											<span class={`text-xs ${COLOR.textMuted}`}>peserta</span>
 										</div>
 										{#if cohort.stats && cohort.enrollmentCount > 0}
@@ -267,7 +284,7 @@
 								</td>
 								<td class="px-5 py-4">
 									<span
-										class={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase ${statusColors[cohort.status] ?? 'bg-gray-100 text-gray-500'}`}
+										class={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase ${statusColors[cohort.status] ?? `${STATUS.neutral.bg} ${STATUS.neutral.text}`}`}
 									>
 										{#if cohort.status === 'upcoming'}
 											<Icon name="clock" size={12} />
@@ -283,7 +300,7 @@
 									<div class="flex items-center gap-2">
 										<a
 											href="/app/admin/cohorts/{cohort.id}"
-											class="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-600 no-underline transition-all hover:bg-blue-100"
+											class={`inline-flex items-center gap-1 ${RADIUS.small} border ${STATUS.info.border} ${STATUS.info.bg} ${STATUS.info.text} px-3 py-1.5 text-xs font-bold no-underline transition-all hover:bg-blue-50`}
 										>
 											Detail
 										</a>
@@ -302,8 +319,8 @@
 												type="submit"
 												class={`inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${
 													cohort.status === 'active'
-														? 'border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100'
-														: 'border-green-200 bg-green-50 text-green-600 hover:bg-green-100'
+														? `${STATUS.neutral.border} ${STATUS.neutral.bg} ${STATUS.neutral.text} hover:bg-zinc-100`
+														: `${STATUS.success.border} ${STATUS.success.bg} ${STATUS.success.text} hover:bg-emerald-50`
 												}`}
 											>
 												{cohort.status === 'active'

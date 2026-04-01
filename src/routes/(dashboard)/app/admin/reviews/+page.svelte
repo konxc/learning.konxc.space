@@ -2,7 +2,16 @@
 	import type { PageData, ActionData } from './$types';
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
-	import { COLOR, RADIUS, TEXT, ELEVATION, TRANSITION } from '$lib/config/design';
+	import {
+		COLOR,
+		RADIUS,
+		TEXT,
+		ELEVATION,
+		TRANSITION,
+		STATUS,
+		TAB,
+		ACTION
+	} from '$lib/config/design';
 	import { enhance } from '$app/forms';
 	import { formToast } from '$lib/utils/formEnhance';
 
@@ -34,9 +43,9 @@
 	];
 
 	const statusColors: Record<string, string> = {
-		pending: 'bg-amber-100 text-amber-700',
-		approved: 'bg-green-100 text-green-700',
-		rejected: 'bg-red-100 text-red-700'
+		pending: `${STATUS.warning.bg} ${STATUS.warning.text}`,
+		approved: `${STATUS.success.bg} ${STATUS.success.text}`,
+		rejected: `${STATUS.error.bg} ${STATUS.error.text}`
 	};
 </script>
 
@@ -60,7 +69,7 @@
 		{#each statusFilters as filter}
 			<a
 				href="?status={filter.value}"
-				class={`{data.statusFilter === filter.value ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'} rounded-full px-4 py-2 text-sm font-bold text-gray-600 transition-all`}
+				class={`${data.statusFilter === filter.value ? TAB.active : TAB.inactive} rounded-full px-4 py-2 text-sm font-bold transition-all`}
 			>
 				{filter.label}
 				<span class="ml-1 opacity-70">({filter.count})</span>
@@ -110,7 +119,7 @@
 								<span class={`${COLOR.textMuted}`}>on</span>
 								<a
 									href="/app/explore/{review.course.id}"
-									class="font-medium text-blue-600 hover:underline"
+									class={`${RADIUS.button} font-medium ${COLOR.accent} hover:underline`}
 								>
 									{review.course.title}
 								</a>
@@ -141,7 +150,7 @@
 									<input type="hidden" name="reviewId" value={review.id} />
 									<button
 										type="submit"
-										class={`${RADIUS.button} bg-green-600 px-4 py-2 text-xs font-bold text-white hover:bg-green-700`}
+										class={`${RADIUS.button} ${ACTION.approve} px-4 py-2 text-xs font-bold`}
 									>
 										Approve
 									</button>
@@ -159,7 +168,7 @@
 									<input type="hidden" name="reviewId" value={review.id} />
 									<button
 										type="submit"
-										class={`${RADIUS.button} border border-red-200 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-100`}
+										class={`${RADIUS.button} ${ACTION.reject} px-4 py-2 text-xs font-bold`}
 									>
 										Reject
 									</button>
@@ -183,11 +192,13 @@
 
 					<!-- Existing Response -->
 					{#if review.response}
-						<div class="mt-4 rounded-lg border-l-4 border-blue-500 bg-blue-50 p-4">
-							<p class="mb-1 text-xs font-bold text-blue-700">Organization Response</p>
-							<p class="text-sm text-blue-900">{review.response}</p>
+						<div
+							class="mt-4 rounded-lg border-l-4 border-blue-500 bg-blue-50 p-4 dark:border-blue-500/50 dark:bg-blue-950/30"
+						>
+							<p class={`mb-1 text-xs font-bold ${COLOR.accent}`}>Organization Response</p>
+							<p class={`text-sm ${COLOR.textPrimary}`}>{review.response}</p>
 							{#if review.responseAt}
-								<p class="mt-2 text-xs text-blue-600">{formatDate(review.responseAt)}</p>
+								<p class={`mt-2 text-xs ${COLOR.textMuted}`}>{formatDate(review.responseAt)}</p>
 							{/if}
 						</div>
 					{/if}
@@ -206,11 +217,14 @@
 									await update();
 								};
 							}}
-							class="mt-4 rounded-lg bg-gray-50 p-4"
+							class={`mt-4 rounded-lg ${COLOR.neutral} p-4`}
 						>
 							<input type="hidden" name="reviewId" value={review.id} />
-							<label class="mb-2 block text-sm font-semibold">Your Response</label>
+							<label for="response-{review.id}" class="mb-2 block text-sm font-semibold"
+								>Your Response</label
+							>
 							<textarea
+								id="response-{review.id}"
 								name="response"
 								bind:value={responseText}
 								rows="3"

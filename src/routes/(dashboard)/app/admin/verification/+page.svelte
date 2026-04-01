@@ -4,7 +4,17 @@
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import { enhance } from '$app/forms';
-	import { COLOR, RADIUS, TEXT, SPACING, ELEVATION } from '$lib/config/design';
+	import {
+		COLOR,
+		RADIUS,
+		TEXT,
+		SPACING,
+		ELEVATION,
+		ACTION,
+		MODAL,
+		TABLE,
+		STATUS
+	} from '$lib/config/design';
 	import { toast } from '$lib/stores/toastStore';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -66,19 +76,19 @@
 	<!-- Stats -->
 	<div class="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
 		<div class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} p-4`}>
-			<p class="text-sm text-zinc-500">Pending KTP</p>
-			<p class="text-2xl font-bold text-amber-600">{data.pendingKtp.length}</p>
+			<p class={`text-sm ${COLOR.textMuted}`}>Pending KTP</p>
+			<p class={`text-2xl font-bold ${TABLE.accentTextAmber}`}>{data.pendingKtp.length}</p>
 		</div>
 		<div class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} p-4`}>
-			<p class="text-sm text-zinc-500">Pending Org</p>
-			<p class="text-2xl font-bold text-blue-600">{data.pendingOrgs.length}</p>
+			<p class={`text-sm ${COLOR.textMuted}`}>Pending Org</p>
+			<p class={`text-2xl font-bold ${TABLE.accentText}`}>{data.pendingOrgs.length}</p>
 		</div>
 	</div>
 
 	<!-- Tabs -->
 	<div class="mb-6 flex gap-2">
 		<button
-			class={`rounded-lg px-4 py-2 font-medium transition-colors ${activeTab === 'ktp' ? 'bg-amber-100 text-amber-700' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'}`}
+			class={`${RADIUS.small} px-4 py-2 font-medium transition-colors ${activeTab === 'ktp' ? `${STATUS.warning.bg} ${STATUS.warning.text}` : `${COLOR.neutral} ${COLOR.textSecondary} ${COLOR.neutralHover}`}`}
 			onclick={() => (activeTab = 'ktp')}
 		>
 			<div class="flex items-center gap-2">
@@ -87,7 +97,7 @@
 			</div>
 		</button>
 		<button
-			class={`rounded-lg px-4 py-2 font-medium transition-colors ${activeTab === 'org' ? 'bg-blue-100 text-blue-700' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'}`}
+			class={`${RADIUS.small} px-4 py-2 font-medium transition-colors ${activeTab === 'org' ? `${STATUS.info.bg} ${STATUS.info.text}` : `${COLOR.neutral} ${COLOR.textSecondary} ${COLOR.neutralHover}`}`}
 			onclick={() => (activeTab = 'org')}
 		>
 			<div class="flex items-center gap-2">
@@ -102,8 +112,8 @@
 		<div class="space-y-4">
 			{#if data.pendingKtp.length === 0}
 				<div class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} p-8 text-center`}>
-					<Icon name="check-circle" size={48} class="mx-auto mb-4 text-emerald-400" />
-					<p class="text-zinc-500">Tidak ada verifikasi KTP yang pending</p>
+					<Icon name="check-circle" size={48} class={`mx-auto mb-4 ${STATUS.success.text}`} />
+					<p class={COLOR.textMuted}>Tidak ada verifikasi KTP yang pending</p>
 				</div>
 			{:else}
 				{#each data.pendingKtp as verification}
@@ -114,31 +124,33 @@
 							<!-- User Info -->
 							<div class="flex-1">
 								<div class="flex items-center gap-3">
-									<div class="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-200">
-										<Icon name="user" size={24} class="text-zinc-500" />
+									<div
+										class={`flex h-12 w-12 items-center justify-center rounded-full ${COLOR.neutral}`}
+									>
+										<Icon name="user" size={24} class={COLOR.textMuted} />
 									</div>
 									<div>
 										<h4 class="font-bold">
 											{verification.ktpName || verification.user?.fullName || 'Unknown'}
 										</h4>
-										<p class="text-sm text-zinc-500">{verification.user?.email}</p>
+										<p class={`text-sm ${COLOR.textMuted}`}>{verification.user?.email}</p>
 									</div>
 								</div>
 								<div class="mt-4 grid grid-cols-2 gap-4 text-sm">
 									<div>
-										<span class="text-zinc-500">NIK:</span>
+										<span class={COLOR.textMuted}>NIK:</span>
 										<span class="ml-2 font-mono">{verification.ktpNumber}</span>
 									</div>
 									<div>
-										<span class="text-zinc-500">Tgl Lahir:</span>
+										<span class={COLOR.textMuted}>Tgl Lahir:</span>
 										<span class="ml-2">{formatDate(verification.ktpDob)}</span>
 									</div>
 									<div class="col-span-2">
-										<span class="text-zinc-500">Alamat:</span>
+										<span class={COLOR.textMuted}>Alamat:</span>
 										<span class="ml-2">{verification.ktpAddress}</span>
 									</div>
 									<div class="col-span-2">
-										<span class="text-zins-500">Submitted:</span>
+										<span class={COLOR.textMuted}>Submitted:</span>
 										<span class="ml-2">{formatDate(verification.createdAt)}</span>
 									</div>
 								</div>
@@ -147,7 +159,7 @@
 							<!-- Photos -->
 							<div class="flex gap-4">
 								<div>
-									<p class="mb-1 text-xs font-medium text-zinc-500">Foto KTP</p>
+									<p class={`mb-1 text-xs font-medium ${COLOR.textMuted}`}>Foto KTP</p>
 									{#if verification.ktpPhotoUrl}
 										<img
 											src={verification.ktpPhotoUrl}
@@ -155,13 +167,15 @@
 											class="h-24 w-36 rounded-lg border object-cover"
 										/>
 									{:else}
-										<div class="flex h-24 w-36 items-center justify-center rounded-lg bg-zinc-100">
-											<Icon name="image" size={24} class="text-zinc-400" />
+										<div
+											class={`flex h-24 w-36 items-center justify-center rounded-lg ${COLOR.neutral}`}
+										>
+											<Icon name="image" size={24} class={COLOR.textMuted} />
 										</div>
 									{/if}
 								</div>
 								<div>
-									<p class="mb-1 text-xs font-medium text-zinc-500">Selfie + KTP</p>
+									<p class={`mb-1 text-xs font-medium ${COLOR.textMuted}`}>Selfie + KTP</p>
 									{#if verification.selfieWithKtpUrl}
 										<img
 											src={verification.selfieWithKtpUrl}
@@ -169,8 +183,10 @@
 											class="h-24 w-36 rounded-lg border object-cover"
 										/>
 									{:else}
-										<div class="flex h-24 w-36 items-center justify-center rounded-lg bg-zinc-100">
-											<Icon name="image" size={24} class="text-zinc-400" />
+										<div
+											class={`flex h-24 w-36 items-center justify-center rounded-lg ${COLOR.neutral}`}
+										>
+											<Icon name="image" size={24} class={COLOR.textMuted} />
 										</div>
 									{/if}
 								</div>
@@ -182,7 +198,7 @@
 									<input type="hidden" name="verificationId" value={verification.id} />
 									<button
 										type="submit"
-										class="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 font-bold text-white transition-colors hover:bg-emerald-700"
+										class={`flex w-full items-center justify-center gap-2 ${RADIUS.small} ${ACTION.approve} px-4 py-2 font-bold`}
 									>
 										<Icon name="check" size={16} />
 										Approve
@@ -190,7 +206,7 @@
 								</form>
 								<button
 									type="button"
-									class="flex w-full items-center justify-center gap-2 rounded-lg bg-rose-600 px-4 py-2 font-bold text-white transition-colors hover:bg-rose-700"
+									class={`flex w-full items-center justify-center gap-2 ${RADIUS.small} ${ACTION.reject} px-4 py-2 font-bold`}
 									onclick={() => openRejectModal(verification.id, 'ktp')}
 								>
 									<Icon name="x" size={16} />
@@ -209,8 +225,8 @@
 		<div class="space-y-4">
 			{#if data.pendingOrgs.length === 0}
 				<div class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} p-8 text-center`}>
-					<Icon name="check-circle" size={48} class="mx-auto mb-4 text-emerald-400" />
-					<p class="text-zinc-500">Tidak ada verifikasi organisasi yang pending</p>
+					<Icon name="check-circle" size={48} class={`mx-auto mb-4 ${STATUS.success.text}`} />
+					<p class={COLOR.textMuted}>Tidak ada verifikasi organisasi yang pending</p>
 				</div>
 			{:else}
 				{#each data.pendingOrgs as verification}
@@ -231,35 +247,35 @@
 										<h4 class="font-bold">
 											{verification.legalName || verification.organization?.name}
 										</h4>
-										<p class="text-sm text-zinc-500">{verification.organization?.slug}</p>
+										<p class={`text-sm ${COLOR.textMuted}`}>{verification.organization?.slug}</p>
 									</div>
 								</div>
 								<div class="mt-4 grid grid-cols-2 gap-4 text-sm">
 									<div>
-										<span class="text-zinc-500">Tipe:</span>
+										<span class={COLOR.textMuted}>Tipe:</span>
 										<span class="ml-2 capitalize">{verification.legalType}</span>
 									</div>
 									<div>
-										<span class="text-zinc-500">NPWP:</span>
+										<span class={COLOR.textMuted}>NPWP:</span>
 										<span class="ml-2 font-mono">{verification.npwp || '-'}</span>
 									</div>
 									<div>
-										<span class="text-zinc-500">Penanggung Jawab:</span>
+										<span class={COLOR.textMuted}>Penanggung Jawab:</span>
 										<span class="ml-2">{verification.representativeName || '-'}</span>
 									</div>
 									<div>
-										<span class="text-zinc-500">Jabatan:</span>
+										<span class={COLOR.textMuted}>Jabatan:</span>
 										<span class="ml-2 capitalize">{verification.representativePosition || '-'}</span
 										>
 									</div>
 									<div class="col-span-2">
-										<span class="text-zinc-500">Alamat:</span>
+										<span class={COLOR.textMuted}>Alamat:</span>
 										<span class="ml-2"
 											>{verification.legalAddress}, {verification.city}, {verification.province}</span
 										>
 									</div>
 									<div class="col-span-2">
-										<span class="text-zinc-500">Submitted:</span>
+										<span class={COLOR.textMuted}>Submitted:</span>
 										<span class="ml-2">{formatDate(verification.createdAt)}</span>
 									</div>
 								</div>
@@ -271,7 +287,7 @@
 									<input type="hidden" name="verificationId" value={verification.id} />
 									<button
 										type="submit"
-										class="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 font-bold text-white transition-colors hover:bg-emerald-700"
+										class={`flex w-full items-center justify-center gap-2 ${RADIUS.small} ${ACTION.approve} px-4 py-2 font-bold`}
 									>
 										<Icon name="check" size={16} />
 										Approve
@@ -279,7 +295,7 @@
 								</form>
 								<button
 									type="button"
-									class="flex w-full items-center justify-center gap-2 rounded-lg bg-rose-600 px-4 py-2 font-bold text-white transition-colors hover:bg-rose-700"
+									class={`flex w-full items-center justify-center gap-2 ${RADIUS.small} ${ACTION.reject} px-4 py-2 font-bold`}
 									onclick={() => openRejectModal(verification.id, 'org')}
 								>
 									<Icon name="x" size={16} />
@@ -295,8 +311,8 @@
 
 	<!-- Reject Modal -->
 	{#if showRejectModal}
-		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-			<div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+		<div class={`fixed inset-0 z-50 flex items-center justify-center ${MODAL.overlay}`}>
+			<div class={`w-full max-w-md ${RADIUS.card} ${MODAL.panel} p-6`}>
 				<h3 class="mb-4 text-lg font-bold">Alasan Penolakan</h3>
 				<form
 					method="POST"
@@ -314,20 +330,20 @@
 						bind:value={rejectReason}
 						placeholder="Masukkan alasan penolakan..."
 						rows="4"
-						class="mb-4 w-full rounded-lg border border-zinc-200 p-3 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
+						class={`mb-4 w-full ${RADIUS.small} border ${COLOR.cardBorder} p-3 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20`}
 						required
 					></textarea>
 					<div class="flex gap-2">
 						<button
 							type="button"
-							class="flex-1 rounded-lg bg-zinc-100 px-4 py-2 font-medium transition-colors hover:bg-zinc-200"
+							class={`flex-1 ${RADIUS.small} ${COLOR.neutral} px-4 py-2 font-medium transition-colors ${COLOR.neutralHover}`}
 							onclick={() => (showRejectModal = false)}
 						>
 							Batal
 						</button>
 						<button
 							type="submit"
-							class="flex-1 rounded-lg bg-rose-600 px-4 py-2 font-bold text-white transition-colors hover:bg-rose-700"
+							class={`flex-1 ${RADIUS.small} bg-rose-600 px-4 py-2 font-bold text-white transition-colors hover:bg-rose-700`}
 						>
 							Konfirmasi Tolak
 						</button>
