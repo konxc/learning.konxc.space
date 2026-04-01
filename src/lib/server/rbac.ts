@@ -95,6 +95,7 @@ export function getNavItemsForRole(role: string, context?: WorkspaceContext): Na
 				category: 'platform'
 			},
 			{ label: 'Payments', href: '/app/admin/payments', icon: 'credit-card', category: 'platform' },
+			{ label: 'Payouts', href: '/app/admin/payouts', icon: 'wallet', category: 'platform' },
 			{ label: 'Partners', href: '/app/admin/partner', icon: 'building', category: 'platform' },
 			{ label: 'Reports', href: '/app/admin/reports', icon: 'chart', category: 'platform' },
 			{ label: 'Reviews', href: '/app/admin/reviews', icon: 'star', category: 'platform' },

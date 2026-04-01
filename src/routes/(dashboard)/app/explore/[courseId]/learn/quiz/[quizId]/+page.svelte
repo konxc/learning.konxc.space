@@ -31,6 +31,7 @@
 		score: number;
 		passingScore: number;
 		passed: boolean;
+		needsManualReview?: boolean;
 	}>;
 
 	type EnhanceCallback = Exclude<Awaited<ReturnType<SubmitFunction>>, void>;
@@ -47,7 +48,8 @@
 				result = {
 					score: typedResult.data.score,
 					passingScore: typedResult.data.passingScore,
-					passed: typedResult.data.passed
+					passed: typedResult.data.passed,
+					needsManualReview: typedResult.data.needsManualReview
 				};
 				showResult = true;
 			} else {
@@ -93,88 +95,155 @@
 			<PageSection>
 				<div class="px-5 py-10 text-center">
 					<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-6`}>Quiz Results</h2>
-					<div class="mb-6 flex items-baseline justify-center">
-						<span class={`text-7xl leading-none font-bold ${COLOR.accent}`}
-							>{data.submission.score}</span
-						>
-						<span class={`text-4xl ${COLOR.textMuted} ml-2`}>/ 100</span>
-					</div>
-					<div>
-						{#if data.submission.score !== null && data.submission.score >= data.quiz.passingScore}
-							<p class={`${TEXT.body} mb-2 text-xl font-semibold ${COLOR.success}`}>
-								✓ Congratulations! You passed the quiz.
-							</p>
-						{:else}
-							<p class={`${TEXT.body} mb-2 text-xl font-semibold ${COLOR.error}`}>
-								✗ You didn't pass. Keep learning and try again!
-							</p>
-							<p class={`${TEXT.body} ${COLOR.textMuted}`}>
-								You need at least {data.quiz.passingScore}% to pass.
-							</p>
-						{/if}
-					</div>
-					<div class="mt-6 flex items-center justify-center gap-4">
+
+					{#if data.needsManualReview}
+						<div class="mb-6 flex items-center justify-center">
+							<div class="rounded-full bg-amber-100 p-4 dark:bg-amber-900/30">
+								<svg
+									class="h-12 w-12 text-amber-600 dark:text-amber-400"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+									stroke-width="2"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
+								</svg>
+							</div>
+						</div>
+						<p class={`${TEXT.body} mb-2 text-xl font-semibold text-amber-600 dark:text-amber-400`}>
+							Sedang Diperiksa Mentor
+						</p>
+						<p class={`${TEXT.body} ${COLOR.textMuted} mb-6`}>
+							Jawabanmu mengandung pertanyaan esai yang perlu penilaian manual. Hasil akan muncul
+							setelah mentor menilai jawabanmu.
+						</p>
 						<a
 							href="/app/explore/{$page.params.courseId}/learn"
 							class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-6 py-3 ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
 						>
-							Continue Learning →
+							Kembali ke Pembelajaran
 						</a>
-						{#if data.canRetake}
-							<form
-								method="post"
-								action="?/retakeQuiz"
-								use:enhance={() => {
-									isRetaking = true;
-									return async ({ result }) => {
-										isRetaking = false;
-										if (result.type === 'success') {
-											// Reload page to reset state
-											window.location.reload();
-										}
-									};
-								}}
+					{:else}
+						<div class="mb-6 flex items-baseline justify-center">
+							<span class={`text-7xl leading-none font-bold ${COLOR.accent}`}
+								>{data.submission.score}</span
 							>
-								<button
-									type="submit"
-									class={`inline-flex items-center ${RADIUS.button} border-2 ${COLOR.cardBorder} px-6 py-3 ${TEXT.button} font-semibold ${COLOR.textPrimary} ${TRANSITION.all} hover:border-blue-500 hover:text-blue-600 ${isRetaking ? 'cursor-not-allowed opacity-60' : ''}`}
-									disabled={isRetaking}
+							<span class={`text-4xl ${COLOR.textMuted} ml-2`}>/ 100</span>
+						</div>
+						<div>
+							{#if data.submission.score !== null && data.submission.score >= data.quiz.passingScore}
+								<p class={`${TEXT.body} mb-2 text-xl font-semibold ${COLOR.success}`}>
+									✓ Congratulations! You passed the quiz.
+								</p>
+							{:else}
+								<p class={`${TEXT.body} mb-2 text-xl font-semibold ${COLOR.error}`}>
+									✗ You didn't pass. Keep learning and try again!
+								</p>
+								<p class={`${TEXT.body} ${COLOR.textMuted}`}>
+									You need at least {data.quiz.passingScore}% to pass.
+								</p>
+							{/if}
+						</div>
+						<div class="mt-6 flex items-center justify-center gap-4">
+							<a
+								href="/app/explore/{$page.params.courseId}/learn"
+								class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-6 py-3 ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+							>
+								Continue Learning →
+							</a>
+							{#if data.canRetake}
+								<form
+									method="post"
+									action="?/retakeQuiz"
+									use:enhance={() => {
+										isRetaking = true;
+										return async ({ result }) => {
+											isRetaking = false;
+											if (result.type === 'success') {
+												// Reload page to reset state
+												window.location.reload();
+											}
+										};
+									}}
 								>
-									{isRetaking ? 'Menghapus...' : 'Coba Lagi'}
-								</button>
-							</form>
-						{/if}
-					</div>
+									<button
+										type="submit"
+										class={`inline-flex items-center ${RADIUS.button} border-2 ${COLOR.cardBorder} px-6 py-3 ${TEXT.button} font-semibold ${COLOR.textPrimary} ${TRANSITION.all} hover:border-blue-500 hover:text-blue-600 ${isRetaking ? 'cursor-not-allowed opacity-60' : ''}`}
+										disabled={isRetaking}
+									>
+										{isRetaking ? 'Menghapus...' : 'Coba Lagi'}
+									</button>
+								</form>
+							{/if}
+						</div>
+					{/if}
 				</div>
 			</PageSection>
 		{:else if showResult && result}
 			<PageSection>
 				<div class="px-5 py-10 text-center">
 					<h2 class={`${TEXT.h2} ${COLOR.textPrimary} mb-6`}>Quiz Results</h2>
-					<div class="mb-6 flex items-baseline justify-center">
-						<span class={`text-7xl leading-none font-bold ${COLOR.accent}`}>{result.score}</span>
-						<span class={`text-4xl ${COLOR.textMuted} ml-2`}>/ 100</span>
-					</div>
-					<div>
-						{#if result.passed}
-							<p class={`${TEXT.body} mb-2 text-xl font-semibold ${COLOR.success}`}>
-								✓ Congratulations! You passed the quiz.
-							</p>
-						{:else}
-							<p class={`${TEXT.body} mb-2 text-xl font-semibold ${COLOR.error}`}>
-								✗ You didn't pass. Keep learning and try again!
-							</p>
-							<p class={`${TEXT.body} ${COLOR.textMuted}`}>
-								You need at least {result.passingScore}% to pass.
-							</p>
-						{/if}
-					</div>
-					<a
-						href="/app/explore/{$page.params.courseId}/learn"
-						class={`mt-6 inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-6 py-3 ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
-					>
-						Continue Learning →
-					</a>
+					{#if result.needsManualReview}
+						<div class="mb-6 flex items-center justify-center">
+							<div class="rounded-full bg-amber-100 p-4 dark:bg-amber-900/30">
+								<svg
+									class="h-12 w-12 text-amber-600 dark:text-amber-400"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+									stroke-width="2"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
+								</svg>
+							</div>
+						</div>
+						<p class={`${TEXT.body} mb-2 text-xl font-semibold text-amber-600 dark:text-amber-400`}>
+							Sedang Diperiksa Mentor
+						</p>
+						<p class={`${TEXT.body} ${COLOR.textMuted} mb-6`}>
+							Jawabanmu mengandung pertanyaan esai yang perlu penilaian manual. Hasil akan muncul
+							setelah mentor menilai jawabanmu.
+						</p>
+						<a
+							href="/app/explore/{$page.params.courseId}/learn"
+							class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-6 py-3 ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+						>
+							Kembali ke Pembelajaran
+						</a>
+					{:else}
+						<div class="mb-6 flex items-baseline justify-center">
+							<span class={`text-7xl leading-none font-bold ${COLOR.accent}`}>{result.score}</span>
+							<span class={`text-4xl ${COLOR.textMuted} ml-2`}>/ 100</span>
+						</div>
+						<div>
+							{#if result.passed}
+								<p class={`${TEXT.body} mb-2 text-xl font-semibold ${COLOR.success}`}>
+									✓ Congratulations! You passed the quiz.
+								</p>
+							{:else}
+								<p class={`${TEXT.body} mb-2 text-xl font-semibold ${COLOR.error}`}>
+									✗ You didn't pass. Keep learning and try again!
+								</p>
+								<p class={`${TEXT.body} ${COLOR.textMuted}`}>
+									You need at least {result.passingScore}% to pass.
+								</p>
+							{/if}
+						</div>
+						<a
+							href="/app/explore/{$page.params.courseId}/learn"
+							class={`mt-6 inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-6 py-3 ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+						>
+							Continue Learning →
+						</a>
+					{/if}
 				</div>
 			</PageSection>
 		{:else}
