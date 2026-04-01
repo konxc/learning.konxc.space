@@ -440,6 +440,152 @@ export const actions: Actions = {
 		return actionSuccess({ message: 'Pengaturan organisasi diperbarui' });
 	},
 
+	uploadOrgLogo: async ({ request, locals, cookies }) => {
+		if (!locals.user) throw redirect(302, '/auth/signin');
+		const activeWorkspaceId = cookies.get('active-workspace');
+		if (!activeWorkspaceId || activeWorkspaceId === 'personal')
+			return actionFailure(400, 'Workspace tidak valid');
+
+		const authCheck = await requireOrgAdmin(locals.user.id, activeWorkspaceId!);
+		if (authCheck.error) return actionFailure(403, authCheck.message);
+
+		const formData = await request.formData();
+		const file = formData.get('logo') as File;
+
+		if (!file || file.size === 0) return actionFailure(400, 'Pilih gambar terlebih dahulu');
+		if (file.size > 2 * 1024 * 1024) return actionFailure(400, 'Ukuran file maksimal 2MB');
+		if (!file.type.startsWith('image/')) return actionFailure(400, 'Format file harus berupa gambar');
+
+		try {
+			const buffer = Buffer.from(await file.arrayBuffer());
+			const extension = file.name.split('.').pop() || 'png';
+			const key = `orgs/${activeWorkspaceId}/logo_${Date.now()}.${extension}`;
+			const logoUrl = await uploadFile(buffer, key, file.type);
+
+			await db
+				.update(schema.organization)
+				.set({ logoUrl, updatedAt: new Date() })
+				.where(eq(schema.organization.id, activeWorkspaceId!));
+
+			return actionSuccess({ message: 'Logo organisasi berhasil diperbarui!', data: { logoUrl } });
+		} catch (e) {
+			return actionFailure(500, 'Gagal mengunggah logo');
+		}
+	},
+
+	inviteMember: async ({ request, locals, cookies }) => {
+		if (!locals.user) throw redirect(302, '/auth/signin');
+		const activeWorkspaceId = cookies.get('active-workspace');
+		if (!activeWorkspaceId || activeWorkspaceId === 'personal')
+			return actionFailure(400, 'Workspace tidak valid');
+
+		const authCheck = await requireOrgAdmin(locals.user.id, activeWorkspaceId!);
+		if (authCheck.error) return actionFailure(403, authCheck.message);
+
+		const formData = await request.formData();
+		const email = formData.get('email')?.toString()?.toLowerCase();
+		const role = formData.get('role')?.toString();
+
+		if (!email || !validateEmail(email)) return actionFailure(400, 'Email tidak valid');
+		if (!role) return actionFailure(400, 'Role wajib dipilih');
+
+		// Check if already a member
+		const existingUser = await db.query.user.findFirst({ where: eq(schema.user.email, email) });
+		if (existingUser) {
+			const member = await db.query.organizationMember.findFirst({
+				where: and(
+					eq(schema.organizationMember.orgId, activeWorkspaceId!),
+					eq(schema.organizationMember.userId, existingUser.id)
+				)
+			});
+			if (member) return actionFailure(400, 'User sudah menjadi anggota organisasi ini');
+		}
+
+		try {
+			const token = crypto.randomUUID();
+			await db.insert(schema.organizationInvitation).values({
+				id: crypto.randomUUID(),
+				orgId: activeWorkspaceId!,
+				email,
+				role: role as any,
+				token,
+				invitedBy: locals.user.id,
+				expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+			});
+
+			// In a real app, send invitation email here
+			return actionSuccess({ message: `Undangan berhasil dikirim ke ${email}` });
+		} catch (e) {
+			return actionFailure(500, 'Gagal mengirim undangan');
+		}
+	},
+
+	updateMemberRole: async ({ request, locals, cookies }) => {
+		if (!locals.user) throw redirect(302, '/auth/signin');
+		const activeWorkspaceId = cookies.get('active-workspace');
+		if (!activeWorkspaceId || activeWorkspaceId === 'personal')
+			return actionFailure(400, 'Workspace tidak valid');
+
+		const authCheck = await requireOrgAdmin(locals.user.id, activeWorkspaceId!);
+		if (authCheck.error) return actionFailure(403, authCheck.message);
+
+		const formData = await request.formData();
+		const memberId = formData.get('memberId')?.toString();
+		const newRole = formData.get('role')?.toString();
+
+		if (!memberId || !newRole) return actionFailure(400, 'Data tidak lengkap');
+
+		const targetMember = await db.query.organizationMember.findFirst({
+			where: eq(schema.organizationMember.id, memberId)
+		});
+
+		if (!targetMember || targetMember.orgId !== activeWorkspaceId) {
+			return actionFailure(404, 'Anggota tidak ditemukan');
+		}
+
+		if (targetMember.role === 'owner' && authCheck.membership.role !== 'owner') {
+			return actionFailure(403, 'Anda tidak dapat mengubah role pemilik organisasi');
+		}
+
+		await db
+			.update(schema.organizationMember)
+			.set({ role: newRole as any, updatedAt: new Date() })
+			.where(eq(schema.organizationMember.id, memberId));
+
+		return actionSuccess({ message: 'Role anggota berhasil diperbarui' });
+	},
+
+	removeMember: async ({ request, locals, cookies }) => {
+		if (!locals.user) throw redirect(302, '/auth/signin');
+		const activeWorkspaceId = cookies.get('active-workspace');
+		if (!activeWorkspaceId || activeWorkspaceId === 'personal')
+			return actionFailure(400, 'Workspace tidak valid');
+
+		const authCheck = await requireOrgAdmin(locals.user.id, activeWorkspaceId!);
+		if (authCheck.error) return actionFailure(403, authCheck.message);
+
+		const formData = await request.formData();
+		const memberId = formData.get('memberId')?.toString();
+
+		if (!memberId) return actionFailure(400, 'Member ID required');
+
+		const targetMember = await db.query.organizationMember.findFirst({
+			where: eq(schema.organizationMember.id, memberId)
+		});
+
+		if (!targetMember || targetMember.orgId !== activeWorkspaceId) {
+			return actionFailure(404, 'Anggota tidak ditemukan');
+		}
+
+		if (targetMember.role === 'owner') {
+			return actionFailure(403, 'Pemilik organisasi tidak dapat dihapus');
+		}
+
+		await db.delete(schema.organizationMember).where(eq(schema.organizationMember.id, memberId));
+
+		return actionSuccess({ message: 'Anggota berhasil dihapus dari organisasi' });
+	},
+
 	createApiKey: async ({ request, locals, cookies }) => {
 		if (!locals.user) throw redirect(302, '/auth/signin');
 
