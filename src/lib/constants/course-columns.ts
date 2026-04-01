@@ -10,6 +10,8 @@ export const COURSE_COLUMNS: TableColumn[] = [
 	{ key: 'price', label: 'Price', required: false },
 	{ key: 'duration', label: 'Duration', required: false },
 	{ key: 'mentor', label: 'Mentor', required: false },
+	{ key: 'modules', label: 'Modules', required: false },
+	{ key: 'lessons', label: 'Lessons', required: false },
 	{ key: 'createdAt', label: 'Created', required: false },
 	{ key: 'actions', label: 'Actions', required: true, width: '150px' }
 ];

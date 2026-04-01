@@ -1,8 +1,8 @@
 <script lang="ts">
 	import DataTable from '$lib/components/ui/DataTable.svelte';
-	import Icon from '$lib/components/ui/Icon.svelte';
+	import ActionButton from '$lib/components/ui/ActionButton.svelte';
 	import type { TableColumn } from '$lib/types/table';
-	import { COLOR, RADIUS, TEXT, TRANSITION, SPACING, ELEVATION } from '$lib/config/design';
+	import { RADIUS } from '$lib/config/design';
 	import { formatDateTime } from '$lib/utils/format';
 	import { PAYMENT_PROOF_STATUS_LABELS } from '$lib/constants/payment-proofs';
 
@@ -84,13 +84,12 @@
 		{:else if key === 'uploaded'}
 			{formatDateTime(entry.createdAt)}
 		{:else if key === 'actions'}
-			<a
+			<ActionButton
+				variant="primary"
+				icon="eye"
+				label="Detail"
 				href="/app/admin/payments/view/{entry.id}"
-				class={`inline-flex items-center gap-1.5 ${RADIUS.small} border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-semibold ${COLOR.textSecondary} ${TRANSITION.all} hover:border-blue-500/50 hover:bg-blue-50/50 hover:text-blue-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-blue-500/50 dark:hover:bg-blue-900/30 dark:hover:text-blue-400`}
-			>
-				<Icon name="eye" size={14} />
-				Detail
-			</a>
+			/>
 		{/if}
 	{/snippet}
 </DataTable>

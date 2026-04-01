@@ -157,3 +157,15 @@ export function filterByActiveStatus<
 		return true;
 	});
 }
+
+/** Build filter options for StatusFilter component from counts and labels */
+export function buildFilterOptions(
+	counts: Record<string, number>,
+	labels: Record<string, string>
+): Array<{ value: string; label: string; count: number }> {
+	return Object.entries(labels).map(([value, label]) => ({
+		value,
+		label,
+		count: counts[value] ?? 0
+	}));
+}

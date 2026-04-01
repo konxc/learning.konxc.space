@@ -1,8 +1,9 @@
 <script lang="ts">
 	import DataTable from '$lib/components/ui/DataTable.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
+	import ActionButton from '$lib/components/ui/ActionButton.svelte';
 	import type { TableColumn } from '$lib/types/table';
-	import { COLOR, RADIUS, TEXT, TRANSITION, ELEVATION } from '$lib/config/design';
+	import { RADIUS } from '$lib/config/design';
 	import { formatDateTime } from '$lib/utils/format';
 
 	interface UserEntry {
@@ -85,24 +86,20 @@
 		{:else if key === 'actions'}
 			<div class="flex items-center gap-2">
 				{#if onEdit}
-					<button
-						type="button"
-						class={`inline-flex items-center gap-1.5 ${RADIUS.small} border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-semibold ${COLOR.textSecondary} ${TRANSITION.all} hover:border-blue-500/50 hover:bg-blue-50/50 hover:text-blue-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-blue-500/50 dark:hover:bg-blue-900/30 dark:hover:text-blue-400`}
+					<ActionButton
+						variant="primary"
+						icon="edit"
+						label="Edit"
 						onclick={() => onEdit(entry.id)}
-					>
-						<Icon name="edit" size={14} />
-						Edit
-					</button>
+					/>
 				{/if}
 				{#if onChangeRole}
-					<button
-						type="button"
-						class={`inline-flex items-center gap-1.5 ${RADIUS.small} border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-semibold ${COLOR.textSecondary} ${TRANSITION.all} hover:border-purple-500/50 hover:bg-purple-50/50 hover:text-purple-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-purple-500/50 dark:hover:bg-purple-900/30 dark:hover:text-purple-400`}
+					<ActionButton
+						variant="neutral"
+						icon="shield"
+						label="Role"
 						onclick={() => onChangeRole(entry.id)}
-					>
-						<Icon name="shield" size={14} />
-						Role
-					</button>
+					/>
 				{/if}
 			</div>
 		{/if}

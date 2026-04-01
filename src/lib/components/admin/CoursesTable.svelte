@@ -1,8 +1,8 @@
 <script lang="ts">
 	import DataTable from '$lib/components/ui/DataTable.svelte';
-	import Icon from '$lib/components/ui/Icon.svelte';
+	import ActionButton from '$lib/components/ui/ActionButton.svelte';
 	import type { TableColumn } from '$lib/types/table';
-	import { COLOR, RADIUS, TEXT, TRANSITION } from '$lib/config/design';
+	import { RADIUS, TRANSITION } from '$lib/config/design';
 	import { formatDateTime } from '$lib/utils/format';
 	import { goto } from '$app/navigation';
 	import { toast } from '$lib/stores/toastStore';
@@ -13,7 +13,10 @@
 		status: string;
 		price: number;
 		duration?: number | null;
-		createdAt: Date | string;
+		mentorName?: string | null;
+		moduleCount?: number;
+		lessonCount?: number;
+		createdAt: Date|string;
 	}
 
 	let {
@@ -76,7 +79,7 @@
 		{#if key === 'title'}
 			<a
 				href="/app/admin/courses/edit/{entry.id}"
-				class="font-medium hover:text-blue-600 dark:hover:text-blue-400 ${TRANSITION.colors}"
+				class={`font-medium hover:text-blue-600 dark:hover:text-blue-400 ${TRANSITION.colors}`}
 			>
 				{entry.title}
 			</a>
@@ -94,25 +97,28 @@
 			{formatPrice(entry.price)}
 		{:else if key === 'duration'}
 			{formatDuration(entry.duration)}
+		{:else if key === 'mentor'}
+			<span class="text-sm font-medium">{entry.mentorName || '—'}</span>
+		{:else if key === 'modules'}
+			<span class="text-sm">{entry.moduleCount ?? 0}</span>
+		{:else if key === 'lessons'}
+			<span class="text-sm">{entry.lessonCount ?? 0}</span>
 		{:else if key === 'createdAt'}
 			{formatDateTime(entry.createdAt)}
 		{:else if key === 'actions'}
 			<div class="flex items-center gap-2">
-				<a
+				<ActionButton
+					variant="primary"
+					icon="edit"
+					label="Edit"
 					href="/app/admin/courses/edit/{entry.id}"
-					class={`inline-flex items-center gap-1.5 ${RADIUS.small} border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-semibold ${COLOR.textSecondary} ${TRANSITION.all} hover:border-blue-500/50 hover:bg-blue-50/50 hover:text-blue-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-blue-500/50 dark:hover:bg-blue-900/30 dark:hover:text-blue-400`}
-				>
-					<Icon name="edit" size={14} />
-					Edit
-				</a>
-				<button
-					type="button"
-					class={`inline-flex items-center gap-1.5 ${RADIUS.small} border border-red-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-red-600 ${TRANSITION.all} hover:border-red-500/50 hover:bg-red-50/50 hover:text-red-700 dark:border-red-800/50 dark:bg-red-950/30 dark:text-red-400 dark:hover:border-red-500/50 dark:hover:bg-red-900/30 dark:hover:text-red-300`}
+				/>
+				<ActionButton
+					variant="danger"
+					icon="delete"
+					label="Delete"
 					onclick={() => handleDelete(entry.id, entry.title)}
-				>
-					<Icon name="delete" size={14} />
-					Delete
-				</button>
+				/>
 			</div>
 		{/if}
 	{/snippet}

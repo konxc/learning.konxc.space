@@ -1,8 +1,9 @@
 <script lang="ts">
 	import DataTable from '$lib/components/ui/DataTable.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
+	import ActionButton from '$lib/components/ui/ActionButton.svelte';
 	import type { TableColumn } from '$lib/types/table';
-	import { COLOR, RADIUS, TEXT, TRANSITION } from '$lib/config/design';
+	import { COLOR, RADIUS, TRANSITION } from '$lib/config/design';
 	import { formatDateTime } from '$lib/utils/format';
 	import { goto } from '$app/navigation';
 
@@ -144,22 +145,19 @@
 			<span class={COLOR.textSecondary}>{entry.creator?.username || '—'}</span>
 		{:else if key === 'actions'}
 			<div class="flex flex-wrap items-center gap-2">
-				<a
+				<ActionButton
+					variant="primary"
+					icon="edit"
+					label="Edit"
 					href="/app/admin/coupons/edit/{entry.id}"
-					class={`inline-flex items-center gap-1.5 ${RADIUS.small} border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-semibold ${COLOR.textSecondary} ${TRANSITION.all} hover:border-blue-500/50 hover:bg-blue-50/50 hover:text-blue-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-blue-500/50 dark:hover:bg-blue-900/30 dark:hover:text-blue-400`}
-				>
-					<Icon name="edit" size={14} />
-					Edit
-				</a>
-				<button
-					type="button"
-					class={`inline-flex items-center gap-1.5 ${RADIUS.small} border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-semibold ${COLOR.textSecondary} ${TRANSITION.all} hover:border-purple-500/50 hover:bg-purple-50/50 hover:text-purple-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-purple-500/50 dark:hover:bg-purple-900/30 dark:hover:text-purple-400`}
+				/>
+				<ActionButton
+					variant="neutral"
+					icon="copy"
+					label="Copy"
 					title="Duplicate coupon"
 					onclick={() => handleDuplicate(entry.id)}
-				>
-					<Icon name="copy" size={14} />
-					Copy
-				</button>
+				/>
 				<button
 					type="button"
 					class={`inline-flex items-center gap-1.5 ${RADIUS.small} px-2.5 py-1.5 text-xs font-semibold ${TRANSITION.all} focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${
