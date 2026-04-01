@@ -101,7 +101,7 @@
 						>Curriculum Completion</span
 					>
 					<span class="text-sm font-black text-zinc-900 dark:text-white"
-						>{data.stats.completedLessons || 0} / {data.totalLessons || 100} Lessons</span
+						>{data.stats.completedLessons || 0} / {data.stats.totalLessons || 0} Lessons</span
 					>
 				</div>
 				<div
@@ -175,22 +175,31 @@
 							Daily Mission
 						</h3>
 						<p class="text-2xl font-black tracking-tight text-zinc-900 dark:text-white">
-							Level Up Today
+							{data.stats.dailyRemaining === 0 ? 'Goal Achieved!' : 'Level Up Today'}
 						</p>
 					</div>
-					<div class="h-12 w-12 flex items-center justify-center rounded-2xl border border-orange-500/20 bg-orange-50 text-2xl shadow-sm dark:bg-orange-900/10">🔥</div>
+					<div class="h-12 w-12 flex items-center justify-center rounded-2xl border border-orange-500/20 bg-orange-50 text-2xl shadow-sm dark:bg-orange-900/10">
+						{data.stats.dailyRemaining === 0 ? '🏆' : '🔥'}
+					</div>
 				</div>
 
 				<div class="mt-4 space-y-5 relative z-10">
 					<div class="flex items-center justify-between text-[11px] font-black tracking-widest text-zinc-400 uppercase">
-						<span>Progress</span>
-						<span class="text-zinc-900 dark:text-white">60%</span>
+						<span>Progress Today</span>
+						<span class="text-zinc-900 dark:text-white">{data.stats.dailyProgress || 0}%</span>
 					</div>
 					<div class="h-2 w-full bg-zinc-100 rounded-full overflow-hidden dark:bg-zinc-800 shadow-inner">
-						<div class="h-full bg-linear-to-r from-orange-400 via-orange-500 to-amber-500 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.3)] transition-all duration-1000" style="width: 60%"></div>
+						<div 
+							class="h-full bg-linear-to-r from-orange-400 via-orange-500 to-amber-500 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.3)] transition-all duration-1000" 
+							style="width: {data.stats.dailyProgress || 0}%"
+						></div>
 					</div>
 					<p class="text-[11px] font-medium text-zinc-500 leading-relaxed">
-						Complete <span class="text-zinc-900 dark:text-white font-black">1 more lesson</span> to hit your daily expert goal.
+						{#if data.stats.dailyRemaining > 0}
+							Complete <span class="text-zinc-900 dark:text-white font-black">{data.stats.dailyRemaining} more lesson{data.stats.dailyRemaining > 1 ? 's' : ''}</span> to hit your daily expert goal.
+						{:else}
+							Well done! You have reached your learning goal for today. <span class="text-blue-600 font-black">Keep going?</span>
+						{/if}
 					</p>
 				</div>
 			</div>
@@ -281,10 +290,11 @@
 				{#if data.courses && data.courses.length > 0}
 					{#each data.courses.slice(0, 3) as course}
 						<div
-							class={`${COLOR.card} ${RADIUS.card} ${COLOR.cardBorder} group flex cursor-pointer items-center gap-7 p-7 ${ELEVATION.base} ${ELEVATION.cardHover} transition-all duration-500 hover:-translate-y-1 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30`}
+							class={`${COLOR.card} ${RADIUS.card} ${COLOR.cardBorder} group flex cursor-pointer items-center gap-6 p-6 ${ELEVATION.base} ${ELEVATION.cardHover} transition-all duration-500 hover:-translate-y-1 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30`}
 						>
+							<!-- Thumbnail -->
 							<div
-								class="h-24 w-24 shrink-0 overflow-hidden rounded-[1.5rem] bg-zinc-100 shadow-xl transition-transform group-hover:scale-105 group-hover:rotate-2 dark:bg-zinc-800"
+								class="h-20 w-20 shrink-0 overflow-hidden rounded-[1.25rem] bg-zinc-100 shadow-lg transition-transform group-hover:scale-105 group-hover:rotate-1 dark:bg-zinc-800"
 							>
 								{#if course.thumbnailUrl}
 									<img src={course.thumbnailUrl} alt="" class="h-full w-full object-cover" />
@@ -292,33 +302,37 @@
 									<div class="flex h-full w-full items-center justify-center text-4xl">📘</div>
 								{/if}
 							</div>
-							<div class="min-w-0 flex-1 space-y-3">
-								<div class="flex items-center gap-3">
+
+							<!-- Main content -->
+							<div class="flex min-w-0 flex-1 flex-col gap-2.5">
+								<div class="flex items-center gap-2">
 									<span
-										class="rounded-lg bg-zinc-100 px-3 py-1 text-[9px] font-black tracking-[0.1em] text-zinc-500 uppercase dark:bg-zinc-800"
-										>UNIT 0{Math.floor(Math.random() * 5) + 1}</span
+										class="rounded-md bg-zinc-100 px-2 py-0.5 text-[9px] font-black tracking-widest text-zinc-500 uppercase dark:bg-zinc-800"
+										>MOD {String(course.currentUnit || 1).padStart(2, '0')}</span
 									>
 									<span class="text-[10px] font-black tracking-widest text-blue-600 uppercase"
-										>{course.progress || 0}% COMPLETED</span
+										>{course.progress || 0}%</span
 									>
 								</div>
-								<h3 class="truncate text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
+								<h3 class="truncate text-base font-bold tracking-tight text-zinc-900 dark:text-white">
 									{course.title}
 								</h3>
-								<div class="h-2 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+								<div class="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
 									<div
 										class="h-full rounded-full bg-blue-600 transition-all duration-1000"
 										style="width: {course.progress || 0}%"
 									></div>
 								</div>
 							</div>
+
+							<!-- Play button -->
 							<a
 								href={`/app/explore/${course.id}/learn`}
-								class={`flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 text-white shadow-xl transition-all hover:scale-110 hover:bg-blue-600 active:scale-95 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white`}
+								class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-zinc-900 text-white shadow-xl transition-all hover:scale-110 hover:bg-blue-600 active:scale-95 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
 								aria-label="Continue learning"
 							>
 								<svg
-									class="h-6 w-6"
+									class="h-5 w-5"
 									viewBox="0 0 24 24"
 									fill="none"
 									stroke="currentColor"
@@ -365,7 +379,7 @@
 					<div
 						class="rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-1.5 text-[9px] font-black tracking-widest text-amber-600 uppercase"
 					>
-						ONGOING STREAK
+						WEEKLY GOAL
 					</div>
 				</div>
 
@@ -382,7 +396,7 @@
 						<circle
 							class="stroke-blue-600 transition-all duration-1000"
 							stroke-width="3"
-							stroke-dasharray="{data.stats.progress || 0}, 100"
+							stroke-dasharray="{data.stats.weeklyProgress || 0}, 100"
 							stroke-linecap="round"
 							fill="none"
 							cx="18"
@@ -395,7 +409,7 @@
 							>Weekly</span
 						>
 						<span class="text-6xl font-black tracking-tighter text-zinc-900 dark:text-white"
-							>{data.stats.progress || 0}%</span
+							>{data.stats.weeklyProgress || 0}%</span
 						>
 					</div>
 				</div>
@@ -408,7 +422,7 @@
 							class="mb-5 flex items-center justify-between border-b border-zinc-100 pb-4 dark:border-zinc-800"
 						>
 							<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase"
-								>Frequency</span
+								>Expert Streak</span
 							>
 							<span class="text-2xl leading-none font-black text-zinc-900 dark:text-white"
 								>🔥 {data.stats.streak || 0} DAYS</span
@@ -426,7 +440,7 @@
 						</div>
 					</div>
 					<p class="px-4 text-xs leading-relaxed font-bold text-zinc-400">
-						Monitor your learning patterns to maintain peak performance and achieve your goals.
+						Monitored learning patterns based on your consistent lesson completion.
 					</p>
 				</div>
 			</div>

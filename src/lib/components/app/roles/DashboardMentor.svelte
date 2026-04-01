@@ -119,16 +119,17 @@
 		>
 			<div class="space-y-1">
 				<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase"
-					>Deployed Courses</span
+					>Instructional Quality</span
 				>
 				<p class="text-5xl leading-tight font-black tracking-tighter text-zinc-900 dark:text-white">
-					{data.stats.myCourses || 0}
+					{data.stats.approvalRate || 0}%
 				</p>
+				<p class="text-[10px] font-bold text-emerald-500 uppercase">Approval Rate</p>
 			</div>
 			<div
 				class="absolute right-4 bottom-4 text-3xl opacity-10 transition-opacity group-hover:opacity-20"
 			>
-				📚
+				🎯
 			</div>
 		</div>
 
@@ -181,11 +182,12 @@
 			<div class="space-y-1">
 				<span
 					class="text-[10px] font-black tracking-widest text-blue-600 uppercase dark:text-blue-400"
-					>Impact Subs</span
+					>Performance Avg</span
 				>
 				<p class="text-5xl leading-tight font-black tracking-tighter text-zinc-900 dark:text-white">
-					{data.stats.totalActionSubmissions || 0}
+					{data.stats.avgScore || 0}
 				</p>
+				<p class="text-[10px] font-bold text-blue-500 uppercase">Avg Student Score</p>
 			</div>
 			<div
 				class="absolute right-4 bottom-4 text-3xl opacity-10 transition-opacity group-hover:opacity-20"
