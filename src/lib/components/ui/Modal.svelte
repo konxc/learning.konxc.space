@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RADIUS, COLOR, SPACING, ELEVATION, TRANSITION } from '$lib/config/design';
+	import { RADIUS, COLOR, SPACING, ELEVATION, TRANSITION, FOCUS } from '$lib/config/design';
 	import type { Snippet } from 'svelte';
 
 	interface ModalProps {
@@ -88,9 +88,7 @@
 		>
 			<!-- Header -->
 			{#if title || header}
-				<div
-					class="mb-5 flex items-center justify-between border-b border-gray-200/60 pb-4 dark:border-neutral-700/60"
-				>
+				<div class="mb-5 flex items-center justify-between border-b pb-4 ${COLOR.cardBorder}">
 					{#if header}
 						{@render header()}
 					{:else if title}
@@ -100,7 +98,7 @@
 					{/if}
 					<button
 						type="button"
-						class={`inline-flex h-8 w-8 items-center justify-center ${RADIUS.badge} ${COLOR.textSecondary} ${TRANSITION.all} hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1 dark:hover:bg-neutral-800 dark:hover:text-gray-100 dark:focus-visible:ring-offset-neutral-900`}
+						class={`inline-flex h-8 w-8 items-center justify-center ${RADIUS.badge} ${COLOR.textSecondary} ${TRANSITION.all} ${COLOR.surfaceHover} ${COLOR.textPrimary} focus:outline-none focus-visible:ring-2 ${FOCUS.accent} focus-visible:ring-offset-1 dark:focus-visible:ring-offset-neutral-900`}
 						aria-label="Close modal"
 						onclick={onClose}
 					>
@@ -129,7 +127,7 @@
 
 			<!-- Footer -->
 			{#if footer}
-				<div class="mt-5 border-t border-gray-200/60 pt-4 dark:border-neutral-700/60">
+				<div class="mt-5 border-t pt-4 ${COLOR.cardBorder}">
 					{@render footer()}
 				</div>
 			{/if}

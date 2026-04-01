@@ -1,96 +1,48 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
-	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
-	import PageQuick from '$lib/components/layouts/PageQuick.svelte';
 	import { COLOR, RADIUS, SPACING, TEXT, TRANSITION, ELEVATION } from '$lib/config/design';
 	import { toast } from '$lib/stores/toastStore';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
-	import { updateQueryParam } from '$lib/utils/url-params';
-	import {
-		setToVisibilityRecord,
-		isColumnVisible as checkColumnVisible
-	} from '$lib/utils/useColumnVisibility';
+	import { useDashboardListState } from '$lib/utils/useDashboardListState';
 	import { matchesSearch, filterByActiveStatus, isActive, isExpired } from '$lib/utils/filter';
-	import { COUPON_COLUMNS, getDefaultCouponColumnVisibility } from '$lib/constants/coupon-columns';
-	import { COUPON_FILTER_TYPES, type CouponFilterType } from '$lib/constants/coupons';
-	import CouponFilters from '$lib/components/admin/CouponFilters.svelte';
+	import { COUPON_COLUMNS } from '$lib/constants/coupon-columns';
+	import { type CouponFilterType } from '$lib/constants/coupons';
+	import DashboardTablePage from '$lib/components/layouts/DashboardTablePage.svelte';
+	import StatusFilter from '$lib/components/ui/StatusFilter.svelte';
 	import CouponsTable from '$lib/components/admin/CouponsTable.svelte';
-	import WaitingListSearchBar from '$lib/components/crm/WaitingListSearchBar.svelte';
-	import ResultsSummary from '$lib/components/crm/ResultsSummary.svelte';
-	import ColumnFilter from '$lib/components/crm/ColumnFilter.svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	// Filter state
-	let searchQuery = $state('');
-	let filter = $state<CouponFilterType>('all');
-	let columnFilterRef: ColumnFilter | null = $state(null);
+	// Dashboard list state management
+	const listState = useDashboardListState({
+		columns: COUPON_COLUMNS,
+		storageKey: 'admin-coupons',
+		filterParam: 'filter',
+		defaultFilter: 'all',
+		searchFields: ['code']
+	});
+
+	// Local state for copy code feedback
 	let copiedCode = $state<string | null>(null);
 
-	// Initialize filter from URL query parameter on mount
-	onMount(() => {
-		const param = $page.url.searchParams.get('filter');
-		if (param && COUPON_FILTER_TYPES.includes(param as CouponFilterType)) {
-			filter = param as CouponFilterType;
-		} else {
-			filter = 'all';
-		}
-	});
-
-	// Sync with URL changes (e.g., browser back/forward)
-	$effect(() => {
-		const param = $page.url.searchParams.get('filter');
-		if (param && COUPON_FILTER_TYPES.includes(param as CouponFilterType)) {
-			if (filter !== param) {
-				filter = param as CouponFilterType;
-			}
-		} else if (filter !== 'all') {
-			filter = 'all';
-		}
-	});
-
-	// Function to update URL query parameter when filter changes
-	async function updateFilter(newFilter: CouponFilterType) {
-		filter = newFilter;
-		await updateQueryParam($page.url, 'filter', newFilter === 'all' ? null : newFilter, goto);
-	}
-
-	// Column definitions (from constants)
-	const tableColumns = COUPON_COLUMNS;
-
-	// Column visibility state
-	let columnVisibility = $state<Record<string, boolean>>(getDefaultCouponColumnVisibility());
-
-	// Callback to update visibility from ColumnFilter
-	function handleVisibilityChange(visibleColumns: Set<string>) {
-		columnVisibility = setToVisibilityRecord(visibleColumns, tableColumns);
-	}
-
-	// Helper to check if column is visible
-	function isColumnVisible(key: string): boolean {
-		return checkColumnVisible(key, columnVisibility);
-	}
-
-	// Filtered coupons based on search and filter
+	// Filtered coupons based on search and filter (using custom logic)
 	const filteredCoupons = $derived(
 		data.coupons
-			.filter((c) => matchesSearch(c, searchQuery, ['code']))
-			.filter((c) => filterByActiveStatus([c], filter)[0] !== undefined || filter === 'all')
+			.filter((c) => matchesSearch(c, listState.searchQuery, ['code']))
 			.filter((c) => {
-				if (filter === 'all') return true;
-				if (filter === 'active') return isActive(c);
-				if (filter === 'expired') return isExpired(c);
+				if (listState.filter === 'all') return true;
+				if (listState.filter === 'active') return isActive(c);
+				if (listState.filter === 'expired') return isExpired(c);
 				return true;
 			})
 	);
 
-	// Count coupons by filter (need to count based on search too for accurate counts)
+	// Count coupons by filter
 	const filterCounts = $derived.by(() => {
 		const searchFiltered = data.coupons.filter(
-			(c) => searchQuery === '' || c.code.toLowerCase().includes(searchQuery.toLowerCase())
+			(c) =>
+				listState.searchQuery === '' ||
+				c.code.toLowerCase().includes(listState.searchQuery.toLowerCase())
 		);
 		return {
 			all: searchFiltered.length,
@@ -98,6 +50,13 @@
 			expired: searchFiltered.filter((c) => isExpired(c)).length
 		};
 	});
+
+	// Filter options for StatusFilter component
+	const filterOptions = $derived([
+		{ value: 'all', label: 'All', count: filterCounts.all ?? 0 },
+		{ value: 'active', label: 'Active', count: filterCounts.active ?? 0 },
+		{ value: 'expired', label: 'Expired', count: filterCounts.expired ?? 0 }
+	]);
 
 	// Copy code handler
 	async function copyCode(code: string) {
@@ -161,72 +120,44 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Coupon Management - Admin</title>
-</svelte:head>
-
-<!-- Filter and Create Button - Outside PageWrapper for full-width control -->
-<PageQuick padding={true}>
-	<div class="flex flex-col items-stretch gap-4 md:flex-row md:items-center md:justify-between">
-		<CouponFilters
-			bind:filter
-			{filterCounts}
-			onFilterChange={(value) => updateFilter(value as CouponFilterType)}
-		/>
-		<a
-			href="/app/admin/coupons/create"
-			class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
-		>
-			+ Create Coupon
-		</a>
-	</div>
-</PageQuick>
-
-<PageWrapper>
-	<PageHeader
-		title="Coupon Management"
-		description="Manage all discount codes and promotional offers available on the platform"
-	/>
-
-	<!-- Results Summary with Search and Column Filter -->
-	<div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-		<div class="min-w-0 flex-1 md:max-w-xs">
-			<ResultsSummary filteredCount={filteredCoupons.length} totalCount={data.coupons.length} />
-		</div>
-
-		<WaitingListSearchBar
-			bind:searchQuery
-			columns={tableColumns}
-			bind:columnFilterRef
-			storageKey="admin-coupons-columns"
-			onVisibilityChange={handleVisibilityChange}
-			placeholder="Cari coupon berdasarkan code..."
-		/>
-	</div>
-
-	<!-- Coupons Table -->
-	{#if filteredCoupons.length === 0 && data.coupons.length === 0}
-		<div
-			class="rounded-lg border border-gray-200 bg-white p-12 text-center dark:border-neutral-800 dark:bg-neutral-900"
-		>
-			<p class={`mb-4 ${COLOR.textSecondary}`}>No coupons found. Create your first coupon!</p>
+<DashboardTablePage
+	title="Coupon Management"
+	description="Manage all discount codes and promotional offers available on the platform"
+	headTitle="Coupon Management - Admin"
+	bind:searchQuery={listState.searchQuery}
+	columns={COUPON_COLUMNS}
+	onVisibilityChange={listState.handleVisibilityChange}
+	storageKey="admin-coupons"
+	filteredCount={filteredCoupons.length}
+	totalCount={data.coupons.length}
+	searchPlaceholder="Cari coupon berdasarkan code..."
+>
+	{#snippet filters()}
+		<div class="flex flex-col items-stretch gap-4 md:flex-row md:items-center md:justify-between">
+			<StatusFilter
+				options={filterOptions}
+				bind:active={listState.filter}
+				onChange={listState.setFilter}
+			/>
 			<a
 				href="/app/admin/coupons/create"
-				class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} ${ELEVATION.cardHover}`}
+				class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} ${SPACING.button} ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
 			>
 				+ Create Coupon
 			</a>
 		</div>
-	{:else}
+	{/snippet}
+
+	{#snippet children()}
 		<CouponsTable
 			entries={filteredCoupons}
-			columns={tableColumns}
-			{columnVisibility}
-			{isColumnVisible}
+			columns={COUPON_COLUMNS}
+			columnVisibility={listState.columnVisibility}
+			isColumnVisible={listState.isColumnVisible}
 			{copiedCode}
 			onCopyCode={copyCode}
 			onDuplicate={duplicateCoupon}
 			onToggleStatus={toggleStatus}
 		/>
-	{/if}
-</PageWrapper>
+	{/snippet}
+</DashboardTablePage>

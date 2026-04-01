@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RADIUS, TEXT, COLOR, TRANSITION } from '$lib/config/design';
+	import { RADIUS, TEXT, COLOR, TRANSITION, EMULATION } from '$lib/config/design';
 	import { m } from '$lib/paraglide/messages.js';
 	import { getRoleLabel } from '$lib/utils/role';
 
@@ -29,7 +29,7 @@
 				src={user.avatarUrl}
 				alt="avatar"
 				class={`h-7 w-7 shrink-0 ${RADIUS.badge} object-cover ring-1 ring-gray-200/50 dark:ring-neutral-700/50 ${
-					isEmulating ? 'ring-2 ring-amber-400/60 dark:ring-amber-500/60' : ''
+					isEmulating ? `ring-2 ${EMULATION.ring}` : ''
 				}`}
 				loading="lazy"
 				decoding="async"
@@ -38,7 +38,7 @@
 		{:else}
 			<div
 				class={`grid h-7 w-7 shrink-0 place-items-center ${RADIUS.badge} bg-linear-to-br from-blue-500 to-purple-600 text-xs font-semibold text-white shadow-sm ${
-					isEmulating ? 'ring-2 ring-amber-400/60 dark:ring-amber-500/60' : ''
+					isEmulating ? `ring-2 ${EMULATION.ring}` : ''
 				}`}
 			>
 				{(user?.fullName ?? user?.username ?? 'U').slice(0, 1).toUpperCase()}
@@ -50,7 +50,7 @@
 			</span>
 			{#if isEmulating}
 				<span
-					class={`inline-flex max-w-fit items-center gap-1 ${RADIUS.badge} mt-0.5 px-1.5 py-0.5 ${TEXT.small} bg-amber-100 font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-400`}
+					class={`inline-flex max-w-fit items-center gap-1 ${RADIUS.badge} mt-0.5 px-1.5 py-0.5 ${TEXT.small} ${EMULATION.bg} ${EMULATION.text} font-semibold`}
 					title="Mode Emulasi: {emulatedRoleLabel}"
 				>
 					<span class="text-[10px]" aria-hidden="true">🔍</span>

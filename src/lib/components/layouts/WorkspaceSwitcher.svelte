@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RADIUS, COLOR, TRANSITION } from '$lib/config/design';
+	import { RADIUS, COLOR, TRANSITION, TEXT, WORKSPACE } from '$lib/config/design';
 	import type { Workspace } from '$lib/types/layout';
 
 	interface Props {
@@ -38,7 +38,7 @@
 		<div class="relative z-10 flex w-full min-w-0 items-center gap-3">
 			{#if workspaces.activeId === 'personal'}
 				<div
-					class={`flex shrink-0 items-center justify-center rounded-lg bg-blue-600 font-black text-white shadow-md ${isCollapsed ? 'h-8 w-8 text-xs' : 'h-8 w-8 text-sm'}`}
+					class={`flex shrink-0 items-center justify-center rounded-lg ${WORKSPACE.personal.bg} font-black ${WORKSPACE.personal.text} shadow-md ${isCollapsed ? 'h-8 w-8 text-xs' : 'h-8 w-8 text-sm'}`}
 				>
 					P
 				</div>
@@ -66,7 +66,8 @@
 						<img src={workspaces.activeOrg.logoUrl} alt="" class="h-full w-full object-cover" />
 					{:else}
 						<div
-							class="flex h-full w-full items-center justify-center bg-indigo-600 text-sm font-black text-white"
+							class="flex h-full w-full items-center justify-center ${WORKSPACE.organization
+								.bg} text-sm font-black ${WORKSPACE.organization.text}"
 						>
 							{workspaces.activeOrg?.name?.[0].toUpperCase() || 'O'}
 						</div>

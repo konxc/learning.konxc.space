@@ -28,13 +28,13 @@
 </script>
 
 <div
-	class={`flex flex-col items-center justify-center rounded-[3rem] border-2 border-zinc-200 bg-zinc-50/50 dark:border-zinc-800 dark:bg-zinc-900/30 ${variantClasses[variant]} ${className}`}
+	class={`flex flex-col items-center justify-center rounded-[3rem] border-2 ${COLOR.cardBorder} bg-zinc-50/50 dark:bg-zinc-900/30 ${variantClasses[variant]} ${className}`}
 >
 	{#if variant !== 'inline'}
 		<div class="mb-6 text-7xl">{icon}</div>
 	{/if}
 
-	<h3 class={`${TEXT.h3} font-black tracking-tight text-neutral-900 dark:text-white`}>
+	<h3 class={`${TEXT.h3} font-black tracking-tight ${COLOR.textPrimary}`}>
 		{title}
 	</h3>
 	{#if description}

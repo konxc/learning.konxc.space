@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RADIUS, COLOR, SPACING, TEXT } from '$lib/config/design';
+	import { RADIUS, COLOR, SPACING, TEXT, STATUS } from '$lib/config/design';
 
 	export interface TableAction {
 		label: string;
@@ -17,10 +17,10 @@
 	let { actions, class: className = '' }: TableActionsProps = $props();
 
 	const variantClasses = $derived({
-		default: `border ${COLOR.cardBorder} ${COLOR.textSecondary} hover:bg-zinc-50 dark:hover:bg-zinc-800`,
+		default: `border ${COLOR.cardBorder} ${COLOR.textSecondary} ${COLOR.surfaceHover}`,
 		primary: `border-none ${COLOR.accentBg} text-white hover:opacity-90`,
-		danger: `border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20`,
-		ghost: `border-none text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200`
+		danger: `border ${STATUS.error.border} ${STATUS.error.text} ${COLOR.surfaceHover}`,
+		ghost: `border-none ${COLOR.textMuted} hover:${COLOR.textSecondary} ${COLOR.neutralHover}`
 	});
 </script>
 

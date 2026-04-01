@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { toasts, type Toast } from '$lib/stores/toastStore';
-	import { RADIUS, ELEVATION, TEXT } from '$lib/config/design';
+	import { RADIUS, ELEVATION, TEXT, TOAST } from '$lib/config/design';
 
 	interface Props {
 		messages?: Toast[];
@@ -17,35 +17,25 @@
 	class="pointer-events-none fixed right-4 bottom-4 z-[9999] flex flex-col gap-3 md:right-6 md:bottom-6"
 >
 	{#each toastList as toast (toast.id)}
+		{@const toastConfig =
+			toast.type === 'error'
+				? TOAST.error
+				: toast.type === 'success'
+					? TOAST.success
+					: toast.type === 'warning'
+						? TOAST.warning
+						: TOAST.info}
 		<div
 			class="animate-in slide-in-from-right-8 fade-in pointer-events-auto w-full max-w-sm duration-300"
 			role="alert"
 		>
 			<div
 				class={`flex items-start gap-3 p-4 ${RADIUS.card} ${ELEVATION.card} border backdrop-blur-xl
-				${
-					toast.type === 'error'
-						? 'border-red-200/80 bg-red-50/95 dark:border-red-900/50 dark:bg-red-950/90'
-						: toast.type === 'success'
-							? 'border-green-200/80 bg-green-50/95 dark:border-green-900/50 dark:bg-green-950/90'
-							: toast.type === 'warning'
-								? 'border-amber-200/80 bg-amber-50/95 dark:border-amber-900/50 dark:bg-amber-950/90'
-								: 'border-blue-200/80 bg-blue-50/95 dark:border-blue-900/50 dark:bg-blue-950/90'
-				}`}
+				${toastConfig.border} ${toastConfig.bg}`}
 			>
 				<div class="min-w-0 flex-1">
-					<p
-						class={`${TEXT.small} mb-1 font-bold
-						${
-							toast.type === 'error'
-								? 'text-red-800 dark:text-red-300'
-								: toast.type === 'success'
-									? 'text-green-800 dark:text-green-300'
-									: toast.type === 'warning'
-										? 'text-amber-800 dark:text-amber-300'
-										: 'text-blue-800 dark:text-blue-300'
-						}`}
-					>
+					<p class={`${TEXT.small} mb-1 font-bold ${toastConfig.title}`}>
+						>
 						{toast.type === 'error'
 							? 'Kesalahan Sistem'
 							: toast.type === 'success'
@@ -54,18 +44,8 @@
 									? 'Peringatan'
 									: 'Informasi'}
 					</p>
-					<p
-						class={`text-sm leading-relaxed
-						${
-							toast.type === 'error'
-								? 'text-red-700/90 dark:text-red-400/90'
-								: toast.type === 'success'
-									? 'text-green-700/90 dark:text-green-400/90'
-									: toast.type === 'warning'
-										? 'text-amber-700/90 dark:text-amber-400/90'
-										: 'text-blue-700/90 dark:text-blue-400/90'
-						}`}
-					>
+					<p class={`text-sm leading-relaxed ${toastConfig.body}`}>
+						>
 						{toast.text}
 					</p>
 				</div>

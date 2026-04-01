@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RADIUS, TEXT, TRANSITION } from '$lib/config/design';
+	import { RADIUS, TEXT, TRANSITION, STATUS } from '$lib/config/design';
 	import type { Snippet } from 'svelte';
 
 	interface BadgeProps {
@@ -9,20 +9,15 @@
 		children?: Snippet;
 	}
 
-	let {
-		variant = 'default',
-		size = 'md',
-		class: className = '',
-		children
-	}: BadgeProps = $props();
+	let { variant = 'default', size = 'md', class: className = '', children }: BadgeProps = $props();
 
 	const variantClasses: Record<string, string> = {
-		default: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-		success: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400',
-		warning: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
-		error: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
-		info: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400',
-		purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400'
+		default: `${STATUS.neutral.bg} ${STATUS.neutral.text}`,
+		success: `${STATUS.success.bg} ${STATUS.success.text}`,
+		warning: `${STATUS.warning.bg} ${STATUS.warning.text}`,
+		error: `${STATUS.error.bg} ${STATUS.error.text}`,
+		info: `${STATUS.info.bg} ${STATUS.info.text}`,
+		purple: `${STATUS.purple.bg} ${STATUS.purple.text}`
 	};
 
 	const sizeClasses: Record<string, string> = {
@@ -32,7 +27,7 @@
 </script>
 
 <span
-	class={`inline-flex items-center font-bold uppercase tracking-wider ${RADIUS.badge} ${TRANSITION.all} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+	class={`inline-flex items-center font-bold tracking-wider uppercase ${RADIUS.badge} ${TRANSITION.all} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
 >
 	{@render children?.()}
 </span>

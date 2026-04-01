@@ -1,80 +1,28 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
-	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
-	import PageQuick from '$lib/components/layouts/PageQuick.svelte';
-	import { COLOR, RADIUS, SPACING, TEXT, TRANSITION, ELEVATION } from '$lib/config/design';
 	import { toast } from '$lib/stores/toastStore';
-	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
-	import { updateQueryParam } from '$lib/utils/url-params';
-	import {
-		setToVisibilityRecord,
-		isColumnVisible as checkColumnVisible
-	} from '$lib/utils/useColumnVisibility';
-	import { filterEntities, countByField, createFilterUtils } from '$lib/utils/filter';
-	import { USER_COLUMNS, getDefaultUserColumnVisibility } from '$lib/constants/user-columns';
-	import UserFilters from '$lib/components/admin/UserFilters.svelte';
+	import { useDashboardListState } from '$lib/utils/useDashboardListState';
+	import { filterEntities, countByField } from '$lib/utils/filter';
+	import { USER_COLUMNS } from '$lib/constants/user-columns';
+	import DashboardTablePage from '$lib/components/layouts/DashboardTablePage.svelte';
+	import StatusFilter from '$lib/components/ui/StatusFilter.svelte';
 	import UsersTable from '$lib/components/admin/UsersTable.svelte';
-	import WaitingListSearchBar from '$lib/components/crm/WaitingListSearchBar.svelte';
-	import ResultsSummary from '$lib/components/crm/ResultsSummary.svelte';
-	import ColumnFilter from '$lib/components/crm/ColumnFilter.svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	// Filter state
-	let searchQuery = $state('');
-	let roleFilter = $state<'all' | 'admin' | 'mentor' | 'user'>('all');
-	let columnFilterRef: ColumnFilter | null = $state(null);
-
-	// Initialize role filter from URL query parameter on mount
-	onMount(() => {
-		const param = $page.url.searchParams.get('role');
-		if (param === 'admin' || param === 'mentor' || param === 'user') {
-			roleFilter = param;
-		} else {
-			roleFilter = 'all';
-		}
+	// Dashboard list state management (filter, search, column visibility)
+	const listState = useDashboardListState({
+		columns: USER_COLUMNS,
+		storageKey: 'admin-users',
+		filterParam: 'role',
+		defaultFilter: 'all',
+		filterStatusField: 'role',
+		searchFields: ['username', 'fullName', 'email']
 	});
-
-	// Sync with URL changes (e.g., browser back/forward)
-	$effect(() => {
-		const param = $page.url.searchParams.get('role');
-		if (param === 'admin' || param === 'mentor' || param === 'user') {
-			if (roleFilter !== param) {
-				roleFilter = param;
-			}
-		} else if (roleFilter !== 'all') {
-			roleFilter = 'all';
-		}
-	});
-
-	// Function to update URL query parameter when role filter changes
-	async function updateRoleFilter(newRole: 'all' | 'admin' | 'mentor' | 'user') {
-		roleFilter = newRole;
-		await updateQueryParam($page.url, 'role', newRole === 'all' ? null : newRole, goto);
-	}
-
-	// Column definitions (from constants)
-	const tableColumns = USER_COLUMNS;
-
-	// Column visibility state
-	let columnVisibility = $state<Record<string, boolean>>(getDefaultUserColumnVisibility());
-
-	// Callback to update visibility from ColumnFilter
-	function handleVisibilityChange(visibleColumns: Set<string>) {
-		columnVisibility = setToVisibilityRecord(visibleColumns, tableColumns);
-	}
-
-	// Helper to check if column is visible
-	function isColumnVisible(key: string): boolean {
-		return checkColumnVisible(key, columnVisibility);
-	}
 
 	// Filtered users based on search and role filter
 	const filteredUsers = $derived(
-		filterEntities(data.users, searchQuery, roleFilter, {
+		filterEntities(data.users, listState.searchQuery, listState.filter, {
 			searchFields: ['username', 'fullName', 'email'],
 			statusField: 'role'
 		})
@@ -83,65 +31,52 @@
 	// Count users by role
 	const roleCounts = $derived(countByField(data.users, 'role'));
 
-	// Action handlers (placeholder for now, can be extended later)
+	// Filter options for StatusFilter component
+	const filterOptions = $derived([
+		{ value: 'all', label: 'All', count: roleCounts.all ?? 0 },
+		{ value: 'admin', label: 'Admins', count: roleCounts.admin ?? 0 },
+		{ value: 'mentor', label: 'Mentors', count: roleCounts.mentor ?? 0 },
+		{ value: 'user', label: 'Users', count: roleCounts.user ?? 0 }
+	]);
+
+	// Action handlers
 	function handleEdit(userId: string) {
-		// TODO: Navigate to edit page or open modal
 		toast.info('Fitur edit pengguna segera hadir');
 	}
 
 	function handleChangeRole(userId: string) {
-		// TODO: Open role change modal
 		toast.info('Fitur ubah peran segera hadir');
 	}
 </script>
 
-<svelte:head>
-	<title>User Management - Admin</title>
-</svelte:head>
-
-<!-- Role Filter - Outside PageWrapper for full-width control -->
-<PageQuick padding={true}>
-	<UserFilters
-		bind:roleFilter
-		{roleCounts}
-		onRoleFilterChange={(value) => updateRoleFilter(value as 'all' | 'admin' | 'mentor' | 'user')}
-	/>
-</PageQuick>
-
-<PageWrapper>
-	<PageHeader title="User Management" description="Manage all users registered on the platform" />
-
-	<!-- Results Summary with Search and Column Filter -->
-	<div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-		<div class="min-w-0 flex-1 md:max-w-xs">
-			<ResultsSummary filteredCount={filteredUsers.length} totalCount={data.users.length} />
-		</div>
-
-		<WaitingListSearchBar
-			bind:searchQuery
-			columns={tableColumns}
-			bind:columnFilterRef
-			storageKey="admin-users-columns"
-			onVisibilityChange={handleVisibilityChange}
-			placeholder="Cari user berdasarkan username, nama, atau email..."
+<DashboardTablePage
+	title="User Management"
+	description="Manage all users registered on the platform"
+	headTitle="User Management - Admin"
+	bind:searchQuery={listState.searchQuery}
+	columns={USER_COLUMNS}
+	onVisibilityChange={listState.handleVisibilityChange}
+	storageKey="admin-users"
+	filteredCount={filteredUsers.length}
+	totalCount={data.users.length}
+	searchPlaceholder="Cari user berdasarkan username, nama, atau email..."
+>
+	{#snippet filters()}
+		<StatusFilter
+			options={filterOptions}
+			bind:active={listState.filter}
+			onChange={listState.setFilter}
 		/>
-	</div>
+	{/snippet}
 
-	<!-- Users Table -->
-	{#if filteredUsers.length === 0 && data.users.length === 0}
-		<div
-			class="rounded-lg border border-gray-200 bg-white p-12 text-center dark:border-neutral-800 dark:bg-neutral-900"
-		>
-			<p class={COLOR.textSecondary}>No users found.</p>
-		</div>
-	{:else}
+	{#snippet children()}
 		<UsersTable
 			entries={filteredUsers}
-			columns={tableColumns}
-			{columnVisibility}
-			{isColumnVisible}
+			columns={USER_COLUMNS}
+			columnVisibility={listState.columnVisibility}
+			isColumnVisible={listState.isColumnVisible}
 			onEdit={handleEdit}
 			onChangeRole={handleChangeRole}
 		/>
-	{/if}
-</PageWrapper>
+	{/snippet}
+</DashboardTablePage>

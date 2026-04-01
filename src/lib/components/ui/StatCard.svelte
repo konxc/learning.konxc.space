@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { COLOR, RADIUS, ELEVATION, TEXT, TRANSITION } from '$lib/config/design';
+	import { COLOR, RADIUS, ELEVATION, TEXT, TRANSITION, STATUS } from '$lib/config/design';
 
 	let {
 		value,
@@ -17,20 +17,20 @@
 
 	const variantStyles: Record<string, string> = {
 		default: `${COLOR.cardBorder} ${COLOR.card}`,
-		success: 'border-green-200 bg-green-50 dark:border-green-800/30 dark:bg-green-900/20',
-		warning: 'border-yellow-200 bg-yellow-50 dark:border-yellow-800/30 dark:bg-yellow-900/20',
-		error: 'border-red-200 bg-red-50 dark:border-red-800/30 dark:bg-red-900/20',
-		accent: 'border-blue-200 bg-blue-50 dark:border-blue-800/30 dark:bg-blue-900/20',
-		purple: 'border-purple-200 bg-purple-50 dark:border-purple-800/30 dark:bg-purple-900/20'
+		success: `${STATUS.success.border} ${STATUS.success.bg}`,
+		warning: `${STATUS.pending.border} ${STATUS.pending.bg}`,
+		error: `${STATUS.error.border} ${STATUS.error.bg}`,
+		accent: `${STATUS.info.border} ${STATUS.info.bg}`,
+		purple: `${STATUS.purple.border} ${STATUS.purple.bg}`
 	};
 
 	const valueColor: Record<string, string> = {
 		default: 'text-neutral-900 dark:text-white',
-		success: 'text-green-600 dark:text-green-400',
-		warning: 'text-yellow-600 dark:text-yellow-400',
-		error: 'text-red-600 dark:text-red-400',
-		accent: 'text-blue-600 dark:text-blue-400',
-		purple: 'text-purple-600 dark:text-purple-400'
+		success: STATUS.success.text,
+		warning: STATUS.pending.text,
+		error: STATUS.error.text,
+		accent: STATUS.info.text,
+		purple: STATUS.purple.text
 	};
 </script>
 

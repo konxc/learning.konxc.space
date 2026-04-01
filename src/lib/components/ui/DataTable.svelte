@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { COLOR, TRANSITION } from '$lib/config/design';
+	import { COLOR, TRANSITION, STATUS, TABLE_ALT } from '$lib/config/design';
 	import type { Snippet } from 'svelte';
 	import type { TableColumn } from '$lib/types/table';
 
@@ -31,9 +31,7 @@
 <!-- Table without card wrapper -->
 <div class="overflow-auto rounded-lg">
 	<table class="w-full border-collapse text-sm">
-		<thead
-			class="sticky top-0 border-b border-gray-200/60 bg-gray-100 backdrop-blur-sm dark:border-neutral-700/60 dark:bg-neutral-800"
-		>
+		<thead class={`sticky top-0 border-b ${COLOR.cardBorder} ${COLOR.neutral} backdrop-blur-sm`}>
 			<tr>
 				{#each visibleColumns as col, index}
 					<th
@@ -53,23 +51,19 @@
 				{/each}
 			</tr>
 		</thead>
-		<tbody class="divide-y divide-gray-200/40 dark:divide-neutral-700/40">
+		<tbody class={`divide-y ${COLOR.cardBorder}`}>
 			{#if loading}
 				{#each Array(6) as _, i}
-					<tr
-						class={`${
-							i % 2 === 0 ? 'bg-white dark:bg-neutral-900' : 'bg-gray-50 dark:bg-neutral-800/60'
-						}`}
-					>
+					<tr class={`${i % 2 === 0 ? COLOR.surface : TABLE_ALT.row}`}>
 						{#each visibleColumns as col}
 							<td class={`px-4 py-3 align-middle`}>
-								<div class="h-4 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-neutral-700"></div>
+								<div class={`h-4 w-3/4 animate-pulse rounded ${STATUS.neutral.bg}`}></div>
 							</td>
 						{/each}
 					</tr>
 				{/each}
 			{:else if entries.length === 0}
-				<tr class="bg-white dark:bg-neutral-900">
+				<tr class={COLOR.surface}>
 					<td class={`px-4 py-12 text-center ${COLOR.textSecondary}`} colspan={visibleColumnsCount}>
 						{emptyStateMessage}
 					</td>
@@ -77,8 +71,8 @@
 			{:else}
 				{#each entries as entry, i}
 					<tr
-						class={`${TRANSITION.all} hover:bg-gray-100 dark:hover:bg-neutral-800/80 ${
-							i % 2 === 0 ? 'bg-white dark:bg-neutral-900' : 'bg-gray-50 dark:bg-neutral-800/60'
+						class={`${TRANSITION.all} ${COLOR.neutralHover} ${
+							i % 2 === 0 ? COLOR.surface : TABLE_ALT.row
 						}`}
 					>
 						{#each visibleColumns as col}

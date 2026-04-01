@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { RADIUS, TEXT, COLOR, ELEVATION } from '$lib/config/design';
+	import { RADIUS, TEXT, COLOR, ELEVATION, WORKSPACE_ITEM } from '$lib/config/design';
 	import { invalidateAll, goto } from '$app/navigation';
 	import { toast } from '$lib/stores/toastStore';
 	import { fly } from 'svelte/transition';
@@ -66,10 +66,10 @@
 		<!-- Personal -->
 		<button
 			onclick={() => switchWorkspace('personal')}
-			class={`flex w-full items-center gap-3 px-3 py-2 ${RADIUS.small} transition-all ${workspaces.activeId === 'personal' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
+			class={`flex w-full items-center gap-3 px-3 py-2 ${RADIUS.small} transition-all ${workspaces.activeId === 'personal' ? WORKSPACE_ITEM.personal.active : WORKSPACE_ITEM.idle}`}
 		>
 			<div
-				class={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${workspaces.activeId === 'personal' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'}`}
+				class={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${workspaces.activeId === 'personal' ? WORKSPACE_ITEM.personal.icon : WORKSPACE_ITEM.iconIdle}`}
 			>
 				P
 			</div>
@@ -79,7 +79,7 @@
 			</div>
 			{#if workspaces.activeId === 'personal'}
 				<svg
-					class="ml-auto h-4 w-4 text-blue-600"
+					class={`ml-auto h-4 w-4 ${WORKSPACE_ITEM.personal.check}`}
 					fill="none"
 					stroke="currentColor"
 					stroke-width="3"
@@ -95,13 +95,13 @@
 		{#each workspaces.organizations as org}
 			<button
 				onclick={() => switchWorkspace(org.id)}
-				class={`flex w-full items-center gap-3 px-3 py-2 ${RADIUS.small} transition-all ${workspaces.activeId === org.id ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'}`}
+				class={`flex w-full items-center gap-3 px-3 py-2 ${RADIUS.small} transition-all ${workspaces.activeId === org.id ? WORKSPACE_ITEM.organization.active : WORKSPACE_ITEM.idle}`}
 			>
 				{#if org.logoUrl}
 					<img src={org.logoUrl} alt="" class="h-8 w-8 rounded-lg object-cover" />
 				{:else}
 					<div
-						class={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${workspaces.activeId === org.id ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-500'}`}
+						class={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${workspaces.activeId === org.id ? WORKSPACE_ITEM.organization.icon : WORKSPACE_ITEM.iconIdle}`}
 					>
 						{org.name[0].toUpperCase()}
 					</div>
@@ -112,7 +112,7 @@
 				</div>
 				{#if workspaces.activeId === org.id}
 					<svg
-						class="ml-auto h-4 w-4 text-indigo-600"
+						class={`ml-auto h-4 w-4 ${WORKSPACE_ITEM.organization.check}`}
 						fill="none"
 						stroke="currentColor"
 						stroke-width="3"

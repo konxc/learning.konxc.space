@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { TEXT, COLOR, RADIUS } from '$lib/config/design';
+	import { TEXT, COLOR, RADIUS, EMULATION } from '$lib/config/design';
 	import { useRoleColor } from '$lib/utils/useRoleColor';
 	import { getRoleLabel } from '$lib/utils/role';
 
@@ -45,7 +45,7 @@
 		</div>
 		{#if isEmulating}
 			<div
-				class={`shrink-0 ${RADIUS.badge} px-2 py-1 ${TEXT.small} border border-amber-200/50 bg-amber-100 font-semibold text-amber-700 dark:border-amber-800/30 dark:bg-amber-950/40 dark:text-amber-400`}
+				class={`shrink-0 ${RADIUS.badge} px-2 py-1 ${TEXT.small} border ${EMULATION.bg} ${EMULATION.text} border-amber-200/50 dark:border-amber-800/30`}
 				title="Mode Emulasi: {emulatedRoleLabel}"
 			>
 				<span class="inline-flex items-center gap-1">

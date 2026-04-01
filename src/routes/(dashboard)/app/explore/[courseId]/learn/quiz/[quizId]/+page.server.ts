@@ -228,11 +228,58 @@ export const actions: Actions = {
 			score: score
 		});
 
+		const passed = score >= quiz.passingScore;
+
+		// If quiz passed, mark the associated lesson as completed
+		if (passed) {
+			// Get the lesson this quiz belongs to
+			const quizWithLesson = await db
+				.select({ lessonId: schema.quiz.lessonId })
+				.from(schema.quiz)
+				.where(eq(schema.quiz.id, quizId))
+				.limit(1);
+
+			if (quizWithLesson[0]?.lessonId) {
+				// Check if lesson progress already exists
+				const existingProgress = await db
+					.select()
+					.from(schema.lessonProgress)
+					.where(
+						and(
+							eq(schema.lessonProgress.userId, user.id),
+							eq(schema.lessonProgress.lessonId, quizWithLesson[0].lessonId)
+						)
+					)
+					.limit(1);
+
+				if (existingProgress.length === 0) {
+					// Create progress record
+					await db.insert(schema.lessonProgress).values({
+						id: encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(10))),
+						courseId: courseId,
+						userId: user.id,
+						lessonId: quizWithLesson[0].lessonId,
+						completedAt: new Date()
+					});
+				} else if (!existingProgress[0].completedAt) {
+					// Update existing progress
+					await db
+						.update(schema.lessonProgress)
+						.set({ completedAt: new Date() })
+						.where(eq(schema.lessonProgress.id, existingProgress[0].id));
+				}
+
+				// Trigger badge checking
+				const { checkAndAwardBadges } = await import('$lib/server/badge');
+				await checkAndAwardBadges(user.id);
+			}
+		}
+
 		return actionSuccess({
 			data: {
 				score,
 				passingScore: quiz.passingScore,
-				passed: score >= quiz.passingScore
+				passed
 			}
 		});
 	}

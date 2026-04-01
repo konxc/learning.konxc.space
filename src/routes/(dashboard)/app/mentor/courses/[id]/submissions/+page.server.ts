@@ -6,6 +6,7 @@ import { eq, and, desc, inArray } from 'drizzle-orm';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
 import { awardXP, checkAndAwardBadges } from '$lib/server/gamification';
+import { createInAppNotification, sendNotification } from '$lib/server/notifications';
 
 type SubmissionRecord = typeof schema.submission.$inferSelect;
 type CourseRecord = typeof schema.course.$inferSelect;
@@ -163,6 +164,17 @@ export const actions: Actions = {
 			score,
 			feedback: feedback.length > 0 ? feedback : null
 		});
+
+		// Send notification to student about their grade
+		await createInAppNotification(
+			submission.userId,
+			'grade',
+			score >= 70 ? '🎉 Assignment Approved!' : '📝 Assignment Graded',
+			score >= 70
+				? `Congratulations! Your submission for "${submission.course?.title}" has been approved with score ${score}/100.`
+				: `Your submission for "${submission.course?.title}" has been graded. Score: ${score}/100. ${feedback || ''}`,
+			`/app/learning`
+		);
 
 		// Award XP (50 XP for approval) and check for badges
 		if (score >= 70) {

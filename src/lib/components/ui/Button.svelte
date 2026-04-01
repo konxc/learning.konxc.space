@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RADIUS, SPACING, TEXT, TRANSITION, COLOR } from '$lib/config/design';
+	import { RADIUS, SPACING, TEXT, TRANSITION, COLOR, FOCUS } from '$lib/config/design';
 	import type { Snippet } from 'svelte';
 
 	interface ButtonProps {
@@ -21,12 +21,12 @@
 	}: ButtonProps = $props();
 
 	const variantClasses: Record<string, string> = {
-		primary: `${COLOR.accentBg} text-white ${COLOR.accentHover} focus-visible:ring-blue-600/70`,
-		secondary: `${COLOR.neutral} ${COLOR.textPrimary} ${COLOR.neutralHover} focus-visible:ring-gray-600/70`,
-		ghost: `bg-transparent ${COLOR.textPrimary} hover:bg-gray-100/80 dark:hover:bg-neutral-800/60 focus-visible:ring-gray-600/70`,
-		danger: `bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600/70`,
-		success: `bg-green-600 text-white hover:bg-green-700 focus-visible:ring-green-600/70`,
-		outline: `border-2 border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50 hover:border-gray-400 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-800 focus-visible:ring-gray-600/70`
+		primary: `${COLOR.accentBg} text-white ${COLOR.accentHover} ${FOCUS.accent}`,
+		secondary: `${COLOR.neutral} ${COLOR.textPrimary} ${COLOR.neutralHover} ${FOCUS.neutral}`,
+		ghost: `bg-transparent ${COLOR.textPrimary} hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60 ${FOCUS.neutral}`,
+		danger: `bg-red-600 text-white hover:bg-red-700 ${FOCUS.error}`,
+		success: `bg-green-600 text-white hover:bg-green-700 ${FOCUS.success}`,
+		outline: `border-2 border-zinc-300 bg-transparent text-zinc-700 hover:bg-zinc-50 hover:border-zinc-400 dark:text-zinc-300 dark:border-zinc-600 dark:hover:bg-zinc-800 ${FOCUS.neutral}`
 	};
 
 	const sizeClasses: Record<string, string> = {

@@ -1,6 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { COLOR, RADIUS, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
+	import {
+		COLOR,
+		RADIUS,
+		TRANSITION,
+		TEXT,
+		ELEVATION,
+		BADGE,
+		NOTIFICATION_DOT
+	} from '$lib/config/design';
 	import type { NavItem, NavGroup } from '$lib/server/rbac';
 	import Logo from './Logo.svelte';
 	import WorkspaceSwitcher from './WorkspaceSwitcher.svelte';
@@ -66,6 +74,21 @@
 		triggerRect = $bindable(null)
 	}: SidebarProps = $props();
 	const { collapsible = true, grouped = true, searchable = true, showBadges = true } = config;
+
+	const badgeColorMap: Record<string, string> = {
+		red: BADGE.red,
+		green: BADGE.green,
+		yellow: BADGE.yellow,
+		blue: BADGE.blue
+	};
+	const dotColorMap: Record<string, string> = {
+		red: NOTIFICATION_DOT.red,
+		green: NOTIFICATION_DOT.green,
+		yellow: NOTIFICATION_DOT.yellow,
+		blue: NOTIFICATION_DOT.blue
+	};
+	const defaultBadgeColor = BADGE.blue;
+	const defaultDotColor = NOTIFICATION_DOT.blue;
 
 	// Sync state dengan localStorage dan data attribute
 	$effect(() => {
@@ -237,30 +260,14 @@
 											<span class="sidebar-label flex-1 truncate">{item.label}</span>
 											{#if item.badge && showBadges}
 												<span
-													class={`sidebar-badge shrink-0 rounded-full px-1.5 py-0.5 ${TEXT.small} leading-none font-medium ${
-														item.badgeColor === 'red'
-															? 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400'
-															: item.badgeColor === 'green'
-																? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400'
-																: item.badgeColor === 'yellow'
-																	? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-400'
-																	: 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400'
-													}`}
+													class={`sidebar-badge shrink-0 rounded-full px-1.5 py-0.5 ${TEXT.small} leading-none font-medium ${item.badgeColor ? (badgeColorMap[item.badgeColor] ?? defaultBadgeColor) : defaultBadgeColor}`}
 												>
 													{item.badge}
 												</span>
 											{/if}
 										{:else if item.badge && showBadges}
 											<span
-												class={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full ${TEXT.small} leading-none text-white ${
-													item.badgeColor === 'red'
-														? 'bg-red-500'
-														: item.badgeColor === 'green'
-															? 'bg-green-500'
-															: item.badgeColor === 'yellow'
-																? 'bg-yellow-500'
-																: 'bg-blue-500'
-												}`}
+												class={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full ${TEXT.small} leading-none text-white ${item.badgeColor ? (dotColorMap[item.badgeColor] ?? defaultDotColor) : defaultDotColor}`}
 												aria-label={`${item.badge} notifications`}
 											>
 												{item.badge}
