@@ -269,6 +269,37 @@ export const TEXT = {
 	small: 'text-[11px] font-bold uppercase tracking-widest'
 };
 
+// Action button tokens (for approve/reject flows)
+export const ACTION = {
+	approve: 'bg-emerald-600 text-white hover:bg-emerald-700',
+	reject:
+		'border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 dark:border-red-900 dark:bg-red-950 dark:text-red-400'
+} as const;
+
+// Tab tokens (for status filter tabs)
+export const TAB = {
+	active: 'bg-blue-600 text-white',
+	inactive:
+		'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
+} as const;
+
+// Table tokens (for thead, tbody divider, row hover)
+export const TABLE = {
+	thead: 'bg-zinc-50/70 dark:bg-zinc-800/50',
+	theadBorder: 'border-zinc-100 dark:border-zinc-800',
+	divider: 'divide-zinc-50 dark:divide-zinc-800/60',
+	rowHover: 'hover:bg-blue-50/20 dark:hover:bg-blue-950/10',
+	accentText: 'text-blue-600 dark:text-blue-400',
+	accentTextGreen: 'text-green-600 dark:text-green-400',
+	accentTextAmber: 'text-amber-600 dark:text-amber-400'
+} as const;
+
+// Modal overlay tokens
+export const MODAL = {
+	overlay: 'bg-black/50 dark:bg-black/70',
+	panel: 'bg-white shadow-xl dark:bg-zinc-900 dark:shadow-2xl'
+} as const;
+
 export const TRANSITION = {
 	colors: 'transition-colors duration-200 ease-out',
 	all: 'transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1)',
