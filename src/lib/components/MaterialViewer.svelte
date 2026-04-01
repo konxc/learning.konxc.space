@@ -39,10 +39,11 @@
 
 	async function saveProgress(position: number, completed: boolean = false) {
 		try {
-			const response = await fetch(`/app/explore/${courseId}/learn/progress`, {
+			const response = await fetch(`/api/progress`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
+					courseId,
 					lessonId,
 					lastPositionMs: position,
 					completed
@@ -67,11 +68,16 @@
 		const currentTime = Math.floor(videoElement.currentTime * 1000);
 		lastPosition = currentTime;
 
-		// Auto-save progress every 5 seconds
-		if (!progressInterval) {
+		// Auto-save progress every 5 seconds if playing
+		if (!videoElement.paused && !progressInterval) {
 			progressInterval = setInterval(() => {
-				saveProgress(lastPosition, false);
+				if (videoElement && !videoElement.paused) {
+					saveProgress(lastPosition, false);
+				}
 			}, 5000);
+		} else if (videoElement.paused && progressInterval) {
+			clearInterval(progressInterval);
+			progressInterval = null;
 		}
 
 		// Mark as complete when video ends
