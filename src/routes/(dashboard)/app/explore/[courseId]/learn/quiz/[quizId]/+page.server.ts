@@ -82,7 +82,9 @@ export const load: PageServerLoad = async (event) => {
 	return {
 		quiz,
 		hasSubmitted: existingSubmission.length > 0,
-		submission: existingSubmission[0] || null
+		submission: existingSubmission[0] || null,
+		canRetake:
+			existingSubmission.length > 0 && (existingSubmission[0].score ?? 0) < quiz.passingScore
 	};
 };
 
@@ -282,5 +284,22 @@ export const actions: Actions = {
 				passed
 			}
 		});
+	},
+	retakeQuiz: async (event) => {
+		const user = await requireAuth(event);
+		const { quizId } = event.params;
+
+		// Delete existing submission
+		await db
+			.delete(schema.submission)
+			.where(
+				and(
+					eq(schema.submission.userId, user.id),
+					eq(schema.submission.quizId, quizId),
+					eq(schema.submission.type, 'quiz')
+				)
+			);
+
+		return actionSuccess();
 	}
 } satisfies Actions;

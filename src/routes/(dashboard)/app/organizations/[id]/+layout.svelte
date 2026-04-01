@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { LayoutData } from './$types';
+	import type { PageData } from './$types';
 	import type { Snippet } from 'svelte';
 
-	let { data, children }: { data: LayoutData; children: Snippet } = $props();
+	let { data, children }: { data: PageData; children: Snippet } = $props();
 
 	const isAdmin = $derived(data.membership && ['owner', 'admin'].includes(data.membership.role));
 </script>

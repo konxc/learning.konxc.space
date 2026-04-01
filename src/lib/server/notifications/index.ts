@@ -16,7 +16,8 @@ interface SendNotificationOptions {
 		| 'certificate'
 		| 'reminder'
 		| 'action_required'
-		| 'broadcast';
+		| 'broadcast'
+		| 'system';
 	title: string;
 	message: string;
 	link?: string;

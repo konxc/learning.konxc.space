@@ -20,6 +20,7 @@
 	let showResult = $state(false);
 	let result: { score: number; passingScore: number; passed: boolean } | null = $state(null);
 	let form = $state<HTMLFormElement | undefined>(undefined);
+	let isRetaking = $state(false);
 
 	type QuizActionResult = ActionResult<{
 		score: number;
@@ -107,12 +108,38 @@
 							</p>
 						{/if}
 					</div>
-					<a
-						href="/app/explore/{$page.params.courseId}/learn"
-						class={`mt-6 inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-6 py-3 ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
-					>
-						Continue Learning →
-					</a>
+					<div class="mt-6 flex items-center justify-center gap-4">
+						<a
+							href="/app/explore/{$page.params.courseId}/learn"
+							class={`inline-flex items-center ${RADIUS.button} ${COLOR.accentBg} px-6 py-3 ${TEXT.button} font-semibold text-white ${ELEVATION.base} ${TRANSITION.all} hover:-translate-y-0.5 ${ELEVATION.cardHover} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
+						>
+							Continue Learning →
+						</a>
+						{#if data.canRetake}
+							<form
+								method="post"
+								action="?/retakeQuiz"
+								use:enhance={() => {
+									isRetaking = true;
+									return async ({ result }) => {
+										isRetaking = false;
+										if (result.type === 'success') {
+											// Reload page to reset state
+											window.location.reload();
+										}
+									};
+								}}
+							>
+								<button
+									type="submit"
+									class={`inline-flex items-center ${RADIUS.button} border-2 ${COLOR.cardBorder} px-6 py-3 ${TEXT.button} font-semibold ${COLOR.textPrimary} ${TRANSITION.all} hover:border-blue-500 hover:text-blue-600 ${isRetaking ? 'cursor-not-allowed opacity-60' : ''}`}
+									disabled={isRetaking}
+								>
+									{isRetaking ? 'Menghapus...' : 'Coba Lagi'}
+								</button>
+							</form>
+						{/if}
+					</div>
 				</div>
 			</PageSection>
 		{:else if showResult && result}
