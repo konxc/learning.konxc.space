@@ -62,7 +62,7 @@
 			{/if}
 
 			{#if variant === 'pills' && isActive}
-				<div class="absolute inset-0 rounded-xl bg-blue-50/50 dark:bg-blue-900/30"></div>
+				<div class={`absolute inset-0 rounded-xl ${COLOR.roleAdmin.bgMuted}`}></div>
 			{/if}
 		</button>
 	{/each}

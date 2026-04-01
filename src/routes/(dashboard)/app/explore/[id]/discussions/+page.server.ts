@@ -5,6 +5,7 @@ import * as schema from '$lib/server/db/schema';
 import { eq, desc, and, isNull } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
+import { createInAppNotification } from '$lib/server/notifications';
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
@@ -132,6 +133,33 @@ export const actions: Actions = {
 			createdAt: new Date(),
 			updatedAt: new Date()
 		});
+
+		// Notify the parent discussion author
+		const parentDiscussion = await db
+			.select({
+				userId: schema.discussion.userId,
+				courseId: schema.discussion.courseId
+			})
+			.from(schema.discussion)
+			.where(eq(schema.discussion.id, parentId))
+			.limit(1);
+
+		if (parentDiscussion[0] && parentDiscussion[0].userId !== user.id) {
+			// Get course name for notification
+			const course = await db
+				.select({ title: schema.course.title })
+				.from(schema.course)
+				.where(eq(schema.course.id, courseId))
+				.limit(1);
+
+			await createInAppNotification(
+				parentDiscussion[0].userId,
+				'grade', // reusing type
+				'💬 New Reply',
+				`${user.fullName || user.username} replied to your discussion in ${course[0]?.title || 'a course'}`,
+				`/app/explore/${courseId}/discussions`
+			);
+		}
 
 		return { success: true };
 	},

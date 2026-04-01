@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RADIUS, TEXT, COLOR, TRANSITION } from '$lib/config/design';
+	import { RADIUS, TEXT, COLOR, FOCUS, TRANSITION } from '$lib/config/design';
 	import type { Snippet } from 'svelte';
 
 	let {
@@ -28,7 +28,7 @@
 	}}
 	aria-label={ariaLabel || label}
 	aria-expanded={isOpen}
-	class={`flex ${fullWidth ? 'w-full' : ''} cursor-pointer list-none items-center justify-between no-underline ${RADIUS.button} px-2 py-1.5 ${TEXT.button} ${COLOR.textPrimary} bg-gray-100 dark:bg-neutral-800/70 ${TRANSITION.all} hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:hover:bg-neutral-700/80 dark:focus-visible:ring-offset-neutral-900`}
+	class={`flex ${fullWidth ? 'w-full' : ''} cursor-pointer list-none items-center justify-between no-underline ${RADIUS.button} px-2 py-1.5 ${TEXT.button} ${COLOR.textPrimary} ${COLOR.neutral} ${TRANSITION.all} ${COLOR.neutralHover} focus:outline-none focus-visible:ring-2 ${FOCUS.accent} focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900`}
 >
 	<div class="mr-2 flex min-w-0 flex-1 items-center gap-2">
 		{@render children?.()}

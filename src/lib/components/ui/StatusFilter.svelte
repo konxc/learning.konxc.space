@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { COLOR, RADIUS, SPACING, TEXT, TRANSITION } from '$lib/config/design';
+	import { COLOR, FOCUS, INPUT, RADIUS, SPACING, TEXT, TRANSITION } from '$lib/config/design';
 
 	export interface StatusFilterOption {
 		value: string;
@@ -29,8 +29,8 @@
 			class={`cursor-pointer ${RADIUS.button} ${SPACING.button} ${TEXT.button} ${TRANSITION.all} ${
 				active === option.value
 					? `${COLOR.accentBg} border-transparent text-white shadow-sm hover:opacity-90`
-					: `border border-gray-300 dark:border-neutral-600 ${COLOR.textPrimary} bg-white hover:border-gray-400 hover:bg-gray-50 dark:bg-neutral-800 dark:hover:border-neutral-500 dark:hover:bg-neutral-700`
-			} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-1 dark:focus-visible:ring-blue-500/70`}
+					: `${INPUT.border} ${COLOR.textPrimary} ${INPUT.bg} ${INPUT.hover} ${COLOR.neutralHover}`
+			} focus:outline-none focus-visible:ring-2 ${FOCUS.accent} focus-visible:ring-offset-1`}
 		>
 			{option.label}
 			{#if option.count !== undefined}

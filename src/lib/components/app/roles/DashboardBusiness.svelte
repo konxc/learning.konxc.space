@@ -37,7 +37,7 @@
 						Business Ops
 					</div>
 					<div class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-					<span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Revenue Live</span>
+					<span class={`text-[10px] font-bold ${COLOR.textMuted} uppercase tracking-widest`}>Revenue Live</span>
 				</div>
 				<h1 class="text-5xl md:text-6xl font-black tracking-tighter leading-none text-zinc-900 dark:text-white">
 					Revenue <span class="bg-linear-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">Nexus</span>
@@ -50,7 +50,7 @@
 
 			<div class="flex items-center gap-3">
 				<a href="/app/admin/reports">
-					<Button variant="ghost" class="h-12 px-8 font-black tracking-widest uppercase border border-zinc-200 dark:border-zinc-800 rounded-full transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800">
+					<Button variant="ghost" class={`h-12 px-8 font-black tracking-widest uppercase border border-zinc-200 dark:border-zinc-800 rounded-full transition-all ${COLOR.surfaceHover}`}>
 						Analytical Export ⬇
 					</Button>
 				</a>
@@ -62,7 +62,7 @@
 	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 		<div class={`group relative p-8 ${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} ${ELEVATION.card} ${TRANSITION.all} hover:-translate-y-1 border-l-4 border-l-emerald-600`}>
 			<div class="space-y-1">
-				<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Gross Revenue</span>
+				<span class={`text-[10px] font-black tracking-widest ${COLOR.textMuted} uppercase`}>Gross Revenue</span>
 				<p class="text-3xl font-black tracking-tighter text-zinc-900 dark:text-white leading-tight">
 					{formatCurrency(data.stats.revenue || 0)}
 				</p>
@@ -72,7 +72,7 @@
 
 		<div class={`group relative p-8 ${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} ${ELEVATION.card} ${TRANSITION.all} hover:-translate-y-1`}>
 			<div class="space-y-1">
-				<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">User ARPU</span>
+				<span class={`text-[10px] font-black tracking-widest ${COLOR.textMuted} uppercase`}>User ARPU</span>
 				<p class="text-3xl font-black tracking-tighter text-zinc-900 dark:text-white leading-tight">
 					{formatCurrency(data.stats.arpu || 0)}
 				</p>
@@ -82,7 +82,7 @@
 
 		<div class={`group relative p-8 ${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} ${ELEVATION.card} ${TRANSITION.all} hover:-translate-y-1`}>
 			<div class="space-y-1">
-				<span class="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Active Subs</span>
+				<span class={`text-[10px] font-black tracking-widest ${COLOR.textMuted} uppercase`}>Active Subs</span>
 				<p class="text-5xl font-black tracking-tighter text-zinc-900 dark:text-white leading-tight">
 					{data.stats.activeSubs || 0}
 				</p>
@@ -114,23 +114,23 @@
 		<div class="lg:col-span-4 space-y-6">
 			<!-- Advanced Ops Actions -->
 			<div class={`${RADIUS.card} ${COLOR.card} border-2 border-zinc-100 dark:border-zinc-800 p-8 shadow-sm`}>
-				<h3 class="text-xs font-black tracking-widest text-zinc-400 uppercase mb-8">Capital Operations</h3>
+				<h3 class={`text-xs font-black tracking-widest ${COLOR.textMuted} uppercase mb-8`}>Capital Operations</h3>
 				<div class="space-y-3">
-					<a href="/app/admin/payments" class={`flex items-center justify-between p-4 ${RADIUS.button} border ${COLOR.cardBorder} ${COLOR.card} ${TRANSITION.all} hover:bg-zinc-50 dark:hover:bg-zinc-800`}>
+					<a href="/app/admin/payments" class={`flex items-center justify-between p-4 ${RADIUS.button} border ${COLOR.cardBorder} ${COLOR.card} ${TRANSITION.all} ${COLOR.surfaceHover}`}>
 						<div class="flex items-center gap-3">
 							<span class="text-lg">🏦</span>
 							<span class="text-xs font-black uppercase tracking-tight">Payout Hub</span>
 						</div>
 					</a>
 
-					<a href="/app/admin/coupons" class={`flex items-center justify-between p-4 ${RADIUS.button} border ${COLOR.cardBorder} ${COLOR.card} ${TRANSITION.all} hover:bg-zinc-50 dark:hover:bg-zinc-800`}>
+					<a href="/app/admin/coupons" class={`flex items-center justify-between p-4 ${RADIUS.button} border ${COLOR.cardBorder} ${COLOR.card} ${TRANSITION.all} ${COLOR.surfaceHover}`}>
 						<div class="flex items-center gap-3">
 							<span class="text-lg">🎟️</span>
 							<span class="text-xs font-black uppercase tracking-tight">Promotions</span>
 						</div>
 					</a>
 
-					<a href="/app/admin/refunds" class={`flex items-center justify-between p-4 ${RADIUS.button} border ${COLOR.cardBorder} ${COLOR.card} ${TRANSITION.all} hover:bg-zinc-50 dark:hover:bg-zinc-800 opacity-60`}>
+					<a href="/app/admin/refunds" class={`flex items-center justify-between p-4 ${RADIUS.button} border ${COLOR.cardBorder} ${COLOR.card} ${TRANSITION.all} ${COLOR.surfaceHover} opacity-60`}>
 						<div class="flex items-center gap-3">
 							<span class="text-lg">↩️</span>
 							<span class="text-xs font-black uppercase tracking-tight">Refund Queue</span>

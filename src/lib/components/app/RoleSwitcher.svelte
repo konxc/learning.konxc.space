@@ -54,7 +54,7 @@
 				{roleMap[$activeRole]?.label || 'Select Role'}
 			</span>
 			<svg
-				class={`h-4 w-4 text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+				class={`h-4 w-4 ${COLOR.textMuted} transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"

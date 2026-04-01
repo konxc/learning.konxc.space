@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RADIUS, TEXT, COLOR, TRANSITION } from '$lib/config/design';
+	import { RADIUS, TEXT, COLOR, TRANSITION, FOCUS } from '$lib/config/design';
 
 	export interface AccordionMenuItem {
 		value: string;
@@ -52,7 +52,7 @@
 
 <details bind:this={accordionRef} class="group/{groupName}" ontoggle={handleDetailsToggle}>
 	<summary
-		class={`flex w-full cursor-pointer list-none items-center justify-between ${RADIUS.small} px-3 py-2 ${TEXT.button} ${COLOR.textSecondary} ${TRANSITION.colors} hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1 dark:hover:bg-neutral-800 dark:hover:text-gray-100`}
+		class={`flex w-full cursor-pointer list-none items-center justify-between ${RADIUS.small} px-3 py-2 ${TEXT.button} ${COLOR.textSecondary} ${TRANSITION.colors} ${COLOR.surfaceHover} ${COLOR.textPrimary} focus:outline-none focus-visible:ring-2 ${FOCUS.accent} focus-visible:ring-offset-1`}
 		onclick={(e) => e.stopPropagation()}
 	>
 		<span class="flex items-center gap-2">
@@ -70,7 +70,9 @@
 			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 		</svg>
 	</summary>
-	<div class="mt-1 space-y-0.5 rounded-lg bg-gray-100/60 p-1.5 dark:bg-neutral-800/40">
+	<div
+		class={`mt-1 space-y-0.5 rounded-lg p-1.5 ${COLOR.neutral} bg-opacity-60 dark:bg-opacity-40`}
+	>
 		{#each items as item}
 			{@const isActive = activeValue === item.value}
 			{#if item.href}

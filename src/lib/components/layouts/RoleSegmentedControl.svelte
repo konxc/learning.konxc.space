@@ -49,11 +49,11 @@
 
 {#if availableRoles.length > 1}
 	<div
-		class={`relative flex items-center bg-zinc-100/80 p-1 dark:bg-white/5 ${RADIUS.badge} border border-zinc-200/50 shadow-inner backdrop-blur-md dark:border-white/5`}
+		class={`relative flex items-center p-1 ${COLOR.neutral} bg-opacity-80 ${RADIUS.badge} border ${COLOR.cardBorder} dark:bg-opacity-5 shadow-inner backdrop-blur-md`}
 	>
 		<!-- Sliding Background Pill -->
 		<div
-			class={`absolute h-[calc(100%-8px)] transition-all ${TRANSITION.spring} bg-white dark:bg-zinc-800 ${RADIUS.badge} ${ELEVATION.base} border border-white/20 shadow-sm dark:border-white/5`}
+			class={`absolute h-[calc(100%-8px)] transition-all ${TRANSITION.spring} ${COLOR.surface} ${RADIUS.badge} ${ELEVATION.base} border border-white/20 shadow-sm dark:border-white/5`}
 			style="width: calc((100% - 8px) / {availableRoles.length}); transform: translateX(calc({activeIndex} * 100%));"
 		></div>
 
@@ -64,7 +64,7 @@
 				class={`relative z-10 flex flex-1 items-center justify-center gap-1.5 px-1 py-1.5 text-[10px] font-black tracking-widest uppercase transition-all duration-300 ${
 					activeRole === role
 						? COLOR.textPrimary
-						: 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
+						: `${COLOR.textMuted} hover:${COLOR.textSecondary} dark:hover:text-zinc-200`
 				}`}
 				aria-pressed={activeRole === role}
 			>

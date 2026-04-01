@@ -1,7 +1,17 @@
 <script lang="ts">
 	import ProfileMenu from './ProfileMenu.svelte';
 	import NotificationsDropdown from '$lib/components/ui/NotificationsDropdown.svelte';
-	import { TEXT, COLOR, SPACING, RADIUS, TRANSITION, ELEVATION } from '$lib/config/design';
+	import {
+		TEXT,
+		COLOR,
+		SPACING,
+		RADIUS,
+		TRANSITION,
+		ELEVATION,
+		Z_INDEX,
+		FOCUS,
+		NOTIFICATION_DOT
+	} from '$lib/config/design';
 	import { getPageMetadata } from '$lib/stores/pageMetadata';
 	import type { Theme } from '$lib/stores/theme';
 	import type { User as DbUser } from '$lib/server/db/schema';
@@ -77,7 +87,7 @@
 </script>
 
 <header
-	class={`cubic-bezier(0.32, 0.72, 0, 1) sticky top-0 z-30 border-b-[0.5px] border-zinc-200/50 bg-white/70 backdrop-blur-xl transition-all duration-300 dark:border-zinc-800/50 dark:bg-zinc-900/70 ${sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'}`}
+	class={`cubic-bezier(0.32, 0.72, 0, 1) sticky top-0 ${Z_INDEX.header} border-b-[0.5px] ${COLOR.cardBorder} ${COLOR.card} transition-all duration-300 ${sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'}`}
 >
 	<div class="flex min-h-[56px] items-center px-4 py-3 md:px-6">
 		<!-- Left Side: Toggle + Breadcrumb -->
@@ -87,7 +97,7 @@
 				type="button"
 				onclick={onSidebarToggle}
 				aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-				class={`group relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-600 shadow-sm transition-all hover:border-blue-500/50 hover:bg-blue-50 hover:text-blue-600 active:scale-95 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:border-blue-400/50 dark:hover:bg-blue-900/40 dark:hover:text-blue-400`}
+				class={`group relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${COLOR.cardBorder} ${COLOR.surface} ${COLOR.textSecondary} shadow-sm transition-all hover:border-blue-500/50 hover:bg-blue-50 hover:text-blue-600 active:scale-95 dark:hover:border-blue-400/50 dark:hover:bg-blue-900/40 dark:hover:text-blue-400`}
 			>
 				<div
 					class="absolute inset-0 scale-75 rounded-lg bg-blue-500/0 opacity-0 blur-xl transition-all group-hover:scale-125 group-hover:bg-blue-500/10 group-hover:opacity-100"
@@ -107,7 +117,7 @@
 				</svg>
 			</button>
 
-			<div class="mx-3 h-4 w-px bg-zinc-200 dark:bg-zinc-800"></div>
+			<div class="mx-3 h-4 w-px ${COLOR.neutral}"></div>
 			{#if breadcrumbs}
 				{@render breadcrumbs()}
 			{:else}
@@ -128,9 +138,7 @@
 							type="button"
 							onclick={() => handleTabSelect(tab.id)}
 							class={`relative px-1 py-1 whitespace-nowrap ${TEXT.button} ${TRANSITION.colors} ${
-								active
-									? 'text-neutral-900 dark:text-white'
-									: 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300'
+								active ? COLOR.textPrimary : `${COLOR.textMuted} hover:${COLOR.textSecondary}`
 							}`}
 							aria-current={active ? 'page' : undefined}
 						>
@@ -164,7 +172,7 @@
 						})
 					);
 				}}
-				class={`group hidden h-9 w-64 items-center gap-2 border border-zinc-200 bg-zinc-50/50 px-3 py-1.5 text-left transition-all hover:border-zinc-300 hover:bg-white md:flex dark:border-zinc-700 dark:bg-zinc-800/50 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 ${RADIUS.small}`}
+				class={`group hidden h-9 w-64 items-center gap-2 border ${COLOR.cardBorder} ${COLOR.bg} px-3 py-1.5 text-left transition-all hover:border-zinc-300 hover:${COLOR.surface} md:flex dark:hover:border-zinc-600 ${RADIUS.small}`}
 			>
 				<span class="text-sm text-zinc-500 dark:text-zinc-400">🔍</span>
 				<span
@@ -190,12 +198,12 @@
 					<div class="relative">
 						<button
 							onclick={() => (showNotifications = !showNotifications)}
-							class="relative rounded-full p-2 text-zinc-600 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+							class={`relative rounded-full p-2 ${COLOR.textSecondary} transition-colors ${COLOR.surfaceHover}`}
 						>
 							🔔
 							{#if unreadCount && unreadCount > 0}
 								<span
-									class="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm"
+									class={`absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full ${NOTIFICATION_DOT.red} text-[10px] font-bold text-white shadow-sm`}
 								>
 									{unreadCount > 9 ? '9+' : unreadCount}
 								</span>

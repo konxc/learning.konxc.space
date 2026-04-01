@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RADIUS, TEXT, COLOR, TRANSITION, ELEVATION } from '$lib/config/design';
+	import { RADIUS, TEXT, COLOR, TRANSITION, ELEVATION, Z_INDEX, FOCUS } from '$lib/config/design';
 	import { m } from '$lib/paraglide/messages.js';
 	import ProfileMenuSummary from './ProfileMenuSummary.svelte';
 	import ProfileUserInfo from './ProfileUserInfo.svelte';
@@ -66,7 +66,7 @@
 	<details bind:this={profileDetailsRef} class="group" ontoggle={onProfileToggle}>
 		<ProfileMenuSummary {user} {activeRole} />
 		<div
-			class={`absolute right-0 z-50 mt-4 min-w-[280px] ${RADIUS.card} border border-zinc-200/50 bg-white/95 p-3 ${ELEVATION.card} backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] dark:border-zinc-800/50 dark:bg-zinc-900/95`}
+			class={`absolute right-0 ${Z_INDEX.modal} mt-4 min-w-[280px] ${RADIUS.card} ${COLOR.cardBorder} ${COLOR.card} p-3 ${ELEVATION.card}`}
 		>
 			<ProfileUserInfo {user} {activeRole} />
 
@@ -87,7 +87,7 @@
 			<!-- Menu Items -->
 			<a
 				href="/app/settings"
-				class={`block no-underline ${RADIUS.small} px-3 py-2 ${TEXT.button} ${COLOR.textSecondary} ${TRANSITION.colors} hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1 dark:hover:bg-neutral-800 dark:hover:text-gray-100`}
+				class={`block no-underline ${RADIUS.small} px-3 py-2 ${TEXT.button} ${COLOR.textSecondary} ${TRANSITION.colors} ${COLOR.surfaceHover} ${COLOR.textPrimary} focus:outline-none focus-visible:ring-2 ${FOCUS.accent} focus-visible:ring-offset-1`}
 			>
 				<span class="mr-2" aria-hidden="true">⚙️</span>
 				{m.settings()}

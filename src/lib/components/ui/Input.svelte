@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RADIUS, SPACING, COLOR, TRANSITION } from '$lib/config/design';
+	import { RADIUS, SPACING, COLOR, INPUT, FOCUS, TRANSITION } from '$lib/config/design';
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 
@@ -32,7 +32,7 @@
 	<label class={`mb-1 block text-sm font-medium ${COLOR.textPrimary}`} for={id}>{label}</label>
 {/if}
 <input
-	class={`w-full ${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} text-sm outline-none ${TRANSITION.all} focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60`}
+	class={`w-full ${RADIUS.input} ${COLOR.cardBorder} ${SPACING.input} text-sm outline-none ${TRANSITION.all} ${INPUT.focus} focus:ring-2 ${FOCUS.accent} disabled:cursor-not-allowed disabled:opacity-60`}
 	{id}
 	{type}
 	bind:value
