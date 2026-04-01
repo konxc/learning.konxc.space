@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "New Component Scaffold Check",
+  "description": "Verifikasi komponen Svelte baru di src/lib/components/ mengikuti standar proyek — $props(), design tokens, dark mode, aria-label.",
+  "version": "1",
+  "when": {
+    "type": "fileCreated",
+    "patterns": [
+      "src/lib/components/**/*.svelte"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A new Svelte component was created in src/lib/components/. Verify it follows project standards and report any issues:\n1. Uses `$props()` with an explicit TypeScript interface (not `export let`)\n2. Imports design tokens from `$lib/config/design` if any styling is applied\n3. Supports dark mode via `dark:` Tailwind variants\n4. All HTML elements are explicitly closed\n5. No imports from `$lib/server/*`\n6. Interactive elements have `aria-label` attributes\n\nIf issues are found, provide the corrected code snippet. If all good, reply 'OK'."
+  }
+}

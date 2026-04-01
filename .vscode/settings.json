@@ -25,7 +25,10 @@
 		"**/.svelte-kit/**": true,
 		"**/build/**": true
 	},
-	"css.customData": [".vscode/tailwind.json"]
+	"css.customData": [
+		".vscode/tailwind.json"
+	],
+	"kiroAgent.configureMCP": "Disabled"
 	// "css.lint.unknownAtRules": "ignore",
 	// "scss.lint.unknownAtRules": "ignore",
 	// "less.lint.unknownAtRules": "ignore"

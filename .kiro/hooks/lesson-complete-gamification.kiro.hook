@@ -1,0 +1,17 @@
+{
+	"enabled": true,
+	"name": "Gamification on Lesson Complete",
+	"description": "Setiap kali ada server action yang menandai lesson sebagai complete, ingatkan agent untuk memanggil awardPoints dan checkAndAwardBadges dari gamification helper.",
+	"version": "1",
+	"when": {
+		"type": "fileEdited",
+		"patterns": [
+			"src/routes/(dashboard)/app/learning/**/*.server.ts",
+			"src/routes/api/notes/+server.ts"
+		]
+	},
+	"then": {
+		"type": "askAgent",
+		"prompt": "File learning server baru saja diedit. Jika ada server action yang menandai lesson sebagai complete atau checkpoint sebagai submitted, pastikan:\n1. `awardPoints(userId, activityType, points)` dipanggil dari `$lib/server/gamification.ts`\n2. `checkAndAwardBadges(userId)` dipanggil setelah award points\n3. `updateStreak(userId)` dipanggil untuk update streak harian\n\nJika gamification.ts belum ada, ingatkan untuk membuatnya terlebih dahulu. Jika tidak ada action lesson complete di file ini, balas 'OK'."
+	}
+}

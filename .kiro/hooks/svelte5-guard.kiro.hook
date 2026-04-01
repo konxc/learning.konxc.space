@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Svelte 5 Runes Guard",
+  "description": "Periksa pelanggaran aturan Svelte 5 dan Tailwind 4 setiap kali file .svelte diedit — export let, bg-gradient-to-*, hardcoded colors, server imports di client.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/**/*.svelte"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A .svelte file was just edited. Check for these violations and report any found with the exact line and file:\n1. `export let` usage — must be replaced with `$props()`\n2. `bg-gradient-to-*` classes — must use `bg-linear-to-*` (Tailwind 4)\n3. Hardcoded colors/shadows/radii (e.g. `text-blue-500`, `shadow-md`, `rounded-lg`) — must use design tokens from `$lib/config/design`\n4. Imports from `$lib/server/*` in a client-side .svelte file\n5. HTML elements not explicitly closed\n\nIf no violations found, reply with 'OK'."
+  }
+}

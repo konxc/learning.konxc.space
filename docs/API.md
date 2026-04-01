@@ -34,6 +34,45 @@ Platform ini mendukung sistem pembelajaran berbasis project untuk program edukas
 
 ---
 
+## Notification Endpoints
+
+### SSE Notification Stream
+
+- **Endpoint**: `GET /api/notifications/stream`
+- **Auth**: Required (session cookie via Lucia)
+- **Description**: Server-Sent Events stream untuk real-time notification updates
+- **Status**: ✅ Implemented
+
+**Response**: `text/event-stream`
+
+Immediately sends initial unread count on connect, then polls every 8 seconds for new notifications. Heartbeat sent every 25 seconds to keep the connection alive.
+
+**Event payload** (JSON in `data:` field):
+
+```json
+{
+	"unreadCount": 3,
+	"newNotifications": [
+		{
+			"id": "notif_abc123",
+			"type": "course_update",
+			"title": "Modul baru tersedia",
+			"message": "Modul 3 sudah bisa diakses",
+			"link": "/app/courses/123"
+		}
+	]
+}
+```
+
+- `newNotifications` hanya ada jika ada notifikasi baru sejak koneksi terakhir
+- Heartbeat dikirim sebagai SSE comment (`: heartbeat`) — tidak perlu diproses client
+
+**Error responses**:
+
+- `401 Unauthorized` — user tidak terautentikasi
+
+---
+
 ## Future Endpoints
 
 ### User Management

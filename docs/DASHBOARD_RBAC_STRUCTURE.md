@@ -35,7 +35,7 @@ Dashboard dengan role-based access control untuk Admin, Mentor, dan User biasa d
 - `/dashboard/admin/courses/delete/[id]` - Delete course API
 - `/dashboard/admin/coupons` - Manage coupons
 - `/dashboard/admin/coupons/create` - Create coupon form
-- `/dashboard/admin/users` - Manage users
+- `/dashboard/admin/users` - Manage users (workspace-aware)
 - `/dashboard/admin/mentor-applications` - Review mentor applications
 - `/dashboard/admin/mentor-applications/review/[id]` - Review/approve/reject
 
@@ -45,7 +45,9 @@ Dashboard dengan role-based access control untuk Admin, Mentor, dan User biasa d
 
 - Full course management (create, edit, delete, publish)
 - Coupon management (create, view, edit, toggle)
-- User management (view, role assignment)
+- User management (view, edit profile, role assignment)
+  - In `personal` workspace: views all users, updates `user.role` globally
+  - In org workspace: views only org members, updates `organizationMember.role` scoped to that org
 - Mentor application review (approve/reject)
 - Can assign mentors to courses
 

@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "Enrollment Activation Check",
+  "description": "Setiap kali payment proof di-approve atau Midtrans webhook diterima, pastikan enrollment diaktifkan dan notifikasi dikirim.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/routes/api/payments/**/*.ts",
+      "src/routes/(dashboard)/app/admin/payments/**/*.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "File payment server baru saja diedit. Jika ada action approve payment proof atau webhook handler yang mengubah status transaksi ke 'settlement'/'paid', pastikan:\n1. `enrollment.status` diupdate dari 'pending' ke 'active'\n2. `enrollment.activatedAt` diset ke timestamp sekarang\n3. Notifikasi dikirim ke student dengan type 'enrollment_activated'\n4. Signature verification TIDAK dihapus dari webhook handler\n\nJika tidak ada action payment approval di file ini, balas 'OK'."
+  }
+}

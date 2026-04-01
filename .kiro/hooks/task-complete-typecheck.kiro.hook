@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Type Check After Task",
+  "description": "Jalankan pnpm run check otomatis setelah setiap spec task selesai dikerjakan agent.",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "pnpm run check"
+  }
+}

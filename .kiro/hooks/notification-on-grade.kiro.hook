@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "Notification on Grade Action",
+  "description": "Setiap kali ada server action grading submission, pastikan notifikasi dikirim ke student.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/routes/(dashboard)/app/mentor/**/*.server.ts",
+      "src/routes/(dashboard)/app/admin/**/*.server.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "File mentor/admin server baru saja diedit. Jika ada server action yang melakukan grading submission (update submissionGrade), pastikan:\n1. Notifikasi dikirim ke student via insert ke tabel `notification` dengan type 'submission_graded'\n2. Message notifikasi menyebutkan nama course dan score yang diberikan\n3. Link notifikasi mengarah ke halaman submission student\n\nJika tidak ada action grading di file ini, balas 'OK'."
+  }
+}

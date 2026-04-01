@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Payment & Webhook Security Guard",
+  "description": "Pastikan perubahan pada file payment atau webhook tidak menghapus signature verification dan security checks kritis.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/routes/api/payments/**",
+      "src/routes/api/webhooks/**",
+      "src/lib/server/payments/**"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A payment or webhook file was just edited. This is a security-critical area. Verify the following are still intact:\n1. `verifyMidtransSignature()` is still called in the webhook handler before processing any status update\n2. No security checks have been removed or bypassed\n3. All request body inputs are validated before being processed\n4. Transaction status updates still use the correct conditions (e.g. `settlement` status activates enrollment)\n5. No sensitive data (API keys, secrets) is logged or exposed\n\nIf any security concern is found, report it immediately with the file and line. If all is safe, reply 'OK'."
+  }
+}
