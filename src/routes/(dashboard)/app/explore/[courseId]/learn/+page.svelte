@@ -16,6 +16,8 @@
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import { fly, fade, slide } from 'svelte/transition';
 
+	import DiscussionSection from '$lib/components/DiscussionSection.svelte';
+
 	let { data }: { data: PageData } = $props();
 
 	let selectedLessonId: string | null = $state(
@@ -23,7 +25,7 @@
 	);
 	let selectedMaterialIndex = $state(0);
 	let expandedModules = $state<Set<string>>(new Set([data.modules[0]?.id || '']));
-	let activeTab = $state<'content' | 'notes'>('content');
+	let activeTab = $state<'content' | 'notes' | 'intel'>('content');
 	let lessonNotes = $state<Record<string, string>>({});
 	let mobileMenuOpen = $state(false);
 	let savingNotes = $state<Record<string, boolean>>({});
@@ -330,14 +332,14 @@
 		</aside>
 
 		<!-- Immersive Content Area -->
-		<main class="relative bg-white p-8 md:p-12 dark:bg-zinc-950">
+		<main class="relative bg-white p-4 md:p-12 dark:bg-zinc-950">
 			{#if selectedLesson}
 				<div class="mx-auto max-w-6xl">
 					<!-- Top Meta / Tab Switcher -->
 					<div
 						class="flex flex-col justify-between gap-8 border-b border-zinc-100 pb-8 md:flex-row md:items-end dark:border-zinc-900"
 					>
-						<div>
+						<div class="max-w-full overflow-hidden">
 							<div class="mb-3 flex items-center gap-3">
 								<div
 									class="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-[10px] font-black tracking-widest text-blue-600 uppercase italic"
@@ -349,15 +351,15 @@
 								</div>
 							</div>
 							<h1
-								class="text-4xl leading-none font-black tracking-tighter text-zinc-900 uppercase italic md:text-5xl dark:text-white"
+								class="text-2xl leading-tight font-black tracking-tighter text-zinc-900 uppercase italic md:text-5xl dark:text-white wrap-break-word"
 							>
 								{selectedLesson.title}
 							</h1>
 						</div>
 
-						<div class="flex rounded-xl bg-zinc-100 p-1 dark:bg-zinc-900">
+						<div class="flex overflow-x-auto rounded-xl bg-zinc-100 p-1 dark:bg-zinc-900 no-scrollbar">
 							<button
-								class={`rounded-lg px-6 py-2.5 text-xs font-black tracking-widest uppercase transition-all ${activeTab === 'content' ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-white' : 'text-zinc-400 hover:text-zinc-600'}`}
+								class={`whitespace-nowrap rounded-lg px-4 py-2.5 text-[10px] md:text-xs font-black tracking-widest uppercase transition-all ${activeTab === 'content' ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-white' : 'text-zinc-400 hover:text-zinc-600'}`}
 								onclick={() => (activeTab = 'content')}
 							>
 								Material Context
@@ -367,6 +369,12 @@
 								onclick={() => (activeTab = 'notes')}
 							>
 								Strategic Log
+							</button>
+							<button
+								class={`rounded-lg px-6 py-2.5 text-xs font-black tracking-widest uppercase transition-all ${activeTab === 'intel' ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-white' : 'text-zinc-400 hover:text-zinc-600'}`}
+								onclick={() => (activeTab = 'intel')}
+							>
+								Operational Intel
 							</button>
 						</div>
 					</div>
@@ -408,7 +416,7 @@
 								</div>
 							{/if}
 						</div>
-					{:else}
+					{:else if activeTab === 'notes'}
 						<div class="space-y-6" in:fade={{ duration: 400 }}>
 							<div class="mb-4 flex items-center justify-between">
 								<h3 class="text-sm font-black tracking-widest text-zinc-400 uppercase italic">
@@ -434,6 +442,14 @@
 								oninput={(e) =>
 									handleNoteChange(selectedLesson.id, (e.target as HTMLTextAreaElement).value)}
 							></textarea>
+						</div>
+					{:else}
+						<div class="space-y-6" in:fade={{ duration: 400 }}>
+							<DiscussionSection
+								lessonId={selectedLesson.id}
+								courseId={data.course.id}
+								user={data.user}
+							/>
 						</div>
 					{/if}
 

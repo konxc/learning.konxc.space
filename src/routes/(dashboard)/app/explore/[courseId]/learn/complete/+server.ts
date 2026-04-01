@@ -87,6 +87,26 @@ export const POST: RequestHandler = async (event) => {
 	const { checkAndAwardBadges } = await import('$lib/server/badge');
 	await checkAndAwardBadges(user.id);
 
+	// Send certificate email
+	try {
+		const { sendEmail } = await import('$lib/server/email');
+		const courseData = await db.query.course.findFirst({
+			where: eq(schema.course.id, courseId)
+		});
+		
+		if (courseData) {
+			await sendEmail(user.email!, 'certificate', {
+				name: user.fullName || user.username,
+				courseName: courseData.title,
+				serial: serial,
+				viewUrl: `${event.url.origin}/app/learning/certificates/${certificateId}`,
+				verifyUrl: `${event.url.origin}/certificate/${serial}`
+			});
+		}
+	} catch (e) {
+		console.error('Failed to send certificate email:', e);
+	}
+
 	return json({
 		success: true,
 		certificateId,

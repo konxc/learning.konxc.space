@@ -62,7 +62,7 @@
 			</div>
 			<div class="h-3 rounded-full bg-gray-200 dark:bg-neutral-700">
 				<div
-					class="h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
+					class="h-3 rounded-full bg-linear-to-r from-blue-500 to-purple-500 transition-all duration-500"
 					style="width: {Math.min((data.stats.xp % 500) / 5, 100)}%"
 				></div>
 			</div>

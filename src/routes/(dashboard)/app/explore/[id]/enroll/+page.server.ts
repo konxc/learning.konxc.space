@@ -77,24 +77,22 @@ export const actions = {
 			await applyCoupon(couponId, user.id, courseId, course.price, discountAmount);
 		}
 
-		// Send email if user has an email and notification
-		if (user.email) {
-			sendEmail(user.email, 'enrollment', {
-				name: user.fullName || user.username,
+		// Send notification and email
+		const { sendNotification } = await import('$lib/server/notifications');
+		await sendNotification({
+			userId: user.id,
+			type: 'enrollment',
+			title: 'Enrollment Successful 📚',
+			message: `You are now enrolled in ${course.title}. Start learning!`,
+			link: `/app/explore/${courseId}/learn`,
+			emailData: {
 				courseName: course.title,
-				track: track || 'Regular',
+				track: validatedTrack || 'General',
 				cohort: 'Open enrollment',
 				learnUrl: `${event.url.origin}/app/explore/${courseId}/learn`
-			}).catch(console.error);
-		}
-
-		createNotification(
-			user.id,
-			'enrollment',
-			'Enrollment Successful 📚',
-			`You are now enrolled in ${course.title}. Start learning!`,
-			`/app/explore/${courseId}/learn`
-		).catch(console.error);
+			},
+			channel: 'both'
+		});
 
 		// Redirect based on price: free courses go directly to learning, paid courses go to payment
 		if (finalPrice === 0) {

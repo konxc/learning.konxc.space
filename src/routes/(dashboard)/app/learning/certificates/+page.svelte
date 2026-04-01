@@ -45,7 +45,7 @@
 					class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} overflow-hidden ${TRANSITION.all} hover:-translate-y-1 ${ELEVATION.cardHover}`}
 				>
 					<div
-						class="flex aspect-video items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600"
+						class="flex aspect-video items-center justify-center bg-linear-to-br from-blue-500 to-purple-600"
 					>
 						<span class="text-6xl">🎓</span>
 					</div>
