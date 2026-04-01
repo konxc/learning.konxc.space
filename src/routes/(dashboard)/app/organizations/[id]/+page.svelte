@@ -46,7 +46,7 @@
 				/>
 			{:else}
 				<div
-					class="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-2xl font-bold text-white"
+					class="flex h-16 w-16 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-purple-600 text-2xl font-bold text-white"
 				>
 					{data.organization.name.charAt(0).toUpperCase()}
 				</div>
