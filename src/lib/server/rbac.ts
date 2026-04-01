@@ -223,7 +223,13 @@ function getOrgNavItems(orgRole: string, context: WorkspaceContext): NavItem[] {
 				icon: 'megaphone',
 				category: 'platform'
 			},
-			{ label: 'Job Board', href: '/app/jobs/new', icon: 'briefcase', category: 'platform' }
+			{ label: 'Job Board', href: '/app/jobs/new', icon: 'briefcase', category: 'platform' },
+			{
+				label: 'Job Applications',
+				href: '/app/jobs/applications',
+				icon: 'file-text',
+				category: 'platform'
+			}
 		];
 	}
 

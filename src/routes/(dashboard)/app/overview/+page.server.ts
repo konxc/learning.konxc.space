@@ -106,9 +106,13 @@ export const load: PageServerLoad = async (event) => {
 
 		const avgProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
-		// Simple streak calculation (mocked for now based on lessons completed this week,
-		// but prepared for real activity tracking)
-		const streak = weeklyCompletedCount > 0 ? Math.min(weeklyCompletedCount, 7) : 0;
+		// Get real streak from userTracker
+		const tracker = await db
+			.select()
+			.from(schema.userTracker)
+			.where(eq(schema.userTracker.userId, user.id))
+			.limit(1);
+		const streak = tracker[0]?.currentStreak ?? 0;
 
 		return {
 			stats: {

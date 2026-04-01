@@ -80,14 +80,28 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		const quiz = s.submission.quizId ? quizMap.get(s.submission.quizId) : null;
 		const grade = gradeMap.get(s.submission.id);
 
-		// Determine if submission is pending (quiz is auto-graded, assignment needs manual grading)
-		const isPending = s.submission.type === 'assignment' && !grade;
+		// Check if quiz submission needs manual review (free-text with no keywords)
+		let needsManualReview = false;
+		if (s.submission.type === 'quiz' && s.submission.payload) {
+			try {
+				const payload = JSON.parse(s.submission.payload);
+				needsManualReview = payload.needsManualReview === true;
+			} catch {
+				// ignore parse errors
+			}
+		}
+
+		// Determine if submission is pending
+		const isPending =
+			(s.submission.type === 'assignment' && !grade) ||
+			(s.submission.type === 'quiz' && needsManualReview && !grade);
 
 		return {
 			...s,
 			quiz,
 			grade,
-			isPending
+			isPending,
+			needsManualReview
 		};
 	});
 
@@ -139,7 +153,9 @@ export const actions: Actions = {
 				course: true,
 				lesson: true
 			}
-		})) as (SubmissionWithCourse & { lesson: typeof schema.lesson.$inferSelect | null }) | undefined;
+		})) as
+			| (SubmissionWithCourse & { lesson: typeof schema.lesson.$inferSelect | null })
+			| undefined;
 
 		if (!submission?.course || submission.course.mentorId !== mentor.id) {
 			return actionFailure(403, 'Unauthorized');
@@ -172,9 +188,10 @@ export const actions: Actions = {
 			userId: submission.userId,
 			type: 'grade',
 			title: score >= 70 ? '🎉 Assignment Approved!' : '📝 Assignment Graded',
-			message: score >= 70
-				? `Congratulations! Your submission for "${submission.course?.title}" has been approved with score ${score}/100.`
-				: `Your submission for "${submission.course?.title}" has been graded. Score: ${score}/100. ${feedback || ''}`,
+			message:
+				score >= 70
+					? `Congratulations! Your submission for "${submission.course?.title}" has been approved with score ${score}/100.`
+					: `Your submission for "${submission.course?.title}" has been graded. Score: ${score}/100. ${feedback || ''}`,
 			link: `/app/learning`,
 			emailData: {
 				lessonName: submission.lesson?.title || 'Assignment',

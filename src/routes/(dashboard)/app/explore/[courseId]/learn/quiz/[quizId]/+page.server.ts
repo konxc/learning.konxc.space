@@ -79,12 +79,26 @@ export const load: PageServerLoad = async (event) => {
 		)
 		.limit(1);
 
+	// Check if submission needs manual review
+	const submissionNeedsReview = existingSubmission[0]?.payload
+		? (() => {
+				try {
+					return JSON.parse(existingSubmission[0].payload).needsManualReview === true;
+				} catch {
+					return false;
+				}
+			})()
+		: false;
+
 	return {
 		quiz,
 		hasSubmitted: existingSubmission.length > 0,
 		submission: existingSubmission[0] || null,
+		needsManualReview: submissionNeedsReview,
 		canRetake:
-			existingSubmission.length > 0 && (existingSubmission[0].score ?? 0) < quiz.passingScore
+			existingSubmission.length > 0 &&
+			!submissionNeedsReview &&
+			(existingSubmission[0].score ?? 0) < quiz.passingScore
 	};
 };
 
@@ -143,6 +157,12 @@ export const actions: Actions = {
 		// Grade the quiz
 		let totalScore = 0;
 		let maxPossibleScore = 0;
+		let needsManualReview = false;
+		const reviewedAnswers: Array<{
+			questionId: string;
+			answer: string | string[];
+			status: 'correct' | 'incorrect' | 'partial' | 'pending';
+		}> = [];
 		const questions: QuizQuestionWithChoices<QuizChoiceWithAnswer>[] =
 			quiz.questions ?? ([] as QuizQuestionWithChoices<QuizChoiceWithAnswer>[]);
 		const totalQuestions = questions.length;
@@ -157,7 +177,10 @@ export const actions: Actions = {
 			const questionMaxScore = question.maxScore || 10;
 			maxPossibleScore += questionMaxScore;
 
-			if (!userAnswer) continue;
+			if (!userAnswer) {
+				reviewedAnswers.push({ questionId: question.id, answer: '', status: 'incorrect' });
+				continue;
+			}
 
 			if (questionType === 'mcq') {
 				// Single choice question
@@ -165,6 +188,13 @@ export const actions: Actions = {
 				const correctChoice = choices.find((choice) => choice.isCorrect);
 				if (correctChoice && userAnswer === correctChoice.id) {
 					totalScore += questionMaxScore;
+					reviewedAnswers.push({ questionId: question.id, answer: userAnswer, status: 'correct' });
+				} else {
+					reviewedAnswers.push({
+						questionId: question.id,
+						answer: userAnswer,
+						status: 'incorrect'
+					});
 				}
 			} else if (questionType === 'multi-select') {
 				// Multi-select question - userAnswer is an array of choice IDs
@@ -173,17 +203,16 @@ export const actions: Actions = {
 				const correctChoiceIds = choices.filter((c) => c.isCorrect).map((c) => c.id);
 				const incorrectChoiceIds = choices.filter((c) => !c.isCorrect).map((c) => c.id);
 
-				// Check if all correct answers are selected AND no incorrect answers
 				const allCorrectSelected = correctChoiceIds.every((id) => selectedIds.includes(id));
 				const noIncorrectSelected = !selectedIds.some((id) => incorrectChoiceIds.includes(id));
 
 				if (allCorrectSelected && noIncorrectSelected && selectedIds.length > 0) {
 					totalScore += questionMaxScore;
+					reviewedAnswers.push({ questionId: question.id, answer: selectedIds, status: 'correct' });
 				} else {
-					// Partial credit: give points for each correct selection, minus penalties for incorrect
 					let partialScore = 0;
 					const pointsPerCorrect = questionMaxScore / (correctChoiceIds.length || 1);
-					const penaltyPerIncorrect = pointsPerCorrect; // Same penalty as reward
+					const penaltyPerIncorrect = pointsPerCorrect;
 
 					for (const id of selectedIds) {
 						if (correctChoiceIds.includes(id)) {
@@ -192,7 +221,10 @@ export const actions: Actions = {
 							partialScore -= penaltyPerIncorrect;
 						}
 					}
-					totalScore += Math.max(0, Math.min(questionMaxScore, partialScore));
+					const finalPartial = Math.max(0, Math.min(questionMaxScore, partialScore));
+					totalScore += finalPartial;
+					const status: 'partial' | 'incorrect' = finalPartial > 0 ? 'partial' : 'incorrect';
+					reviewedAnswers.push({ questionId: question.id, answer: selectedIds, status });
 				}
 			} else if (questionType === 'free-text') {
 				// Free-text question - check for keyword matches
@@ -201,8 +233,14 @@ export const actions: Actions = {
 				const answerText = (userAnswer as string).toLowerCase();
 
 				if (expectedKeywords.length === 0) {
-					// No keywords defined, needs manual grading - give 0 for now
-					// TODO: Flag for manual review
+					// No keywords defined - flag for manual review
+					needsManualReview = true;
+					maxPossibleScore -= questionMaxScore; // Don't count toward max
+					reviewedAnswers.push({
+						questionId: question.id,
+						answer: userAnswer as string,
+						status: 'pending'
+					});
 				} else {
 					// Count how many keywords are found
 					const matchedKeywords = expectedKeywords.filter((keyword) =>
@@ -210,12 +248,18 @@ export const actions: Actions = {
 					);
 					const matchRatio = matchedKeywords.length / expectedKeywords.length;
 					totalScore += Math.round(questionMaxScore * matchRatio);
+					const status = matchRatio >= 1 ? 'correct' : matchRatio > 0 ? 'partial' : 'incorrect';
+					reviewedAnswers.push({ questionId: question.id, answer: userAnswer as string, status });
 				}
 			}
 		}
 
-		// Convert to percentage
-		const score = maxPossibleScore > 0 ? Math.round((totalScore / maxPossibleScore) * 100) : 0;
+		// Convert to percentage (only count graded questions)
+		const score = needsManualReview
+			? null
+			: maxPossibleScore > 0
+				? Math.round((totalScore / maxPossibleScore) * 100)
+				: 0;
 
 		// Save submission
 		const submissionId = encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(10)));
@@ -226,11 +270,18 @@ export const actions: Actions = {
 			courseId: courseId,
 			quizId: quizId,
 			type: 'quiz',
-			payload: JSON.stringify({ answers, totalScore, maxPossibleScore, totalQuestions }),
+			payload: JSON.stringify({
+				answers,
+				totalScore,
+				maxPossibleScore,
+				totalQuestions,
+				needsManualReview,
+				reviewedAnswers
+			}),
 			score: score
 		});
 
-		const passed = score >= quiz.passingScore;
+		const passed = score !== null && score >= quiz.passingScore;
 
 		// If quiz passed, mark the associated lesson as completed
 		if (passed) {
@@ -281,7 +332,8 @@ export const actions: Actions = {
 			data: {
 				score,
 				passingScore: quiz.passingScore,
-				passed
+				passed,
+				needsManualReview
 			}
 		});
 	},

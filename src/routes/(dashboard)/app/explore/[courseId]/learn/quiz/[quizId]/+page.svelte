@@ -18,7 +18,12 @@
 	let answers: Record<string, string | string[]> = $state({});
 	let isSubmitting = $state(false);
 	let showResult = $state(false);
-	let result: { score: number; passingScore: number; passed: boolean } | null = $state(null);
+	let result: {
+		score: number;
+		passingScore: number;
+		passed: boolean;
+		needsManualReview?: boolean;
+	} | null = $state(null);
 	let form = $state<HTMLFormElement | undefined>(undefined);
 	let isRetaking = $state(false);
 
