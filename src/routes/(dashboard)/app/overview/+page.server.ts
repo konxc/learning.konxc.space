@@ -13,7 +13,8 @@ export const load: PageServerLoad = async (event) => {
 	const roleInContext = parentData.effectiveRole || user.role;
 
 	// Role-specific statistics
-	if (roleInContext === 'user') {
+	if (roleInContext === 'user' || roleInContext === 'learner') {
+		// Handle both aliases
 		// Get user's enrollment stats
 		const activeEnrollments = await db
 			.select()
@@ -30,58 +31,84 @@ export const load: PageServerLoad = async (event) => {
 			.from(schema.certificate)
 			.where(eq(schema.certificate.userId, user.id));
 
-		// Calculate average progress
+		// Calculate progress and streaks
 		let completedLessons = 0;
 		let totalLessons = 0;
+		let dailyCompletedCount = 0;
+		let weeklyCompletedCount = 0;
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const sevenDaysAgo = new Date(today);
+		sevenDaysAgo.setDate(today.getDate() - 7);
 
-		for (const enrollment of activeEnrollments) {
-			const lessons = await db
-				.select()
-				.from(schema.lesson)
-				.innerJoin(schema.module, eq(schema.lesson.moduleId, schema.module.id))
-				.where(eq(schema.module.courseId, enrollment.courseId));
-
-			totalLessons += lessons.length;
-
-			const progress = await db
-				.select()
-				.from(schema.lessonProgress)
-				.where(
-					and(
-						eq(schema.lessonProgress.userId, user.id),
-						eq(schema.lessonProgress.courseId, enrollment.courseId)
-					)
-				);
-
-			completedLessons += progress.length;
-		}
-
-		const avgProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-
-		// Get active course details for the "Continue Learning" section
 		const enrolledCourses = [];
 		for (const enrollment of activeEnrollments) {
 			const course = await db.query.course.findFirst({
 				where: eq(schema.course.id, enrollment.courseId)
 			});
+
 			if (course) {
-				const courseLessons = await db
-					.select()
-					.from(schema.lesson)
-					.innerJoin(schema.module, eq(schema.lesson.moduleId, schema.module.id))
-					.where(eq(schema.module.courseId, course.id));
-				
+				const modules = (await db.query.module.findMany({
+					where: eq(schema.module.courseId, course.id),
+					orderBy: (m: any, { asc }: any) => [asc(m.order)],
+					with: {
+						lessons: {
+							orderBy: (l: any, { asc }: any) => [asc(l.order)]
+						}
+					}
+				})) as Array<{ id: string; order: number | null; lessons: Array<{ id: string }> }>;
+
+				const allCourseLessons = modules.flatMap((m) => m.lessons);
+				totalLessons += allCourseLessons.length;
+
 				const courseProgress = await db
 					.select()
 					.from(schema.lessonProgress)
-					.where(and(eq(schema.lessonProgress.userId, user.id), eq(schema.lessonProgress.courseId, course.id)));
-				
+					.where(
+						and(
+							eq(schema.lessonProgress.userId, user.id),
+							eq(schema.lessonProgress.courseId, course.id)
+						)
+					);
+
+				completedLessons += courseProgress.length;
+
+				// Calculate daily/weekly from progress timestamps
+				for (const p of courseProgress) {
+					if (p.completedAt) {
+						const compDate = new Date(p.completedAt);
+						if (compDate >= today) dailyCompletedCount++;
+						if (compDate >= sevenDaysAgo) weeklyCompletedCount++;
+					}
+				}
+
+				// Find current unit (module)
+				const completedLessonIds = new Set(courseProgress.map((p) => p.lessonId));
+				let currentUnitOrder = 1;
+				for (const mod of modules) {
+					const hasIncomplete = mod.lessons.some((l) => !completedLessonIds.has(l.id));
+					if (hasIncomplete) {
+						currentUnitOrder = mod.order || 1;
+						break;
+					}
+				}
+
 				enrolledCourses.push({
 					...course,
-					progress: courseLessons.length > 0 ? Math.round((courseProgress.length / courseLessons.length) * 100) : 0
+					progress:
+						allCourseLessons.length > 0
+							? Math.round((courseProgress.length / allCourseLessons.length) * 100)
+							: 0,
+					currentUnit: currentUnitOrder
 				});
 			}
 		}
+
+		const avgProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+
+		// Simple streak calculation (mocked for now based on lessons completed this week,
+		// but prepared for real activity tracking)
+		const streak = weeklyCompletedCount > 0 ? Math.min(weeklyCompletedCount, 7) : 0;
 
 		return {
 			stats: {
@@ -89,6 +116,10 @@ export const load: PageServerLoad = async (event) => {
 				progress: avgProgress,
 				completedLessons,
 				totalLessons,
+				dailyProgress: Math.min(Math.round((dailyCompletedCount / 1) * 100), 100), // Target 1 lesson/day
+				dailyRemaining: Math.max(1 - dailyCompletedCount, 0),
+				weeklyProgress: Math.min(Math.round((weeklyCompletedCount / 5) * 100), 100), // Target 5 lessons/week
+				streak,
 				certificates: certificates.length,
 				pendingPayments: pendingEnrollments.length
 			},
@@ -102,30 +133,30 @@ export const load: PageServerLoad = async (event) => {
 		const allCourses = await db.select().from(schema.course);
 		const allEnrollments = await db.select().from(schema.enrollment);
 		const allCohorts = await db.select().from(schema.cohort);
-		
+
 		// Count users by role
 		const userCounts = {
 			total: allUsers.length,
-			admin: allUsers.filter(u => u.role === 'admin').length,
-			mentor: allUsers.filter(u => u.role === 'mentor').length,
-			user: allUsers.filter(u => u.role === 'user').length,
+			admin: allUsers.filter((u) => u.role === 'admin').length,
+			mentor: allUsers.filter((u) => u.role === 'mentor').length,
+			user: allUsers.filter((u) => u.role === 'user').length
 		};
 
 		// Count active enrollments
-		const activeEnrollments = allEnrollments.filter(e => e.status === 'active').length;
-		const pendingEnrollments = allEnrollments.filter(e => e.status === 'pending').length;
+		const activeEnrollments = allEnrollments.filter((e) => e.status === 'active').length;
+		const pendingEnrollments = allEnrollments.filter((e) => e.status === 'pending').length;
 
 		// Count courses by status
 		const courseCounts = {
 			total: allCourses.length,
-			published: allCourses.filter(c => c.status === 'published').length,
-			draft: allCourses.filter(c => c.status === 'draft').length,
+			published: allCourses.filter((c) => c.status === 'published').length,
+			draft: allCourses.filter((c) => c.status === 'draft').length
 		};
 
 		// Count cohorts by status
 		const cohortCounts = {
 			total: allCohorts.length,
-			active: allCohorts.filter(c => c.status === 'active').length,
+			active: allCohorts.filter((c) => c.status === 'active').length
 		};
 
 		// Get pending mentor applications
@@ -173,10 +204,7 @@ export const load: PageServerLoad = async (event) => {
 				.select()
 				.from(schema.course)
 				.where(
-					and(
-						eq(schema.course.orgId, activeWorkspaceId),
-						eq(schema.course.mentorId, user.id)
-					)
+					and(eq(schema.course.orgId, activeWorkspaceId), eq(schema.course.mentorId, user.id))
 				);
 		}
 
@@ -192,7 +220,9 @@ export const load: PageServerLoad = async (event) => {
 				const students = await db
 					.select()
 					.from(schema.enrollment)
-					.where(and(eq(schema.enrollment.courseId, courseId), eq(schema.enrollment.status, 'active')));
+					.where(
+						and(eq(schema.enrollment.courseId, courseId), eq(schema.enrollment.status, 'active'))
+					);
 				totalStudents += students.length;
 
 				// Count tracks
@@ -205,17 +235,22 @@ export const load: PageServerLoad = async (event) => {
 			}
 		}
 
-		// Get pending submissions
+		// Get pending submissions and average scores
 		let pendingSubmissions = 0;
 		let totalActionSubmissions = 0;
-		
+		let totalApproved = 0;
+		let totalScore = 0;
+		let gradedCount = 0;
+
 		if (courseIds.length > 0) {
 			for (const courseId of courseIds) {
 				const submissions = await db
 					.select()
 					.from(schema.submission)
-					.where(and(eq(schema.submission.courseId, courseId), eq(schema.submission.type, 'assignment')));
-				
+					.where(
+						and(eq(schema.submission.courseId, courseId), eq(schema.submission.type, 'assignment'))
+					);
+
 				totalActionSubmissions += submissions.length;
 
 				for (const submission of submissions) {
@@ -227,10 +262,18 @@ export const load: PageServerLoad = async (event) => {
 
 					if (grade.length === 0) {
 						pendingSubmissions++;
+					} else {
+						gradedCount++;
+						totalScore += grade[0].score;
+						if (grade[0].score >= 70) totalApproved++;
 					}
 				}
 			}
 		}
+
+		// Calculate performance metrics
+		const approvalRate = gradedCount > 0 ? Math.round((totalApproved / gradedCount) * 100) : 0;
+		const avgScore = gradedCount > 0 ? Math.round(totalScore / gradedCount) : 0;
 
 		// Get Mid-Term Review Candidates (Week 6)
 		let midTermReviews = 0;
@@ -238,13 +281,17 @@ export const load: PageServerLoad = async (event) => {
 			const activeEnrollmentsByMentor = await db
 				.select()
 				.from(schema.enrollment)
-				.where(and(
-					inArray(schema.enrollment.courseId, courseIds),
-					eq(schema.enrollment.status, 'active')
-				));
-			
+				.where(
+					and(
+						inArray(schema.enrollment.courseId, courseIds),
+						eq(schema.enrollment.status, 'active')
+					)
+				);
+
 			for (const enrollment of activeEnrollmentsByMentor) {
-				const diffDays = Math.floor((new Date().getTime() - new Date(enrollment.enrolledAt).getTime()) / (1000 * 60 * 60 * 24));
+				const diffDays = Math.floor(
+					(new Date().getTime() - new Date(enrollment.enrolledAt).getTime()) / (1000 * 60 * 60 * 24)
+				);
 				const weekNumber = Math.ceil(diffDays / 7);
 				if (weekNumber === 6) {
 					midTermReviews++;
@@ -254,7 +301,7 @@ export const load: PageServerLoad = async (event) => {
 
 		// Get active cohorts filtered by workspace if in org
 		let cohortsQuery = db.select().from(schema.cohort).where(eq(schema.cohort.status, 'active'));
-		
+
 		const cohorts = await cohortsQuery;
 
 		return {
@@ -265,7 +312,9 @@ export const load: PageServerLoad = async (event) => {
 				totalActionSubmissions: totalActionSubmissions,
 				midTermReviews: midTermReviews,
 				trackCounts: trackCounts,
-				activeCohorts: cohorts.length
+				activeCohorts: cohorts.length,
+				approvalRate,
+				avgScore
 			},
 			user: user,
 			workspace: { id: activeWorkspaceId, org: activeOrg }

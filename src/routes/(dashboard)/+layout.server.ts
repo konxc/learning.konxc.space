@@ -102,9 +102,17 @@ export const load: LayoutServerLoad = async ({ locals, cookies, url }) => {
 		// Notification table might not exist yet
 	}
 
+	// 6. Update navItems with badges
+	const enrichedNavItems = navItems.map((item) => {
+		if (item.label === 'Notifications' && unreadCount > 0) {
+			return { ...item, badge: unreadCount, badgeColor: 'red' as const };
+		}
+		return item;
+	});
+
 	return {
 		user: user,
-		navItems,
+		navItems: enrichedNavItems,
 		activeRole,
 		availableRoles,
 		effectiveRole,

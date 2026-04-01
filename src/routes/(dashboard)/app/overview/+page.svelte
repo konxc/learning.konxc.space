@@ -13,14 +13,20 @@
 		const role = (data.activeRole || data.user.role || 'user').toLowerCase();
 		try {
 			if (role === 'user' || role === 'learner' || role === 'siswa') {
-				RoleComponent = (await import('$lib/components/app/roles/DashboardLearner.svelte')).default;
+				const mod = await import('$lib/components/app/roles/DashboardLearner.svelte');
+				RoleComponent = mod.default ?? mod;
 			} else if (role === 'mentor') {
-				RoleComponent = (await import('$lib/components/app/roles/DashboardMentor.svelte')).default;
-			} else if (role === 'business') {
-				RoleComponent = (await import('$lib/components/app/roles/DashboardBusiness.svelte'))
-					.default;
+				const mod = await import('$lib/components/app/roles/DashboardMentor.svelte');
+				RoleComponent = mod.default ?? mod;
+			} else if (role === 'facilitator') {
+				const mod = await import('$lib/components/app/roles/DashboardFacilitator.svelte');
+				RoleComponent = mod.default ?? mod;
+			} else if (role === 'business' || role === 'bd') {
+				const mod = await import('$lib/components/app/roles/DashboardBusiness.svelte');
+				RoleComponent = mod.default ?? mod;
 			} else if (role === 'admin') {
-				RoleComponent = (await import('$lib/components/app/roles/DashboardAdmin.svelte')).default;
+				const mod = await import('$lib/components/app/roles/DashboardAdmin.svelte');
+				RoleComponent = mod.default ?? mod;
 			}
 		} catch (e) {
 			// fallback silently
