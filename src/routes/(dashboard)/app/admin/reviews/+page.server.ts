@@ -17,6 +17,8 @@ export const load: PageServerLoad = async (event) => {
 			rating: schema.courseReview.rating,
 			comment: schema.courseReview.comment,
 			moderationStatus: schema.courseReview.moderationStatus,
+			response: schema.courseReview.response,
+			responseAt: schema.courseReview.responseAt,
 			createdAt: schema.courseReview.createdAt,
 			user: {
 				id: schema.user.id,
@@ -109,5 +111,29 @@ export const actions: Actions = {
 		await db.delete(schema.courseReview).where(eq(schema.courseReview.id, reviewId));
 
 		return { success: true, message: 'Review deleted.' };
+	},
+
+	respond: async (event) => {
+		const user = await requireAuth(event);
+		if (user.role !== 'admin') return fail(403, { error: 'Forbidden' });
+
+		const formData = await event.request.formData();
+		const reviewId = formData.get('reviewId') as string;
+		const response = formData.get('response') as string;
+
+		if (!response?.trim()) {
+			return fail(400, { error: 'Response is required.' });
+		}
+
+		await db
+			.update(schema.courseReview)
+			.set({
+				responseBy: user.id,
+				response: response.trim(),
+				responseAt: new Date()
+			})
+			.where(eq(schema.courseReview.id, reviewId));
+
+		return { success: true, message: 'Response added.' };
 	}
 };

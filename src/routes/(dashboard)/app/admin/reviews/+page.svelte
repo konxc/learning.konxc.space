@@ -8,8 +8,22 @@
 
 	let { data, form }: { data: PageData; form?: ActionData | null } = $props();
 
+	let respondingTo: string | null = $state(null);
+	let responseText = $state('');
+	let isSubmitting = $state(false);
+
 	function getRatingStars(rating: number): string {
 		return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+	}
+
+	function formatDate(date: Date) {
+		return new Date(date).toLocaleDateString('id-ID', {
+			day: 'numeric',
+			month: 'long',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
+		});
 	}
 
 	const statusFilters = [
@@ -152,7 +166,69 @@
 								</form>
 							</div>
 						{/if}
+
+						{#if review.moderationStatus === 'approved'}
+							<button
+								type="button"
+								onclick={() => {
+									respondingTo = respondingTo === review.id ? null : review.id;
+									responseText = '';
+								}}
+								class={`${RADIUS.button} ${COLOR.accentBg} px-4 py-2 text-xs font-bold text-white`}
+							>
+								{respondingTo === review.id ? 'Cancel' : 'Respond'}
+							</button>
+						{/if}
 					</div>
+
+					<!-- Existing Response -->
+					{#if review.response}
+						<div class="mt-4 rounded-lg border-l-4 border-blue-500 bg-blue-50 p-4">
+							<p class="mb-1 text-xs font-bold text-blue-700">Organization Response</p>
+							<p class="text-sm text-blue-900">{review.response}</p>
+							{#if review.responseAt}
+								<p class="mt-2 text-xs text-blue-600">{formatDate(review.responseAt)}</p>
+							{/if}
+						</div>
+					{/if}
+
+					<!-- Response Form -->
+					{#if respondingTo === review.id}
+						<form
+							method="POST"
+							action="?/respond"
+							use:enhance={() => {
+								isSubmitting = true;
+								return async ({ update }) => {
+									isSubmitting = false;
+									respondingTo = null;
+									responseText = '';
+									await update();
+								};
+							}}
+							class="mt-4 rounded-lg bg-gray-50 p-4"
+						>
+							<input type="hidden" name="reviewId" value={review.id} />
+							<label class="mb-2 block text-sm font-semibold">Your Response</label>
+							<textarea
+								name="response"
+								bind:value={responseText}
+								rows="3"
+								placeholder="Write your response to this review..."
+								class={`w-full ${RADIUS.input} border ${COLOR.cardBorder} p-3 text-sm`}
+								required
+							></textarea>
+							<div class="mt-3 flex justify-end">
+								<button
+									type="submit"
+									disabled={isSubmitting || !responseText.trim()}
+									class={`${RADIUS.button} ${COLOR.accentBg} px-4 py-2 text-sm font-bold text-white disabled:opacity-50`}
+								>
+									{isSubmitting ? 'Sending...' : 'Send Response'}
+								</button>
+							</div>
+						</form>
+					{/if}
 				</div>
 			{/each}
 		</div>

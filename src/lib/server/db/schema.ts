@@ -680,6 +680,10 @@ export const courseReview = sqliteTable('course_review', {
 	rating: integer('rating').notNull(), // 1-5 stars
 	comment: text('comment'),
 	moderationStatus: text('moderation_status').notNull().default('pending'), // 'pending', 'approved', 'rejected'
+	// Mentor/organization response
+	responseBy: text('response_by').references(() => user.id),
+	response: text('response'),
+	responseAt: integer('response_at', { mode: 'timestamp' }),
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date()),
