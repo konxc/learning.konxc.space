@@ -275,6 +275,21 @@
 							</p>
 						</div>
 
+						{#if selectedSubmission.submission.payload}
+							<div class="space-y-2">
+								<h3 class="text-xs font-black tracking-widest text-zinc-400 uppercase">Student Submission</h3>
+								<div class={`p-4 ${RADIUS.small} ${COLOR.card} border ${COLOR.cardBorder} shadow-inner`}>
+									{#if selectedSubmission.submission.payload.startsWith('http')}
+										<a href={selectedSubmission.submission.payload} target="_blank" class="text-blue-600 hover:underline break-all font-medium">
+											{selectedSubmission.submission.payload}
+										</a>
+									{:else}
+										<p class="whitespace-pre-wrap text-sm leading-relaxed">{selectedSubmission.submission.payload}</p>
+									{/if}
+								</div>
+							</div>
+						{/if}
+
 						{#if selectedSubmission.submission.type === 'quiz'}
 							<div class={`${RADIUS.small} ${COLOR.neutral} ${SPACING.cardPadding}`}>
 								<p class={`mb-2 ${TEXT.body} ${COLOR.textPrimary}`}>

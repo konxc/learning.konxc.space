@@ -109,7 +109,8 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 };
 
 export const actions: Actions = {
-	gradeAssignment: async ({ request, locals }) => {
+	gradeAssignment: async (event) => {
+		const { request, locals, url } = event;
 		const mentor = await requireMentor({ user: locals.user });
 
 		const formData = await request.formData();
@@ -135,9 +136,10 @@ export const actions: Actions = {
 		const submission = (await db.query.submission.findFirst({
 			where: eq(schema.submission.id, submissionId),
 			with: {
-				course: true
+				course: true,
+				lesson: true
 			}
-		})) as SubmissionWithCourse | undefined;
+		})) as (SubmissionWithCourse & { lesson: typeof schema.lesson.$inferSelect | null }) | undefined;
 
 		if (!submission?.course || submission.course.mentorId !== mentor.id) {
 			return actionFailure(403, 'Unauthorized');
@@ -166,15 +168,22 @@ export const actions: Actions = {
 		});
 
 		// Send notification to student about their grade
-		await createInAppNotification(
-			submission.userId,
-			'grade',
-			score >= 70 ? '🎉 Assignment Approved!' : '📝 Assignment Graded',
-			score >= 70
+		await sendNotification({
+			userId: submission.userId,
+			type: 'grade',
+			title: score >= 70 ? '🎉 Assignment Approved!' : '📝 Assignment Graded',
+			message: score >= 70
 				? `Congratulations! Your submission for "${submission.course?.title}" has been approved with score ${score}/100.`
 				: `Your submission for "${submission.course?.title}" has been graded. Score: ${score}/100. ${feedback || ''}`,
-			`/app/learning`
-		);
+			link: `/app/learning`,
+			emailData: {
+				lessonName: submission.lesson?.title || 'Assignment',
+				score: score.toString(),
+				feedback: feedback || '',
+				viewUrl: `${url.origin}/app/learning`
+			},
+			channel: 'email' // Default to email for now to ensure delivery
+		});
 
 		// Award XP (50 XP for approval) and check for badges
 		if (score >= 70) {
