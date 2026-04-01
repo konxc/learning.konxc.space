@@ -2,14 +2,18 @@ import { redirect } from '@sveltejs/kit';
 import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, desc, sum, sql } from 'drizzle-orm';
+import { eq, desc, sum, sql, and, gte } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
 	const tab = event.url.searchParams.get('tab') || 'links';
 
-	const [statsData, platformStats] = await Promise.all([
+	// 30 hari ke belakang untuk grafik tren
+	const thirtyDaysAgo = new Date();
+	thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+	const [statsData, platformStats, trendData, affiliateAccount] = await Promise.all([
 		db
 			.select({
 				totalSales: sum(schema.affiliateSale.saleAmount),
@@ -25,7 +29,29 @@ export const load: PageServerLoad = async (event) => {
 			})
 			.from(schema.affiliateSale)
 			.where(eq(schema.affiliateSale.userId, user.id))
-			.groupBy(schema.affiliateSale.platform)
+			.groupBy(schema.affiliateSale.platform),
+		// Sales 30 hari terakhir untuk grafik tren
+		db
+			.select({
+				date: sql<string>`date(${schema.affiliateSale.createdAt} / 1000, 'unixepoch')`,
+				commission: sum(schema.affiliateSale.commissionAmount),
+				sales: sum(schema.affiliateSale.saleAmount)
+			})
+			.from(schema.affiliateSale)
+			.where(
+				and(
+					eq(schema.affiliateSale.userId, user.id),
+					gte(schema.affiliateSale.createdAt, thirtyDaysAgo)
+				)
+			)
+			.groupBy(sql`date(${schema.affiliateSale.createdAt} / 1000, 'unixepoch')`)
+			.orderBy(sql`date(${schema.affiliateSale.createdAt} / 1000, 'unixepoch')`),
+		// Affiliate account untuk payout info
+		db
+			.select()
+			.from(schema.affiliateAccount)
+			.where(eq(schema.affiliateAccount.userId, user.id))
+			.limit(1)
 	]);
 
 	const [allLinks, allSales] = await Promise.all([
@@ -55,6 +81,24 @@ export const load: PageServerLoad = async (event) => {
 					]
 				: [[], []];
 
+	// Build 30-day trend array (fill missing dates with 0)
+	const trendMap = new Map<string, { commission: number; sales: number }>();
+	for (const row of trendData) {
+		trendMap.set(row.date, {
+			commission: Number(row.commission ?? 0),
+			sales: Number(row.sales ?? 0)
+		});
+	}
+	const trend: { date: string; commission: number; sales: number }[] = [];
+	for (let i = 29; i >= 0; i--) {
+		const d = new Date();
+		d.setDate(d.getDate() - i);
+		const key = d.toISOString().slice(0, 10);
+		trend.push({ date: key, ...(trendMap.get(key) ?? { commission: 0, sales: 0 }) });
+	}
+
+	const account = affiliateAccount[0] ?? null;
+
 	return {
 		links,
 		sales,
@@ -65,6 +109,18 @@ export const load: PageServerLoad = async (event) => {
 			saleCount: allSales.length
 		},
 		platformStats,
+		trend,
+		payout: account
+			? {
+					pendingPayout: account.pendingPayout ?? 0,
+					paidOut: account.paidOut ?? 0,
+					totalEarnings: account.totalEarnings ?? 0,
+					bankName: account.bankName,
+					bankAccountNumber: account.bankAccountNumber,
+					bankAccountName: account.bankAccountName,
+					tier: account.tier ?? 'bronze'
+				}
+			: null,
 		tab
 	};
 };
@@ -171,6 +227,41 @@ export const actions: Actions = {
 			.update(schema.affiliateLink)
 			.set({ status: 'inactive' })
 			.where(eq(schema.affiliateLink.id, linkId));
+
+		return { success: true };
+	},
+
+	requestPayout: async ({ locals }) => {
+		const user = await requireAuth(locals);
+
+		const account = await db
+			.select()
+			.from(schema.affiliateAccount)
+			.where(eq(schema.affiliateAccount.userId, user.id))
+			.limit(1);
+
+		if (!account[0]) {
+			return { success: false, error: 'Affiliate account tidak ditemukan' };
+		}
+
+		const pending = account[0].pendingPayout ?? 0;
+		const MINIMUM_PAYOUT = 100000;
+
+		if (pending < MINIMUM_PAYOUT) {
+			return {
+				success: false,
+				error: `Saldo minimum payout Rp 100.000. Saldo kamu: Rp ${pending.toLocaleString('id-ID')}`
+			};
+		}
+
+		await db.insert(schema.notification).values({
+			id: crypto.randomUUID(),
+			userId: user.id,
+			type: 'system',
+			title: 'Permintaan Payout Diterima',
+			message: `Permintaan payout Rp ${pending.toLocaleString('id-ID')} sedang diproses. Tim kami akan menghubungi dalam 1-3 hari kerja.`,
+			read: false
+		});
 
 		return { success: true };
 	}
