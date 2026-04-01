@@ -5,6 +5,7 @@
 	import SearchBar from '$lib/components/ui/SearchBar.svelte';
 	import ResultsSummary from '$lib/components/crm/ResultsSummary.svelte';
 	import ColumnFilter from '$lib/components/crm/ColumnFilter.svelte';
+	import TableSkeleton from '$lib/components/ui/TableSkeleton.svelte';
 	import { COLOR } from '$lib/config/design';
 	import type { TableColumn } from '$lib/types/table';
 	import type { Snippet } from 'svelte';
@@ -34,6 +35,7 @@
 
 		// State
 		showColumnFilter?: boolean;
+		loading?: boolean;
 	}
 
 	let {
@@ -51,7 +53,8 @@
 		filters,
 		actions,
 		children,
-		showColumnFilter = true
+		showColumnFilter = true,
+		loading = false
 	}: Props = $props();
 
 	let columnFilterRef: ColumnFilter | null = $state(null);
@@ -92,7 +95,9 @@
 	</div>
 
 	<!-- Table Content -->
-	{#if filteredCount === 0 && totalCount === 0}
+	{#if loading}
+		<TableSkeleton rows={5} cols={columns.length} />
+	{:else if filteredCount === 0 && totalCount === 0}
 		<div
 			class="rounded-lg border border-gray-200 bg-white p-12 text-center dark:border-neutral-800 dark:bg-neutral-900"
 		>

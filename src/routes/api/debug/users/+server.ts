@@ -1,7 +1,13 @@
+import { json, error } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 
 export const GET = async () => {
+	if (!dev) {
+		throw error(404, 'Not found');
+	}
+
 	const users = await db
 		.select({
 			id: schema.user.id,
@@ -14,5 +20,5 @@ export const GET = async () => {
 		.from(schema.user)
 		.limit(20);
 
-	return Response.json(users);
+	return json(users);
 };

@@ -1,40 +1,34 @@
 import { requireAdmin } from '$lib/server/middleware';
-import type { Actions, PageServerLoad } from './$types';
+import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
-import { redirect } from '@sveltejs/kit';
-import { actionFailure } from '$lib/server/actions';
+import { redirect, error } from '@sveltejs/kit';
+import { actionSuccess, actionFailure } from '$lib/server/actions';
 
 export const load: PageServerLoad = async (event) => {
 	await requireAdmin(event);
-
 	const applicationId = event.params.id;
 
-	// Get application with user info
-	const applications = await db
+	const apps = await db
 		.select({
-			application: {
-				id: schema.mentorApplication.id,
-				userId: schema.mentorApplication.userId,
-				fullName: schema.mentorApplication.fullName,
-				email: schema.mentorApplication.email,
-				phone: schema.mentorApplication.phone,
-				bio: schema.mentorApplication.bio,
-				expertise: schema.mentorApplication.expertise,
-				yearsExperience: schema.mentorApplication.yearsExperience,
-				portfolioUrl: schema.mentorApplication.portfolioUrl,
-				githubUrl: schema.mentorApplication.githubUrl,
-				linkedinUrl: schema.mentorApplication.linkedinUrl,
-				motivation: schema.mentorApplication.motivation,
-				status: schema.mentorApplication.status,
-				adminNotes: schema.mentorApplication.adminNotes,
-				createdAt: schema.mentorApplication.createdAt,
-				reviewedAt: schema.mentorApplication.reviewedAt,
-				reviewedBy: schema.mentorApplication.reviewedBy
-			},
+			id: schema.mentorApplication.id,
+			userId: schema.mentorApplication.userId,
+			fullName: schema.mentorApplication.fullName,
+			email: schema.mentorApplication.email,
+			phone: schema.mentorApplication.phone,
+			bio: schema.mentorApplication.bio,
+			expertise: schema.mentorApplication.expertise,
+			yearsExperience: schema.mentorApplication.yearsExperience,
+			portfolioUrl: schema.mentorApplication.portfolioUrl,
+			githubUrl: schema.mentorApplication.githubUrl,
+			linkedinUrl: schema.mentorApplication.linkedinUrl,
+			motivation: schema.mentorApplication.motivation,
+			status: schema.mentorApplication.status,
+			adminNotes: schema.mentorApplication.adminNotes,
+			createdAt: schema.mentorApplication.createdAt,
+			reviewedAt: schema.mentorApplication.reviewedAt,
 			user: {
-				id: schema.user.id,
 				username: schema.user.username,
 				role: schema.user.role,
 				email: schema.user.email
@@ -45,93 +39,84 @@ export const load: PageServerLoad = async (event) => {
 		.where(eq(schema.mentorApplication.id, applicationId))
 		.limit(1);
 
-	if (applications.length === 0) {
-		throw redirect(303, '/app/admin/mentor-applications');
-	}
+	if (!apps[0]) throw error(404, 'Application not found');
 
-	return {
-		application: applications[0].application,
-		user: applications[0].user,
-		currentUser: event.locals.user
-	};
+	return { application: apps[0] };
 };
 
 export const actions: Actions = {
 	approve: async (event) => {
-		await requireAdmin(event);
-
+		const admin = await requireAdmin(event);
 		const applicationId = event.params.id;
 		const formData = await event.request.formData();
-		const adminNotes = formData.get('adminNotes');
+		const adminNotes = formData.get('adminNotes') as string;
 
-		// Get application
-		const applications = await db
+		const app = await db
 			.select()
 			.from(schema.mentorApplication)
 			.where(eq(schema.mentorApplication.id, applicationId))
 			.limit(1);
 
-		if (applications.length === 0) {
-			return actionFailure(404, 'Application not found');
-		}
+		if (!app[0]) return actionFailure(404, 'Application not found');
 
-		const application = applications[0];
-
-		// Update application status
 		await db
 			.update(schema.mentorApplication)
 			.set({
 				status: 'approved',
-				reviewedBy: event.locals.user!.id,
+				adminNotes: adminNotes || null,
 				reviewedAt: new Date(),
-				adminNotes: adminNotes && typeof adminNotes === 'string' ? adminNotes.trim() : null
+				reviewedBy: admin.id
 			})
 			.where(eq(schema.mentorApplication.id, applicationId));
 
-		// Update user role to mentor and trigger re-onboarding
-		await db
-			.update(schema.user)
-			.set({
-				role: 'mentor',
-				onboardingCompleted: false // Trigger role-specific onboarding
-			})
-			.where(eq(schema.user.id, application.userId));
+		await db.update(schema.user).set({ role: 'mentor' }).where(eq(schema.user.id, app[0].userId));
+
+		await db.insert(schema.notification).values({
+			id: crypto.randomUUID(),
+			userId: app[0].userId,
+			type: 'system',
+			title: 'Selamat! Aplikasi Mentor Disetujui 🎉',
+			message: `Aplikasi mentor kamu telah disetujui. Akun kamu sekarang memiliki akses mentor.${adminNotes ? ` Catatan: ${adminNotes}` : ''}`,
+			link: '/app/mentor/courses',
+			read: false
+		});
 
 		throw redirect(303, '/app/admin/mentor-applications');
 	},
 
 	reject: async (event) => {
-		await requireAdmin(event);
-
+		const admin = await requireAdmin(event);
 		const applicationId = event.params.id;
 		const formData = await event.request.formData();
-		const adminNotes = formData.get('adminNotes');
+		const adminNotes = formData.get('adminNotes') as string;
 
-		if (!adminNotes || typeof adminNotes !== 'string' || adminNotes.trim().length === 0) {
-			return actionFailure(400, 'Admin notes is required when rejecting');
-		}
-
-		// Get application
-		const applications = await db
+		const app = await db
 			.select()
 			.from(schema.mentorApplication)
 			.where(eq(schema.mentorApplication.id, applicationId))
 			.limit(1);
 
-		if (applications.length === 0) {
-			return actionFailure(404, 'Application not found');
-		}
+		if (!app[0]) return actionFailure(404, 'Application not found');
 
-		// Update application status
 		await db
 			.update(schema.mentorApplication)
 			.set({
 				status: 'rejected',
-				reviewedBy: event.locals.user!.id,
+				adminNotes: adminNotes || null,
 				reviewedAt: new Date(),
-				adminNotes: adminNotes.trim()
+				reviewedBy: admin.id
 			})
 			.where(eq(schema.mentorApplication.id, applicationId));
+
+		await db.insert(schema.notification).values({
+			id: crypto.randomUUID(),
+			userId: app[0].userId,
+			type: 'system',
+			title: 'Update Aplikasi Mentor',
+			message: `Aplikasi mentor kamu belum dapat disetujui.${adminNotes ? ` Alasan: ${adminNotes}` : ' Kamu bisa mengajukan kembali setelah memenuhi persyaratan.'}`,
+			link: '/app/apply-mentor',
+			read: false
+		});
 
 		throw redirect(303, '/app/admin/mentor-applications');
 	}

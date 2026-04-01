@@ -79,6 +79,17 @@ export const actions: Actions = {
 				)
 			);
 
+		// Notify student
+		await db.insert(schema.notification).values({
+			id: crypto.randomUUID(),
+			userId: proof[0].userId,
+			type: 'enrollment',
+			title: 'Pembayaran Dikonfirmasi ✅',
+			message: `Pembayaran kamu untuk course "${proof[0].courseId}" telah dikonfirmasi. Selamat belajar!`,
+			link: '/app/learning',
+			read: false
+		});
+
 		return actionSuccess({ message: 'Payment proof approved and enrollment activated' });
 	},
 
@@ -93,6 +104,12 @@ export const actions: Actions = {
 			return actionFailure(400, 'Missing proof ID');
 		}
 
+		const proof = await db
+			.select()
+			.from(schema.paymentProof)
+			.where(eq(schema.paymentProof.id, proofId))
+			.limit(1);
+
 		// Update proof status
 		await db
 			.update(schema.paymentProof)
@@ -101,6 +118,19 @@ export const actions: Actions = {
 				notes: notes || null
 			})
 			.where(eq(schema.paymentProof.id, proofId));
+
+		// Notify student
+		if (proof[0]) {
+			await db.insert(schema.notification).values({
+				id: crypto.randomUUID(),
+				userId: proof[0].userId,
+				type: 'system',
+				title: 'Bukti Pembayaran Ditolak',
+				message: `Bukti pembayaran kamu ditolak. ${notes ? `Alasan: ${notes}` : 'Silakan upload ulang bukti yang valid.'}`,
+				link: '/app/payments',
+				read: false
+			});
+		}
 
 		return actionSuccess({ message: 'Payment proof rejected' });
 	}

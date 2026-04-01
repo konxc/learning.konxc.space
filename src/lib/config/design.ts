@@ -192,7 +192,8 @@ export const FOCUS = {
 
 // Table alternating row colors
 export const TABLE_ALT = {
-	row: 'bg-zinc-50 dark:bg-zinc-800/60'
+	row: 'bg-zinc-50 dark:bg-zinc-800/60',
+	header: 'bg-white dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400'
 } as const;
 
 // Toast notification tokens

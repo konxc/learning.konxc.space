@@ -4,6 +4,7 @@ import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import { eq, and, isNotNull, count, desc, asc, like, or } from 'drizzle-orm';
 import * as schema from '$lib/server/db/schema';
+import { awardPoints, updateStreak, checkAndAwardBadges } from '$lib/server/gamification';
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
@@ -28,9 +29,12 @@ export const load: PageServerLoad = async (event) => {
 	}
 };
 
-async function loadCourses(event: Parameters<PageServerLoad>[0], { userId, activeWorkspaceId }: { userId: string; activeWorkspaceId: string }) {
+async function loadCourses(
+	event: Parameters<PageServerLoad>[0],
+	{ userId, activeWorkspaceId }: { userId: string; activeWorkspaceId: string }
+) {
 	const q = event.url.searchParams.get('q');
-	
+
 	let whereClause = eq(schema.enrollment.userId, userId);
 	if (q) {
 		whereClause = and(whereClause, like(schema.course.title, `%${q}%`)) as any;
@@ -88,10 +92,7 @@ async function loadCourses(event: Parameters<PageServerLoad>[0], { userId, activ
 				}
 			})
 			.from(schema.enrollment)
-			.innerJoin(
-				schema.course,
-				eq(schema.enrollment.courseId, schema.course.id)
-			)
+			.innerJoin(schema.course, eq(schema.enrollment.courseId, schema.course.id))
 			.where(workspaceWhere);
 	}
 
@@ -151,7 +152,8 @@ async function loadCourses(event: Parameters<PageServerLoad>[0], { userId, activ
 		const prog = progressMap.get(enrollment.course.id);
 		const totalLessons = prog?.totalLessons ?? 0;
 		const completedLessons = prog?.completedLessons ?? 0;
-		const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+		const progressPercent =
+			totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
 		return {
 			...enrollment,
@@ -166,9 +168,12 @@ async function loadCourses(event: Parameters<PageServerLoad>[0], { userId, activ
 	return { tab: 'courses', enrollments: enrichedEnrollments };
 }
 
-async function loadProgress(event: Parameters<PageServerLoad>[0], { userId }: { userId: string; activeWorkspaceId: string }) {
+async function loadProgress(
+	event: Parameters<PageServerLoad>[0],
+	{ userId }: { userId: string; activeWorkspaceId: string }
+) {
 	const q = event.url.searchParams.get('q');
-	
+
 	let whereClause = eq(schema.enrollment.userId, userId);
 	if (q) {
 		whereClause = and(whereClause, like(schema.course.title, `%${q}%`)) as any;
@@ -267,7 +272,9 @@ async function loadProgress(event: Parameters<PageServerLoad>[0], { userId }: { 
 	const gradedSubmissions = submissions.filter((s) => s.score !== null);
 	const avgScore =
 		gradedSubmissions.length > 0
-			? Math.round(gradedSubmissions.reduce((sum, s) => sum + (s.score || 0), 0) / gradedSubmissions.length)
+			? Math.round(
+					gradedSubmissions.reduce((sum, s) => sum + (s.score || 0), 0) / gradedSubmissions.length
+				)
 			: 0;
 	const passedQuizzes = gradedSubmissions.filter((s) => (s.score || 0) >= 70).length;
 
@@ -307,17 +314,20 @@ async function loadProgress(event: Parameters<PageServerLoad>[0], { userId }: { 
 	};
 }
 
-async function loadCheckpoints(event: Parameters<PageServerLoad>[0], { userId }: { userId: string; activeWorkspaceId: string }) {
+async function loadCheckpoints(
+	event: Parameters<PageServerLoad>[0],
+	{ userId }: { userId: string; activeWorkspaceId: string }
+) {
 	const q = event.url.searchParams.get('q');
 
-	let enrollmentWhere = and(eq(schema.enrollment.userId, userId), eq(schema.enrollment.status, 'active'));
+	let enrollmentWhere = and(
+		eq(schema.enrollment.userId, userId),
+		eq(schema.enrollment.status, 'active')
+	);
 	if (q) {
 		enrollmentWhere = and(
-			enrollmentWhere, 
-			or(
-				like(schema.course.title, `%${q}%`),
-				like(schema.cohort.name, `%${q}%`)
-			)
+			enrollmentWhere,
+			or(like(schema.course.title, `%${q}%`), like(schema.cohort.name, `%${q}%`))
 		) as any;
 	}
 
@@ -390,7 +400,10 @@ async function loadCheckpoints(event: Parameters<PageServerLoad>[0], { userId }:
 	return { tab: 'checkpoints', checkpoints: checkpointsWithSubmissions, stats };
 }
 
-async function loadCertificates(event: Parameters<PageServerLoad>[0], { userId }: { userId: string; activeWorkspaceId: string }) {
+async function loadCertificates(
+	event: Parameters<PageServerLoad>[0],
+	{ userId }: { userId: string; activeWorkspaceId: string }
+) {
 	const q = event.url.searchParams.get('q');
 
 	let whereClause = eq(schema.certificate.userId, userId);
@@ -456,6 +469,15 @@ export const actions: Actions = {
 				completed: true,
 				submittedAt: new Date()
 			});
+		}
+
+		// Award gamification points
+		try {
+			await awardPoints(user.id, 'checkpoint_submit');
+			await updateStreak(user.id);
+			await checkAndAwardBadges(user.id);
+		} catch {
+			// Gamification errors should not block submission
 		}
 
 		return { success: true };

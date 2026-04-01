@@ -7,6 +7,7 @@
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { COLOR, RADIUS, TEXT, TABLE_ALT } from '$lib/config/design';
 
 	interface TableProps {
 		columns?: Column<any>[];
@@ -19,25 +20,27 @@
 </script>
 
 <div class="overflow-x-auto">
-	<table class="w-full caption-bottom text-left text-sm">
+	<table class={`w-full caption-bottom text-left text-sm ${TEXT.body}`}>
 		<thead>
-			<tr class="border-b bg-neutral-50 text-xs text-neutral-600">
+			<tr class={`border-b ${COLOR.surface} text-xs`}>
 				{#each columns as c}
-					<th class="px-3 py-2 font-medium">{c.label}</th>
+					<th class={`px-3 py-2 font-medium ${COLOR.textMuted}`}>{c.label}</th>
 				{/each}
 			</tr>
 		</thead>
 		<tbody>
 			{#each rows as r}
-				<tr class="border-b hover:bg-neutral-50">
+				<tr class={`border-b ${COLOR.cardBorder} ${TABLE_ALT.row}`}>
 					{#each columns as c}
-						<td class="px-3 py-2">{r[c.key]}</td>
+						<td class={`px-3 py-2 ${COLOR.textPrimary}`}>{r[c.key]}</td>
 					{/each}
 				</tr>
 			{/each}
 			{#if rows.length === 0}
 				<tr>
-					<td class="px-3 py-4 text-center text-neutral-500" colspan={columns.length}>No data</td>
+					<td class={`px-3 py-4 text-center ${COLOR.textMuted}`} colspan={columns.length}
+						>No data</td
+					>
 				</tr>
 			{/if}
 		</tbody>
