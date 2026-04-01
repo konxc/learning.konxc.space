@@ -63,7 +63,7 @@
 		<div class="grid gap-4 lg:grid-cols-2">
 			{#each data.jobs as job}
 				<a
-					href="/jobs/{job.id}"
+					href="/app/jobs/{job.id}"
 					class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} p-5 ${TRANSITION.all} hover:-translate-y-1 ${ELEVATION.cardHover}`}
 				>
 					<div class="flex items-start gap-4">
