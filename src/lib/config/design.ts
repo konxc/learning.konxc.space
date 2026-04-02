@@ -43,10 +43,13 @@ export const COLOR = {
 	// Status (Slightly more vibrant for SaaS feel)
 	success: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400',
 	successBg: 'bg-emerald-500 text-white',
+	successBorder: 'border-emerald-200 dark:border-emerald-800',
 	warning: 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400',
 	warningBg: 'bg-amber-500 text-white',
+	warningBorder: 'border-amber-200 dark:border-amber-800',
 	error: 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400',
 	errorBg: 'bg-rose-500 text-white',
+	errorBorder: 'border-rose-200 dark:border-rose-800',
 	info: 'bg-sky-50 text-sky-700 dark:bg-sky-950/30 dark:text-sky-400'
 };
 

@@ -8,6 +8,7 @@ import { get } from 'svelte/store';
 import { page } from '$app/stores';
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
+import { writable, derived, get as getStore } from 'svelte/store';
 import { updateQueryParam } from './url-params';
 import { filterEntities, countByField } from './filter';
 import type { TableColumn } from '$lib/types/table';
@@ -21,40 +22,24 @@ export interface FilterOption {
 }
 
 export interface UseDashboardListStateOptions {
-	// Column visibility
 	columns: TableColumn[];
 	storageKey: string;
 	defaultVisible?: string[];
-
-	// Filter
 	filterParam: string;
 	defaultFilter?: string;
 	filterStatusField?: string;
-
-	// Search
 	searchFields?: string[];
-
-	// URL sync
 	enableUrlSync?: boolean;
 }
 
 export interface DashboardListState {
-	// Filter state (reactive, use with $state)
 	filter: string;
-
-	// Search state (reactive, use with $state)
 	searchQuery: string;
-
-	// Column visibility
 	columnVisibility: Record<string, boolean>;
 	isColumnVisible: (key: string) => boolean;
-
-	// Actions
 	setFilter: (value: string) => Promise<void>;
 	setSearchQuery: (query: string) => void;
 	handleVisibilityChange: (visibleColumns: Set<string>) => void;
-
-	// Computed data helpers
 	filterEntities: <T extends Record<string, unknown>>(
 		entities: T[],
 		overrideFilter?: string
@@ -77,30 +62,31 @@ export function useDashboardListState(options: UseDashboardListStateOptions): Da
 	} = options;
 
 	// ── Filter State ───────────────────────────────────────────────────────────
-	let _filter = $state(defaultFilter);
+	const _filter = writable(defaultFilter);
 
 	// Initialize from URL on mount
 	if (browser && enableUrlSync) {
 		const urlParam = get(page).url.searchParams.get(filterParam);
 		if (urlParam) {
-			_filter = urlParam;
+			_filter.set(urlParam);
 		}
 	}
 
 	// Sync with URL changes (browser back/forward)
-	$effect(() => {
-		if (!enableUrlSync) return;
-
-		const param = get(page).url.searchParams.get(filterParam);
-		if (param && param !== _filter) {
-			_filter = param;
-		} else if (!param && _filter !== defaultFilter) {
-			_filter = defaultFilter;
-		}
-	});
+	if (browser && enableUrlSync) {
+		const unsubscribe = page.subscribe(() => {
+			const param = get(page).url.searchParams.get(filterParam);
+			const currentFilter = getStore(_filter);
+			if (param && param !== currentFilter) {
+				_filter.set(param);
+			} else if (!param && currentFilter !== defaultFilter) {
+				_filter.set(defaultFilter);
+			}
+		});
+	}
 
 	async function setFilter(value: string) {
-		_filter = value;
+		_filter.set(value);
 
 		if (enableUrlSync) {
 			const finalValue = value === defaultFilter ? null : value;
@@ -113,10 +99,10 @@ export function useDashboardListState(options: UseDashboardListStateOptions): Da
 	}
 
 	// ── Search State ───────────────────────────────────────────────────────────
-	let _searchQuery = $state('');
+	const _searchQuery = writable('');
 
 	function setSearchQuery(query: string) {
-		_searchQuery = query;
+		_searchQuery.set(query);
 	}
 
 	// ── Column Visibility ──────────────────────────────────────────────────────
@@ -125,29 +111,27 @@ export function useDashboardListState(options: UseDashboardListStateOptions): Da
 		defaultState[col.key] = defaultVisible?.includes(col.key) ?? true;
 	});
 
-	let _visibility = $state<Record<string, boolean>>(defaultState);
+	const _visibility = writable<Record<string, boolean>>(defaultState);
 
 	// Load from localStorage on mount
-	$effect(() => {
-		if (!browser) return;
-
+	if (browser) {
 		const stored = localStorage.getItem(`${storageKey}:columns`);
 		if (stored) {
 			try {
 				const parsed = JSON.parse(stored);
-				_visibility = { ..._visibility, ...parsed };
+				_visibility.update((v) => ({ ...v, ...parsed }));
 			} catch {
 				// Invalid JSON, use defaults
 			}
 		}
-	});
+	}
 
 	function handleVisibilityChange(visibleColumns: Set<string>) {
 		const updated: Record<string, boolean> = {};
 		columns.forEach((col) => {
 			updated[col.key] = visibleColumns.has(col.key);
 		});
-		_visibility = updated;
+		_visibility.set(updated);
 
 		if (storageKey && browser) {
 			localStorage.setItem(`${storageKey}:columns`, JSON.stringify(updated));
@@ -155,7 +139,7 @@ export function useDashboardListState(options: UseDashboardListStateOptions): Da
 	}
 
 	function isColumnVisible(key: string): boolean {
-		return _visibility[key] ?? true;
+		return getStore(_visibility)[key] ?? true;
 	}
 
 	// ── Computed Data Helpers ───────────────────────────────────────────────────
@@ -164,7 +148,7 @@ export function useDashboardListState(options: UseDashboardListStateOptions): Da
 		entities: T[],
 		overrideFilter?: string
 	): T[] {
-		return filterEntities(entities, _searchQuery, overrideFilter ?? _filter, {
+		return filterEntities(entities, getStore(_searchQuery), overrideFilter ?? getStore(_filter), {
 			searchFields,
 			statusField: filterStatusField
 		});
@@ -179,21 +163,21 @@ export function useDashboardListState(options: UseDashboardListStateOptions): Da
 	// ── Return ──────────────────────────────────────────────────────────────────
 	return {
 		get filter() {
-			return _filter;
+			return getStore(_filter);
 		},
 		set filter(value: string) {
 			setFilter(value);
 		},
 
 		get searchQuery() {
-			return _searchQuery;
+			return getStore(_searchQuery);
 		},
 		set searchQuery(value: string) {
 			setSearchQuery(value);
 		},
 
 		get columnVisibility() {
-			return _visibility;
+			return getStore(_visibility);
 		},
 		isColumnVisible,
 

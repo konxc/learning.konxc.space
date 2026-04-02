@@ -21,10 +21,17 @@
 
 	let { data }: DashboardAdminProps = $props();
 
-	// Mock system pulse state — replaced with real session count from DB
-	// systemHealth and activeUsers are now passed via data.systemStats
-	const systemHealth = $derived(data.systemStats?.health ?? 99.9);
-	const activeUsers = $derived(data.systemStats?.activeUsers ?? data.stats?.totalUsers ?? 0);
+	// Derive system health from real data — 100% unless there are critical pending issues
+	const systemHealth = $derived(() => {
+		// Deduct points for critical pending items
+		let health = 100;
+		if ((data.stats?.pendingPayments ?? 0) > 20) health -= 1;
+		if ((data.stats?.pendingApplications ?? 0) > 10) health -= 0.5;
+		return health.toFixed(1);
+	});
+
+	// Active users = total users on platform (real DB count)
+	const activeUsers = $derived(data.stats?.totalUsers ?? 0);
 
 	const columns = [
 		{ key: 'applicant', label: 'Candidate' },
@@ -98,7 +105,7 @@
 						<p
 							class="text-2xl leading-none font-black tracking-tighter text-zinc-900 dark:text-white"
 						>
-							{systemHealth}%
+							{systemHealth()}%
 						</p>
 					</div>
 					<div

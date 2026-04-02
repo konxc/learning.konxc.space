@@ -90,7 +90,7 @@
 						class={`flex items-center gap-4 p-4 ${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder}`}
 					>
 						<div
-							class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-neutral-800"
+							class="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-neutral-800"
 						>
 							{#if course.course.thumbnailUrl}
 								<img
@@ -118,7 +118,7 @@
 							</div>
 						</div>
 
-						<div class="flex-shrink-0 text-right">
+						<div class="shrink-0 text-right">
 							<p
 								class={`${TEXT.h3} ${course.progressPercent >= 100 ? 'text-green-500' : COLOR.accent}`}
 							>
@@ -131,7 +131,7 @@
 
 						<a
 							href="/app/explore/{course.course.id}/learn"
-							class={`flex-shrink-0 ${RADIUS.button} ${COLOR.accentBg} px-4 py-2 ${TEXT.button} text-white`}
+							class={`shrink-0 ${RADIUS.button} ${COLOR.accentBg} px-4 py-2 ${TEXT.button} text-white`}
 						>
 							{course.progressPercent >= 100 ? 'Review' : 'Continue'}
 						</a>
