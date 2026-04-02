@@ -1,8 +1,8 @@
 import * as schema from '../../src/lib/server/db/schema.js';
 import { logSection, logSuccess, generateId } from './utils.js';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 
-export async function seedCheckpoints(db: LibSQLDatabase<typeof schema>, cohortIds: string[]) {
+export async function seedCheckpoints(db: NeonHttpDatabase<typeof schema>, cohortIds: string[]) {
 	logSection('Seeding checkpoints');
 
 	const checkpoints = [
@@ -47,7 +47,7 @@ export async function seedCheckpoints(db: LibSQLDatabase<typeof schema>, cohortI
 }
 
 export async function seedCheckpointSubmissions(
-	db: LibSQLDatabase<typeof schema>,
+	db: NeonHttpDatabase<typeof schema>,
 	userIds: string[],
 	checkpointIds: string[]
 ) {
@@ -93,7 +93,7 @@ export async function seedCheckpointSubmissions(
 }
 
 export async function seedDiscussions(
-	db: LibSQLDatabase<typeof schema>,
+	db: NeonHttpDatabase<typeof schema>,
 	userIds: string[],
 	courseIds: string[],
 	lessonIds: string[]
@@ -163,7 +163,7 @@ export async function seedDiscussions(
 }
 
 export async function seedLessonNotes(
-	db: LibSQLDatabase<typeof schema>,
+	db: NeonHttpDatabase<typeof schema>,
 	userIds: string[],
 	lessonIds: string[],
 	courseIds: string[]

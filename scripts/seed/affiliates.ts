@@ -1,8 +1,8 @@
 import * as schema from '../../src/lib/server/db/schema.js';
 import { logSection, logSuccess, generateId } from './utils.js';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 
-export async function seedAffiliateLinks(db: LibSQLDatabase<typeof schema>, studentIds: string[]) {
+export async function seedAffiliateLinks(db: NeonHttpDatabase<typeof schema>, studentIds: string[]) {
 	logSection('Seeding affiliate links (15 links)');
 
 	const links = [
@@ -195,7 +195,7 @@ export async function seedAffiliateLinks(db: LibSQLDatabase<typeof schema>, stud
 }
 
 export async function seedAffiliateSales(
-	db: LibSQLDatabase<typeof schema>,
+	db: NeonHttpDatabase<typeof schema>,
 	studentIds: string[],
 	linkIds: string[]
 ) {

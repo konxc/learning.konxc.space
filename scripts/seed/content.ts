@@ -1,6 +1,6 @@
 import * as schema from '../../src/lib/server/db/schema.js';
 import { logSection, logSuccess, generateId } from './utils.js';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 
 // ─────────────────────────────────────────────
 // HELPER
@@ -13,7 +13,7 @@ type MaterialInput = {
 };
 
 async function insertLesson(
-	db: LibSQLDatabase<typeof schema>,
+	db: NeonHttpDatabase<typeof schema>,
 	id: string,
 	moduleId: string,
 	title: string,
@@ -102,7 +102,7 @@ async function insertLesson(
 // ─────────────────────────────────────────────
 // COURSE 001 — Akselerasi Bisnis Digital
 // ─────────────────────────────────────────────
-async function seedCourse001(db: LibSQLDatabase<typeof schema>) {
+async function seedCourse001(db: NeonHttpDatabase<typeof schema>) {
 	const cid = 'course-001';
 	const mods = [
 		{ id: 'c1m1', title: 'Fondasi Bisnis Digital', order: 1 },
@@ -267,7 +267,7 @@ async function seedCourse001(db: LibSQLDatabase<typeof schema>) {
 // ─────────────────────────────────────────────
 // COURSE 002 — Content Creator Mastery
 // ─────────────────────────────────────────────
-async function seedCourse002(db: LibSQLDatabase<typeof schema>) {
+async function seedCourse002(db: NeonHttpDatabase<typeof schema>) {
 	const cid = 'course-002';
 	const mods = [
 		{ id: 'c2m1', title: 'Fondasi Content Creator', order: 1 },
@@ -389,7 +389,7 @@ async function seedCourse002(db: LibSQLDatabase<typeof schema>) {
 // ─────────────────────────────────────────────
 // COURSE 003 — E-Commerce Success Blueprint
 // ─────────────────────────────────────────────
-async function seedCourse003(db: LibSQLDatabase<typeof schema>) {
+async function seedCourse003(db: NeonHttpDatabase<typeof schema>) {
 	const cid = 'course-003';
 	const mods = [
 		{ id: 'c3m1', title: 'Memulai Bisnis E-Commerce', order: 1 },
@@ -505,7 +505,7 @@ async function seedCourse003(db: LibSQLDatabase<typeof schema>) {
 // ─────────────────────────────────────────────
 // COURSE 005 — Python untuk Data Science
 // ─────────────────────────────────────────────
-async function seedCourse005(db: LibSQLDatabase<typeof schema>) {
+async function seedCourse005(db: NeonHttpDatabase<typeof schema>) {
 	const cid = 'course-005';
 	const mods = [
 		{ id: 'c5m1', title: 'Python Fundamentals', order: 1 },
@@ -647,7 +647,7 @@ async function seedCourse005(db: LibSQLDatabase<typeof schema>) {
 // ─────────────────────────────────────────────
 // COURSE 006 — Full Stack Web Development
 // ─────────────────────────────────────────────
-async function seedCourse006(db: LibSQLDatabase<typeof schema>) {
+async function seedCourse006(db: NeonHttpDatabase<typeof schema>) {
 	const cid = 'course-006';
 	const mods = [
 		{ id: 'c6m1', title: 'HTML & CSS Fundamentals', order: 1 },
@@ -790,7 +790,7 @@ async function seedCourse006(db: LibSQLDatabase<typeof schema>) {
 // ─────────────────────────────────────────────
 // COURSE 004 — Affiliate Marketing Pro
 // ─────────────────────────────────────────────
-async function seedCourse004(db: LibSQLDatabase<typeof schema>) {
+async function seedCourse004(db: NeonHttpDatabase<typeof schema>) {
 	const cid = 'course-004';
 	const mods = [
 		{ id: 'c4m1', title: 'Dasar Affiliate Marketing', order: 1 },
@@ -890,7 +890,7 @@ async function seedCourse004(db: LibSQLDatabase<typeof schema>) {
 // ─────────────────────────────────────────────
 // MAIN EXPORT
 // ─────────────────────────────────────────────
-export async function seedCourseContent(db: LibSQLDatabase<typeof schema>, courseIds: string[]) {
+export async function seedCourseContent(db: NeonHttpDatabase<typeof schema>, courseIds: string[]) {
 	logSection('Seeding comprehensive course content (modules, lessons, materials, quizzes)');
 
 	await seedCourse001(db); // Akselerasi Bisnis Digital

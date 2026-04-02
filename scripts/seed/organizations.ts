@@ -41,9 +41,9 @@
 import * as schema from '../../src/lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
 import { logSection, logSuccess, generateId } from './utils.js';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 
-export async function seedOrganizations(db: LibSQLDatabase<typeof schema>, _unused: string[]) {
+export async function seedOrganizations(db: NeonHttpDatabase<typeof schema>, _unused: string[]) {
 	logSection('Seeding organizations (4 orgs, 1 user = 1 role)');
 
 	const organizations = [
@@ -208,7 +208,7 @@ export async function seedOrganizations(db: LibSQLDatabase<typeof schema>, _unus
 }
 
 export async function assignCoursesToOrganizations(
-	db: LibSQLDatabase<typeof schema>,
+	db: NeonHttpDatabase<typeof schema>,
 	_courseIds: string[]
 ) {
 	logSection('Assigning courses to organizations');
@@ -242,7 +242,7 @@ export async function assignCoursesToOrganizations(
 	logSuccess(`Assigned ${assignments.length} courses to organizations`);
 }
 
-export async function seedWorkspaces(db: LibSQLDatabase<typeof schema>, _unused: string[]) {
+export async function seedWorkspaces(db: NeonHttpDatabase<typeof schema>, _unused: string[]) {
 	logSection('Seeding workspaces');
 
 	const workspaces = [

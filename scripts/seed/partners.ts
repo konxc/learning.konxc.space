@@ -1,8 +1,8 @@
 import * as schema from '../../src/lib/server/db/schema.js';
 import { logSection, logSuccess, generateId } from './utils.js';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 
-export async function seedPartners(db: LibSQLDatabase<typeof schema>) {
+export async function seedPartners(db: NeonHttpDatabase<typeof schema>) {
 	logSection('Seeding partners');
 
 	const partners = [
@@ -57,7 +57,7 @@ export async function seedPartners(db: LibSQLDatabase<typeof schema>) {
 }
 
 export async function seedCohorts(
-	db: LibSQLDatabase<typeof schema>,
+	db: NeonHttpDatabase<typeof schema>,
 	mentorIds: string[],
 	facilitatorIds: string[],
 	courseIds: string[]

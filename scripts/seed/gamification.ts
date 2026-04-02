@@ -1,8 +1,8 @@
 import * as schema from '../../src/lib/server/db/schema.js';
 import { logSection, logSuccess, generateId } from './utils.js';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 
-export async function seedBadges(db: LibSQLDatabase<typeof schema>) {
+export async function seedBadges(db: NeonHttpDatabase<typeof schema>) {
 	logSection('Seeding badges');
 
 	const badges = [
@@ -71,7 +71,7 @@ export async function seedBadges(db: LibSQLDatabase<typeof schema>) {
 	logSuccess(`Seeded ${badges.length} badges`);
 }
 
-export async function seedUserXP(db: LibSQLDatabase<typeof schema>, userIds: string[]) {
+export async function seedUserXP(db: NeonHttpDatabase<typeof schema>, userIds: string[]) {
 	logSection('Seeding user XP');
 
 	const xpData = [
@@ -111,7 +111,7 @@ export async function seedUserXP(db: LibSQLDatabase<typeof schema>, userIds: str
 	logSuccess(`Seeded user XP for ${xpData.length} users`);
 }
 
-export async function seedUserBadges(db: LibSQLDatabase<typeof schema>, userIds: string[]) {
+export async function seedUserBadges(db: NeonHttpDatabase<typeof schema>, userIds: string[]) {
 	logSection('Seeding user badges');
 
 	const userBadges = [

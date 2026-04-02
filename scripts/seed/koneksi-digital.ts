@@ -1,11 +1,11 @@
 import * as schema from '../../src/lib/server/db/schema.js';
 import { logSection, logSuccess, generateId } from './utils.js';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
 export async function seedKoneksiDigital(
-	db: LibSQLDatabase<typeof schema>,
+	db: NeonHttpDatabase<typeof schema>,
 	adminId: string
 ) {
 	logSection('Seeding Koneksi Digital Curriculum (3 Pillars)');
@@ -44,7 +44,7 @@ export async function seedKoneksiDigital(
 }
 
 async function seedModuleFromMarkdown(
-	db: LibSQLDatabase<typeof schema>,
+	db: NeonHttpDatabase<typeof schema>,
 	courseId: string,
 	filePath: string,
 	track: string | null

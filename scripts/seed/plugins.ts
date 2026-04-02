@@ -1,9 +1,9 @@
 import * as schema from '../../src/lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 import { builtInPlugins } from '../../src/lib/plugins/built-in/index.js';
 
-export async function seedPlugins(db: LibSQLDatabase<typeof schema>) {
+export async function seedPlugins(db: NeonHttpDatabase<typeof schema>) {
 	console.log('🧩 Seeding plugins...');
 
 	for (const plugin of builtInPlugins) {

@@ -1,6 +1,6 @@
 import * as schema from '../../src/lib/server/db/schema.js';
 import { logSection, logSuccess, generateId } from './utils.js';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 
 const THUMBNAILS = {
 	marketing: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=500&fit=crop',
@@ -16,7 +16,7 @@ const THUMBNAILS = {
 };
 
 export async function seedCourses(
-	db: LibSQLDatabase<typeof schema>,
+	db: NeonHttpDatabase<typeof schema>,
 	adminId: string
 ) {
 	logSection('Seeding courses (15 courses)');
@@ -266,7 +266,7 @@ export async function seedCourses(
 	return courses;
 }
 
-export async function seedCoupons(db: LibSQLDatabase<typeof schema>, adminId: string) {
+export async function seedCoupons(db: NeonHttpDatabase<typeof schema>, adminId: string) {
 	logSection('Seeding coupons');
 
 	const coupons = [
@@ -366,7 +366,7 @@ export async function seedCoupons(db: LibSQLDatabase<typeof schema>, adminId: st
 }
 
 export async function seedEnrollments(
-	db: LibSQLDatabase<typeof schema>,
+	db: NeonHttpDatabase<typeof schema>,
 	studentIds: string[],
 	courseIds: string[],
 	couponIds: string[],

@@ -1,6 +1,6 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { boolean, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
-export const user = sqliteTable('user', {
+export const user = pgTable('user', {
 	id: text('id').primaryKey(),
 	username: text('username').notNull().unique(),
 	passwordHash: text('password_hash').notNull(),
@@ -9,47 +9,101 @@ export const user = sqliteTable('user', {
 	email: text('email'),
 	phone: text('phone'),
 	avatarUrl: text('avatar_url'),
-	onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' }).default(false),
-	lastWorkspaceId: text('last_workspace_id'), // To remember user's last active workspace
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	onboardingCompleted: boolean('onboarding_completed').default(false),
+	lastWorkspaceId: text('last_workspace_id'),
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	deletedAt: integer('deleted_at', { mode: 'timestamp' }) // Soft delete timestamp
+	deletedAt: timestamp('deleted_at')
 });
 
-export const session = sqliteTable('session', {
+export const session = pgTable('session', {
 	id: text('id').primaryKey(),
 	userId: text('user_id')
 		.notNull()
 		.references(() => user.id),
-	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
+	expiresAt: timestamp('expires_at').notNull()
 });
 
-export const course = sqliteTable('course', {
+export const organization = pgTable('organization', {
 	id: text('id').primaryKey(),
-	orgId: text('org_id').references(() => organization.id), // Owner organization
-	category: text('category').default('general'), // 'marketing', 'technical', 'business'
+	slug: text('slug').notNull().unique(),
+	name: text('name').notNull(),
+	logoUrl: text('logo_url'),
+	brandColor: text('brand_color').default('#4f46e5'),
+	planType: text('plan_type').notNull().default('free'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: timestamp('updated_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const course = pgTable('course', {
+	id: text('id').primaryKey(),
+	orgId: text('org_id').references(() => organization.id),
+	category: text('category').default('general'),
 	title: text('title').notNull(),
 	description: text('description').notNull(),
 	thumbnailUrl: text('thumbnail_url'),
 	price: integer('price').notNull(),
-	duration: integer('duration'), // in weeks
+	duration: integer('duration'),
 	status: text('status').notNull().default('draft'),
-	featuresConfig: text('features_config'), // JSON string: { tracks: boolean, affiliate: boolean, performance: boolean }
+	featuresConfig: text('features_config'),
 	mentorId: text('mentor_id').references(() => user.id),
 	createdBy: text('created_by')
 		.notNull()
 		.references(() => user.id),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: timestamp('updated_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	deletedAt: integer('deleted_at', { mode: 'timestamp' }) // Soft delete timestamp
+	deletedAt: timestamp('deleted_at')
 });
 
-export const enrollment = sqliteTable('enrollment', {
+export const coupon = pgTable('coupon', {
+	id: text('id').primaryKey(),
+	code: text('code').notNull().unique(),
+	type: text('type').notNull(),
+	discountType: text('discount_type'),
+	discountValue: integer('discount_value'),
+	maxUses: integer('max_uses'),
+	currentUses: integer('current_uses').notNull().default(0),
+	validFrom: timestamp('valid_from')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	validUntil: timestamp('valid_until'),
+	description: text('description'),
+	applicableCourses: text('applicable_courses'),
+	minPurchaseAmount: integer('min_purchase_amount'),
+	createdBy: text('created_by')
+		.notNull()
+		.references(() => user.id),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	isActive: boolean('is_active').notNull().default(true)
+});
+
+export const cohort = pgTable('cohort', {
+	id: text('id').primaryKey(),
+	name: text('name').notNull(),
+	courseId: text('course_id')
+		.notNull()
+		.references(() => course.id),
+	facilitatorId: text('facilitator_id').references(() => user.id),
+	startDate: timestamp('start_date').notNull(),
+	endDate: timestamp('end_date'),
+	status: text('status').notNull().default('active'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const enrollment = pgTable('enrollment', {
 	id: text('id').primaryKey(),
 	userId: text('user_id')
 		.notNull()
@@ -58,42 +112,18 @@ export const enrollment = sqliteTable('enrollment', {
 		.notNull()
 		.references(() => course.id),
 	cohortId: text('cohort_id').references(() => cohort.id),
-	track: text('track'), // 'creator' | 'seller' | 'affiliate'
+	track: text('track'),
 	couponId: text('coupon_id').references(() => coupon.id),
-	partnerId: text('partner_id'), // Partner organization ID (e.g., 'yayasan-asib')
+	partnerId: text('partner_id'),
 	status: text('status').notNull().default('pending'),
-	enrolledAt: integer('enrolled_at', { mode: 'timestamp' })
+	enrolledAt: timestamp('enrolled_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	activatedAt: integer('activated_at', { mode: 'timestamp' }),
-	completedAt: integer('completed_at', { mode: 'timestamp' })
+	activatedAt: timestamp('activated_at'),
+	completedAt: timestamp('completed_at')
 });
 
-export const coupon = sqliteTable('coupon', {
-	id: text('id').primaryKey(),
-	code: text('code').notNull().unique(),
-	type: text('type').notNull(), // 'discount' | 'free'
-	discountType: text('discount_type'), // 'percentage' | 'fixed'
-	discountValue: integer('discount_value'),
-	maxUses: integer('max_uses'),
-	currentUses: integer('current_uses').notNull().default(0),
-	validFrom: integer('valid_from', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	validUntil: integer('valid_until', { mode: 'timestamp' }),
-	description: text('description'),
-	applicableCourses: text('applicable_courses'), // JSON array
-	minPurchaseAmount: integer('min_purchase_amount'),
-	createdBy: text('created_by')
-		.notNull()
-		.references(() => user.id),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true)
-});
-
-export const couponUsage = sqliteTable('coupon_usage', {
+export const couponUsage = pgTable('coupon_usage', {
 	id: text('id').primaryKey(),
 	couponId: text('coupon_id')
 		.notNull()
@@ -105,12 +135,12 @@ export const couponUsage = sqliteTable('coupon_usage', {
 	discountAmount: integer('discount_amount').notNull(),
 	orderAmount: integer('order_amount').notNull(),
 	finalAmount: integer('final_amount').notNull(),
-	usedAt: integer('used_at', { mode: 'timestamp' })
+	usedAt: timestamp('used_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-export const mentorApplication = sqliteTable('mentor_application', {
+export const mentorApplication = pgTable('mentor_application', {
 	id: text('id').primaryKey(),
 	userId: text('user_id')
 		.notNull()
@@ -127,70 +157,69 @@ export const mentorApplication = sqliteTable('mentor_application', {
 	motivation: text('motivation').notNull(),
 	status: text('status').notNull().default('pending'),
 	adminNotes: text('admin_notes'),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	reviewedAt: integer('reviewed_at', { mode: 'timestamp' }),
+	reviewedAt: timestamp('reviewed_at'),
 	reviewedBy: text('reviewed_by').references(() => user.id)
 });
 
-export const waitingList = sqliteTable('waiting_list', {
+export const waitingList = pgTable('waiting_list', {
 	id: text('id').primaryKey(),
 	fullName: text('full_name').notNull(),
 	email: text('email').notNull().unique(),
 	phone: text('phone'),
-	interest: text('interest'), // e.g. 'python', 'web', 'career-switch'
-	source: text('source'), // e.g. 'landing-cta', 'ads', 'referral'
-	school: text('school'), // Asal sekolah atau universitas
-	enrollmentYear: text('enrollment_year'), // Tahun masuk
-	educationStatus: text('education_status'), // 'lulus' | 'tidak-lulus' | 'aktif' | 'nonaktif'
-	screenshot: text('screenshot'), // URL screenshot bukti follow Instagram
-	instagramUsername: text('instagram_username'), // Username Instagram untuk verifikasi
-	status: text('status').notNull().default('new'), // 'new' | 'contacted' | 'qualified' | 'converted' | 'archived'
+	interest: text('interest'),
+	source: text('source'),
+	school: text('school'),
+	enrollmentYear: text('enrollment_year'),
+	educationStatus: text('education_status'),
+	screenshot: text('screenshot'),
+	instagramUsername: text('instagram_username'),
+	status: text('status').notNull().default('new'),
 	notes: text('notes'),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: timestamp('updated_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-// Course content hierarchy
-export const module = sqliteTable('module', {
+export const module = pgTable('module', {
 	id: text('id').primaryKey(),
 	courseId: text('course_id')
 		.notNull()
 		.references(() => course.id),
 	title: text('title').notNull(),
 	order: integer('order').notNull(),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: timestamp('updated_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-export const lesson = sqliteTable('lesson', {
+export const lesson = pgTable('lesson', {
 	id: text('id').primaryKey(),
 	moduleId: text('module_id')
 		.notNull()
 		.references(() => module.id),
 	title: text('title').notNull(),
 	order: integer('order').notNull(),
-	availableFrom: integer('available_from', { mode: 'timestamp' }), // Drip content
+	availableFrom: timestamp('available_from'),
 	weekNumber: integer('week_number'),
-	isFree: integer('is_free', { mode: 'boolean' }).default(false),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	isFree: boolean('is_free').default(false),
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: timestamp('updated_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-export const material = sqliteTable('material', {
+export const material = pgTable('material', {
 	id: text('id').primaryKey(),
 	lessonId: text('lesson_id')
 		.notNull()
@@ -200,16 +229,15 @@ export const material = sqliteTable('material', {
 	url: text('url'),
 	order: integer('order').notNull(),
 	durationMs: integer('duration_ms'),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: timestamp('updated_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-// Progress tracking
-export const lessonProgress = sqliteTable('lesson_progress', {
+export const lessonProgress = pgTable('lesson_progress', {
 	id: text('id').primaryKey(),
 	userId: text('user_id')
 		.notNull()
@@ -221,11 +249,10 @@ export const lessonProgress = sqliteTable('lesson_progress', {
 		.notNull()
 		.references(() => lesson.id),
 	lastPositionMs: integer('last_position_ms'),
-	completedAt: integer('completed_at', { mode: 'timestamp' })
+	completedAt: timestamp('completed_at')
 });
 
-// Lesson Notes (sync from localStorage to server)
-export const lessonNote = sqliteTable('lesson_note', {
+export const lessonNote = pgTable('lesson_note', {
 	id: text('id').primaryKey(),
 	userId: text('user_id')
 		.notNull()
@@ -237,51 +264,48 @@ export const lessonNote = sqliteTable('lesson_note', {
 		.notNull()
 		.references(() => lesson.id),
 	content: text('content').notNull(),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: timestamp('updated_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-// Quiz & assessment
-export const quiz = sqliteTable('quiz', {
+export const quiz = pgTable('quiz', {
 	id: text('id').primaryKey(),
 	lessonId: text('lesson_id')
 		.notNull()
 		.references(() => lesson.id),
 	title: text('title').notNull(),
-	passingScore: integer('passing_score').notNull(), // 0-100
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	passingScore: integer('passing_score').notNull(),
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-export const quizQuestion = sqliteTable('quiz_question', {
+export const quizQuestion = pgTable('quiz_question', {
 	id: text('id').primaryKey(),
 	quizId: text('quiz_id')
 		.notNull()
 		.references(() => quiz.id),
-	type: text('type').notNull(), // 'mcq' | 'multi-select' | 'free-text'
+	type: text('type').notNull(),
 	question: text('question').notNull(),
 	order: integer('order_index').notNull(),
-	// For free-text questions: keywords for auto-grading (comma-separated)
 	expectedKeywords: text('expected_keywords'),
-	// For free-text: max score for this question
 	maxScore: integer('max_score').default(10)
 });
 
-export const quizChoice = sqliteTable('quiz_choice', {
+export const quizChoice = pgTable('quiz_choice', {
 	id: text('id').primaryKey(),
 	questionId: text('question_id')
 		.notNull()
 		.references(() => quizQuestion.id),
 	text: text('text').notNull(),
-	isCorrect: integer('is_correct', { mode: 'boolean' }).notNull().default(false)
+	isCorrect: boolean('is_correct').notNull().default(false)
 });
 
-export const submission = sqliteTable('submission', {
+export const submission = pgTable('submission', {
 	id: text('id').primaryKey(),
 	userId: text('user_id')
 		.notNull()
@@ -291,16 +315,16 @@ export const submission = sqliteTable('submission', {
 		.references(() => course.id),
 	lessonId: text('lesson_id').references(() => lesson.id),
 	quizId: text('quiz_id').references(() => quiz.id),
-	type: text('type').notNull(), // 'quiz' | 'assignment'
-	payload: text('payload'), // JSON string (answers or content)
-	metadata: text('metadata'), // JSON string (links, stats, tracking etc)
+	type: text('type').notNull(),
+	payload: text('payload'),
+	metadata: text('metadata'),
 	score: integer('score'),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-export const submissionGrade = sqliteTable('submission_grade', {
+export const submissionGrade = pgTable('submission_grade', {
 	id: text('id').primaryKey(),
 	submissionId: text('submission_id')
 		.notNull()
@@ -308,13 +332,12 @@ export const submissionGrade = sqliteTable('submission_grade', {
 	gradedBy: text('graded_by').references(() => user.id),
 	score: integer('score').notNull(),
 	feedback: text('feedback'),
-	gradedAt: integer('graded_at', { mode: 'timestamp' })
+	gradedAt: timestamp('graded_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-// Certificates
-export const certificate = sqliteTable('certificate', {
+export const certificate = pgTable('certificate', {
 	id: text('id').primaryKey(),
 	userId: text('user_id')
 		.notNull()
@@ -323,14 +346,13 @@ export const certificate = sqliteTable('certificate', {
 		.notNull()
 		.references(() => course.id),
 	serial: text('serial').notNull().unique(),
-	issuedAt: integer('issued_at', { mode: 'timestamp' })
+	issuedAt: timestamp('issued_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
 	signature: text('signature')
 });
 
-// Payment proofs (temporary base64 storage)
-export const paymentProof = sqliteTable('payment_proof', {
+export const paymentProof = pgTable('payment_proof', {
 	id: text('id').primaryKey(),
 	userId: text('user_id')
 		.notNull()
@@ -341,79 +363,47 @@ export const paymentProof = sqliteTable('payment_proof', {
 	dataBase64: text('data_base64').notNull(),
 	mime: text('mime').notNull(),
 	size: integer('size').notNull(),
-	status: text('status').notNull().default('pending'), // 'pending' | 'approved' | 'rejected'
+	status: text('status').notNull().default('pending'),
 	notes: text('notes'),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-// Midtrans Transactions
-export const transaction = sqliteTable('transaction', {
-	id: text('id').primaryKey(), // Order ID (e.g. NC-TRX-...)
+export const transaction = pgTable('transaction', {
+	id: text('id').primaryKey(),
 	userId: text('user_id')
 		.notNull()
 		.references(() => user.id),
-	courseId: text('course_id').references(() => course.id), // Made nullable for org plan purchases
-	orgId: text('org_id').references(() => organization.id), // For organization plan purchases
+	courseId: text('course_id').references(() => course.id),
+	orgId: text('org_id').references(() => organization.id),
 	amount: integer('amount').notNull(),
-	status: text('status').notNull().default('pending'), // 'pending', 'settlement', 'expire', 'cancel', 'deny'
+	status: text('status').notNull().default('pending'),
 	paymentType: text('payment_type'),
 	snapToken: text('snap_token'),
 	snapUrl: text('snap_url'),
-	payload: text('payload'), // JSON from Midtrans
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	payload: text('payload'),
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: timestamp('updated_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-export const cohort = sqliteTable('cohort', {
+export const partner = pgTable('partner', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
-	courseId: text('course_id')
-		.notNull()
-		.references(() => course.id),
-	facilitatorId: text('facilitator_id').references(() => user.id), // Assigned facilitator
-	startDate: integer('start_date', { mode: 'timestamp' }).notNull(),
-	endDate: integer('end_date', { mode: 'timestamp' }),
-	status: text('status').notNull().default('active'), // 'active' | 'archived'
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-export const partner = sqliteTable('partner', {
-	id: text('id').primaryKey(), // e.g., 'yayasan-asib'
-	name: text('name').notNull(), // e.g., 'Yayasan ASIB'
 	description: text('description'),
 	contactEmail: text('contact_email'),
 	contactPhone: text('contact_phone'),
-	status: text('status').notNull().default('active'), // 'active' | 'inactive'
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	status: text('status').notNull().default('active'),
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-// Organization/Workspace Support
-export const organization = sqliteTable('organization', {
-	id: text('id').primaryKey(),
-	slug: text('slug').notNull().unique(),
-	name: text('name').notNull(),
-	logoUrl: text('logo_url'),
-	brandColor: text('brand_color').default('#4f46e5'),
-	planType: text('plan_type').notNull().default('free'), // 'free' | 'pro' | 'enterprise'
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-export const organizationMember = sqliteTable('organization_member', {
+export const organizationMember = pgTable('organization_member', {
 	id: text('id').primaryKey(),
 	orgId: text('org_id')
 		.notNull()
@@ -421,16 +411,16 @@ export const organizationMember = sqliteTable('organization_member', {
 	userId: text('user_id')
 		.notNull()
 		.references(() => user.id),
-	role: text('role').notNull().default('member'), // 'owner' | 'admin' | 'creator' | 'facilitator' | 'member'
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	role: text('role').notNull().default('member'),
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: timestamp('updated_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-export const organizationInvitation = sqliteTable('organization_invitation', {
+export const organizationInvitation = pgTable('organization_invitation', {
 	id: text('id').primaryKey(),
 	orgId: text('org_id')
 		.notNull()
@@ -441,14 +431,13 @@ export const organizationInvitation = sqliteTable('organization_invitation', {
 	invitedBy: text('invited_by')
 		.notNull()
 		.references(() => user.id),
-	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	expiresAt: timestamp('expires_at').notNull(),
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-// Workspace (sub-division within organization)
-export const workspace = sqliteTable('workspace', {
+export const workspace = pgTable('workspace', {
 	id: text('id').primaryKey(),
 	orgId: text('org_id')
 		.notNull()
@@ -456,16 +445,15 @@ export const workspace = sqliteTable('workspace', {
 	name: text('name').notNull(),
 	description: text('description'),
 	logoUrl: text('logo_url'),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: timestamp('updated_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-// Workspace Member (users in workspace with roles)
-export const workspaceMember = sqliteTable('workspace_member', {
+export const workspaceMember = pgTable('workspace_member', {
 	id: text('id').primaryKey(),
 	workspaceId: text('workspace_id')
 		.notNull()
@@ -473,35 +461,34 @@ export const workspaceMember = sqliteTable('workspace_member', {
 	userId: text('user_id')
 		.notNull()
 		.references(() => user.id),
-	role: text('role').notNull().default('member'), // 'admin' | 'member' | 'viewer'
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	role: text('role').notNull().default('member'),
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: timestamp('updated_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-// Plugin Registry
-export const pluginRegistry = sqliteTable('plugin_registry', {
+export const pluginRegistry = pgTable('plugin_registry', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
 	version: text('version').notNull().default('1.0.0'),
-	type: text('type').notNull(), // 'social' | 'assessment' | 'gamification' | 'content' | 'analytics' | 'communication'
+	type: text('type').notNull(),
 	description: text('description'),
 	icon: text('icon').default('📦'),
-	dependencies: text('dependencies').default('[]'), // JSON array of plugin IDs
-	defaultConfig: text('default_config').default('{}'), // JSON object
-	isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	dependencies: text('dependencies').default('[]'),
+	defaultConfig: text('default_config').default('{}'),
+	isActive: boolean('is_active').notNull().default(true),
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: timestamp('updated_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
 
-export const coursePlugin = sqliteTable('course_plugin', {
+export const coursePlugin = pgTable('course_plugin', {
 	id: text('id').primaryKey(),
 	courseId: text('course_id')
 		.notNull()
@@ -509,15 +496,452 @@ export const coursePlugin = sqliteTable('course_plugin', {
 	pluginId: text('plugin_id')
 		.notNull()
 		.references(() => pluginRegistry.id),
-	isEnabled: integer('is_enabled', { mode: 'boolean' }).notNull().default(true),
-	config: text('config').default('{}'), // JSON object for course-specific config
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	isEnabled: boolean('is_enabled').notNull().default(true),
+	config: text('config').default('{}'),
+	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: timestamp('updated_at')
 		.notNull()
 		.$defaultFn(() => new Date())
 });
+
+export const notification = pgTable('notification', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	type: text('type').notNull(),
+	title: text('title').notNull(),
+	message: text('message').notNull(),
+	link: text('link'),
+	read: boolean('read').notNull().default(false),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const broadcastMessage = pgTable('broadcast_message', {
+	id: text('id').primaryKey(),
+	senderId: text('sender_id')
+		.notNull()
+		.references(() => user.id),
+	title: text('title').notNull(),
+	content: text('content').notNull(),
+	targetRole: text('target_role'),
+	targetCohortId: text('target_cohort_id').references(() => cohort.id),
+	targetCourseId: text('target_course_id').references(() => course.id),
+	sentVia: text('sent_via').notNull().default('notification'),
+	status: text('status').notNull().default('pending'),
+	recipientCount: integer('recipient_count').default(0),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const emailLog = pgTable('email_log', {
+	id: text('id').primaryKey(),
+	to: text('to').notNull(),
+	subject: text('subject').notNull(),
+	type: text('type').notNull(),
+	status: text('status').notNull().default('pending'),
+	error: text('error'),
+	sentAt: timestamp('sent_at'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const whatsappLog = pgTable('whatsapp_log', {
+	id: text('id').primaryKey(),
+	to: text('to').notNull(),
+	type: text('type').notNull(),
+	status: text('status').notNull().default('pending'),
+	error: text('error'),
+	messageId: text('message_id'),
+	sentAt: timestamp('sent_at'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const affiliateSale = pgTable('affiliate_sale', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	affiliateLinkId: text('affiliate_link_id'),
+	productName: text('product_name').notNull(),
+	platform: text('platform').notNull(),
+	saleAmount: integer('sale_amount').notNull(),
+	commissionAmount: integer('commission_amount'),
+	commissionRate: integer('commission_rate'),
+	currency: text('currency').notNull().default('IDR'),
+	transactionId: text('transaction_id'),
+	link: text('link'),
+	status: text('status').notNull().default('pending'),
+	notes: text('notes'),
+	recordedAt: timestamp('recorded_at'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const affiliateLink = pgTable('affiliate_link', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	name: text('name').notNull(),
+	platform: text('platform').notNull(),
+	url: text('url').notNull(),
+	productPrice: integer('product_price'),
+	commissionRate: integer('commission_rate'),
+	clicks: integer('clicks').notNull().default(0),
+	conversions: integer('conversions').notNull().default(0),
+	status: text('status').notNull().default('active'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const courseReview = pgTable('course_review', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	courseId: text('course_id')
+		.notNull()
+		.references(() => course.id),
+	rating: integer('rating').notNull(),
+	comment: text('comment'),
+	moderationStatus: text('moderation_status').notNull().default('pending'),
+	responseBy: text('response_by').references(() => user.id),
+	response: text('response'),
+	responseAt: timestamp('response_at'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: timestamp('updated_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const userXP = pgTable('user_xp', {
+	userId: text('user_id')
+		.primaryKey()
+		.references(() => user.id),
+	points: integer('points').notNull().default(0),
+	level: integer('level').notNull().default(1),
+	streakDays: integer('streak_days').notNull().default(0),
+	lastActiveAt: timestamp('last_active_at'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: timestamp('updated_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const badge = pgTable('badge', {
+	id: text('id').primaryKey(),
+	name: text('name').notNull(),
+	description: text('description'),
+	icon: text('icon'),
+	criteria: text('criteria').notNull(),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const userBadge = pgTable('user_badge', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	badgeId: text('badge_id')
+		.notNull()
+		.references(() => badge.id),
+	earnedAt: timestamp('earned_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const checkpoint = pgTable('checkpoint', {
+	id: text('id').primaryKey(),
+	cohortId: text('cohort_id')
+		.notNull()
+		.references(() => cohort.id),
+	title: text('title').notNull(),
+	description: text('description'),
+	weekNumber: integer('week_number').notNull(),
+	dueDate: timestamp('due_date'),
+	isActive: boolean('is_active').notNull().default(true),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const checkpointSubmission = pgTable('checkpoint_submission', {
+	id: text('id').primaryKey(),
+	checkpointId: text('checkpoint_id')
+		.notNull()
+		.references(() => checkpoint.id),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	notes: text('notes'),
+	completed: boolean('completed').notNull().default(false),
+	submittedAt: timestamp('submitted_at'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const discussion = pgTable('discussion', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	courseId: text('course_id').references(() => course.id),
+	lessonId: text('lesson_id').references(() => lesson.id),
+	parentId: text('parent_id'),
+	title: text('title'),
+	content: text('content').notNull(),
+	upvotes: integer('upvotes').notNull().default(0),
+	isPinned: boolean('is_pinned').notNull().default(false),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: timestamp('updated_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const userVerification = pgTable('user_verification', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id)
+		.unique(),
+	ktpNumber: text('ktp_number'),
+	ktpName: text('ktp_name'),
+	ktpAddress: text('ktp_address'),
+	ktpDob: timestamp('ktp_dob'),
+	ktpPhotoUrl: text('ktp_photo_url'),
+	selfieWithKtpUrl: text('selfie_with_ktp_url'),
+	status: text('status').default('pending'),
+	verifiedAt: timestamp('verified_at'),
+	verifiedBy: text('verified_by').references(() => user.id),
+	rejectionReason: text('rejection_reason'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: timestamp('updated_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const organizationVerification = pgTable('organization_verification', {
+	id: text('id').primaryKey(),
+	orgId: text('org_id')
+		.notNull()
+		.references(() => organization.id)
+		.unique(),
+	legalName: text('legal_name'),
+	legalType: text('legal_type'),
+	npwp: text('npwp'),
+	skPendirian: text('sk_pendirian'),
+	siup: text('siup'),
+	representativeName: text('representative_name'),
+	representativeKtp: text('representative_ktp'),
+	representativePosition: text('representative_position'),
+	legalAddress: text('legal_address'),
+	city: text('city'),
+	province: text('province'),
+	postalCode: text('postal_code'),
+	status: text('status').default('pending'),
+	verifiedAt: timestamp('verified_at'),
+	verifiedBy: text('verified_by').references(() => user.id),
+	rejectionReason: text('rejection_reason'),
+	isTrusted: boolean('is_trusted').default(false),
+	trustedBadgeUrl: text('trusted_badge_url'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: timestamp('updated_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const affiliateAccount = pgTable('affiliate_account', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	orgId: text('org_id')
+		.notNull()
+		.references(() => organization.id),
+	role: text('role').notNull(),
+	commissionRate: integer('commission_rate').default(25),
+	totalEarnings: integer('total_earnings').default(0),
+	pendingPayout: integer('pending_payout').default(0),
+	paidOut: integer('paid_out').default(0),
+	bankName: text('bank_name'),
+	bankAccountNumber: text('bank_account_number'),
+	bankAccountName: text('bank_account_name'),
+	isActive: boolean('is_active').default(true),
+	tier: text('tier').default('bronze'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: timestamp('updated_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const autoAffiliateLink = pgTable('auto_affiliate_link', {
+	id: text('id').primaryKey(),
+	accountId: text('account_id')
+		.notNull()
+		.references(() => affiliateAccount.id),
+	courseId: text('course_id').references(() => course.id),
+	orgId: text('org_id').references(() => organization.id),
+	code: text('code').notNull().unique(),
+	url: text('url').notNull(),
+	clickCount: integer('click_count').default(0),
+	conversionCount: integer('conversion_count').default(0),
+	isActive: boolean('is_active').default(true),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const userTracker = pgTable('user_tracker', {
+	userId: text('user_id')
+		.primaryKey()
+		.references(() => user.id),
+	totalPoints: integer('total_points').default(0),
+	weeklyPoints: integer('weekly_points').default(0),
+	currentStreak: integer('current_streak').default(0),
+	longestStreak: integer('longest_streak').default(0),
+	lastActiveDate: text('last_active_date'),
+	totalLessonsCompleted: integer('total_lessons_completed').default(0),
+	totalCheckpointsCompleted: integer('total_checkpoints_completed').default(0),
+	totalDiscussions: integer('total_discussions').default(0),
+	totalReferrals: integer('total_referrals').default(0),
+	tier: text('tier').default('starter'),
+	tierProgress: integer('tier_progress').default(0),
+	earnedCoupons: integer('earned_coupons').default(0),
+	earnedCertificates: integer('earned_certificates').default(0),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: timestamp('updated_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const trackerActivity = pgTable('tracker_activity', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	activityType: text('activity_type').notNull(),
+	points: integer('points').notNull(),
+	description: text('description'),
+	referenceId: text('reference_id'),
+	referenceType: text('reference_type'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const userPreferences = pgTable('user_preferences', {
+	userId: text('user_id')
+		.primaryKey()
+		.references(() => user.id),
+	goals: text('goals'),
+	interests: text('interests'),
+	experienceLevel: text('experience_level'),
+	learningSchedule: text('learning_schedule'),
+	notificationPrefs: text('notification_prefs'),
+	focusMode: boolean('focus_mode').default(true),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: timestamp('updated_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const organizationApiKey = pgTable('organization_api_key', {
+	id: text('id').primaryKey(),
+	orgId: text('org_id')
+		.notNull()
+		.references(() => organization.id),
+	key: text('key').notNull().unique(),
+	name: text('name').notNull(),
+	status: text('status').notNull().default('active'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	lastUsedAt: timestamp('last_used_at')
+});
+
+export const jobPosting = pgTable('job_posting', {
+	id: text('id').primaryKey(),
+	orgId: text('org_id')
+		.notNull()
+		.references(() => organization.id),
+	title: text('title').notNull(),
+	description: text('description').notNull(),
+	requirements: text('requirements'),
+	responsibilities: text('responsibilities'),
+	salaryMin: integer('salary_min'),
+	salaryMax: integer('salary_max'),
+	jobType: text('job_type').notNull().default('full-time'),
+	location: text('location'),
+	isRemote: boolean('is_remote').default(false),
+	visibility: text('visibility').notNull().default('internal'),
+	status: text('status').notNull().default('active'),
+	createdBy: text('created_by')
+		.notNull()
+		.references(() => user.id),
+	expiresAt: timestamp('expires_at'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: timestamp('updated_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export const jobApplication = pgTable('job_application', {
+	id: text('id').primaryKey(),
+	jobId: text('job_id')
+		.notNull()
+		.references(() => jobPosting.id),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	resumeUrl: text('resume_url'),
+	coverLetter: text('cover_letter'),
+	portfolioUrl: text('portfolio_url'),
+	proposedRole: text('proposed_role'),
+	status: text('status').notNull().default('pending'),
+	notes: text('notes'),
+	createdAt: timestamp('created_at')
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: timestamp('updated_at')
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+// ============================================================
+// TYPE EXPORTS
+// ============================================================
 
 export type Session = typeof session.$inferSelect;
 export type User = typeof user.$inferSelect;
@@ -562,516 +986,13 @@ export type Discussion = typeof discussion.$inferSelect;
 export type BroadcastMessage = typeof broadcastMessage.$inferSelect;
 export type PluginRegistry = typeof pluginRegistry.$inferSelect;
 export type CoursePlugin = typeof coursePlugin.$inferSelect;
-
-// Notifications
-export const notification = sqliteTable('notification', {
-	id: text('id').primaryKey(),
-	userId: text('user_id')
-		.notNull()
-		.references(() => user.id),
-	type: text('type').notNull(), // 'enrollment', 'grade', 'submission', 'certificate', 'system'
-	title: text('title').notNull(),
-	message: text('message').notNull(),
-	link: text('link'), // URL to navigate to
-	read: integer('read', { mode: 'boolean' }).notNull().default(false),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Broadcast Messages (from mentor/admin to students)
-export const broadcastMessage = sqliteTable('broadcast_message', {
-	id: text('id').primaryKey(),
-	senderId: text('sender_id')
-		.notNull()
-		.references(() => user.id),
-	title: text('title').notNull(),
-	content: text('content').notNull(),
-	targetRole: text('target_role'), // 'all', 'mentor', 'learner', 'partner'
-	targetCohortId: text('target_cohort_id').references(() => cohort.id),
-	targetCourseId: text('target_course_id').references(() => course.id),
-	sentVia: text('sent_via').notNull().default('notification'), // 'notification', 'email', 'whatsapp', 'all'
-	status: text('status').notNull().default('pending'), // 'pending', 'sent', 'failed'
-	recipientCount: integer('recipient_count').default(0),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Email notifications log
-export const emailLog = sqliteTable('email_log', {
-	id: text('id').primaryKey(),
-	to: text('to').notNull(),
-	subject: text('subject').notNull(),
-	type: text('type').notNull(), // 'welcome', 'enrollment', 'grade', 'certificate', 'reminder'
-	status: text('status').notNull().default('pending'), // 'pending', 'sent', 'failed'
-	error: text('error'),
-	sentAt: integer('sent_at', { mode: 'timestamp' }),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// WhatsApp notifications log
-export const whatsappLog = sqliteTable('whatsapp_log', {
-	id: text('id').primaryKey(),
-	to: text('to').notNull(),
-	type: text('type').notNull(), // 'welcome', 'enrollment', 'grade', 'certificate', 'reminder'
-	status: text('status').notNull().default('pending'), // 'pending', 'sent', 'failed'
-	error: text('error'),
-	messageId: text('message_id'),
-	sentAt: integer('sent_at', { mode: 'timestamp' }),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Affiliate Sales Tracking
-export const affiliateSale = sqliteTable('affiliate_sale', {
-	id: text('id').primaryKey(),
-	userId: text('user_id')
-		.notNull()
-		.references(() => user.id),
-	affiliateLinkId: text('affiliate_link_id'), // Reference to the link used
-	productName: text('product_name').notNull(),
-	platform: text('platform').notNull(), // 'shopee', 'tokopedia', 'tiktok_shop', 'lazada', 'other'
-	saleAmount: integer('sale_amount').notNull(), // In rupiah
-	commissionAmount: integer('commission_amount'), // In rupiah
-	commissionRate: integer('commission_rate'), // Percentage (0-100)
-	currency: text('currency').notNull().default('IDR'),
-	transactionId: text('transaction_id'), // External transaction ID
-	link: text('link'), // URL to the product
-	status: text('status').notNull().default('pending'), // 'pending', 'confirmed', 'paid', 'cancelled'
-	notes: text('notes'),
-	recordedAt: integer('recorded_at', { mode: 'timestamp' }),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Affiliate Links/Products
-export const affiliateLink = sqliteTable('affiliate_link', {
-	id: text('id').primaryKey(),
-	userId: text('user_id')
-		.notNull()
-		.references(() => user.id),
-	name: text('name').notNull(),
-	platform: text('platform').notNull(), // 'shopee', 'tokopedia', 'tiktok_shop', 'lazada', 'other'
-	url: text('url').notNull(),
-	productPrice: integer('product_price'), // Recommended price
-	commissionRate: integer('commission_rate'), // Default commission rate
-	clicks: integer('clicks').notNull().default(0),
-	conversions: integer('conversions').notNull().default(0),
-	status: text('status').notNull().default('active'), // 'active', 'inactive'
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Course Reviews
-export const courseReview = sqliteTable('course_review', {
-	id: text('id').primaryKey(),
-	userId: text('user_id')
-		.notNull()
-		.references(() => user.id),
-	courseId: text('course_id')
-		.notNull()
-		.references(() => course.id),
-	rating: integer('rating').notNull(), // 1-5 stars
-	comment: text('comment'),
-	moderationStatus: text('moderation_status').notNull().default('pending'), // 'pending', 'approved', 'rejected'
-	// Mentor/organization response
-	responseBy: text('response_by').references(() => user.id),
-	response: text('response'),
-	responseAt: integer('response_at', { mode: 'timestamp' }),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// User XP/Points for gamification
-export const userXP = sqliteTable('user_xp', {
-	userId: text('user_id')
-		.primaryKey()
-		.references(() => user.id),
-	points: integer('points').notNull().default(0),
-	level: integer('level').notNull().default(1),
-	streakDays: integer('streak_days').notNull().default(0),
-	lastActiveAt: integer('last_active_at', { mode: 'timestamp' }),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Badges/Achievements
-export const badge = sqliteTable('badge', {
-	id: text('id').primaryKey(),
-	name: text('name').notNull(),
-	description: text('description'),
-	icon: text('icon'), // emoji or icon name
-	criteria: text('criteria').notNull(), // JSON criteria
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// User Badges
-export const userBadge = sqliteTable('user_badge', {
-	id: text('id').primaryKey(),
-	userId: text('user_id')
-		.notNull()
-		.references(() => user.id),
-	badgeId: text('badge_id')
-		.notNull()
-		.references(() => badge.id),
-	earnedAt: integer('earned_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Weekly Checkpoints for batches
-export const checkpoint = sqliteTable('checkpoint', {
-	id: text('id').primaryKey(),
-	cohortId: text('cohort_id')
-		.notNull()
-		.references(() => cohort.id),
-	title: text('title').notNull(),
-	description: text('description'),
-	weekNumber: integer('week_number').notNull(),
-	dueDate: integer('due_date', { mode: 'timestamp' }),
-	isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Student Checkpoint Submissions
-export const checkpointSubmission = sqliteTable('checkpoint_submission', {
-	id: text('id').primaryKey(),
-	checkpointId: text('checkpoint_id')
-		.notNull()
-		.references(() => checkpoint.id),
-	userId: text('user_id')
-		.notNull()
-		.references(() => user.id),
-	notes: text('notes'),
-	completed: integer('completed', { mode: 'boolean' }).notNull().default(false),
-	submittedAt: integer('submitted_at', { mode: 'timestamp' }),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Discussion/Forum
-export const discussion = sqliteTable('discussion', (t) => ({
-	id: t.text('id').primaryKey(),
-	userId: t
-		.text('user_id')
-		.notNull()
-		.references(() => user.id),
-	courseId: t.text('course_id').references(() => course.id),
-	lessonId: t.text('lesson_id').references(() => lesson.id),
-	parentId: t.text('parent_id').references((): any => discussion.id),
-	title: t.text('title'),
-	content: t.text('content').notNull(),
-	upvotes: t.integer('upvotes').notNull().default(0),
-	isPinned: t.integer('is_pinned', { mode: 'boolean' }).notNull().default(false),
-	createdAt: t
-		.integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: t
-		.integer('updated_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-}));
-
-// ============================================================
-// VERIFICATION SYSTEMS
-// ============================================================
-
-// User KTP Verification (Required to create Organization)
-export const userVerification = sqliteTable('user_verification', {
-	id: text('id').primaryKey(),
-	userId: text('user_id')
-		.notNull()
-		.references(() => user.id)
-		.unique(),
-	// KTP Data
-	ktpNumber: text('ktp_number'),
-	ktpName: text('ktp_name'),
-	ktpAddress: text('ktp_address'),
-	ktpDob: integer('ktp_dob', { mode: 'timestamp' }), // Date of birth
-	ktpPhotoUrl: text('ktp_photo_url'), // Base64 or uploaded URL
-	selfieWithKtpUrl: text('selfie_with_ktp_url'),
-	// Status
-	status: text('status').default('pending'), // 'pending' | 'approved' | 'rejected'
-	verifiedAt: integer('verified_at', { mode: 'timestamp' }),
-	verifiedBy: text('verified_by').references(() => user.id),
-	rejectionReason: text('rejection_reason'),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Organization Verification (Trusted/Verified badge)
-export const organizationVerification = sqliteTable('organization_verification', {
-	id: text('id').primaryKey(),
-	orgId: text('org_id')
-		.notNull()
-		.references(() => organization.id)
-		.unique(),
-	// Legal Entity Data
-	legalName: text('legal_name'), // "Yayasan ASIB", "PT Koneksi Digital"
-	legalType: text('legal_type'), // 'yayasan' | 'pt' | 'cv' | 'koperasi' | 'perorangan'
-	npwp: text('npwp'),
-	skPendirian: text('sk_pendirian'), // URL to document
-	siup: text('siup'), // Optional
-	// Representative
-	representativeName: text('representative_name'), // Penanggung jawab
-	representativeKtp: text('representative_ktp'),
-	representativePosition: text('representative_position'), // 'ketua' | 'direktur' | 'pemilik'
-	// Address
-	legalAddress: text('legal_address'),
-	city: text('city'),
-	province: text('province'),
-	postalCode: text('postal_code'),
-	// Verification
-	status: text('status').default('pending'), // 'pending' | 'verified' | 'rejected'
-	verifiedAt: integer('verified_at', { mode: 'timestamp' }),
-	verifiedBy: text('verified_by').references(() => user.id),
-	rejectionReason: text('rejection_reason'),
-	// Trust Benefits
-	isTrusted: integer('is_trusted', { mode: 'boolean' }).default(false),
-	trustedBadgeUrl: text('trusted_badge_url'),
-	// Timestamps
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// ============================================================
-// AUTO-AFFILIATE SYSTEM FOR MENTORS & FACILITATORS
-// ============================================================
-
-// Affiliate Account (Auto-created when user becomes mentor/facilitator)
-export const affiliateAccount = sqliteTable('affiliate_account', {
-	id: text('id').primaryKey(),
-	userId: text('user_id')
-		.notNull()
-		.references(() => user.id),
-	orgId: text('org_id')
-		.notNull()
-		.references(() => organization.id),
-	role: text('role').notNull(), // 'mentor' | 'facilitator'
-	// Commission
-	commissionRate: integer('commission_rate').default(25), // Default 25%
-	totalEarnings: integer('total_earnings').default(0),
-	pendingPayout: integer('pending_payout').default(0),
-	paidOut: integer('paid_out').default(0),
-	// Payout Info
-	bankName: text('bank_name'),
-	bankAccountNumber: text('bank_account_number'),
-	bankAccountName: text('bank_account_name'),
-	// Status
-	isActive: integer('is_active', { mode: 'boolean' }).default(true),
-	// Tier (based on tracker points)
-	tier: text('tier').default('bronze'), // 'bronze' | 'silver' | 'gold' | 'platinum'
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Affiliate Links (Auto-generated for mentors/facilitators)
-export const autoAffiliateLink = sqliteTable('auto_affiliate_link', {
-	id: text('id').primaryKey(),
-	accountId: text('account_id')
-		.notNull()
-		.references(() => affiliateAccount.id),
-	courseId: text('course_id').references(() => course.id), // null = org landing page
-	orgId: text('org_id').references(() => organization.id),
-	// Link
-	code: text('code').notNull().unique(), // e.g., "mentor-budi-abc123"
-	url: text('url').notNull(), // Full URL
-	// Tracking
-	clickCount: integer('click_count').default(0),
-	conversionCount: integer('conversion_count').default(0),
-	// Status
-	isActive: integer('is_active', { mode: 'boolean' }).default(true),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// ============================================================
-// TRACKER SYSTEM (Differentiating Feature)
-// ============================================================
-
-// User Tracker Points - Enhanced gamification
-export const userTracker = sqliteTable('user_tracker', {
-	userId: text('user_id')
-		.primaryKey()
-		.references(() => user.id),
-	// Points
-	totalPoints: integer('total_points').default(0),
-	weeklyPoints: integer('weekly_points').default(0),
-	// Streak
-	currentStreak: integer('current_streak').default(0),
-	longestStreak: integer('longest_streak').default(0),
-	lastActiveDate: text('last_active_date'), // YYYY-MM-DD format
-	// Stats
-	totalLessonsCompleted: integer('total_lessons_completed').default(0),
-	totalCheckpointsCompleted: integer('total_checkpoints_completed').default(0),
-	totalDiscussions: integer('total_discussions').default(0),
-	totalReferrals: integer('total_referrals').default(0),
-	// Tier
-	tier: text('tier').default('starter'), // 'starter' | 'learner' | 'achiever' | 'champion' | 'legend'
-	tierProgress: integer('tier_progress').default(0), // Points to next tier
-	// Rewards
-	earnedCoupons: integer('earned_coupons').default(0),
-	earnedCertificates: integer('earned_certificates').default(0),
-	// Timestamps
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Tracker Activity Log
-export const trackerActivity = sqliteTable('tracker_activity', {
-	id: text('id').primaryKey(),
-	userId: text('user_id')
-		.notNull()
-		.references(() => user.id),
-	activityType: text('activity_type').notNull(), // 'lesson_complete' | 'checkpoint' | 'discussion' | 'referral' | 'streak'
-	points: integer('points').notNull(),
-	description: text('description'),
-	referenceId: text('reference_id'), // lessonId, checkpointId, etc
-	referenceType: text('reference_type'), // 'lesson' | 'checkpoint' | 'discussion' | 'referral'
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// ============================================================
-// USER PREFERENCES (Telemetry for Personalization)
-// ============================================================
-
-export const userPreferences = sqliteTable('user_preferences', {
-	userId: text('user_id')
-		.primaryKey()
-		.references(() => user.id),
-	// Goals: what user wants to achieve
-	goals: text('goals'), // JSON: ["career", "business", "skill", "hobby"]
-	// Interests: topics user is interested in
-	interests: text('interests'), // JSON: ["creator", "affiliate", "seller", "smm", "seo"]
-	// Experience level
-	experienceLevel: text('experience_level'), // 'beginner' | 'intermediate' | 'advanced'
-	// Learning schedule preference
-	learningSchedule: text('learning_schedule'), // 'morning' | 'afternoon' | 'evening' | 'flexible'
-	// Notification preferences
-	notificationPrefs: text('notification_prefs'), // JSON: ["email", "wa", "push"]
-	// Focus mode (LMS sidebar auto-hide)
-	focusMode: integer('focus_mode', { mode: 'boolean' }).default(true),
-	// Timestamps
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Organization API Keys (Secure deployment for Agents)
-export const organizationApiKey = sqliteTable('organization_api_key', {
-	id: text('id').primaryKey(),
-	orgId: text('org_id')
-		.notNull()
-		.references(() => organization.id),
-	key: text('key').notNull().unique(), // Secure hashed or long random string
-	name: text('name').notNull(), // e.g., 'Naik Kelas Telegram Agent'
-	status: text('status').notNull().default('active'), // 'active' | 'revoked'
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	lastUsedAt: integer('last_used_at', { mode: 'timestamp' })
-});
-
+export type UserVerification = typeof userVerification.$inferSelect;
+export type OrganizationVerification = typeof organizationVerification.$inferSelect;
+export type AffiliateAccount = typeof affiliateAccount.$inferSelect;
+export type AutoAffiliateLink = typeof autoAffiliateLink.$inferSelect;
+export type UserTracker = typeof userTracker.$inferSelect;
+export type TrackerActivity = typeof trackerActivity.$inferSelect;
+export type UserPreferences = typeof userPreferences.$inferSelect;
 export type OrganizationApiKey = typeof organizationApiKey.$inferSelect;
-
-// ============================================================
-// JOB BOARD SYSTEM
-// ============================================================
-
-// Job Postings
-export const jobPosting = sqliteTable('job_posting', {
-	id: text('id').primaryKey(),
-	orgId: text('org_id')
-		.notNull()
-		.references(() => organization.id),
-	title: text('title').notNull(),
-	description: text('description').notNull(),
-	requirements: text('requirements'), // JSON array of requirements
-	responsibilities: text('responsibilities'), // JSON array
-	salaryMin: integer('salary_min'),
-	salaryMax: integer('salary_max'),
-	jobType: text('job_type').notNull().default('full-time'), // 'full-time', 'part-time', 'contract', 'internship'
-	location: text('location'),
-	isRemote: integer('is_remote', { mode: 'boolean' }).default(false),
-	visibility: text('visibility').notNull().default('internal'), // 'internal' | 'public'
-	status: text('status').notNull().default('active'), // 'active', 'closed', 'draft'
-	createdBy: text('created_by')
-		.notNull()
-		.references(() => user.id),
-	expiresAt: integer('expires_at', { mode: 'timestamp' }),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Job Applications
-export const jobApplication = sqliteTable('job_application', {
-	id: text('id').primaryKey(),
-	jobId: text('job_id')
-		.notNull()
-		.references(() => jobPosting.id),
-	userId: text('user_id')
-		.notNull()
-		.references(() => user.id),
-	resumeUrl: text('resume_url'),
-	coverLetter: text('cover_letter'),
-	portfolioUrl: text('portfolio_url'),
-	proposedRole: text('proposed_role'), // Role they're applying for
-	status: text('status').notNull().default('pending'), // 'pending', 'reviewed', 'interview', 'accepted', 'rejected'
-	notes: text('notes'), // Internal notes from org
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date()),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
-		.notNull()
-		.$defaultFn(() => new Date())
-});
-
-// Export types
 export type JobPosting = typeof jobPosting.$inferSelect;
 export type JobApplication = typeof jobApplication.$inferSelect;

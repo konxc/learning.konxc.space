@@ -1,5 +1,5 @@
-import { drizzle } from 'drizzle-orm/libsql';
-import { createClient } from '@libsql/client';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from '../src/lib/server/db/schema.js';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -44,46 +44,21 @@ try {
 
 // Parse args
 const args = process.argv.slice(2);
-const isRemoteMode = args.includes('--remote') || args.includes('--turso');
 const shouldReset = args.includes('--reset');
-const skipConfirmation = args.includes('--yes');
 
-const LOCAL_DB_URL = process.env.LOCAL_DB_URL || 'file:./local.db';
-const REMOTE_DB_URL = process.env.DATABASE_URL;
-const REMOTE_DB_AUTH_TOKEN = process.env.DATABASE_AUTH_TOKEN;
+if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL not set.');
 
-let DATABASE_URL: string;
-let DATABASE_AUTH_TOKEN: string | undefined;
+console.log(`\n📊 Seed Target: Neon PostgreSQL\n`);
 
-if (isRemoteMode) {
-	if (!REMOTE_DB_URL) throw new Error('DATABASE_URL not set.');
-	DATABASE_URL = REMOTE_DB_URL;
-	DATABASE_AUTH_TOKEN = REMOTE_DB_AUTH_TOKEN;
-} else {
-	DATABASE_URL = LOCAL_DB_URL;
-}
-
-const isRemote = DATABASE_URL.startsWith('libsql://') || DATABASE_URL.startsWith('https://');
-const isLocal = !isRemote;
-
-if (isRemote && !isRemoteMode) throw new Error('Use --remote to target remote DB.');
-if (!skipConfirmation && isRemote) throw new Error('Remote seeding requires --yes flag.');
-
-console.log(`\n📊 Seed Target: ${isLocal ? 'LOCAL' : 'REMOTE'} (${DATABASE_URL})\n`);
-
-const client = createClient({ url: DATABASE_URL, authToken: DATABASE_AUTH_TOKEN });
-const db = drizzle(client, { schema });
+const sql = neon(process.env.DATABASE_URL);
+const db = drizzle(sql, { schema });
 
 async function safeDelete(table: any, tableName: string) {
 	try {
 		await db.delete(table);
 		console.log(`  ✓ Cleared ${tableName}`);
 	} catch (err: any) {
-		if (err?.cause?.code === 'SQLITE_ERROR' && err?.cause?.message?.includes('no such table')) {
-			console.log(`  ⊘ Skipped ${tableName} (table doesn't exist yet)`);
-		} else {
-			throw err;
-		}
+		console.log(`  ⊘ Skipped ${tableName}: ${err?.message ?? err}`);
 	}
 }
 

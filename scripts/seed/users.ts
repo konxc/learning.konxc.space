@@ -1,11 +1,11 @@
 import { hashPassword } from '../../src/lib/server/password.js';
 import * as schema from '../../src/lib/server/db/schema.js';
 import { logSection, logSuccess } from './utils.js';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 
 const PASSWORD = 'naikkelas2024';
 
-export async function seedUsers(db: LibSQLDatabase<typeof schema>) {
+export async function seedUsers(db: NeonHttpDatabase<typeof schema>) {
 	logSection('Seeding core users (admin, bd, mentors, facilitators)');
 
 	const users = [
@@ -144,7 +144,7 @@ export async function seedUsers(db: LibSQLDatabase<typeof schema>) {
 	return users;
 }
 
-export async function seedStudents(db: LibSQLDatabase<typeof schema>) {
+export async function seedStudents(db: NeonHttpDatabase<typeof schema>) {
 	logSection('Seeding students (60 users)');
 
 	const students = [
