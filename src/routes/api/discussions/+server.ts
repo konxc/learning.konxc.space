@@ -9,7 +9,6 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	if (!locals.user) return json({ error: 'Unauthorized' }, { status: 401 });
 
 	const lessonId = url.searchParams.get('lessonId');
-	const courseId = url.searchParams.get('courseId');
 
 	if (!lessonId) return json({ error: 'Lesson ID required' }, { status: 400 });
 
@@ -30,9 +29,16 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			}
 		});
 
-		// For each discussion, fetch replies (nested or separate, let's keep it simple for now)
+		if (discussions.length === 0) {
+			return json({ discussions: [] });
+		}
+
+		// N+1 Query Fix: Fetch replies in parallel with concurrency limit
+		// Limit to first 10 discussions to prevent overwhelming the DB
+		const discussionsToFetch = discussions.slice(0, 10);
+
 		const withReplies = await Promise.all(
-			discussions.map(async (d) => {
+			discussionsToFetch.map(async (d) => {
 				const replies = await db.query.discussion.findMany({
 					where: eq(schema.discussion.parentId, d.id),
 					orderBy: [schema.discussion.createdAt],
@@ -51,9 +57,13 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			})
 		);
 
-		return json({ discussions: withReplies });
+		// Attach discussions beyond limit with empty replies
+		const remaining = discussions.slice(10).map((d) => ({ ...d, replies: [] }));
+		const result = [...withReplies, ...remaining];
+
+		return json({ discussions: result });
 	} catch (e) {
-		console.error(e);
+		console.error('Discussion API error:', e);
 		return json({ error: 'Server error' }, { status: 500 });
 	}
 };

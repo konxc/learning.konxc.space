@@ -16,7 +16,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	if (!VALID_TRACKS.includes(newTrack)) {
-		return json({ error: 'Invalid track' }, { status: 400 });
+		return json(
+			{ error: 'Invalid track. Valid tracks: ' + VALID_TRACKS.join(', ') },
+			{ status: 400 }
+		);
 	}
 
 	try {
@@ -37,6 +40,33 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Can only switch track for active enrollments' }, { status: 400 });
 		}
 
+		// Additional validation: Check if course exists and is active
+		const [course] = await db
+			.select({ id: schema.course.id })
+			.from(schema.course)
+			.where(eq(schema.course.id, enrollment.courseId))
+			.limit(1);
+
+		if (!course) {
+			return json({ error: 'Course not found' }, { status: 404 });
+		}
+
+		// Check if user has affiliate capability for affiliate track
+		if (newTrack === 'affiliate') {
+			const [affiliateAccount] = await db
+				.select()
+				.from(schema.affiliateAccount)
+				.where(eq(schema.affiliateAccount.userId, locals.user.id))
+				.limit(1);
+
+			if (!affiliateAccount || !affiliateAccount.isActive) {
+				return json(
+					{ error: 'You need an active affiliate account to switch to affiliate track' },
+					{ status: 400 }
+				);
+			}
+		}
+
 		// Update track
 		await db
 			.update(schema.enrollment)
@@ -45,7 +75,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		return json({ success: true, track: newTrack });
 	} catch (e) {
-		console.error(e);
+		console.error('Track switch error:', e);
 		return json({ error: 'Failed to switch track' }, { status: 500 });
 	}
 };

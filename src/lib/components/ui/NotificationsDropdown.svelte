@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { RADIUS, COLOR, TEXT, ELEVATION } from '$lib/config/design';
 	import { formatRelativeTime } from '$lib/utils/date';
+	import { goto } from '$app/navigation';
 
 	interface Notification {
 		id: string;
@@ -40,10 +41,12 @@
 
 	let markingId = $state<string | null>(null);
 	let errorMsg = $state<string | null>(null);
+	let targetUrl = $state<string | null>(null);
 
-	async function markAsRead(id: string) {
+	async function markAsRead(id: string, link: string | null | undefined) {
 		markingId = id;
 		errorMsg = null;
+		targetUrl = link || '/app/notifications';
 
 		try {
 			const res = await fetch(`/api/notifications/${id}/read`, {
@@ -56,24 +59,30 @@
 
 			if (!res.ok) {
 				errorMsg = data.error || 'Failed to mark as read';
+				targetUrl = null;
 				return;
 			}
 
-			// Reload page to refresh notifications
-			window.location.reload();
+			// Navigate to target URL using SvelteKit's goto
+			await goto(targetUrl);
 		} catch (e) {
 			errorMsg = 'Network error. Please try again.';
+			targetUrl = null;
 		} finally {
 			markingId = null;
 		}
 	}
 
 	async function handleNotificationClick(notif: Notification) {
-		if (!notif.read && markingId !== notif.id) {
-			await markAsRead(notif.id);
-		}
-		if (errorMsg) return;
+		// Optimistically close dropdown first
 		onClose();
+
+		if (!notif.read) {
+			await markAsRead(notif.id, notif.link);
+		} else {
+			// Already read, just navigate
+			await goto(notif.link || '/app/notifications');
+		}
 	}
 
 	function handleKeyDown(e: KeyboardEvent) {

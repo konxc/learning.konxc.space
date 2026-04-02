@@ -90,27 +90,55 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		createdAt: new Date()
 	});
 
-	// Send notifications
+	// Send notifications with rate limiting
 	let successCount = 0;
 	let failCount = 0;
 
-	for (const recipient of uniqueRecipients) {
-		try {
-			if (sentVia === 'all' || sentVia === 'notification' || sentVia === 'whatsapp') {
-				const channel =
-					sentVia === 'whatsapp' ? 'whatsapp' : sentVia === 'all' ? 'both' : 'notification';
-				await sendNotification({
-					userId: recipient.id,
-					type: 'broadcast',
-					title,
-					message: content,
-					channel
-				});
-			}
-			successCount++;
-		} catch (e) {
-			console.error(`Failed to send to ${recipient.id}:`, e);
-			failCount++;
+	// Rate limiting: max 100 recipients per broadcast request
+	const MAX_RECIPIENTS = 100;
+	if (uniqueRecipients.length > MAX_RECIPIENTS) {
+		return json(
+			{
+				error: `Too many recipients. Maximum is ${MAX_RECIPIENTS} per request.`,
+				received: uniqueRecipients.length,
+				max: MAX_RECIPIENTS
+			},
+			{ status: 400 }
+		);
+	}
+
+	// Process in batches to prevent blocking
+	const BATCH_SIZE = 10;
+	const DELAY_MS = 100; // 100ms delay between batches
+
+	for (let i = 0; i < uniqueRecipients.length; i += BATCH_SIZE) {
+		const batch = uniqueRecipients.slice(i, i + BATCH_SIZE);
+
+		await Promise.allSettled(
+			batch.map(async (recipient) => {
+				try {
+					if (sentVia === 'all' || sentVia === 'notification' || sentVia === 'whatsapp') {
+						const channel =
+							sentVia === 'whatsapp' ? 'whatsapp' : sentVia === 'all' ? 'both' : 'notification';
+						await sendNotification({
+							userId: recipient.id,
+							type: 'broadcast',
+							title,
+							message: content,
+							channel
+						});
+					}
+					successCount++;
+				} catch (e) {
+					console.error(`Failed to send to ${recipient.id}:`, e);
+					failCount++;
+				}
+			})
+		);
+
+		// Small delay between batches to prevent overwhelming the notification service
+		if (i + BATCH_SIZE < uniqueRecipients.length) {
+			await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
 		}
 	}
 
