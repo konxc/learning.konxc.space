@@ -41,12 +41,12 @@
 
 ## Task 6 — Course Settings
 
-- [ ] Toggle switches untuk fitur course (affiliate, discussion, performance) — parse dari `featuresConfig` JSON
-- [ ] Prerequisite course selector (dropdown dari courses yang ada)
-- [ ] Visibility selector: `public` / `internal` / `draft` / `invite_only` (sesuai `course.visibility` di schema)
+- [x] Toggle switches untuk fitur course (affiliate, discussion, performance) — parse dari `featuresConfig` JSON
+- [x] Prerequisite course selector (dropdown dari courses yang ada)
+- [x] Visibility selector: `public` / `internal` / `draft` / `invite_only` (sesuai `course.visibility` di schema)
   - `public` = siapapun bisa beli di marketplace
   - `internal` = hanya member org
   - `draft` = hanya mentor/admin org
   - `invite_only` = hanya yang punya link khusus
-- [ ] Save settings via server action
-- [ ] Jalankan `pnpm run check`
+- [x] Save settings via server action
+- [x] Jalankan `pnpm run check`

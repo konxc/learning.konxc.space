@@ -2,39 +2,39 @@
 
 ## Task 1 — SSE Endpoint
 
-- [ ] Buat `src/routes/api/notifications/stream/+server.ts`
-- [ ] Implementasi `ReadableStream` dengan heartbeat 30 detik
-- [ ] Poll DB setiap 5 detik untuk notifikasi baru milik user
-- [ ] Auth guard: redirect jika tidak login
-- [ ] Jalankan `pnpm run check`
+- [x] Buat `src/routes/api/notifications/stream/+server.ts`
+- [x] Implementasi `ReadableStream` dengan heartbeat 30 detik
+- [x] Poll DB setiap 5 detik untuk notifikasi baru milik user
+- [x] Auth guard: redirect jika tidak login
+- [x] Jalankan `pnpm run check`
 
 ## Task 2 — Notification Helper
 
-- [ ] Buat `src/lib/server/notifications.ts`
-- [ ] Fungsi `createNotification(params)` dengan type safety
-- [ ] Fungsi `markAsRead(notificationId, userId)`
-- [ ] Fungsi `getUnreadCount(userId): Promise<number>`
-- [ ] Jalankan `pnpm run check`
+- [x] Buat `src/lib/server/notifications.ts`
+- [x] Fungsi `createNotification(params)` dengan type safety
+- [x] Fungsi `markAsRead(notificationId, userId)`
+- [x] Fungsi `getUnreadCount(userId): Promise<number>`
+- [x] Jalankan `pnpm run check`
 
 ## Task 3 — Update DashboardHeader
 
-- [ ] Tambahkan SSE listener di `DashboardHeader.svelte` via `$effect`
-- [ ] Update `unreadCount` state dari SSE events
-- [ ] Trigger toast untuk notifikasi penting (payment, grade)
-- [ ] Cleanup EventSource saat komponen destroy
-- [ ] Jalankan `pnpm run check`
+- [x] Tambahkan SSE listener di `DashboardHeader.svelte` via `$effect`
+- [x] Update `unreadCount` state dari SSE events
+- [x] Trigger toast untuk notifikasi penting (payment, grade)
+- [x] Cleanup EventSource saat komponen destroy
+- [x] Jalankan `pnpm run check`
 
 ## Task 4 — Notification Preferences UI
 
-- [ ] Tambahkan tab "Notifikasi" di `/app/settings`
-- [ ] Toggle per notification type (in-app / email)
-- [ ] Save preferences ke `userPreferences.notificationSettings`
-- [ ] Load preferences saat halaman settings dibuka
-- [ ] Jalankan `pnpm run check`
+- [x] Tambahkan tab "Notifikasi" di `/app/settings`
+- [x] Toggle per notification type (in-app / email)
+- [x] Save preferences ke `userPreferences.notificationSettings`
+- [x] Load preferences saat halaman settings dibuka
+- [x] Jalankan `pnpm run check`
 
 ## Task 5 — Notification Center Enhancement
 
-- [ ] Update `/app/notifications/+page.server.ts` dengan pagination (20/halaman)
-- [ ] Tambahkan filter by type dan read/unread
-- [ ] Implementasi "Mark all as read" action
-- [ ] Jalankan `pnpm run check`
+- [x] Update `/app/notifications/+page.server.ts` dengan pagination (20/halaman)
+- [x] Tambahkan filter by type dan read/unread
+- [x] Implementasi "Mark all as read" action
+- [x] Jalankan `pnpm run check`
