@@ -225,6 +225,71 @@ export const load: PageServerLoad = async (event) => {
 			user: user,
 			workspace: { id: activeWorkspaceId, org: activeOrg }
 		};
+	} else if (roleInContext === 'business' || roleInContext === 'bd') {
+		// Get business stats (revenue, ARPU, active subs, churn)
+		const allEnrollments = await db
+			.select()
+			.from(schema.enrollment)
+			.where(eq(schema.enrollment.status, 'active'));
+
+		const allTransactions = await db.select().from(schema.transaction);
+
+		// Calculate revenue (sum of all successful transactions)
+		const totalRevenue = allTransactions
+			.filter((t) => t.status === 'completed')
+			.reduce((sum, t) => sum + (t.amount || 0), 0);
+
+		// ARPU (Average Revenue Per User)
+		const uniqueUsers = new Set(allEnrollments.map((e) => e.userId)).size;
+		const arpu = uniqueUsers > 0 ? Math.round(totalRevenue / uniqueUsers) : 0;
+
+		// Active subscriptions
+		const activeSubs = allEnrollments.filter((e) => e.status === 'active').length;
+
+		// Churn rate (enrollments marked as cancelled/expired)
+		const cancelledEnrollments = allEnrollments.filter(
+			(e) => e.status === 'cancelled' || e.status === 'expired'
+		).length;
+		const churn =
+			allEnrollments.length > 0
+				? Math.round((cancelledEnrollments / allEnrollments.length) * 100)
+				: 0;
+
+		// Get recent transactions
+		const recentTransactions = await db
+			.select()
+			.from(schema.transaction)
+			.where(eq(schema.transaction.status, 'completed'))
+			.orderBy(desc(schema.transaction.createdAt))
+			.limit(10);
+
+		// Join with user to get usernames
+		const userMap = new Map();
+		const users = await db.select().from(schema.user);
+		for (const u of users) {
+			userMap.set(u.id, u);
+		}
+
+		const enrichedTransactions = recentTransactions.map((t) => {
+			const user = userMap.get(t.userId);
+			return {
+				...t,
+				username: user?.username || user?.fullName || t.userId
+			};
+		});
+
+		return {
+			stats: {
+				revenue: totalRevenue,
+				arpu,
+				activeSubs,
+				churn
+			},
+			recentTransactions: enrichedTransactions,
+			activityGraph: await buildActivityGraph(user.id),
+			user: user,
+			workspace: { id: activeWorkspaceId, org: activeOrg }
+		};
 	} else if (roleInContext === 'mentor' || roleInContext === 'facilitator') {
 		// Get mentor's courses filtered by workspace
 		let mentorCoursesQuery = db

@@ -5,7 +5,7 @@ import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
-import { actionFailure } from '$lib/server/actions';
+import { actionSuccess, actionFailure } from '$lib/server/actions';
 import { snap } from '$lib/server/midtrans';
 import { MIDTRANS_CLIENT_KEY } from '$env/static/private';
 
@@ -177,11 +177,13 @@ export const actions: Actions = {
 				status: 'pending'
 			});
 
-			return {
-				success: true,
-				orderId,
-				snapToken: transactionRecord.token
-			};
+			return actionSuccess({
+				data: {
+					orderId,
+					snapToken: transactionRecord.token,
+					redirectUrl: transactionRecord.redirect_url
+				}
+			});
 		} catch (e) {
 			console.error('Midtrans Error:', e);
 			return actionFailure(500, 'Gagal membuat transaksi pembayaran');

@@ -160,12 +160,17 @@
 
 			const result = await response.json();
 
-			// Handle both form action return formats
+			// Handle SvelteKit form action return format
+			// actionSuccess returns: { type: 'success', data: { ... } }
+			// actionFailure returns: { type: 'failure', data: { error: '...' } }
 			let data: any;
-			if (result.data) {
-				// result.data is a JSON string from form action
-				data = typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
+
+			if (result.type === 'success' && result.data) {
+				data = result.data;
+			} else if (result.type === 'failure') {
+				throw new Error(result.data?.error || 'Failed to create online transaction');
 			} else {
+				// Fallback for direct returns
 				data = result;
 			}
 
@@ -186,8 +191,7 @@
 					}
 				});
 			} else {
-				const failureMsg = data?.message || 'Failed to create online transaction';
-				throw new Error(failureMsg);
+				throw new Error(data?.error || 'Failed to create online transaction');
 			}
 		} catch (err) {
 			console.error('Payment error:', err);
