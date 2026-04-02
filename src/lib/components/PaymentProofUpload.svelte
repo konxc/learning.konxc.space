@@ -158,7 +158,26 @@
 				body: formData
 			});
 
+			// Debug: log response status and text
+			console.log('Payment response status:', response.status);
+			console.log('Payment response content-type:', response.headers.get('content-type'));
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				console.error('Payment failed with status:', response.status, errorText);
+				throw new Error(`Server error: ${response.status}`);
+			}
+
+			const contentType = response.headers.get('content-type');
+			if (!contentType?.includes('application/json')) {
+				// Not JSON - might be redirect or HTML error page
+				const text = await response.text();
+				console.error('Non-JSON response:', text.substring(0, 500));
+				throw new Error('Invalid server response. Please try again.');
+			}
+
 			const result = await response.json();
+			console.log('Payment result:', result);
 
 			// Handle SvelteKit form action return format
 			// actionSuccess returns: { type: 'success', data: { ... } }
@@ -169,8 +188,13 @@
 				data = result.data;
 			} else if (result.type === 'failure') {
 				throw new Error(result.data?.error || 'Failed to create online transaction');
+			} else if (result.success === true && result.data) {
+				// Direct return format
+				data = result.data;
+			} else if (result.success === false || result.error) {
+				throw new Error(result.error || result.message || 'Failed to create online transaction');
 			} else {
-				// Fallback for direct returns
+				// Fallback for other formats
 				data = result;
 			}
 
@@ -191,7 +215,8 @@
 					}
 				});
 			} else {
-				throw new Error(data?.error || 'Failed to create online transaction');
+				console.error('No snapToken in response:', data);
+				throw new Error(data?.error || 'Failed to create online transaction - no token');
 			}
 		} catch (err) {
 			console.error('Payment error:', err);

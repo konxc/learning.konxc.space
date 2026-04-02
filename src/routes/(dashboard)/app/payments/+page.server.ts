@@ -132,12 +132,24 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const courseId = formData.get('courseId') as string;
 
+		if (!courseId) {
+			return actionFailure(400, 'Course ID is required');
+		}
+
 		// 1. Get Course details
 		const course = await db.query.course.findFirst({
 			where: eq(schema.course.id, courseId)
 		});
 
-		if (!course) return actionFailure(404, 'Kursus tidak ditemukan');
+		if (!course) {
+			console.error('Course not found:', courseId);
+			return actionFailure(404, 'Kursus tidak ditemukan');
+		}
+
+		if (!course.price || course.price <= 0) {
+			console.error('Invalid course price:', course.price);
+			return actionFailure(400, 'Kursus ini tidak dapat dibeli secara online');
+		}
 
 		// 2. Generate Order ID
 		const orderId = `NC-${encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(5))).toUpperCase()}`;
