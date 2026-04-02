@@ -2,7 +2,7 @@ import type { PageServerLoad } from './$types';
 import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, and, count, inArray } from 'drizzle-orm';
+import { eq, and, count, inArray, lt, sql } from 'drizzle-orm';
 import { redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async (event) => {
@@ -10,7 +10,6 @@ export const load: PageServerLoad = async (event) => {
 
 	const isPlatformAdmin = user.role === 'admin';
 
-	// Platform admin has access. Others need org membership with facilitator/mentor/owner/admin role.
 	if (!isPlatformAdmin) {
 		const eligibleMemberships = await db
 			.select({ orgId: schema.organizationMember.orgId })
@@ -28,7 +27,6 @@ export const load: PageServerLoad = async (event) => {
 		}
 	}
 
-	// Get user's organizations where they are a facilitator
 	const memberships = await db
 		.select({
 			orgId: schema.organizationMember.orgId,
@@ -47,11 +45,8 @@ export const load: PageServerLoad = async (event) => {
 			)
 		);
 
-	const orgIds = memberships.map((m) => m.orgId);
-
-	// Get cohorts where user is assigned as facilitator
 	const cohorts =
-		orgIds.length > 0
+		memberships.length > 0
 			? await db
 					.select({
 						id: schema.cohort.id,
@@ -75,17 +70,66 @@ export const load: PageServerLoad = async (event) => {
 					.orderBy(schema.cohort.startDate)
 			: [];
 
-	// Get student counts for each cohort
+	// Three weeks ago threshold for at-risk detection
+	const threeWeeksAgo = new Date();
+	threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21);
+
+	// Get student counts + at-risk count per cohort
 	const cohortsWithStats = await Promise.all(
 		cohorts.map(async (cohort) => {
-			const studentCount = await db
+			const [studentCountResult, enrollmentsResult] = await Promise.all([
+				db
+					.select({ count: count() })
+					.from(schema.enrollment)
+					.where(eq(schema.enrollment.cohortId, cohort.id)),
+				db
+					.select({
+						userId: schema.enrollment.userId,
+						enrolledAt: schema.enrollment.enrolledAt
+					})
+					.from(schema.enrollment)
+					.where(
+						and(eq(schema.enrollment.cohortId, cohort.id), eq(schema.enrollment.status, 'active'))
+					)
+			]);
+
+			const studentCount = Number(studentCountResult[0]?.count ?? 0);
+
+			// Count at-risk: enrolled > 21 days ago but progress < 30%
+			// Get total lessons for the course
+			const totalLessonsResult = await db
 				.select({ count: count() })
-				.from(schema.enrollment)
-				.where(eq(schema.enrollment.cohortId, cohort.id));
+				.from(schema.lesson)
+				.innerJoin(schema.module, eq(schema.lesson.moduleId, schema.module.id))
+				.where(eq(schema.module.courseId, cohort.course.id));
+
+			const totalLessons = Number(totalLessonsResult[0]?.count ?? 1);
+
+			let atRiskCount = 0;
+			for (const enrollment of enrollmentsResult) {
+				const enrolledDate = new Date(enrollment.enrolledAt);
+				if (enrolledDate > threeWeeksAgo) continue; // not yet 3 weeks
+
+				const progressResult = await db
+					.select({ count: count() })
+					.from(schema.lessonProgress)
+					.where(
+						and(
+							eq(schema.lessonProgress.userId, enrollment.userId),
+							eq(schema.lessonProgress.courseId, cohort.course.id),
+							sql`${schema.lessonProgress.completedAt} IS NOT NULL`
+						)
+					);
+
+				const completed = Number(progressResult[0]?.count ?? 0);
+				const pct = totalLessons > 0 ? (completed / totalLessons) * 100 : 0;
+				if (pct < 30) atRiskCount++;
+			}
 
 			return {
 				...cohort,
-				studentCount: Number(studentCount[0]?.count || 0)
+				studentCount,
+				atRiskCount
 			};
 		})
 	);

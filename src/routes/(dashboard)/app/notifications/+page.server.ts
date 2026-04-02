@@ -1,22 +1,72 @@
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
-import { error, fail } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ locals }) => {
-	if (!locals.user) throw error(401, 'Unauthorized');
+const PAGE_SIZE = 20;
 
-	// Fetch all notifications for the user
+export const load: PageServerLoad = async ({ locals, url }) => {
+	if (!locals.user) throw redirect(302, '/auth/signin');
+
+	const page = Math.max(1, parseInt(url.searchParams.get('page') ?? '1'));
+	const typeFilter = url.searchParams.get('type') ?? '';
+	const readFilter = url.searchParams.get('read') ?? '';
+
+	// Build where conditions
+	const conditions = [eq(schema.notification.userId, locals.user.id)];
+
+	if (typeFilter) {
+		conditions.push(eq(schema.notification.type, typeFilter));
+	}
+	if (readFilter === 'true') {
+		conditions.push(eq(schema.notification.read, true));
+	} else if (readFilter === 'false') {
+		conditions.push(eq(schema.notification.read, false));
+	}
+
+	const whereClause = conditions.length === 1 ? conditions[0] : and(...conditions);
+
+	// Total count for pagination
+	const allForCount = await db
+		.select({ id: schema.notification.id })
+		.from(schema.notification)
+		.where(whereClause);
+
+	const total = allForCount.length;
+	const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+	const safePage = Math.min(page, totalPages);
+	const offset = (safePage - 1) * PAGE_SIZE;
+
 	const notifications = await db
 		.select()
 		.from(schema.notification)
-		.where(eq(schema.notification.userId, locals.user.id))
+		.where(whereClause)
 		.orderBy(desc(schema.notification.createdAt))
-		.limit(50);
+		.limit(PAGE_SIZE)
+		.offset(offset);
+
+	// Distinct types for filter dropdown
+	const allTypes = await db
+		.select({ type: schema.notification.type })
+		.from(schema.notification)
+		.where(eq(schema.notification.userId, locals.user.id));
+
+	const distinctTypes = [...new Set(allTypes.map((r) => r.type))].sort();
 
 	return {
-		notifications
+		notifications,
+		pagination: {
+			page: safePage,
+			totalPages,
+			total,
+			pageSize: PAGE_SIZE
+		},
+		filters: {
+			type: typeFilter,
+			read: readFilter
+		},
+		distinctTypes
 	};
 };
 
@@ -29,33 +79,23 @@ export const actions: Actions = {
 
 		if (!id) return fail(400, { error: 'Notification ID is required' });
 
-		try {
-			await db
-				.update(schema.notification)
-				.set({ read: true })
-				.where(eq(schema.notification.id, id));
+		await db
+			.update(schema.notification)
+			.set({ read: true })
+			.where(and(eq(schema.notification.id, id), eq(schema.notification.userId, locals.user.id)));
 
-			return { success: true };
-		} catch (e) {
-			console.error('Error marking notification as read:', e);
-			return fail(500, { error: 'Internal Server Error' });
-		}
+		return { success: true };
 	},
 
 	markAllAsRead: async ({ locals }) => {
 		if (!locals.user) throw error(401, 'Unauthorized');
 
-		try {
-			await db
-				.update(schema.notification)
-				.set({ read: true })
-				.where(eq(schema.notification.userId, locals.user.id));
+		await db
+			.update(schema.notification)
+			.set({ read: true })
+			.where(eq(schema.notification.userId, locals.user.id));
 
-			return { success: true };
-		} catch (e) {
-			console.error('Error marking all notifications as read:', e);
-			return fail(500, { error: 'Internal Server Error' });
-		}
+		return { success: true };
 	},
 
 	delete: async ({ locals, request }) => {
@@ -66,26 +106,18 @@ export const actions: Actions = {
 
 		if (!id) return fail(400, { error: 'Notification ID is required' });
 
-		try {
-			await db.delete(schema.notification).where(eq(schema.notification.id, id));
+		await db
+			.delete(schema.notification)
+			.where(and(eq(schema.notification.id, id), eq(schema.notification.userId, locals.user.id)));
 
-			return { success: true };
-		} catch (e) {
-			console.error('Error deleting notification:', e);
-			return fail(500, { error: 'Internal Server Error' });
-		}
+		return { success: true };
 	},
 
 	deleteAll: async ({ locals }) => {
 		if (!locals.user) throw error(401, 'Unauthorized');
 
-		try {
-			await db.delete(schema.notification).where(eq(schema.notification.userId, locals.user.id));
+		await db.delete(schema.notification).where(eq(schema.notification.userId, locals.user.id));
 
-			return { success: true };
-		} catch (e) {
-			console.error('Error deleting all notifications:', e);
-			return fail(500, { error: 'Internal Server Error' });
-		}
+		return { success: true };
 	}
 };

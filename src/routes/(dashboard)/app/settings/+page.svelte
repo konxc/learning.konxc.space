@@ -9,6 +9,7 @@
 	import SecurityTab from './tabs/SecurityTab.svelte';
 	import OrganizationTab from './tabs/OrganizationTab.svelte';
 	import PreferencesTab from './tabs/PreferencesTab.svelte';
+	import NotificationPrefsTab from './tabs/NotificationPrefsTab.svelte';
 	import PaymentsTab from './tabs/PaymentsTab.svelte';
 	import AccountTab from './tabs/AccountTab.svelte';
 
@@ -24,7 +25,15 @@
 			createdAt: Date;
 			isVerified: boolean;
 		};
-		verification: any;
+		verification: {
+			ktpName?: string | null;
+			ktpNumber?: string | null;
+			ktpDob?: Date | null;
+			ktpAddress?: string | null;
+			verifiedAt?: Date | null;
+			status?: string | null;
+			rejectionReason?: string | null;
+		} | null;
 		organization: {
 			id: string;
 			name: string;
@@ -50,6 +59,8 @@
 			waNotif: boolean;
 			focusMode: boolean;
 		};
+		notificationTypes: string[];
+		enabledNotifTypes: string[];
 	}
 
 	let { data, form }: { data: PageData; form?: ActionData } = $props();
@@ -89,6 +100,13 @@
 					emailNotif={data.preferences.emailNotif}
 					waNotif={data.preferences.waNotif}
 					focusMode={data.preferences.focusMode}
+				/>
+			{/if}
+
+			{#if activeTab === 'notifications'}
+				<NotificationPrefsTab
+					notificationTypes={data.notificationTypes}
+					enabledTypes={data.enabledNotifTypes}
 				/>
 			{/if}
 

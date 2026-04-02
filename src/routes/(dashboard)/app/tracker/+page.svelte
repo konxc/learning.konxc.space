@@ -3,7 +3,8 @@
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
-	import { COLOR, RADIUS, TEXT, SPACING, ELEVATION, GRADIENT } from '$lib/config/design';
+	import StreakCalendar from '$lib/components/app/tracker/StreakCalendar.svelte';
+	import { COLOR, RADIUS, TEXT, SPACING, ELEVATION, TRANSITION } from '$lib/config/design';
 
 	let { data }: { data: PageData } = $props();
 
@@ -18,55 +19,54 @@
 		legend: { label: 'Legend', icon: '👑', color: 'text-rose-600', bgColor: 'bg-rose-100' }
 	};
 
-	const currentTierConfig = $derived(tierConfig[data.currentTier || 'starter']);
+	const currentTierConfig = $derived(tierConfig[data.currentTier ?? 'starter']);
+
 	const progressPercent = $derived(() => {
 		const tracker = data.tracker;
-		if (!tracker || !tracker.totalPoints) return 0;
+		if (!tracker?.totalPoints) return 0;
 		const tierInfo = data.tierInfo;
 		if (!tierInfo || tierInfo.max === Infinity) return 100;
 		const progress = ((tracker.totalPoints - tierInfo.min) / (tierInfo.max - tierInfo.min)) * 100;
 		return Math.min(100, Math.max(0, progress));
 	});
 
-	function getActivityIcon(type: string) {
+	const maxBreakdownPoints = $derived(
+		Math.max(1, ...data.breakdown.map((b) => Number(b.total ?? 0)))
+	);
+
+	const ACTIVITY_LABELS: Record<string, string> = {
+		lesson_complete: 'Pelajaran Selesai',
+		checkpoint_submit: 'Submit Checkpoint',
+		quiz_pass: 'Lulus Quiz',
+		daily_login: 'Login Harian',
+		streak_7: 'Streak 7 Hari',
+		streak_30: 'Streak 30 Hari',
+		streak_100: 'Streak 100 Hari',
+		course_complete: 'Kursus Selesai',
+		discussion_post: 'Posting Diskusi',
+		referral: 'Referral'
+	};
+
+	function getActivityIcon(type: string): string {
 		switch (type) {
 			case 'lesson_complete':
 				return 'check-circle';
-			case 'checkpoint':
+			case 'checkpoint_submit':
 				return 'flag';
-			case 'discussion':
+			case 'quiz_pass':
+				return 'award';
+			case 'discussion_post':
 				return 'message-circle';
 			case 'referral':
 				return 'users';
-			case 'streak':
-				return 'flame';
-			case 'certificate':
-				return 'award';
+			case 'daily_login':
+				return 'sun';
 			default:
 				return 'star';
 		}
 	}
 
-	function getActivityLabel(type: string) {
-		switch (type) {
-			case 'lesson_complete':
-				return 'Menyelesaikan Pelajaran';
-			case 'checkpoint':
-				return 'Submit Checkpoint';
-			case 'discussion':
-				return 'Diskusi';
-			case 'referral':
-				return 'Referral';
-			case 'streak':
-				return 'Streak Harian';
-			case 'certificate':
-				return 'Sertifikat';
-			default:
-				return 'Aktivitas';
-		}
-	}
-
-	function formatDate(date: Date | string) {
+	function formatDate(date: Date | string): string {
 		return new Date(date).toLocaleDateString('id-ID', {
 			day: 'numeric',
 			month: 'short',
@@ -266,6 +266,42 @@
 			</div>
 		</div>
 
+		<!-- Streak Calendar -->
+		<StreakCalendar activities={data.calendarData} />
+
+		<!-- Points Breakdown per Category -->
+		<div
+			class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} ${SPACING.cardPadding} ${ELEVATION.card}`}
+		>
+			<h3 class={`${TEXT.h4} ${COLOR.textPrimary} mb-4`}>Breakdown Poin per Kategori</h3>
+			{#if data.breakdown.length === 0}
+				<p class={`text-sm ${COLOR.textMuted}`}>Belum ada aktivitas tercatat.</p>
+			{:else}
+				<div class="space-y-3">
+					{#each data.breakdown as item}
+						{@const pts = Number(item.total ?? 0)}
+						{@const pct = Math.round((pts / maxBreakdownPoints) * 100)}
+						<div>
+							<div class="mb-1 flex items-center justify-between">
+								<span class={`text-sm font-semibold ${COLOR.textPrimary}`}>
+									{ACTIVITY_LABELS[item.activityType] ?? item.activityType}
+								</span>
+								<span class={`text-sm font-bold text-emerald-600 dark:text-emerald-400`}
+									>+{pts}</span
+								>
+							</div>
+							<div class="h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
+								<div
+									class={`h-full rounded-full bg-linear-to-r from-blue-500 to-purple-500 ${TRANSITION.all}`}
+									style="width: {pct}%"
+								></div>
+							</div>
+						</div>
+					{/each}
+				</div>
+			{/if}
+		</div>
+
 		<!-- Recent Activities -->
 		<div
 			class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} ${SPACING.cardPadding} ${ELEVATION.card}`}
@@ -275,21 +311,25 @@
 			{#if data.activities && data.activities.length > 0}
 				<div class="space-y-3">
 					{#each data.activities as activity}
-						<div class="flex items-center gap-4 rounded-lg bg-zinc-50 p-3">
+						<div class="flex items-center gap-4 rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/50">
 							<div
-								class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600"
+								class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30"
 							>
 								<Icon name={getActivityIcon(activity.activityType)} size={18} />
 							</div>
 							<div class="flex-1">
-								<p class="font-medium">
-									{activity.description || getActivityLabel(activity.activityType)}
+								<p class={`font-medium ${COLOR.textPrimary}`}>
+									{activity.description ??
+										ACTIVITY_LABELS[activity.activityType] ??
+										activity.activityType}
 								</p>
-								<p class="text-xs text-zinc-500">{formatDate(activity.createdAt)}</p>
+								<p class={`text-xs ${COLOR.textMuted}`}>{formatDate(activity.createdAt)}</p>
 							</div>
 							<div class="text-right">
-								<span class="font-bold text-emerald-600">+{activity.points}</span>
-								<p class="text-xs text-zinc-500">poin</p>
+								<span class="font-bold text-emerald-600 dark:text-emerald-400"
+									>+{activity.points}</span
+								>
+								<p class={`text-xs ${COLOR.textMuted}`}>poin</p>
 							</div>
 						</div>
 					{/each}
@@ -297,8 +337,8 @@
 			{:else}
 				<div class="py-8 text-center">
 					<Icon name="activity" size={48} class="mx-auto mb-4 text-zinc-300" />
-					<p class="text-zinc-500">Belum ada aktivitas</p>
-					<p class="text-sm text-zinc-400">Mulai belajar untuk mengumpulkan poin!</p>
+					<p class={`${COLOR.textMuted}`}>Belum ada aktivitas</p>
+					<p class={`text-sm ${COLOR.textMuted}`}>Mulai belajar untuk mengumpulkan poin!</p>
 				</div>
 			{/if}
 		</div>

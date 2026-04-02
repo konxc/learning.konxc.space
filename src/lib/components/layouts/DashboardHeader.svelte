@@ -73,6 +73,38 @@
 	const pageMetadataStore = getPageMetadata();
 
 	let showNotifications = $state(false);
+	let liveUnreadCount = $state(unreadCount);
+
+	$effect(() => {
+		liveUnreadCount = unreadCount;
+	});
+
+	$effect(() => {
+		const es = new EventSource('/api/notifications/stream');
+
+		es.onmessage = (event) => {
+			try {
+				const data = JSON.parse(event.data as string) as {
+					type?: string;
+					unreadCount?: number;
+					newNotifications?: Array<{ id: string; type: string; title: string }>;
+				};
+				if (data.unreadCount !== undefined) {
+					liveUnreadCount = data.unreadCount;
+				}
+			} catch {
+				// ignore parse errors
+			}
+		};
+
+		es.onerror = () => {
+			es.close();
+		};
+
+		return () => {
+			es.close();
+		};
+	});
 
 	// Tab selection handler for PageData-driven tabs
 	function handleTabSelect(tabId: string) {
@@ -199,20 +231,21 @@
 						<button
 							onclick={() => (showNotifications = !showNotifications)}
 							class={`relative rounded-full p-2 ${COLOR.textSecondary} transition-colors ${COLOR.surfaceHover}`}
+							aria-label="Notifikasi"
 						>
 							🔔
-							{#if unreadCount && unreadCount > 0}
+							{#if liveUnreadCount > 0}
 								<span
 									class={`absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full ${NOTIFICATION_DOT.red} text-[10px] font-bold text-white shadow-sm`}
 								>
-									{unreadCount > 9 ? '9+' : unreadCount}
+									{liveUnreadCount > 9 ? '9+' : liveUnreadCount}
 								</span>
 							{/if}
 						</button>
 
 						<NotificationsDropdown
 							notifications={notifications as any[]}
-							{unreadCount}
+							unreadCount={liveUnreadCount}
 							show={showNotifications}
 							onClose={() => (showNotifications = false)}
 						/>

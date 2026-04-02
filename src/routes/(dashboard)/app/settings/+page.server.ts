@@ -126,6 +126,7 @@ export const load: PageServerLoad = async ({ locals, url, cookies }) => {
 		{ label: 'Keamanan', id: 'security', icon: 'shield' },
 		{ label: 'Organisasi', id: 'organization', icon: 'layout' },
 		{ label: 'Preferensi', id: 'preferences', icon: 'settings' },
+		{ label: 'Notifikasi', id: 'notifications', icon: 'bell' },
 		{ label: 'Akun', id: 'account', icon: 'trash-2' }
 	];
 
@@ -147,6 +148,28 @@ export const load: PageServerLoad = async ({ locals, url, cookies }) => {
 		}
 	} catch {
 		notificationPrefs = { email: true, wa: false, push: false };
+	}
+
+	// Notification type preferences (per-type enabled list)
+	const NOTIFICATION_TYPES = [
+		'enrollment_activated',
+		'submission_graded',
+		'checkpoint_due',
+		'broadcast_received',
+		'badge_earned',
+		'payment_confirmed'
+	];
+
+	let enabledNotifTypes: string[] = NOTIFICATION_TYPES;
+	try {
+		if (userPrefs?.notificationPrefs) {
+			const parsed = JSON.parse(userPrefs.notificationPrefs) as Record<string, unknown>;
+			if (Array.isArray(parsed.enabledTypes)) {
+				enabledNotifTypes = parsed.enabledTypes as string[];
+			}
+		}
+	} catch {
+		enabledNotifTypes = NOTIFICATION_TYPES;
 	}
 
 	return {
@@ -174,7 +197,9 @@ export const load: PageServerLoad = async ({ locals, url, cookies }) => {
 			emailNotif: notificationPrefs.email,
 			waNotif: notificationPrefs.wa,
 			focusMode: userPrefs?.focusMode ?? true
-		}
+		},
+		notificationTypes: NOTIFICATION_TYPES,
+		enabledNotifTypes
 	};
 };
 
@@ -235,10 +260,10 @@ export const actions: Actions = {
 
 	uploadAvatar: async ({ request, locals }) => {
 		if (!locals.user) throw redirect(302, '/auth/signin');
-		
+
 		const formData = await request.formData();
 		const file = formData.get('avatar') as File;
-		
+
 		if (!file || file.size === 0) {
 			return actionFailure(400, 'Pilih gambar terlebih dahulu');
 		}
@@ -256,13 +281,11 @@ export const actions: Actions = {
 			// Create a unique key e.g. avatars/123_1623...png
 			const extension = file.name.split('.').pop() || 'png';
 			const key = `avatars/${locals.user.id}_${Date.now()}.${extension}`;
-			
+
 			const avatarUrl = await uploadFile(buffer, key, file.type);
-			
-			await db.update(schema.user)
-				.set({ avatarUrl })
-				.where(eq(schema.user.id, locals.user.id));
-				
+
+			await db.update(schema.user).set({ avatarUrl }).where(eq(schema.user.id, locals.user.id));
+
 			return actionSuccess({ message: 'Avatar berhasil diunggah!', data: { avatarUrl } });
 		} catch (error) {
 			console.error('S3 Avatar Upload Error:', error);
@@ -454,7 +477,8 @@ export const actions: Actions = {
 
 		if (!file || file.size === 0) return actionFailure(400, 'Pilih gambar terlebih dahulu');
 		if (file.size > 2 * 1024 * 1024) return actionFailure(400, 'Ukuran file maksimal 2MB');
-		if (!file.type.startsWith('image/')) return actionFailure(400, 'Format file harus berupa gambar');
+		if (!file.type.startsWith('image/'))
+			return actionFailure(400, 'Format file harus berupa gambar');
 
 		try {
 			const buffer = Buffer.from(await file.arrayBuffer());
@@ -705,6 +729,47 @@ export const actions: Actions = {
 		} catch (e) {
 			console.error('Save preferences error:', e);
 			return actionFailure(500, 'Gagal menyimpan preferensi');
+		}
+	},
+
+	saveNotificationPrefs: async ({ request, locals }) => {
+		if (!locals.user) throw redirect(302, '/auth/signin');
+
+		const formData = await request.formData();
+		const enabledTypes = formData.getAll('enabledTypes') as string[];
+
+		const existing = await db
+			.select()
+			.from(schema.userPreferences)
+			.where(eq(schema.userPreferences.userId, locals.user.id))
+			.limit(1);
+
+		let currentPrefs: Record<string, unknown> = {};
+		try {
+			if (existing[0]?.notificationPrefs) {
+				currentPrefs = JSON.parse(existing[0].notificationPrefs) as Record<string, unknown>;
+			}
+		} catch {
+			currentPrefs = {};
+		}
+
+		const notificationPrefs = JSON.stringify({ ...currentPrefs, enabledTypes });
+
+		try {
+			await db
+				.insert(schema.userPreferences)
+				.values({
+					userId: locals.user.id,
+					notificationPrefs,
+					updatedAt: new Date()
+				})
+				.onConflictDoUpdate({
+					target: schema.userPreferences.userId,
+					set: { notificationPrefs, updatedAt: new Date() }
+				});
+			return actionSuccess({ message: 'Preferensi notifikasi disimpan!' });
+		} catch (e) {
+			return actionFailure(500, 'Gagal menyimpan preferensi notifikasi');
 		}
 	},
 

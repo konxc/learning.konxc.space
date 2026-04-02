@@ -71,6 +71,16 @@
 							<span class={COLOR.textMuted}>Students</span>
 							<span class={COLOR.textPrimary}>{cohort.studentCount}</span>
 						</div>
+						{#if cohort.atRiskCount > 0}
+							<div class="flex justify-between">
+								<span class={COLOR.textMuted}>At Risk</span>
+								<span
+									class="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-700 dark:bg-rose-900/40 dark:text-rose-300"
+								>
+									⚠️ {cohort.atRiskCount} siswa
+								</span>
+							</div>
+						{/if}
 						<div class="flex justify-between">
 							<span class={COLOR.textMuted}>Start</span>
 							<span class={COLOR.textPrimary}>{formatDate(cohort.startDate)}</span>
