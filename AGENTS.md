@@ -4,16 +4,16 @@
 
 ## Quick Reference
 
-| Item | Value |
-|------|-------|
-| **Framework** | SvelteKit 2 + Svelte 5 Runes |
-| **Styling** | Tailwind CSS 4 (CSS-first, no config file) |
-| **Database** | Turso (LibSQL) via Drizzle ORM |
-| **Auth** | Lucia v3 (session cookies) |
-| **Adapter** | `@sveltejs/adapter-node` |
-| **Package Manager** | pnpm |
-| **Type Check** | `pnpm run check` |
-| **Build** | `pnpm run build` |
+| Item                | Value                                      |
+| ------------------- | ------------------------------------------ |
+| **Framework**       | SvelteKit 2 + Svelte 5 Runes               |
+| **Styling**         | Tailwind CSS 4 (CSS-first, no config file) |
+| **Database**        | Neon (PostgreSQL) via Drizzle ORM          |
+| **Auth**            | Lucia v3 (session cookies)                 |
+| **Adapter**         | `@sveltejs/adapter-node`                   |
+| **Package Manager** | pnpm                                       |
+| **Type Check**      | `pnpm run check`                           |
+| **Build**           | `pnpm run build`                           |
 
 ## Rules of Engagement
 
@@ -44,7 +44,7 @@ src/
 ├── lib/
 │   ├── config/design.ts     # 🎨 ALL design tokens (import from here)
 │   ├── server/
-│   │   ├── db/schema.ts     # 📦 44 Drizzle tables (SQLite)
+│   │   ├── db/schema.ts     # 📦 Drizzle tables (PostgreSQL/Neon)
 │   │   ├── rbac.ts          # 🔐 Role-based nav & permissions
 │   │   ├── auth.ts          # 🔒 Lucia auth setup
 │   │   └── payments/        # 💰 Midtrans integration
@@ -109,18 +109,18 @@ The dashboard uses a **fixed sidebar + sticky header** pattern:
 
 ## Database Entities (Key Groups)
 
-| Group | Tables | Notes |
-|-------|--------|-------|
-| Auth | `user`, `session` | Lucia-managed |
-| LMS | `course`, `module`, `lesson`, `material`, `enrollment`, `cohort` | Core learning flow |
-| Assessment | `quiz`, `quizQuestion`, `quizChoice`, `submission`, `submissionGrade` | Mentor grading |
-| Progress | `lessonProgress`, `lessonNote`, `checkpoint`, `checkpointSubmission` | Student tracking |
-| Commerce | `transaction`, `paymentProof`, `coupon`, `couponUsage` | Midtrans + manual |
-| Affiliate | `affiliateSale`, `affiliateLink` | Commission tracking |
-| Multi-Tenant | `organization`, `organizationMember`, `organizationInvitation`, `workspace`, `workspaceMember` | B2B support |
-| Plugins | `pluginRegistry`, `coursePlugin` | Feature toggles |
-| Social | `discussion`, `notification`, `broadcastMessage`, `courseReview` | Community |
-| Gamification | `certificate`, `badge`, `userBadge`, `userXP` | Engagement |
+| Group        | Tables                                                                                         | Notes               |
+| ------------ | ---------------------------------------------------------------------------------------------- | ------------------- |
+| Auth         | `user`, `session`                                                                              | Lucia-managed       |
+| LMS          | `course`, `module`, `lesson`, `material`, `enrollment`, `cohort`                               | Core learning flow  |
+| Assessment   | `quiz`, `quizQuestion`, `quizChoice`, `submission`, `submissionGrade`                          | Mentor grading      |
+| Progress     | `lessonProgress`, `lessonNote`, `checkpoint`, `checkpointSubmission`                           | Student tracking    |
+| Commerce     | `transaction`, `paymentProof`, `coupon`, `couponUsage`                                         | Midtrans + manual   |
+| Affiliate    | `affiliateSale`, `affiliateLink`                                                               | Commission tracking |
+| Multi-Tenant | `organization`, `organizationMember`, `organizationInvitation`, `workspace`, `workspaceMember` | B2B support         |
+| Plugins      | `pluginRegistry`, `coursePlugin`                                                               | Feature toggles     |
+| Social       | `discussion`, `notification`, `broadcastMessage`, `courseReview`                               | Community           |
+| Gamification | `certificate`, `badge`, `userBadge`, `userXP`                                                  | Engagement          |
 
 ## Common Tasks
 
@@ -152,7 +152,7 @@ The dashboard uses a **fixed sidebar + sticky header** pattern:
 
 ```
 feat: add new feature
-fix: resolve bug  
+fix: resolve bug
 style: UI/UX changes (no logic change)
 refactor: code restructure
 docs: documentation updates

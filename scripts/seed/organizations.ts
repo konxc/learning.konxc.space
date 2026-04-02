@@ -4,8 +4,8 @@
  *
  * ROLE PLATFORM → ROLE ORG yang SESUAI:
  *   admin       → owner  (hanya di org utama: Koneksi Digital)
- *   mentor      → creator (hanya di 1 org sesuai spesialisasi)
- *   facilitator → facilitator (hanya di 1 org)
+ *   user/mentor → mentor (hanya di 1 org sesuai spesialisasi)
+ *   user/facil  → facilitator (hanya di 1 org)
  *   bd          → tidak masuk org (hanya akses CRM)
  *   user/student→ tidak masuk org (hanya belajar)
  *
@@ -112,14 +112,14 @@ export async function seedOrganizations(db: NeonHttpDatabase<typeof schema>, _un
 			id: 'mem-kd-002',
 			orgId: 'org-koneksi',
 			userId: 'mentor-001',
-			role: 'creator',
+			role: 'mentor',
 			createdAt: new Date('2024-01-03')
 		},
 		{
 			id: 'mem-kd-003',
 			orgId: 'org-koneksi',
 			userId: 'mentor-002',
-			role: 'creator',
+			role: 'mentor',
 			createdAt: new Date('2024-01-03')
 		},
 		{
@@ -152,7 +152,7 @@ export async function seedOrganizations(db: NeonHttpDatabase<typeof schema>, _un
 			id: 'mem-pi-002',
 			orgId: 'org-pondokit',
 			userId: 'mentor-005',
-			role: 'creator',
+			role: 'mentor',
 			createdAt: new Date('2024-01-10')
 		},
 		{
@@ -177,7 +177,7 @@ export async function seedOrganizations(db: NeonHttpDatabase<typeof schema>, _un
 			id: 'mem-ml-002',
 			orgId: 'org-marketinglab',
 			userId: 'mentor-003',
-			role: 'creator',
+			role: 'mentor',
 			createdAt: new Date('2024-01-20')
 		},
 

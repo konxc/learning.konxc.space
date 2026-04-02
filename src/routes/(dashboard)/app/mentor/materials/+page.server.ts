@@ -2,10 +2,10 @@ import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
-import { requireMentor } from '$lib/server/middleware';
+import { requireAuth } from '$lib/server/middleware';
 
 export const load: PageServerLoad = async (event) => {
-	const user = await requireMentor(event);
+	const user = await requireAuth(event);
 
 	// Get all materials across mentor's courses
 	const materials = await db

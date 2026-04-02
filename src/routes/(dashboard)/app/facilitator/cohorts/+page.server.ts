@@ -2,21 +2,37 @@ import type { PageServerLoad } from './$types';
 import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, and, count } from 'drizzle-orm';
+import { eq, and, count, inArray } from 'drizzle-orm';
 import { redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
 
-	// Only facilitator, mentor, and admin can access
-	if (!['facilitator', 'mentor', 'admin'].includes(user.role)) {
-		throw redirect(303, '/app/overview');
+	const isPlatformAdmin = user.role === 'admin';
+
+	// Platform admin has access. Others need org membership with facilitator/mentor/owner/admin role.
+	if (!isPlatformAdmin) {
+		const eligibleMemberships = await db
+			.select({ orgId: schema.organizationMember.orgId })
+			.from(schema.organizationMember)
+			.where(
+				and(
+					eq(schema.organizationMember.userId, user.id),
+					inArray(schema.organizationMember.role, ['facilitator', 'mentor', 'owner', 'admin'])
+				)
+			)
+			.limit(1);
+
+		if (eligibleMemberships.length === 0) {
+			throw redirect(303, '/app/overview');
+		}
 	}
 
 	// Get user's organizations where they are a facilitator
 	const memberships = await db
 		.select({
 			orgId: schema.organizationMember.orgId,
+			role: schema.organizationMember.role,
 			organization: {
 				name: schema.organization.name,
 				logoUrl: schema.organization.logoUrl
@@ -27,13 +43,13 @@ export const load: PageServerLoad = async (event) => {
 		.where(
 			and(
 				eq(schema.organizationMember.userId, user.id),
-				eq(schema.organizationMember.role, 'facilitator')
+				inArray(schema.organizationMember.role, ['facilitator', 'mentor', 'owner', 'admin'])
 			)
 		);
 
 	const orgIds = memberships.map((m) => m.orgId);
 
-	// Get cohorts where user is facilitator
+	// Get cohorts where user is assigned as facilitator
 	const cohorts =
 		orgIds.length > 0
 			? await db

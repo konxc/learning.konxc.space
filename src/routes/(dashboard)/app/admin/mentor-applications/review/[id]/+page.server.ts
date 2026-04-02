@@ -2,9 +2,15 @@ import { requireAdmin } from '$lib/server/middleware';
 import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { redirect, error } from '@sveltejs/kit';
 import { actionSuccess, actionFailure } from '$lib/server/actions';
+import { encodeBase32LowerCase } from '@oslojs/encoding';
+
+function generateId(): string {
+	const bytes = crypto.getRandomValues(new Uint8Array(15));
+	return encodeBase32LowerCase(bytes);
+}
 
 export const load: PageServerLoad = async (event) => {
 	await requireAdmin(event);
@@ -59,6 +65,7 @@ export const actions: Actions = {
 
 		if (!app[0]) return actionFailure(404, 'Application not found');
 
+		// Update application status
 		await db
 			.update(schema.mentorApplication)
 			.set({
@@ -69,7 +76,65 @@ export const actions: Actions = {
 			})
 			.where(eq(schema.mentorApplication.id, applicationId));
 
-		await db.update(schema.user).set({ role: 'mentor' }).where(eq(schema.user.id, app[0].userId));
+		// Check if user already has an org (as owner)
+		const existingOwnership = await db
+			.select({ orgId: schema.organizationMember.orgId })
+			.from(schema.organizationMember)
+			.where(
+				and(
+					eq(schema.organizationMember.userId, app[0].userId),
+					eq(schema.organizationMember.role, 'owner')
+				)
+			)
+			.limit(1);
+
+		if (!existingOwnership[0]) {
+			// Auto-create org for this mentor
+			const orgId = generateId();
+			const slug = `${app[0].userId}-academy`;
+
+			await db.insert(schema.organization).values({
+				id: orgId,
+				slug,
+				name: `${app[0].fullName} Academy`,
+				planType: 'free'
+			});
+
+			// Add as owner (org-level) — single record per user per org
+			await db.insert(schema.organizationMember).values({
+				id: generateId(),
+				orgId,
+				userId: app[0].userId,
+				role: 'owner',
+				createdAt: new Date(),
+				updatedAt: new Date()
+			});
+		} else {
+			// Already has an org — ensure they have mentor role in it
+			const orgId = existingOwnership[0].orgId;
+			const existingMentorRole = await db
+				.select({ id: schema.organizationMember.id })
+				.from(schema.organizationMember)
+				.where(
+					and(
+						eq(schema.organizationMember.userId, app[0].userId),
+						eq(schema.organizationMember.orgId, orgId),
+						eq(schema.organizationMember.role, 'mentor')
+					)
+				)
+				.limit(1);
+
+			if (!existingMentorRole[0]) {
+				await db.insert(schema.organizationMember).values({
+					id: generateId(),
+					orgId,
+					userId: app[0].userId,
+					role: 'mentor',
+					createdAt: new Date(),
+					updatedAt: new Date()
+				});
+			}
+		}
 
 		await db.insert(schema.notification).values({
 			id: crypto.randomUUID(),

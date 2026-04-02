@@ -2,7 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, desc, count, isNotNull } from 'drizzle-orm';
+import { eq, desc, count, isNotNull, inArray } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 
@@ -17,12 +17,18 @@ export const load: PageServerLoad = async (event) => {
 		.where(eq(schema.course.status, 'published'))
 		.orderBy(desc(schema.course.createdAt));
 
-	// Get facilitators for assignment dropdown
-	const facilitators = await db
-		.select({ id: schema.user.id, fullName: schema.user.fullName, username: schema.user.username })
+	// Get facilitators for assignment dropdown — via org membership role
+	const facilitatorMembers = await db
+		.selectDistinct({
+			id: schema.user.id,
+			fullName: schema.user.fullName,
+			username: schema.user.username
+		})
 		.from(schema.user)
-		.where(eq(schema.user.role, 'facilitator'))
+		.innerJoin(schema.organizationMember, eq(schema.organizationMember.userId, schema.user.id))
+		.where(eq(schema.organizationMember.role, 'facilitator'))
 		.orderBy(schema.user.fullName);
+	const facilitators = facilitatorMembers;
 
 	// Get all cohorts with course name and enrollment count
 	const cohorts = await db

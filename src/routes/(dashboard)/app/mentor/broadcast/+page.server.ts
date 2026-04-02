@@ -8,9 +8,25 @@ import type { PageServerLoad, Actions } from './$types';
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
 
-	// Only admin and mentor can access
-	if (user.role !== 'admin' && user.role !== 'mentor') {
-		throw redirect(302, '/app');
+	// Platform admin always has access.
+	// Non-admin users need at least one org membership with mentor/owner/admin role.
+	const isPlatformAdmin = user.role === 'admin';
+
+	if (!isPlatformAdmin) {
+		const mentorMemberships = await db
+			.select({ orgId: schema.organizationMember.orgId })
+			.from(schema.organizationMember)
+			.where(
+				and(
+					eq(schema.organizationMember.userId, user.id),
+					inArray(schema.organizationMember.role, ['mentor', 'owner', 'admin'])
+				)
+			)
+			.limit(1);
+
+		if (mentorMemberships.length === 0) {
+			throw redirect(302, '/app');
+		}
 	}
 
 	// Get active organization from cookie
@@ -26,7 +42,7 @@ export const load: PageServerLoad = async (event) => {
 
 	// Get available courses - scoped to org for non-admin users
 	let courses: { id: string; title: string; orgId: string | null }[] = [];
-	if (user.role === 'admin') {
+	if (isPlatformAdmin) {
 		courses = await db
 			.select({
 				id: schema.course.id,
@@ -50,7 +66,7 @@ export const load: PageServerLoad = async (event) => {
 
 	// Get available cohorts - only from user's org courses
 	let cohorts: { id: string; name: string; courseName: string | null; orgId: string | null }[] = [];
-	if (user.role === 'admin') {
+	if (isPlatformAdmin) {
 		cohorts = await db
 			.select({
 				id: schema.cohort.id,
@@ -74,9 +90,9 @@ export const load: PageServerLoad = async (event) => {
 			.where(and(eq(schema.cohort.status, 'active'), inArray(schema.cohort.courseId, courseIds)));
 	}
 
-	// Get recent broadcasts - admins see all, mentors see their org's
+	// Get recent broadcasts
 	let broadcasts;
-	if (user.role === 'admin') {
+	if (isPlatformAdmin) {
 		broadcasts = await db
 			.select({
 				id: schema.broadcastMessage.id,
@@ -95,7 +111,6 @@ export const load: PageServerLoad = async (event) => {
 			.orderBy(schema.broadcastMessage.createdAt)
 			.limit(20);
 	} else {
-		// For mentors: show broadcasts for their courses
 		broadcasts = await db
 			.select({
 				id: schema.broadcastMessage.id,
@@ -111,32 +126,25 @@ export const load: PageServerLoad = async (event) => {
 			})
 			.from(schema.broadcastMessage)
 			.leftJoin(schema.user, eq(schema.broadcastMessage.senderId, schema.user.id))
-			.where(
-				// Show broadcasts targeting user's courses or sent by user
-				eq(schema.broadcastMessage.senderId, user.id)
-			)
+			.where(eq(schema.broadcastMessage.senderId, user.id))
 			.orderBy(schema.broadcastMessage.createdAt)
 			.limit(20);
 	}
 
 	// Get user's organizations for org selection
-	const memberships =
-		user.role !== 'admin'
-			? await db
-					.select({
-						orgId: schema.organizationMember.orgId,
-						organization: {
-							id: schema.organization.id,
-							name: schema.organization.name
-						}
-					})
-					.from(schema.organizationMember)
-					.innerJoin(
-						schema.organization,
-						eq(schema.organizationMember.orgId, schema.organization.id)
-					)
-					.where(eq(schema.organizationMember.userId, user.id))
-			: [];
+	const memberships = !isPlatformAdmin
+		? await db
+				.select({
+					orgId: schema.organizationMember.orgId,
+					organization: {
+						id: schema.organization.id,
+						name: schema.organization.name
+					}
+				})
+				.from(schema.organizationMember)
+				.innerJoin(schema.organization, eq(schema.organizationMember.orgId, schema.organization.id))
+				.where(eq(schema.organizationMember.userId, user.id))
+		: [];
 
 	return {
 		broadcasts,
@@ -152,8 +160,23 @@ export const actions: Actions = {
 	send: async ({ request, locals, url }) => {
 		const user = await requireAuth(locals);
 
-		if (user.role !== 'admin' && user.role !== 'mentor') {
-			return { success: false, error: 'Unauthorized' };
+		const isPlatformAdmin = user.role === 'admin';
+
+		if (!isPlatformAdmin) {
+			const mentorMemberships = await db
+				.select({ orgId: schema.organizationMember.orgId })
+				.from(schema.organizationMember)
+				.where(
+					and(
+						eq(schema.organizationMember.userId, user.id),
+						inArray(schema.organizationMember.role, ['mentor', 'owner', 'admin'])
+					)
+				)
+				.limit(1);
+
+			if (mentorMemberships.length === 0) {
+				return { success: false, error: 'Unauthorized' };
+			}
 		}
 
 		const formData = await request.formData();

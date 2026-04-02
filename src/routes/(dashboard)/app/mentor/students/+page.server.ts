@@ -1,11 +1,11 @@
-import { requireMentor } from '$lib/server/middleware';
+import { requireAuth } from '$lib/server/middleware';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 
 export const load: PageServerLoad = async (event) => {
-	const mentor = await requireMentor(event);
+	const mentor = await requireAuth(event);
 
 	// Get the filters if provided
 	const courseId = event.url.searchParams.get('course');

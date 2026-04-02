@@ -3,7 +3,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
-import { eq } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.user) {
@@ -29,23 +29,51 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		}
 	}
 
-	// Redirect to dashboard if onboarding already completed (for mentor/facilitator)
-	if ((user.role === 'mentor' || user.role === 'facilitator') && user.onboardingCompleted) {
+	// Determine effective role from org context (URL param) or org memberships
+	let effectiveOrgRole: string | null = null;
+
+	if (invitedOrgId && invitedRole) {
+		// Verify the user actually has this role in the invited org
+		const membership = await db.query.organizationMember.findFirst({
+			where: and(
+				eq(schema.organizationMember.userId, user.id),
+				eq(schema.organizationMember.orgId, invitedOrgId)
+			)
+		});
+		if (membership) {
+			effectiveOrgRole = membership.role;
+		}
+	}
+
+	// If no org context from URL, check if user has any mentor/facilitator org membership
+	if (!effectiveOrgRole) {
+		const orgMembership = await db.query.organizationMember.findFirst({
+			where: and(
+				eq(schema.organizationMember.userId, user.id),
+				inArray(schema.organizationMember.role, ['mentor', 'facilitator', 'owner'])
+			)
+		});
+		if (orgMembership) {
+			effectiveOrgRole = orgMembership.role;
+		}
+	}
+
+	// Redirect to dashboard if onboarding already completed and no special org role
+	if (user.onboardingCompleted && !effectiveOrgRole) {
 		throw redirect(303, '/app');
 	}
 
-	// For Mentors - Load application status
+	// For Mentors — Load application status
 	let mentorData = null;
-	if (user.role === 'mentor') {
+	if (effectiveOrgRole === 'mentor' || effectiveOrgRole === 'owner') {
 		mentorData = await db.query.mentorApplication.findFirst({
 			where: eq(schema.mentorApplication.userId, user.id)
 		});
 	}
 
-	// For Facilitators - Load available organizations
+	// For Facilitators — Load available organizations
 	let organizations: Array<{ id: string; name: string; slug: string }> = [];
-	if (user.role === 'facilitator') {
-		// If invited to a specific org, only load that org
+	if (effectiveOrgRole === 'facilitator') {
 		if (invitedOrgId) {
 			const invitedOrg = await db
 				.select({
@@ -60,11 +88,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			if (invitedOrg.length > 0) {
 				organizations = invitedOrg;
 			} else {
-				// Org not found — strip invalid param and redirect
 				throw redirect(303, '/onboarding');
 			}
-		} else if (user.role === 'facilitator') {
-			// No specific invitation - load all available orgs for facilitator
+		} else {
 			organizations = await db
 				.select({
 					id: schema.organization.id,
@@ -76,7 +102,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	}
 
 	return {
-		role: user.role,
+		role: effectiveOrgRole || user.role,
 		mentorData,
 		organizations,
 		invitedOrgId,
@@ -85,7 +111,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-	// Save user preferences (telemetry data)
 	savePreferences: async ({ request, locals }) => {
 		const user = locals.user;
 		if (!user) {
@@ -93,20 +118,18 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const goals = formData.get('goals') as string; // JSON array string
-		const interests = formData.get('interests') as string; // JSON array string
+		const goals = formData.get('goals') as string;
+		const interests = formData.get('interests') as string;
 		const experienceLevel = formData.get('experienceLevel') as string;
 		const learningSchedule = formData.get('learningSchedule') as string;
-		const notificationPrefs = formData.get('notificationPrefs') as string; // JSON array string
+		const notificationPrefs = formData.get('notificationPrefs') as string;
 
 		try {
-			// Check if user preferences already exist
 			const existing = await db.query.userPreferences.findFirst({
 				where: eq(schema.userPreferences.userId, user.id)
 			});
 
 			if (existing) {
-				// Update existing preferences
 				await db
 					.update(schema.userPreferences)
 					.set({
@@ -119,7 +142,6 @@ export const actions: Actions = {
 					})
 					.where(eq(schema.userPreferences.userId, user.id));
 			} else {
-				// Insert new preferences
 				await db.insert(schema.userPreferences).values({
 					userId: user.id,
 					goals: goals || '[]',
@@ -130,7 +152,6 @@ export const actions: Actions = {
 				});
 			}
 
-			// Mark onboarding as complete
 			await db
 				.update(schema.user)
 				.set({ onboardingCompleted: true })
@@ -144,7 +165,6 @@ export const actions: Actions = {
 		}
 	},
 
-	// Complete onboarding for facilitators (organization selection)
 	completeOnboarding: async ({ request, locals }) => {
 		const user = locals.user;
 		if (!user) {
@@ -155,15 +175,13 @@ export const actions: Actions = {
 		const organizationId = formData.get('organizationId') as string | null;
 
 		try {
-			// If facilitator, add them to the organization
-			if (user.role === 'facilitator' && organizationId) {
-				// Check if already a member
+			// If facilitator invited to an org, ensure membership exists
+			if (organizationId) {
 				const existingMember = await db.query.organizationMember.findFirst({
-					where: (fields, operators) =>
-						operators.and(
-							operators.eq(fields.orgId, organizationId),
-							operators.eq(fields.userId, user.id)
-						)
+					where: and(
+						eq(schema.organizationMember.orgId, organizationId),
+						eq(schema.organizationMember.userId, user.id)
+					)
 				});
 
 				if (!existingMember) {
@@ -176,7 +194,6 @@ export const actions: Actions = {
 				}
 			}
 
-			// Mark onboarding as complete
 			await db
 				.update(schema.user)
 				.set({ onboardingCompleted: true })
@@ -196,7 +213,6 @@ export const actions: Actions = {
 			return fail(401, { error: 'Not authenticated' });
 		}
 
-		// Mark onboarding as complete and redirect to settings
 		try {
 			await db
 				.update(schema.user)

@@ -189,22 +189,13 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 			sameSite: 'lax'
 		});
 
-		// Update user's last workspace and role (for mentor/facilitator invitations)
-		const needsRoleUpdate =
-			(invitation.role === 'mentor' || invitation.role === 'facilitator') &&
-			user.role !== 'mentor' &&
-			user.role !== 'facilitator' &&
-			user.role !== 'admin';
-
+		// Update user's last workspace only (role stays as platform role — no longer updated)
 		await db
 			.update(schema.user)
-			.set({
-				lastWorkspaceId: invitation.orgId,
-				...(needsRoleUpdate ? { role: invitation.role, onboardingCompleted: false } : {})
-			})
+			.set({ lastWorkspaceId: invitation.orgId })
 			.where(eq(schema.user.id, user.id));
 
-		// Redirect to appropriate onboarding based on role
+		// Redirect to appropriate onboarding based on org role
 		if (invitation.role === 'mentor' || invitation.role === 'facilitator') {
 			throw redirect(302, `/onboarding?org=${invitation.orgId}&role=${invitation.role}`);
 		}

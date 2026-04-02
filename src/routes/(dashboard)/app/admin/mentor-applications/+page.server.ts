@@ -2,9 +2,14 @@ import { requireAdmin } from '$lib/server/middleware';
 import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { actionSuccess, actionFailure } from '$lib/server/actions';
-import { createAffiliateAccountForUser } from '$lib/server/affiliate';
+import { encodeBase32LowerCase } from '@oslojs/encoding';
+
+function generateId(): string {
+	const bytes = crypto.getRandomValues(new Uint8Array(15));
+	return encodeBase32LowerCase(bytes);
+}
 
 export const load: PageServerLoad = async (event) => {
 	await requireAdmin(event);
@@ -49,7 +54,6 @@ export const actions: Actions = {
 
 		if (!applicationId) return actionFailure(400, 'Application ID required');
 
-		// Verify application exists first
 		const app = await db
 			.select()
 			.from(schema.mentorApplication)
@@ -59,7 +63,6 @@ export const actions: Actions = {
 		if (!app[0]) return actionFailure(404, 'Application not found');
 		if (app[0].status !== 'pending') return actionFailure(400, 'Application already processed');
 
-		// Verify user exists
 		const userExists = await db
 			.select({ id: schema.user.id })
 			.from(schema.user)
@@ -68,18 +71,7 @@ export const actions: Actions = {
 
 		if (!userExists[0]) return actionFailure(404, 'User not found');
 
-		// Get user's org
-		const userOrgs = await db
-			.select()
-			.from(schema.organizationMember)
-			.where(eq(schema.organizationMember.userId, app[0].userId))
-			.limit(1);
-
-		const orgId = userOrgs[0]?.orgId || 'personal';
-		const notificationId = crypto.randomUUID();
-
 		try {
-			// Execute all operations in a transaction
 			await db.transaction(async (tx) => {
 				// 1. Update application status
 				await tx
@@ -92,13 +84,43 @@ export const actions: Actions = {
 					})
 					.where(eq(schema.mentorApplication.id, applicationId));
 
-				// 2. Upgrade user role to mentor
-				await tx
-					.update(schema.user)
-					.set({ role: 'mentor' })
-					.where(eq(schema.user.id, app[0].userId));
+				// 2. Check if user already owns an org
+				const existingOwnership = await tx
+					.select({ orgId: schema.organizationMember.orgId })
+					.from(schema.organizationMember)
+					.where(
+						and(
+							eq(schema.organizationMember.userId, app[0].userId),
+							eq(schema.organizationMember.role, 'owner')
+						)
+					)
+					.limit(1);
 
-				// 3. Create affiliate account
+				let orgId: string;
+
+				if (!existingOwnership[0]) {
+					// Auto-create org for this mentor
+					orgId = generateId();
+					await tx.insert(schema.organization).values({
+						id: orgId,
+						slug: `${app[0].userId}-academy`,
+						name: `${app[0].fullName} Academy`,
+						planType: 'free'
+					});
+
+					await tx.insert(schema.organizationMember).values({
+						id: generateId(),
+						orgId,
+						userId: app[0].userId,
+						role: 'owner',
+						createdAt: new Date(),
+						updatedAt: new Date()
+					});
+				} else {
+					orgId = existingOwnership[0].orgId;
+				}
+
+				// 3. Create affiliate account linked to org
 				const accountId = `aff_${crypto.randomUUID().slice(0, 12)}`;
 				await tx.insert(schema.affiliateAccount).values({
 					id: accountId,
@@ -122,7 +144,7 @@ export const actions: Actions = {
 
 				// 5. Send notification
 				await tx.insert(schema.notification).values({
-					id: notificationId,
+					id: crypto.randomUUID(),
 					userId: app[0].userId,
 					type: 'system',
 					title: 'Selamat! Aplikasi Mentor Disetujui 🎉',
@@ -133,10 +155,10 @@ export const actions: Actions = {
 			});
 
 			return actionSuccess({
-				message: `Aplikasi ${app[0].fullName} disetujui, role diupgrade ke mentor, dan affiliate account dibuat.`
+				message: `Aplikasi ${app[0].fullName} disetujui, org dibuat, dan affiliate account dibuat.`
 			});
-		} catch (error) {
-			console.error('Approve mentor application failed:', error);
+		} catch (err) {
+			console.error('Approve mentor application failed:', err);
 			return actionFailure(500, 'Failed to process application. Please try again.');
 		}
 	},
@@ -168,7 +190,6 @@ export const actions: Actions = {
 			})
 			.where(eq(schema.mentorApplication.id, applicationId));
 
-		// Notify applicant
 		await db.insert(schema.notification).values({
 			id: crypto.randomUUID(),
 			userId: app[0].userId,

@@ -1,4 +1,5 @@
 import { requireAuth } from '$lib/server/middleware';
+import { checkHasOrgRole } from '$lib/server/org-context';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
@@ -9,8 +10,9 @@ import { actionFailure } from '$lib/server/actions';
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
 
-	// Check if user is already mentor or admin
-	if (user.role === 'mentor' || user.role === 'admin') {
+	// Check if user is already admin (platform) or already has mentor org role
+	const isAlreadyMentor = user.role === 'admin' || (await checkHasOrgRole(user.id, 'mentor'));
+	if (isAlreadyMentor) {
 		throw redirect(303, '/app');
 	}
 
@@ -32,8 +34,9 @@ export const actions: Actions = {
 	default: async (event) => {
 		const user = await requireAuth(event);
 
-		// Check if user is already mentor/admin
-		if (user.role === 'mentor' || user.role === 'admin') {
+		// Check if user is already admin/mentor
+		const isAlreadyMentor = user.role === 'admin' || (await checkHasOrgRole(user.id, 'mentor'));
+		if (isAlreadyMentor) {
 			return actionFailure(403, 'Anda sudah menjadi mentor atau admin');
 		}
 

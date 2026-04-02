@@ -1,4 +1,4 @@
-import { requireMentor } from '$lib/server/middleware';
+import { requireAuth } from '$lib/server/middleware';
 import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
@@ -9,7 +9,7 @@ import { sendEmail, createNotification } from '$lib/server/email';
 import { awardXP, checkAndAwardBadges } from '$lib/server/gamification';
 
 export const load: PageServerLoad = async (event) => {
-	const mentor = await requireMentor(event);
+	const mentor = await requireAuth(event);
 	const { userId } = event.params;
 
 	// Verify the student exists and is enrolled in at least one mentor course
@@ -180,7 +180,7 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	grade: async (event) => {
-		const mentor = await requireMentor(event);
+		const mentor = await requireAuth(event);
 		const { userId } = event.params;
 
 		const formData = await event.request.formData();

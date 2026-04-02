@@ -1,5 +1,5 @@
 import type { Actions, PageServerLoad } from './$types';
-import { requireMentor } from '$lib/server/middleware';
+import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, desc, inArray } from 'drizzle-orm';
@@ -13,7 +13,7 @@ type CourseRecord = typeof schema.course.$inferSelect;
 type SubmissionWithCourse = SubmissionRecord & { course: CourseRecord | null };
 
 export const load: PageServerLoad = async ({ params, locals, url }) => {
-	const mentor = await requireMentor({ user: locals.user });
+	const mentor = await requireAuth({ user: locals.user });
 	const courseId = params.id;
 	const filterType = url.searchParams.get('type'); // 'quiz' | 'assignment' | null
 	const filterStatus = url.searchParams.get('status'); // 'pending' | 'graded' | null
@@ -125,7 +125,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 export const actions: Actions = {
 	gradeAssignment: async (event) => {
 		const { request, locals, url } = event;
-		const mentor = await requireMentor({ user: locals.user });
+		const mentor = await requireAuth({ user: locals.user });
 
 		const formData = await request.formData();
 		const submissionIdValue = formData.get('submissionId');

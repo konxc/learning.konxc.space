@@ -80,15 +80,16 @@ export const load: PageServerLoad = async (event) => {
 		unassigned: enrollments.filter((e) => !e.track).length
 	};
 
-	// Get all facilitators for dropdown
+	// Get all facilitators for dropdown — via org membership role
 	const facilitators = await db
-		.select({
+		.selectDistinct({
 			id: schema.user.id,
 			fullName: schema.user.fullName,
 			email: schema.user.email
 		})
 		.from(schema.user)
-		.where(eq(schema.user.role, 'facilitator'));
+		.innerJoin(schema.organizationMember, eq(schema.organizationMember.userId, schema.user.id))
+		.where(eq(schema.organizationMember.role, 'facilitator'));
 
 	return {
 		cohort,

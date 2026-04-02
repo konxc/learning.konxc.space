@@ -102,44 +102,26 @@ export function deleteSessionTokenCookie(event: RequestEvent) {
 }
 
 /**
- * Handle role change and trigger re-onboarding if needed.
- * When a user's role changes to mentor/facilitator, reset onboarding status
- * to trigger role-specific onboarding flow.
+ * Handle role change for platform-level roles only (admin, bd, user).
+ * Mentor/facilitator roles are now exclusively managed via organization_member.
  */
 export async function handleRoleChange(
 	userId: string,
 	newRole: string,
 	oldRole: string
 ): Promise<boolean> {
-	// If role changed from 'user' to 'mentor' or 'facilitator', trigger re-onboarding
-	if (oldRole === 'user' && (newRole === 'mentor' || newRole === 'facilitator')) {
-		await db
-			.update(table.user)
-			.set({
-				onboardingCompleted: false,
-				role: newRole
-			})
-			.where(eq(table.user.id, userId));
-		return true; // Re-onboarding triggered
-	}
-
-	// Just update role for other cases
+	// Only update platform-level roles
 	await db.update(table.user).set({ role: newRole }).where(eq(table.user.id, userId));
-
-	return false; // No re-onboarding needed
+	return false; // No re-onboarding triggered via platform role change
 }
 
 /**
- * Get the onboarding status for a user's current role.
- * Returns whether role-specific onboarding is needed.
+ * Get the onboarding status for a user.
+ * Onboarding is now based on completion flag only — not role.
  */
 export function needsRoleOnboarding(user: {
 	role: string;
 	onboardingCompleted: boolean | null;
 }): boolean {
-	// For mentors and facilitators, check if they need role-specific onboarding
-	if ((user.role === 'mentor' || user.role === 'facilitator') && !user.onboardingCompleted) {
-		return true;
-	}
-	return false;
+	return !user.onboardingCompleted;
 }

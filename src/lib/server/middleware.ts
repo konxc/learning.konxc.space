@@ -16,15 +16,11 @@ export async function requireAuth(eventOrLocals: RequestEvent | { user: any }) {
 
 export async function requireRole(
 	eventOrLocals: RequestEvent | { user: any },
-	role: 'admin' | 'mentor' | 'user'
+	role: 'admin' | 'user'
 ) {
 	const user = await requireAuth(eventOrLocals);
 
 	if (role === 'admin' && user.role !== 'admin') {
-		throw redirect(303, '/app');
-	}
-
-	if (role === 'mentor' && !['mentor', 'admin'].includes(user.role)) {
 		throw redirect(303, '/app');
 	}
 
@@ -46,8 +42,11 @@ export async function requireAdmin(eventOrLocals: RequestEvent | { user: any }) 
 	return requireRole(eventOrLocals, 'admin');
 }
 
-export async function requireMentor(eventOrLocals: RequestEvent | { user: any }) {
-	return requireRole(eventOrLocals, 'mentor');
+/** Require platform admin — explicit alias for clarity */
+export async function requirePlatformAdmin(eventOrLocals: RequestEvent | { user: any }) {
+	const user = await requireAuth(eventOrLocals);
+	if (user.role !== 'admin') throw redirect(303, '/app');
+	return user;
 }
 
 // ─── Organization Permission Checks ───────────────────────────────────────────
@@ -56,7 +55,7 @@ export interface OrgMembership {
 	id: string;
 	orgId: string;
 	userId: string;
-	role: 'owner' | 'admin' | 'member';
+	role: string;
 	createdAt: Date;
 	updatedAt: Date;
 }

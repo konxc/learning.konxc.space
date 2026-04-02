@@ -1,5 +1,5 @@
 import type { Actions, PageServerLoad } from './$types';
-import { requireMentor } from '$lib/server/middleware';
+import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -8,7 +8,7 @@ import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const mentor = await requireMentor({ user: locals.user });
+	const mentor = await requireAuth({ user: locals.user });
 	const courseId = params.id;
 
 	// Verify mentor owns this course
@@ -51,7 +51,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 export const actions: Actions = {
 	createQuiz: async ({ request, params, locals }) => {
-		const mentor = await requireMentor({ user: locals.user });
+		const mentor = await requireAuth({ user: locals.user });
 		const courseId = params.id;
 
 		const formData = await request.formData();
@@ -104,7 +104,7 @@ export const actions: Actions = {
 	},
 
 	addQuestion: async ({ request, locals }) => {
-		const mentor = await requireMentor({ user: locals.user });
+		const mentor = await requireAuth({ user: locals.user });
 
 		const formData = await request.formData();
 		const quizId = formData.get('quizId') as string;

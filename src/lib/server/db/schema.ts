@@ -50,6 +50,7 @@ export const course = pgTable('course', {
 	price: integer('price').notNull(),
 	duration: integer('duration'),
 	status: text('status').notNull().default('draft'),
+	visibility: text('visibility').notNull().default('public'),
 	featuresConfig: text('features_config'),
 	mentorId: text('mentor_id').references(() => user.id),
 	createdBy: text('created_by')

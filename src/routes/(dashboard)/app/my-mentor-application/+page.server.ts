@@ -1,4 +1,5 @@
 import { requireAuth } from '$lib/server/middleware';
+import { checkHasOrgRole } from '$lib/server/org-context';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
@@ -20,6 +21,6 @@ export const load: PageServerLoad = async (event) => {
 	return {
 		user,
 		application,
-		isMentor: user.role === 'mentor' || user.role === 'admin'
+		isMentor: user.role === 'admin' || (await checkHasOrgRole(user.id, 'mentor'))
 	};
 };

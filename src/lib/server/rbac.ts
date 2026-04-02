@@ -21,13 +21,18 @@ export function isAdmin(user: User | null): boolean {
 	return hasRole(user, 'admin');
 }
 
-export function isMentor(user: User | null): boolean {
-	return hasRole(user, ['mentor', 'admin']);
+/** Platform-level admin check */
+export function isPlatformAdmin(user: User | null): boolean {
+	return user?.role === 'admin';
 }
 
-export function isFacilitator(user: User | null): boolean {
-	return hasRole(user, ['facilitator', 'mentor', 'admin']);
+/** Platform-level BD check */
+export function isBD(user: User | null): boolean {
+	return user?.role === 'bd';
 }
+
+// isMentor and isFacilitator are now only via org context
+// Use hasOrgPermission() for org-level checks
 
 export function isUser(user: User | null): boolean {
 	return user !== null;
@@ -117,39 +122,7 @@ export function getNavItemsForRole(role: string, context?: WorkspaceContext): Na
 		];
 	}
 
-	if (role === 'mentor') {
-		return [
-			...baseNav,
-			...workspaceNav,
-			{
-				label: 'My Courses',
-				href: '/app/mentor/courses',
-				icon: 'graduation',
-				category: 'management'
-			},
-			{ label: 'Students', href: '/app/mentor/students', icon: 'users', category: 'management' },
-			{
-				label: 'Broadcast',
-				href: '/app/mentor/broadcast',
-				icon: 'megaphone',
-				category: 'management'
-			}
-		];
-	}
-
-	if (role === 'facilitator') {
-		return [
-			...baseNav,
-			...workspaceNav,
-			{
-				label: 'My Batches',
-				href: '/app/facilitator/cohorts',
-				icon: 'calendar',
-				category: 'management'
-			}
-		];
-	}
-
+	// Default: regular user / learner
 	return [
 		...baseNav,
 		...workspaceNav,
@@ -234,7 +207,7 @@ function getOrgNavItems(orgRole: string, context: WorkspaceContext): NavItem[] {
 		];
 	}
 
-	if (orgRole === 'creator') {
+	if (orgRole === 'mentor') {
 		return [
 			...baseOrgNav,
 			...learningNav,
@@ -370,7 +343,7 @@ const orgPermissions: Record<string, OrgPermission[]> = {
 		'cohort:update',
 		'analytics:view'
 	],
-	creator: [
+	mentor: [
 		'org:read',
 		'member:read',
 		'course:create',
