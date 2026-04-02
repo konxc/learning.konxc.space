@@ -140,8 +140,8 @@
 			sidebarCollapsed = !sidebarCollapsed;
 			if (workspaceSwitcherOpen) workspaceSwitcherOpen = false;
 		}}
-		notifications={data.user?.notifications}
-		unreadCount={liveUnreadCount}
+		notifications={(data as any).notifications}
+		unreadCount={(data as any).unreadCount ?? liveUnreadCount}
 		workspaces={data.workspaces}
 	/>
 
