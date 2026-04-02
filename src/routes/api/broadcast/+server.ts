@@ -7,19 +7,94 @@ import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { sendNotification } from '$lib/server/notifications';
 import type { RequestHandler } from './$types';
 
+// Per PLATFORM_ARCHITECTURE_BRIEF.md:
+// - Platform admin (user.role = 'admin') can send broadcasts globally
+// - Org mentors/admins can send broadcasts to their org's courses/cohorts
+// - mentor/facilitator are ORG-LEVEL roles, NOT platform-level
+
+/**
+ * Check if user can send broadcasts:
+ * 1. Platform admin can send to anyone
+ * 2. Org mentor/admin/owner can send to their org's courses/cohorts
+ */
+async function canUserSendBroadcast(
+	userId: string,
+	userRole: string,
+	targetCourseId?: string,
+	targetCohortId?: string
+): Promise<boolean> {
+	// Platform admin can always send broadcasts
+	if (userRole === 'admin') {
+		return true;
+	}
+
+	// For org-level access, check organization membership
+	if (targetCourseId || targetCohortId) {
+		// Get the org from the target course (cohort links to course, course links to org)
+		let orgId: string | null = null;
+
+		if (targetCourseId) {
+			const course = await db
+				.select({ orgId: schema.course.orgId })
+				.from(schema.course)
+				.where(eq(schema.course.id, targetCourseId))
+				.limit(1);
+			orgId = course[0]?.orgId || null;
+		} else if (targetCohortId) {
+			// Cohort -> Course -> Org
+			const cohortWithCourse = await db
+				.select({ orgId: schema.course.orgId })
+				.from(schema.cohort)
+				.innerJoin(schema.course, eq(schema.cohort.courseId, schema.course.id))
+				.where(eq(schema.cohort.id, targetCohortId))
+				.limit(1);
+			orgId = cohortWithCourse[0]?.orgId || null;
+		}
+
+		if (orgId) {
+			// Check if user has org-level permission (mentor, admin, or owner)
+			const membership = await db
+				.select({ role: schema.organizationMember.role })
+				.from(schema.organizationMember)
+				.where(
+					and(
+						eq(schema.organizationMember.userId, userId),
+						eq(schema.organizationMember.orgId, orgId),
+						inArray(schema.organizationMember.role, ['mentor', 'admin', 'owner'])
+					)
+				)
+				.limit(1);
+
+			return membership.length > 0;
+		}
+	}
+
+	return false;
+}
+
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const user = await requireAuth(locals);
-
-	// Only admin and mentor can send broadcasts
-	if (user.role !== 'admin' && user.role !== 'mentor') {
-		return json({ error: 'Unauthorized' }, { status: 403 });
-	}
 
 	const data = await request.json();
 	const { title, content, targetRole, targetCohortId, targetCourseId, sentVia } = data;
 
 	if (!title || !content) {
 		return json({ error: 'Title and content are required' }, { status: 400 });
+	}
+
+	// Check permission based on architecture
+	const hasPermission = await canUserSendBroadcast(
+		user.id,
+		user.role,
+		targetCourseId,
+		targetCohortId
+	);
+
+	if (!hasPermission) {
+		return json(
+			{ error: 'Unauthorized - you can only broadcast to your organization' },
+			{ status: 403 }
+		);
 	}
 
 	// Build query to get recipients
@@ -154,27 +229,52 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 export const GET: RequestHandler = async ({ url, locals }) => {
 	const user = await requireAuth(locals);
 
-	if (user.role !== 'admin' && user.role !== 'mentor') {
-		return json({ error: 'Unauthorized' }, { status: 403 });
-	}
+	// Platform admin can see all broadcasts
+	// Org mentors/admins see only broadcasts sent by them
+	const isAdmin = user.role === 'admin';
 
-	const broadcasts = await db
-		.select({
-			id: schema.broadcastMessage.id,
-			title: schema.broadcastMessage.title,
-			content: schema.broadcastMessage.content,
-			targetRole: schema.broadcastMessage.targetRole,
-			targetCohortId: schema.broadcastMessage.targetCohortId,
-			targetCourseId: schema.broadcastMessage.targetCourseId,
-			sentVia: schema.broadcastMessage.sentVia,
-			recipientCount: schema.broadcastMessage.recipientCount,
-			createdAt: schema.broadcastMessage.createdAt,
-			senderName: schema.user.fullName
-		})
-		.from(schema.broadcastMessage)
-		.leftJoin(schema.user, eq(schema.broadcastMessage.senderId, schema.user.id))
-		.orderBy(schema.broadcastMessage.createdAt)
-		.limit(50);
+	let broadcasts;
+
+	if (isAdmin) {
+		// Admin sees all broadcasts
+		broadcasts = await db
+			.select({
+				id: schema.broadcastMessage.id,
+				title: schema.broadcastMessage.title,
+				content: schema.broadcastMessage.content,
+				targetRole: schema.broadcastMessage.targetRole,
+				targetCohortId: schema.broadcastMessage.targetCohortId,
+				targetCourseId: schema.broadcastMessage.targetCourseId,
+				sentVia: schema.broadcastMessage.sentVia,
+				recipientCount: schema.broadcastMessage.recipientCount,
+				createdAt: schema.broadcastMessage.createdAt,
+				senderName: schema.user.fullName
+			})
+			.from(schema.broadcastMessage)
+			.leftJoin(schema.user, eq(schema.broadcastMessage.senderId, schema.user.id))
+			.orderBy(schema.broadcastMessage.createdAt)
+			.limit(50);
+	} else {
+		// Non-admin users see only their own broadcasts
+		broadcasts = await db
+			.select({
+				id: schema.broadcastMessage.id,
+				title: schema.broadcastMessage.title,
+				content: schema.broadcastMessage.content,
+				targetRole: schema.broadcastMessage.targetRole,
+				targetCohortId: schema.broadcastMessage.targetCohortId,
+				targetCourseId: schema.broadcastMessage.targetCourseId,
+				sentVia: schema.broadcastMessage.sentVia,
+				recipientCount: schema.broadcastMessage.recipientCount,
+				createdAt: schema.broadcastMessage.createdAt,
+				senderName: schema.user.fullName
+			})
+			.from(schema.broadcastMessage)
+			.leftJoin(schema.user, eq(schema.broadcastMessage.senderId, schema.user.id))
+			.where(eq(schema.broadcastMessage.senderId, user.id))
+			.orderBy(schema.broadcastMessage.createdAt)
+			.limit(50);
+	}
 
 	return json({ broadcasts });
 };
