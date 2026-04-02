@@ -179,26 +179,51 @@
 			const result = await response.json();
 			console.log('Payment result:', result);
 
-			// Handle SvelteKit form action return format
-			// actionSuccess returns: { type: 'success', data: { ... } }
-			// actionFailure returns: { type: 'failure', data: { error: '...' } }
+			// Handle SvelteKit form action return format OR special string format
 			let data: any;
 
-			if (result.type === 'success' && result.data) {
+			// Check if data is a string (could be PHP-like JSON array string)
+			if (typeof result.data === 'string') {
+				console.log('Result data is string, parsing:', result.data);
+
+				try {
+					// Try to parse the string as JSON
+					const parsed = JSON.parse(result.data);
+					console.log('Parsed result:', parsed);
+
+					// Handle array format: [metadata, success, dataObj, orderId, token, redirectUrl]
+					// Index 2 contains: {orderId, snapToken, redirectUrl}
+					if (Array.isArray(parsed) && parsed.length >= 3) {
+						// Try to find the object with snapToken
+						const dataObj = parsed.find((p) => p && typeof p === 'object' && p.snapToken);
+						if (dataObj) {
+							data = dataObj;
+							console.log('Found data object with snapToken:', data);
+						} else if (typeof parsed[2] === 'object') {
+							// Fallback: index 2 might be the data object
+							data = parsed[2];
+						}
+					} else if (typeof parsed === 'object') {
+						data = parsed;
+					}
+				} catch (parseErr) {
+					console.error('Failed to parse result data:', parseErr);
+				}
+			} else if (result.type === 'success' && result.data) {
+				data = result.data;
+			} else if (result.success === true && result.data) {
 				data = result.data;
 			} else if (result.type === 'failure') {
 				throw new Error(result.data?.error || 'Failed to create online transaction');
-			} else if (result.success === true && result.data) {
-				// Direct return format
-				data = result.data;
 			} else if (result.success === false || result.error) {
 				throw new Error(result.error || result.message || 'Failed to create online transaction');
 			} else {
-				// Fallback for other formats
 				data = result;
 			}
 
-			if (data.snapToken) {
+			console.log('Final parsed data:', data);
+
+			if (data?.snapToken) {
 				(window as any).snap.pay(data.snapToken, {
 					onSuccess: function () {
 						goto('/app/learning/courses?payment=success');
