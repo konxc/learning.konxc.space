@@ -112,10 +112,11 @@ export const enrollment = pgTable('enrollment', {
 	courseId: text('course_id')
 		.notNull()
 		.references(() => course.id),
+	orgId: text('org_id').references(() => organization.id), // Multi-tenant isolation
 	cohortId: text('cohort_id').references(() => cohort.id),
 	track: text('track'),
 	couponId: text('coupon_id').references(() => coupon.id),
-	partnerId: text('partner_id'),
+	partnerId: text('partner_id'), // Legacy - for backwards compatibility
 	status: text('status').notNull().default('pending'),
 	enrolledAt: timestamp('enrolled_at')
 		.notNull()
