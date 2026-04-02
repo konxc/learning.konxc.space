@@ -22,6 +22,7 @@ export async function seedCourses(db: NeonHttpDatabase<typeof schema>, adminId: 
 		// ===== MARKETING TRACK COURSES (enable tracks) =====
 		{
 			id: 'course-001',
+			orgId: 'org-koneksi', // Koneksi Digital Academy
 			title: 'Akselerasi Bisnis Digital (Naik Kelas)',
 			description:
 				'Program akselerasi bisnis untuk UMKM dan Content Creator. Praktek langsung membangun bisnis dari nol hingga profit. Cocok untuk yang ingin memulai bisnis digital.',
@@ -39,6 +40,7 @@ export async function seedCourses(db: NeonHttpDatabase<typeof schema>, adminId: 
 		},
 		{
 			id: 'course-002',
+			orgId: 'org-koneksi', // Koneksi Digital Academy
 			title: 'Content Creator Mastery',
 			description:
 				'Kuasai seni membuat konten yang menarik dan menghasilkan. Pelajari strategi growth hacking, editing video profesional, dan monetisasi konten di platform YouTube, TikTok, dan Instagram.',
@@ -56,6 +58,7 @@ export async function seedCourses(db: NeonHttpDatabase<typeof schema>, adminId: 
 		},
 		{
 			id: 'course-003',
+			orgId: 'org-marketinglab', // Marketing Lab Indonesia
 			title: 'E-Commerce Success Blueprint',
 			description:
 				'Pelajari cara membangun dan mengembangkan bisnis e-commerce dari nol. Strategi marketplace, manajemen inventori, customer service, dan optimasi konversi penjualan.',
@@ -73,6 +76,7 @@ export async function seedCourses(db: NeonHttpDatabase<typeof schema>, adminId: 
 		},
 		{
 			id: 'course-004',
+			orgId: 'org-koneksi', // Koneksi Digital Academy
 			title: 'Affiliate Marketing Pro',
 			description:
 				'Menjadi affiliate marketer profesional. Pelajari cara memilih produk, membangun audience, create high-converting content, dan optimasi komisi affiliate secara konsisten.',
