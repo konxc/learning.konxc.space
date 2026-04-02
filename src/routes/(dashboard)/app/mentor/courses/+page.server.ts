@@ -36,6 +36,7 @@ export const load: PageServerLoad = async (event) => {
 			price: schema.course.price,
 			duration: schema.course.duration,
 			status: schema.course.status,
+			visibility: schema.course.visibility,
 			createdAt: schema.course.createdAt,
 			orgId: schema.course.orgId
 		})

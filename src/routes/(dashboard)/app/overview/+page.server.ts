@@ -182,11 +182,17 @@ export const load: PageServerLoad = async (event) => {
 		const allEnrollments = await db.select().from(schema.enrollment);
 		const allCohorts = await db.select().from(schema.cohort);
 
-		// Count users by role
+		// Count org-level mentors (distinct users with mentor/owner role in any org)
+		const mentorMembers = await db
+			.selectDistinct({ userId: schema.organizationMember.userId })
+			.from(schema.organizationMember)
+			.where(inArray(schema.organizationMember.role, ['mentor', 'owner']));
+
+		// Count users by role (mentor is now an org-level role, not platform role)
 		const userCounts = {
 			total: allUsers.length,
 			admin: allUsers.filter((u) => u.role === 'admin').length,
-			mentor: allUsers.filter((u) => u.role === 'mentor').length,
+			mentor: mentorMembers.length,
 			user: allUsers.filter((u) => u.role === 'user').length
 		};
 
@@ -413,10 +419,17 @@ export const load: PageServerLoad = async (event) => {
 			}
 		}
 
-		// Get active cohorts filtered by workspace if in org
-		let cohortsQuery = db.select().from(schema.cohort).where(eq(schema.cohort.status, 'active'));
-
-		const cohorts = await cohortsQuery;
+		// Get active cohorts — filter by mentor's course IDs (already org-scoped above)
+		// This prevents cross-tenant data leak: only cohorts for courses this mentor owns
+		const cohorts =
+			courseIds.length > 0
+				? await db
+						.select()
+						.from(schema.cohort)
+						.where(
+							and(eq(schema.cohort.status, 'active'), inArray(schema.cohort.courseId, courseIds))
+						)
+				: [];
 
 		return {
 			stats: {

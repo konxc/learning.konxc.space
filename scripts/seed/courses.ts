@@ -15,10 +15,7 @@ const THUMBNAILS = {
 	branding: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800&h=500&fit=crop'
 };
 
-export async function seedCourses(
-	db: NeonHttpDatabase<typeof schema>,
-	adminId: string
-) {
+export async function seedCourses(db: NeonHttpDatabase<typeof schema>, adminId: string) {
 	logSection('Seeding courses (15 courses)');
 
 	const courses = [
@@ -26,11 +23,13 @@ export async function seedCourses(
 		{
 			id: 'course-001',
 			title: 'Akselerasi Bisnis Digital (Naik Kelas)',
-			description: 'Program akselerasi bisnis untuk UMKM dan Content Creator. Praktek langsung membangun bisnis dari nol hingga profit. Cocok untuk yang ingin memulai bisnis digital.',
+			description:
+				'Program akselerasi bisnis untuk UMKM dan Content Creator. Praktek langsung membangun bisnis dari nol hingga profit. Cocok untuk yang ingin memulai bisnis digital.',
 			thumbnailUrl: THUMBNAILS.marketing,
 			price: 1500000,
 			duration: 8,
 			status: 'published',
+			visibility: 'public',
 			category: 'marketing',
 			featuresConfig: JSON.stringify({ tracks: true, affiliate: true, performance: true }),
 			mentorId: 'mentor-001',
@@ -41,11 +40,13 @@ export async function seedCourses(
 		{
 			id: 'course-002',
 			title: 'Content Creator Mastery',
-			description: 'Kuasai seni membuat konten yang menarik dan menghasilkan. Pelajari strategi growth hacking, editing video profesional, dan monetisasi konten di platform YouTube, TikTok, dan Instagram.',
+			description:
+				'Kuasai seni membuat konten yang menarik dan menghasilkan. Pelajari strategi growth hacking, editing video profesional, dan monetisasi konten di platform YouTube, TikTok, dan Instagram.',
 			thumbnailUrl: THUMBNAILS.content,
 			price: 1200000,
 			duration: 6,
 			status: 'published',
+			visibility: 'public',
 			category: 'marketing',
 			featuresConfig: JSON.stringify({ tracks: true, affiliate: true, performance: true }),
 			mentorId: 'mentor-002',
@@ -56,11 +57,13 @@ export async function seedCourses(
 		{
 			id: 'course-003',
 			title: 'E-Commerce Success Blueprint',
-			description: 'Pelajari cara membangun dan mengembangkan bisnis e-commerce dari nol. Strategi marketplace, manajemen inventori, customer service, dan optimasi konversi penjualan.',
+			description:
+				'Pelajari cara membangun dan mengembangkan bisnis e-commerce dari nol. Strategi marketplace, manajemen inventori, customer service, dan optimasi konversi penjualan.',
 			thumbnailUrl: THUMBNAILS.ecommerce,
 			price: 1300000,
 			duration: 7,
 			status: 'published',
+			visibility: 'public',
 			category: 'marketing',
 			featuresConfig: JSON.stringify({ tracks: true, affiliate: true, performance: true }),
 			mentorId: 'mentor-003',
@@ -71,11 +74,13 @@ export async function seedCourses(
 		{
 			id: 'course-004',
 			title: 'Affiliate Marketing Pro',
-			description: 'Menjadi affiliate marketer profesional. Pelajari cara memilih produk, membangun audience, create high-converting content, dan optimasi komisi affiliate secara konsisten.',
+			description:
+				'Menjadi affiliate marketer profesional. Pelajari cara memilih produk, membangun audience, create high-converting content, dan optimasi komisi affiliate secara konsisten.',
 			thumbnailUrl: THUMBNAILS.affiliate,
 			price: 950000,
 			duration: 5,
 			status: 'published',
+			visibility: 'public',
 			category: 'marketing',
 			featuresConfig: JSON.stringify({ tracks: true, affiliate: true, performance: true }),
 			mentorId: 'mentor-001',
@@ -83,16 +88,18 @@ export async function seedCourses(
 			createdAt: new Date('2024-02-01'),
 			updatedAt: new Date('2024-02-01')
 		},
-		
+
 		// ===== TECHNICAL COURSES =====
 		{
 			id: 'course-005',
 			title: 'Python untuk Data Science',
-			description: 'Belajar Python dari dasar hingga mahir untuk data science. Termasuk NumPy, Pandas, Matplotlib, dan machine learning basics dengan scikit-learn.',
+			description:
+				'Belajar Python dari dasar hingga mahir untuk data science. Termasuk NumPy, Pandas, Matplotlib, dan machine learning basics dengan scikit-learn.',
 			thumbnailUrl: THUMBNAILS.technical,
 			price: 1800000,
 			duration: 10,
 			status: 'published',
+			visibility: 'public',
 			category: 'technical',
 			featuresConfig: JSON.stringify({ tracks: false, affiliate: true, performance: true }),
 			mentorId: 'mentor-004',
@@ -103,11 +110,13 @@ export async function seedCourses(
 		{
 			id: 'course-006',
 			title: 'Full Stack Web Development',
-			description: 'Jadi full stack developer lengkap. Pelajari HTML, CSS, JavaScript, React, Node.js, dan database. Bangun portfolio proyek nyata dari frontend hingga backend.',
+			description:
+				'Jadi full stack developer lengkap. Pelajari HTML, CSS, JavaScript, React, Node.js, dan database. Bangun portfolio proyek nyata dari frontend hingga backend.',
 			thumbnailUrl: THUMBNAILS.technical,
 			price: 2500000,
 			duration: 12,
 			status: 'published',
+			visibility: 'public',
 			category: 'technical',
 			featuresConfig: JSON.stringify({ tracks: false, affiliate: true, performance: true }),
 			mentorId: 'mentor-005',
@@ -118,11 +127,13 @@ export async function seedCourses(
 		{
 			id: 'course-007',
 			title: 'Mobile App Development dengan Flutter',
-			description: 'Kembangkan aplikasi mobile cross-platform dengan Flutter dan Dart. Dari design UI hingga publish di Google Play dan App Store.',
+			description:
+				'Kembangkan aplikasi mobile cross-platform dengan Flutter dan Dart. Dari design UI hingga publish di Google Play dan App Store.',
 			thumbnailUrl: THUMBNAILS.technical,
 			price: 2200000,
 			duration: 10,
 			status: 'published',
+			visibility: 'public',
 			category: 'technical',
 			featuresConfig: JSON.stringify({ tracks: false, affiliate: true, performance: true }),
 			mentorId: 'mentor-004',
@@ -130,16 +141,18 @@ export async function seedCourses(
 			createdAt: new Date('2024-02-15'),
 			updatedAt: new Date('2024-02-15')
 		},
-		
+
 		// ===== BUSINESS COURSES =====
 		{
 			id: 'course-008',
 			title: 'Digital Marketing Lengkap',
-			description: 'Kuasai seluruh aspek digital marketing: SEO, SEM, Social Media Marketing, Email Marketing, dan Analytics. Strategi terbukti untuk meningkatkan penjualan online.',
+			description:
+				'Kuasai seluruh aspek digital marketing: SEO, SEM, Social Media Marketing, Email Marketing, dan Analytics. Strategi terbukti untuk meningkatkan penjualan online.',
 			thumbnailUrl: THUMBNAILS.marketing,
 			price: 1500000,
 			duration: 8,
 			status: 'published',
+			visibility: 'public',
 			category: 'marketing',
 			featuresConfig: JSON.stringify({ tracks: false, affiliate: true, performance: true }),
 			mentorId: 'mentor-002',
@@ -150,11 +163,13 @@ export async function seedCourses(
 		{
 			id: 'course-009',
 			title: 'Brand Building & Strategy',
-			description: 'Pelajari cara membangun brand yang kuat dan berkesan. Dari brand identity, positioning, storytelling, hingga brand management jangka panjang.',
+			description:
+				'Pelajari cara membangun brand yang kuat dan berkesan. Dari brand identity, positioning, storytelling, hingga brand management jangka panjang.',
 			thumbnailUrl: THUMBNAILS.branding,
 			price: 1100000,
 			duration: 5,
 			status: 'published',
+			visibility: 'public',
 			category: 'business',
 			featuresConfig: JSON.stringify({ tracks: false, affiliate: true, performance: true }),
 			mentorId: 'mentor-006',
@@ -165,11 +180,13 @@ export async function seedCourses(
 		{
 			id: 'course-010',
 			title: 'Keuangan untuk UMKM',
-			description: 'Kelola keuangan bisnis dengan benar. Pelajari accounting dasar, cash flow management, budgeting, dan financial planning untuk pertumbuhan bisnis.',
+			description:
+				'Kelola keuangan bisnis dengan benar. Pelajari accounting dasar, cash flow management, budgeting, dan financial planning untuk pertumbuhan bisnis.',
 			thumbnailUrl: THUMBNAILS.finance,
 			price: 950000,
 			duration: 6,
 			status: 'published',
+			visibility: 'public',
 			category: 'business',
 			featuresConfig: JSON.stringify({ tracks: false, affiliate: true, performance: true }),
 			mentorId: 'mentor-006',
@@ -177,16 +194,18 @@ export async function seedCourses(
 			createdAt: new Date('2024-03-05'),
 			updatedAt: new Date('2024-03-05')
 		},
-		
+
 		// ===== DESIGN COURSES =====
 		{
 			id: 'course-011',
 			title: 'UI/UX Design Fundamentals',
-			description: 'Kuasai dasar-dasar UI/UX design. Pelajari design thinking, wireframing, prototyping dengan Figma, dan user research untuk menciptakan produk digital yang user-friendly.',
+			description:
+				'Kuasai dasar-dasar UI/UX design. Pelajari design thinking, wireframing, prototyping dengan Figma, dan user research untuk menciptakan produk digital yang user-friendly.',
 			thumbnailUrl: THUMBNAILS.design,
 			price: 1400000,
 			duration: 7,
 			status: 'published',
+			visibility: 'public',
 			category: 'design',
 			featuresConfig: JSON.stringify({ tracks: false, affiliate: true, performance: true }),
 			mentorId: 'mentor-003',
@@ -197,11 +216,13 @@ export async function seedCourses(
 		{
 			id: 'course-012',
 			title: 'Video Production Professional',
-			description: 'Dari ide hingga upload. Pelajari pre-production, shooting techniques, lighting, audio, editing dengan Adobe Premiere Pro, dan color grading.',
+			description:
+				'Dari ide hingga upload. Pelajari pre-production, shooting techniques, lighting, audio, editing dengan Adobe Premiere Pro, dan color grading.',
 			thumbnailUrl: THUMBNAILS.video,
 			price: 1600000,
 			duration: 8,
 			status: 'published',
+			visibility: 'public',
 			category: 'design',
 			featuresConfig: JSON.stringify({ tracks: false, affiliate: true, performance: true }),
 			mentorId: 'mentor-005',
@@ -209,16 +230,18 @@ export async function seedCourses(
 			createdAt: new Date('2024-03-15'),
 			updatedAt: new Date('2024-03-15')
 		},
-		
+
 		// ===== DRAFT COURSES (upcoming) =====
 		{
 			id: 'course-013',
 			title: 'Social Media Growth Hacking',
-			description: 'Strategi advanced untuk pertumbuhan akun social media yang eksponensial. Organic growth, paid ads, dan community building.',
+			description:
+				'Strategi advanced untuk pertumbuhan akun social media yang eksponensial. Organic growth, paid ads, dan community building.',
 			thumbnailUrl: THUMBNAILS.marketing,
 			price: 850000,
 			duration: 4,
 			status: 'draft',
+			visibility: 'private',
 			category: 'marketing',
 			featuresConfig: JSON.stringify({ tracks: true, affiliate: true, performance: true }),
 			mentorId: 'mentor-002',
@@ -229,11 +252,13 @@ export async function seedCourses(
 		{
 			id: 'course-014',
 			title: 'SEO Mastery',
-			description: 'Kuasai teknik SEO terkini. Keyword research, on-page optimization, link building, technical SEO, dan local SEO untuk ranking #1 Google.',
+			description:
+				'Kuasai teknik SEO terkini. Keyword research, on-page optimization, link building, technical SEO, dan local SEO untuk ranking #1 Google.',
 			thumbnailUrl: THUMBNAILS.technical,
 			price: 1100000,
 			duration: 6,
 			status: 'draft',
+			visibility: 'private',
 			category: 'marketing',
 			featuresConfig: JSON.stringify({ tracks: false, affiliate: true, performance: true }),
 			mentorId: 'mentor-004',
@@ -244,11 +269,13 @@ export async function seedCourses(
 		{
 			id: 'course-015',
 			title: 'Email Marketing untuk Penjualan',
-			description: 'Bangun dan kelola database email. Buat sequence email yang converting, automation, dan optimasi open rate & click-through rate.',
+			description:
+				'Bangun dan kelola database email. Buat sequence email yang converting, automation, dan optimasi open rate & click-through rate.',
 			thumbnailUrl: THUMBNAILS.marketing,
 			price: 750000,
 			duration: 4,
 			status: 'draft',
+			visibility: 'private',
 			category: 'marketing',
 			featuresConfig: JSON.stringify({ tracks: false, affiliate: true, performance: true }),
 			mentorId: 'mentor-001',

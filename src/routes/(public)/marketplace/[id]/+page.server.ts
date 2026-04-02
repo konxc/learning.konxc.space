@@ -17,6 +17,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				price: schema.course.price,
 				duration: schema.course.duration,
 				status: schema.course.status,
+				visibility: schema.course.visibility,
 				createdAt: schema.course.createdAt
 			},
 			mentor: {
@@ -40,8 +41,11 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	const courseData = courses[0];
 
-	// Only show published courses
-	if (courseData.course && courseData.course.status !== 'published') {
+	// Only show published AND public courses
+	if (
+		courseData.course &&
+		(courseData.course.status !== 'published' || courseData.course.visibility !== 'public')
+	) {
 		return {
 			course: null,
 			mentor: null,

@@ -1,10 +1,10 @@
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 export const load: PageServerLoad = async () => {
-	// Get all published courses with mentor info (no authentication required)
+	// Get all published + public courses with mentor info (no authentication required)
 	const courses = await db
 		.select({
 			id: schema.course.id,
@@ -22,7 +22,7 @@ export const load: PageServerLoad = async () => {
 		})
 		.from(schema.course)
 		.leftJoin(schema.user, eq(schema.course.mentorId, schema.user.id))
-		.where(eq(schema.course.status, 'published'));
+		.where(and(eq(schema.course.status, 'published'), eq(schema.course.visibility, 'public')));
 
 	return {
 		courses

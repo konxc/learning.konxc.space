@@ -212,9 +212,9 @@ function getOrgNavItems(orgRole: string, context: WorkspaceContext): NavItem[] {
 			...baseOrgNav,
 			...learningNav,
 			{
-				label: 'Course Builder',
+				label: 'My Courses',
 				href: '/app/mentor/courses',
-				icon: 'hammer',
+				icon: 'graduation',
 				category: 'management'
 			},
 			{ label: 'Students', href: '/app/mentor/students', icon: 'users', category: 'management' },
