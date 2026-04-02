@@ -144,7 +144,7 @@
 			<input type="hidden" name="activeWorkspaceId" value={data.activeWorkspaceId} />
 			<div class="space-y-2">
 				<label for="newRole" class={`block text-sm font-medium ${COLOR.textPrimary}`}>
-					New Role
+					Platform Role
 				</label>
 				<select
 					id="newRole"
@@ -152,13 +152,12 @@
 					class={`w-full ${RADIUS.input} border px-3 py-2 text-sm outline-none focus:border-blue-500 ${COLOR.cardBorder} ${COLOR.card}`}
 				>
 					<option value="user" selected={selectedUser.role === 'user'}>User</option>
-					<option value="mentor" selected={selectedUser.role === 'mentor'}>Mentor</option>
-					<option value="facilitator" selected={selectedUser.role === 'facilitator'}
-						>Facilitator</option
-					>
 					<option value="bd" selected={selectedUser.role === 'bd'}>Business Development</option>
 					<option value="admin" selected={selectedUser.role === 'admin'}>Admin</option>
 				</select>
+				<p class="text-xs text-zinc-500 dark:text-zinc-400">
+					Note: Mentor/Facilitator roles are managed at organization level
+				</p>
 			</div>
 			<div class="flex justify-end gap-3 pt-4">
 				<Button variant="ghost" onclick={() => (showRoleModal = false)}>Cancel</Button>

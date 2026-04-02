@@ -9,12 +9,12 @@
 
 	let isOpen = $state(false);
 
+	// Platform roles only (per PLATFORM_ARCHITECTURE_BRIEF.md)
+	// mentor/facilitator are ORG-LEVEL roles, not platform-level
 	const roleMap: Record<string, { label: string; icon: string; color: string }> = {
-		user: { label: 'Siswa', icon: '🎓', color: 'blue' },
-		mentor: { label: 'Mentor', icon: '🖋️', color: 'indigo' },
+		user: { label: 'Pengguna', icon: '👤', color: 'blue' },
 		bd: { label: 'Business Dev', icon: '📈', color: 'emerald' },
-		admin: { label: 'Admin', icon: '🛡️', color: 'red' },
-		facilitator: { label: 'Facilitator', icon: '🎯', color: 'orange' }
+		admin: { label: 'Admin', icon: '🛡️', color: 'red' }
 	};
 
 	// Determine available roles based on ROLE_SWITCH_MAP from roles.ts
@@ -47,7 +47,9 @@
 			onclick={toggleDropdown}
 			class={`group flex items-center gap-3 rounded-2xl border border-zinc-200/60 bg-white/80 px-4 py-2.5 shadow-sm backdrop-blur-md transition-all hover:border-blue-500/30 hover:bg-white dark:border-zinc-800/60 dark:bg-zinc-900/80 dark:hover:border-blue-400/30 dark:hover:bg-zinc-900`}
 		>
-			<div class="flex h-6 w-6 items-center justify-center rounded-lg bg-zinc-100 text-sm shadow-inner dark:bg-zinc-800">
+			<div
+				class="flex h-6 w-6 items-center justify-center rounded-lg bg-zinc-100 text-sm shadow-inner dark:bg-zinc-800"
+			>
 				{roleMap[$activeRole]?.icon || '👤'}
 			</div>
 			<span class="text-xs font-black tracking-widest text-zinc-900 uppercase dark:text-white">
@@ -92,7 +94,9 @@
 								{roleMap[role]?.label || role}
 							</span>
 							{#if active}
-								<span class="text-[9px] font-bold text-blue-100 uppercase opacity-80">ACTIVE NOW</span>
+								<span class="text-[9px] font-bold text-blue-100 uppercase opacity-80"
+									>ACTIVE NOW</span
+								>
 							{/if}
 						</div>
 					</button>

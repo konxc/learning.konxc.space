@@ -5,6 +5,13 @@ import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 
+// Platform roles - per PLATFORM_ARCHITECTURE_BRIEF.md
+const PLATFORM_ROLES = ['admin', 'bd', 'user'] as const;
+type PlatformRole = (typeof PLATFORM_ROLES)[number];
+
+// Org roles - mentor/facilitator are ONLY org-level, never platform-level
+const ORG_ROLES = ['owner', 'admin', 'mentor', 'facilitator', 'member'] as const;
+
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
 	const parentData = await event.parent();
@@ -99,6 +106,26 @@ export const actions: Actions = {
 		const activeWorkspaceId = (formData.get('activeWorkspaceId') as string) || 'personal';
 
 		if (!userId || !newRole) return { success: false, error: 'User ID and Role are required' };
+
+		// Validate role based on context (per PLATFORM_ARCHITECTURE_BRIEF.md)
+		if (activeWorkspaceId === 'personal') {
+			// Platform role - must be one of: admin, bd, user
+			// mentor and facilitator are ORG-LEVEL roles only, never platform-level
+			if (!PLATFORM_ROLES.includes(newRole as PlatformRole)) {
+				return {
+					success: false,
+					error: `Invalid platform role. Must be one of: ${PLATFORM_ROLES.join(', ')}`
+				};
+			}
+		} else {
+			// Org role - must be one of: owner, admin, mentor, facilitator, member
+			if (!(ORG_ROLES as readonly string[]).includes(newRole)) {
+				return {
+					success: false,
+					error: `Invalid organization role. Must be one of: ${ORG_ROLES.join(', ')}`
+				};
+			}
+		}
 
 		try {
 			if (activeWorkspaceId === 'personal') {
