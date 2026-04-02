@@ -1,8 +1,7 @@
 {
-  "enabled": true,
   "name": "Enrollment Activation Check",
+  "version": "1.0.0",
   "description": "Setiap kali payment proof di-approve atau Midtrans webhook diterima, pastikan enrollment diaktifkan dan notifikasi dikirim.",
-  "version": "1",
   "when": {
     "type": "fileEdited",
     "patterns": [

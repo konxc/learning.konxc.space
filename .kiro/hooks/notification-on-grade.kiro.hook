@@ -1,8 +1,7 @@
 {
-  "enabled": true,
   "name": "Notification on Grade Action",
+  "version": "1.0.0",
   "description": "Setiap kali ada server action grading submission, pastikan notifikasi dikirim ke student.",
-  "version": "1",
   "when": {
     "type": "fileEdited",
     "patterns": [

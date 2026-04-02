@@ -1,8 +1,7 @@
 {
-  "enabled": true,
   "name": "Organization Permission Check",
+  "version": "1.0.0",
   "description": "Setiap kali file server di routes organizations dibuat atau diedit, pastikan permission check menggunakan hasOrgPermission dari rbac.ts.",
-  "version": "1",
   "when": {
     "type": "fileEdited",
     "patterns": [
@@ -11,6 +10,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "File organizations server baru saja diedit. Periksa apakah:\n1. Setiap action yang mengubah data org menggunakan `hasOrgPermission(orgRole, permission)` dari `$lib/server/rbac.ts`\n2. Member management actions (invite, remove, changeRole) hanya bisa dilakukan oleh owner atau admin org\n3. Course creation di org context menggunakan `canCreateCourses(orgRole)` check\n4. Tidak ada hardcoded role check seperti `if (role === 'owner')` — gunakan fungsi dari rbac.ts\n\nJika ada pelanggaran, berikan contoh kode yang benar. Jika aman, balas 'OK'."
+    "prompt": "File organizations server baru saja diedit. Periksa apakah:\n1. Setiap action yang mengubah data org menggunakan `hasOrgPermission(orgRole, permission)` dari `$lib/server/rbac.ts`\n2. Member management actions (invite, remove, changeRole) hanya bisa dilakukan oleh owner atau admin org\n3. Course creation di org context menggunakan `canCreateCourses(orgRole)` check\n4. Tidak ada hardcoded role check seperti `if (role === 'owner')` — gunakan fungsi dari rbac.ts\n5. Org roles yang valid adalah: 'owner' | 'admin' | 'mentor' | 'facilitator' | 'member' — TIDAK ADA 'creator'\n\nJika ada pelanggaran, berikan contoh kode yang benar. Jika aman, balas 'OK'."
   }
 }

@@ -1,8 +1,7 @@
 {
-  "enabled": true,
   "name": "Svelte 5 Runes Guard",
+  "version": "1.0.0",
   "description": "Periksa pelanggaran aturan Svelte 5 dan Tailwind 4 setiap kali file .svelte diedit — export let, bg-gradient-to-*, hardcoded colors, server imports di client.",
-  "version": "1",
   "when": {
     "type": "fileEdited",
     "patterns": [

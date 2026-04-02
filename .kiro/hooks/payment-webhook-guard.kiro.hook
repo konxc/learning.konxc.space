@@ -1,8 +1,7 @@
 {
-  "enabled": true,
   "name": "Payment & Webhook Security Guard",
+  "version": "1.0.0",
   "description": "Pastikan perubahan pada file payment atau webhook tidak menghapus signature verification dan security checks kritis.",
-  "version": "1",
   "when": {
     "type": "fileEdited",
     "patterns": [

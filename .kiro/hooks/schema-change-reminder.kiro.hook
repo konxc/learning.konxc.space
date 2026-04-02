@@ -1,17 +1,15 @@
 {
-  "enabled": true,
   "name": "Schema Change Reminder",
-  "description": "Ingatkan langkah-langkah wajib setelah file schema atau relations database diubah.",
-  "version": "1",
+  "version": "1.0.0",
+  "description": "Ingatkan langkah-langkah wajib setelah file schema database diubah.",
   "when": {
     "type": "fileEdited",
     "patterns": [
-      "src/lib/server/db/schema.ts",
-      "src/lib/server/db/relations.ts"
+      "src/lib/server/db/schema.ts"
     ]
   },
   "then": {
     "type": "askAgent",
-    "prompt": "The database schema or relations file was just edited. Remind the user of the required follow-up steps as a checklist:\n1. Run `pnpm run db:push` to apply schema changes to the database\n2. Update `src/lib/server/db/relations.ts` if new tables were added that need relations\n3. Update seed files in `scripts/seed/` if needed\n4. Run `pnpm run check` to validate TypeScript types\n\nKeep the reminder brief and actionable."
+    "prompt": "The database schema file was just edited. Remind the user of the required follow-up steps as a checklist:\n1. Run `pnpm run db:push` to apply schema changes to Neon PostgreSQL\n2. Update seed files in `scripts/seed/` if new tables or columns were added\n3. Run `pnpm run check` to validate TypeScript types\n\nNote: This project does NOT use a relations.ts file — Drizzle queries use explicit joins instead. Keep the reminder brief and actionable. If the change is minor (e.g. adding a comment), reply 'OK'."
   }
 }

@@ -1,17 +1,17 @@
 {
-  "enabled": true,
-  "name": "Type Check on Save",
-  "description": "Jalankan pnpm run check setiap kali file Svelte atau TypeScript disimpan untuk memastikan 0 errors dan 0 warnings.",
-  "version": "1",
-  "when": {
-    "type": "fileEdited",
-    "patterns": [
-      "src/**/*.svelte",
-      "src/**/*.ts"
-    ]
-  },
-  "then": {
-    "type": "runCommand",
-    "command": "pnpm run check"
-  }
+	"name": "Type Check on Save",
+	"version": "1.0.0",
+	"description": "Jalankan pnpm run check setiap kali file TypeScript server disimpan untuk memastikan 0 errors dan 0 warnings.",
+	"when": {
+		"type": "fileEdited",
+		"patterns": [
+			"src/**/*.server.ts",
+			"src/lib/server/**/*.ts",
+			"src/lib/constants/**/*.ts"
+		]
+	},
+	"then": {
+		"type": "runCommand",
+		"command": "pnpm run check"
+	}
 }

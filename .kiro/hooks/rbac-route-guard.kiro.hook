@@ -1,8 +1,7 @@
 {
-  "enabled": true,
   "name": "RBAC Route Guard",
+  "version": "1.0.0",
   "description": "Periksa apakah route dashboard baru sudah punya auth check di server loader dan terdaftar di rbac.ts.",
-  "version": "1",
   "when": {
     "type": "fileCreated",
     "patterns": [
@@ -12,6 +11,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "A new file was created inside the dashboard route group. Check the following and report any gaps:\n1. Is there a `+page.server.ts` with an auth guard: `if (!event.locals.user) redirect(302, '/login')`?\n2. Is this route registered in `src/lib/server/rbac.ts` under the correct role's nav items?\n3. Is there a role-specific permission check if the route is admin/mentor/facilitator-only?\n\nIf anything is missing, provide the exact code snippet needed to fix it."
+    "prompt": "A new file was created inside the dashboard route group. Check the following and report any gaps:\n1. Is there a `+page.server.ts` with an auth guard: `if (!event.locals.user) redirect(302, '/auth/signin')`?\n2. Is this route registered in `src/lib/server/rbac.ts` under the correct role's nav items?\n3. Is there a role-specific permission check if the route is admin/org-owner/mentor-only?\n\nNote: Auth route is `/auth/signin`, NOT `/login`. If anything is missing, provide the exact code snippet needed to fix it. If all good, reply 'OK'."
   }
 }

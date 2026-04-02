@@ -127,18 +127,41 @@ The dashboard uses a **fixed sidebar + sticky header** pattern:
 ### Adding a New Dashboard Page
 
 1. Create route: `src/routes/(dashboard)/app/your-page/+page.svelte`
-2. Create server loader: `+page.server.ts` with auth check (`if (!event.locals.user) redirect(302, '/login')`)
-3. Register nav item in `src/lib/server/rbac.ts` under the appropriate role
+2. Create server loader: `+page.server.ts` with auth check (`if (!event.locals.user) redirect(302, '/auth/signin')`)
+3. Register nav item in `src/lib/server/rbac.ts` under the correct role
 4. Use design tokens for consistent styling
 5. Run `pnpm run check`
 
 ### Adding a New Database Table
 
 1. Add table definition to `src/lib/server/db/schema.ts`
-2. Add relations if needed in `src/lib/server/db/relations.ts`
-3. Run `pnpm run db:push` to apply schema
-4. Update seed file if needed: `scripts/seed/`
-5. Run `pnpm run check`
+2. Run `pnpm run db:push` to apply schema to Neon PostgreSQL
+3. Update seed files in `scripts/seed/` if needed
+4. Run `pnpm run check`
+
+> **Note:** This project does NOT use `relations.ts`. All Drizzle queries use explicit joins (`leftJoin`, `innerJoin`) instead of relational queries (`db.query.*` with `with:`).
+
+### Role Architecture (Two-Layer)
+
+Platform roles live in `user.role` — only 3 values:
+
+| `user.role` | Who                        |
+| ----------- | -------------------------- |
+| `admin`     | Platform operations team   |
+| `bd`        | Business Development / CRM |
+| `user`      | Everyone else (default)    |
+
+Org roles live in `organization_member.role` — 5 values:
+
+| `organization_member.role` | Who                                 |
+| -------------------------- | ----------------------------------- |
+| `owner`                    | Org founder, full control           |
+| `admin`                    | Org manager, member management      |
+| `mentor`                   | Course creator, grader              |
+| `facilitator`              | Cohort monitor, checkpoint reviewer |
+| `member`                   | Student within the org              |
+
+**Key rule:** A mentor does NOT have `user.role = 'mentor'`. They have `user.role = 'user'` + `organization_member.role = 'mentor'` in their org. Use `requireOrgMembership()` from `$lib/server/org-context.ts` for org-level access checks.
 
 ### Creating a Reusable Component
 
