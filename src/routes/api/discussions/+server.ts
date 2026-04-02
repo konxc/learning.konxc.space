@@ -2,64 +2,84 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, and, desc, isNull } from 'drizzle-orm';
+import { eq, and, desc, isNull, inArray } from 'drizzle-orm';
 import { sendNotification } from '$lib/server/notifications';
 
 export const GET: RequestHandler = async ({ url, locals }) => {
 	if (!locals.user) return json({ error: 'Unauthorized' }, { status: 401 });
 
 	const lessonId = url.searchParams.get('lessonId');
-
 	if (!lessonId) return json({ error: 'Lesson ID required' }, { status: 400 });
 
 	try {
-		// Fetch top-level discussions (questions) for this lesson
-		const discussions = await db.query.discussion.findMany({
-			where: and(eq(schema.discussion.lessonId, lessonId), isNull(schema.discussion.parentId)),
-			orderBy: [desc(schema.discussion.isPinned), desc(schema.discussion.createdAt)],
-			with: {
+		// Fetch top-level discussions for this lesson
+		const rawDiscussions = await db
+			.select({
+				id: schema.discussion.id,
+				content: schema.discussion.content,
+				title: schema.discussion.title,
+				upvotes: schema.discussion.upvotes,
+				isPinned: schema.discussion.isPinned,
+				createdAt: schema.discussion.createdAt,
+				updatedAt: schema.discussion.updatedAt,
+				userId: schema.discussion.userId,
+				parentId: schema.discussion.parentId,
+				lessonId: schema.discussion.lessonId,
+				courseId: schema.discussion.courseId,
 				user: {
-					columns: {
-						username: true,
-						fullName: true,
-						avatarUrl: true,
-						role: true
-					}
+					username: schema.user.username,
+					fullName: schema.user.fullName,
+					avatarUrl: schema.user.avatarUrl,
+					role: schema.user.role
 				}
-			}
-		});
+			})
+			.from(schema.discussion)
+			.innerJoin(schema.user, eq(schema.discussion.userId, schema.user.id))
+			.where(and(eq(schema.discussion.lessonId, lessonId), isNull(schema.discussion.parentId)))
+			.orderBy(desc(schema.discussion.isPinned), desc(schema.discussion.createdAt));
 
-		if (discussions.length === 0) {
-			return json({ discussions: [] });
+		if (rawDiscussions.length === 0) return json({ discussions: [] });
+
+		// Fetch replies for first 10 discussions
+		const topIds = rawDiscussions.slice(0, 10).map((d) => d.id);
+
+		const rawReplies = await db
+			.select({
+				id: schema.discussion.id,
+				content: schema.discussion.content,
+				title: schema.discussion.title,
+				upvotes: schema.discussion.upvotes,
+				isPinned: schema.discussion.isPinned,
+				createdAt: schema.discussion.createdAt,
+				updatedAt: schema.discussion.updatedAt,
+				userId: schema.discussion.userId,
+				parentId: schema.discussion.parentId,
+				lessonId: schema.discussion.lessonId,
+				courseId: schema.discussion.courseId,
+				user: {
+					username: schema.user.username,
+					fullName: schema.user.fullName,
+					avatarUrl: schema.user.avatarUrl,
+					role: schema.user.role
+				}
+			})
+			.from(schema.discussion)
+			.innerJoin(schema.user, eq(schema.discussion.userId, schema.user.id))
+			.where(inArray(schema.discussion.parentId, topIds))
+			.orderBy(schema.discussion.createdAt);
+
+		// Group replies by parentId
+		const repliesMap = new Map<string, typeof rawReplies>();
+		for (const reply of rawReplies) {
+			const pid = reply.parentId!;
+			if (!repliesMap.has(pid)) repliesMap.set(pid, []);
+			repliesMap.get(pid)!.push(reply);
 		}
 
-		// N+1 Query Fix: Fetch replies in parallel with concurrency limit
-		// Limit to first 10 discussions to prevent overwhelming the DB
-		const discussionsToFetch = discussions.slice(0, 10);
-
-		const withReplies = await Promise.all(
-			discussionsToFetch.map(async (d) => {
-				const replies = await db.query.discussion.findMany({
-					where: eq(schema.discussion.parentId, d.id),
-					orderBy: [schema.discussion.createdAt],
-					with: {
-						user: {
-							columns: {
-								username: true,
-								fullName: true,
-								avatarUrl: true,
-								role: true
-							}
-						}
-					}
-				});
-				return { ...d, replies };
-			})
-		);
-
-		// Attach discussions beyond limit with empty replies
-		const remaining = discussions.slice(10).map((d) => ({ ...d, replies: [] }));
-		const result = [...withReplies, ...remaining];
+		const result = rawDiscussions.map((d) => ({
+			...d,
+			replies: repliesMap.get(d.id) ?? []
+		}));
 
 		return json({ discussions: result });
 	} catch (e) {
@@ -92,17 +112,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			updatedAt: new Date()
 		});
 
-		// Notify: if replying to a discussion, notify the parent author
+		// Notify parent author on reply
 		if (parentId) {
-			const parentDiscussion = await db.query.discussion.findFirst({
-				where: eq(schema.discussion.id, parentId),
-				columns: { userId: true }
-			});
+			const parentRows = await db
+				.select({ userId: schema.discussion.userId })
+				.from(schema.discussion)
+				.where(eq(schema.discussion.id, parentId))
+				.limit(1);
 
-			if (parentDiscussion && parentDiscussion.userId !== locals.user.id) {
+			const parentUserId = parentRows[0]?.userId;
+			if (parentUserId && parentUserId !== locals.user.id) {
 				try {
 					await sendNotification({
-						userId: parentDiscussion.userId,
+						userId: parentUserId,
 						type: 'system',
 						title: 'Balasan Diskusi Baru',
 						message: `${locals.user.fullName ?? locals.user.username} membalas diskusi kamu`,
@@ -115,13 +137,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			}
 		}
 
-		// Notify mentor if this is a new top-level discussion
+		// Notify mentor on new top-level discussion
 		if (!parentId && courseId) {
-			const course = await db.query.course.findFirst({
-				where: eq(schema.course.id, courseId),
-				columns: { mentorId: true, title: true }
-			});
+			const courseRows = await db
+				.select({ mentorId: schema.course.mentorId, title: schema.course.title })
+				.from(schema.course)
+				.where(eq(schema.course.id, courseId))
+				.limit(1);
 
+			const course = courseRows[0];
 			if (course?.mentorId && course.mentorId !== locals.user.id) {
 				try {
 					await sendNotification({
@@ -155,35 +179,29 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 	}
 
 	try {
-		// Verify discussion exists
-		const discussion = await db.query.discussion.findFirst({
-			where: eq(schema.discussion.id, discussionId),
-			columns: { upvotes: true, userId: true }
-		});
+		const discRows = await db
+			.select({ upvotes: schema.discussion.upvotes, userId: schema.discussion.userId })
+			.from(schema.discussion)
+			.where(eq(schema.discussion.id, discussionId))
+			.limit(1);
 
-		if (!discussion) {
-			return json({ error: 'Discussion not found' }, { status: 404 });
-		}
+		const discussion = discRows[0];
+		if (!discussion) return json({ error: 'Discussion not found' }, { status: 404 });
 
-		// Prevent user from voting on their own discussion
 		if (discussion.userId === locals.user.id) {
 			return json({ error: 'Cannot vote on your own discussion' }, { status: 400 });
 		}
 
 		if (action === 'upvote') {
-			// Atomic increment - prevents race conditions
 			await db
 				.update(schema.discussion)
 				.set({ upvotes: (discussion.upvotes ?? 0) + 1 })
 				.where(eq(schema.discussion.id, discussionId));
-		} else if (action === 'remove') {
-			// Remove vote - only if currently voted (positive)
-			if ((discussion.upvotes ?? 0) > 0) {
-				await db
-					.update(schema.discussion)
-					.set({ upvotes: Math.max(0, (discussion.upvotes ?? 0) - 1) })
-					.where(eq(schema.discussion.id, discussionId));
-			}
+		} else if (action === 'remove' && (discussion.upvotes ?? 0) > 0) {
+			await db
+				.update(schema.discussion)
+				.set({ upvotes: Math.max(0, (discussion.upvotes ?? 0) - 1) })
+				.where(eq(schema.discussion.id, discussionId));
 		}
 
 		return json({ success: true, action });

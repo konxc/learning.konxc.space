@@ -146,18 +146,47 @@ export const actions: Actions = {
 		const submissionId = submissionIdValue.trim();
 		const score = parsedScore;
 
-		// Verify mentor owns the course
-		const submission = (await db.query.submission.findFirst({
-			where: eq(schema.submission.id, submissionId),
-			with: {
-				course: true,
-				lesson: true
-			}
-		})) as
-			| (SubmissionWithCourse & { lesson: typeof schema.lesson.$inferSelect | null })
-			| undefined;
+		// Verify mentor owns the course — explicit join, no db.query with:
+		const submissionRows = await db
+			.select({
+				id: schema.submission.id,
+				userId: schema.submission.userId,
+				courseId: schema.submission.courseId,
+				lessonId: schema.submission.lessonId,
+				type: schema.submission.type,
+				payload: schema.submission.payload,
+				metadata: schema.submission.metadata,
+				score: schema.submission.score,
+				createdAt: schema.submission.createdAt
+			})
+			.from(schema.submission)
+			.where(eq(schema.submission.id, submissionId))
+			.limit(1);
 
-		if (!submission?.course || submission.course.mentorId !== mentor.id) {
+		const submissionBase = submissionRows[0];
+		if (!submissionBase) return actionFailure(403, 'Unauthorized');
+
+		const courseRows = await db
+			.select()
+			.from(schema.course)
+			.where(eq(schema.course.id, submissionBase.courseId))
+			.limit(1);
+
+		const lessonRows = submissionBase.lessonId
+			? await db
+					.select()
+					.from(schema.lesson)
+					.where(eq(schema.lesson.id, submissionBase.lessonId))
+					.limit(1)
+			: [];
+
+		const submission = {
+			...submissionBase,
+			course: courseRows[0] ?? null,
+			lesson: lessonRows[0] ?? null
+		};
+
+		if (!submission.course || submission.course.mentorId !== mentor.id) {
 			return actionFailure(403, 'Unauthorized');
 		}
 

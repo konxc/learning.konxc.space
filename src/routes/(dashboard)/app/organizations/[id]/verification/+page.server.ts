@@ -1,7 +1,7 @@
 import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 
@@ -17,33 +17,42 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const orgId = params.id;
 
-	// Check if user is owner/admin of this org
-	const member = await db.query.organizationMember.findFirst({
-		where: (fields, operators) =>
-			operators.and(
-				eq(fields.orgId, orgId),
-				eq(fields.userId, locals.user!.id),
-				eq(fields.role, 'owner')
+	// Check if user is owner of this org — explicit join, no db.query
+	const memberRows = await db
+		.select()
+		.from(schema.organizationMember)
+		.where(
+			and(
+				eq(schema.organizationMember.orgId, orgId),
+				eq(schema.organizationMember.userId, locals.user.id),
+				eq(schema.organizationMember.role, 'owner')
 			)
-	});
+		)
+		.limit(1);
 
-	if (!member) {
+	if (!memberRows[0]) {
 		throw redirect(303, '/app');
 	}
 
 	// Get organization
-	const organization = await db.query.organization.findFirst({
-		where: eq(schema.organization.id, orgId)
-	});
+	const orgRows = await db
+		.select()
+		.from(schema.organization)
+		.where(eq(schema.organization.id, orgId))
+		.limit(1);
 
 	// Get existing verification
-	const verification = await db.query.organizationVerification.findFirst({
-		where: eq(schema.organizationVerification.orgId, orgId)
-	});
+	const verificationRows = await db
+		.select()
+		.from(schema.organizationVerification)
+		.where(eq(schema.organizationVerification.orgId, orgId))
+		.limit(1);
+
+	const verification = verificationRows[0] ?? null;
 
 	return {
-		organization,
-		verification: verification || null,
+		organization: orgRows[0] ?? null,
+		verification,
 		isVerified: verification?.status === 'verified'
 	};
 };
@@ -57,16 +66,19 @@ export const actions: Actions = {
 		const orgId = params.id;
 
 		// Check if user is owner/admin
-		const member = await db.query.organizationMember.findFirst({
-			where: (fields, operators) =>
-				operators.and(
-					eq(fields.orgId, orgId),
-					eq(fields.userId, locals.user!.id),
-					eq(fields.role, 'owner')
+		const memberRows2 = await db
+			.select()
+			.from(schema.organizationMember)
+			.where(
+				and(
+					eq(schema.organizationMember.orgId, orgId),
+					eq(schema.organizationMember.userId, locals.user!.id),
+					eq(schema.organizationMember.role, 'owner')
 				)
-		});
+			)
+			.limit(1);
 
-		if (!member) {
+		if (!memberRows2[0]) {
 			return fail(403, { error: 'Hanya owner yang dapat melakukan verifikasi' });
 		}
 
@@ -97,9 +109,12 @@ export const actions: Actions = {
 
 		try {
 			// Check if already has verification
-			const existing = await db.query.organizationVerification.findFirst({
-				where: eq(schema.organizationVerification.orgId, orgId)
-			});
+			const existingRows = await db
+				.select()
+				.from(schema.organizationVerification)
+				.where(eq(schema.organizationVerification.orgId, orgId))
+				.limit(1);
+			const existing = existingRows[0] ?? null;
 
 			if (existing) {
 				if (existing.status === 'verified') {

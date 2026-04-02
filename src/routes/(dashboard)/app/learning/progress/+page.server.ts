@@ -75,9 +75,12 @@ export const load: PageServerLoad = async (event) => {
 		);
 
 	// Get user XP
-	const userXP = await db.query.userXP.findFirst({
-		where: eq(schema.userXP.userId, user.id)
-	});
+	const userXPRows = await db
+		.select()
+		.from(schema.userXP)
+		.where(eq(schema.userXP.userId, user.id))
+		.limit(1);
+	const userXP = userXPRows[0] ?? null;
 
 	return {
 		courseProgress,

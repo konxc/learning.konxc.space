@@ -70,22 +70,36 @@ export const load: PageServerLoad = async (event) => {
 
 		const enrolledCourses = [];
 		for (const enrollment of activeEnrollments) {
-			const course = await db.query.course.findFirst({
-				where: eq(schema.course.id, enrollment.courseId)
-			});
+			const courseRows = await db
+				.select()
+				.from(schema.course)
+				.where(eq(schema.course.id, enrollment.courseId))
+				.limit(1);
+			const course = courseRows[0];
 
 			if (course) {
-				const modules = (await db.query.module.findMany({
-					where: eq(schema.module.courseId, course.id),
-					orderBy: (m: any, { asc }: any) => [asc(m.order)],
-					with: {
-						lessons: {
-							orderBy: (l: any, { asc }: any) => [asc(l.order)]
-						}
-					}
+				// Get modules ordered
+				const modules = await db
+					.select()
+					.from(schema.module)
+					.where(eq(schema.module.courseId, course.id))
+					.orderBy(schema.module.order);
+
+				// Get all lessons for this course
+				const lessons = await db
+					.select({ id: schema.lesson.id, moduleId: schema.lesson.moduleId })
+					.from(schema.lesson)
+					.innerJoin(schema.module, eq(schema.lesson.moduleId, schema.module.id))
+					.where(eq(schema.module.courseId, course.id))
+					.orderBy(schema.lesson.order);
+
+				// Attach lessons to modules
+				const modulesWithLessons = modules.map((m) => ({
+					...m,
+					lessons: lessons.filter((l) => l.moduleId === m.id)
 				})) as Array<{ id: string; order: number | null; lessons: Array<{ id: string }> }>;
 
-				const allCourseLessons = modules.flatMap((m) => m.lessons);
+				const allCourseLessons = modulesWithLessons.flatMap((m) => m.lessons);
 				totalLessons += allCourseLessons.length;
 
 				const courseProgress = await db
@@ -112,8 +126,10 @@ export const load: PageServerLoad = async (event) => {
 				// Find current unit (module)
 				const completedLessonIds = new Set(courseProgress.map((p) => p.lessonId));
 				let currentUnitOrder = 1;
-				for (const mod of modules) {
-					const hasIncomplete = mod.lessons.some((l) => !completedLessonIds.has(l.id));
+				for (const mod of modulesWithLessons) {
+					const hasIncomplete = mod.lessons.some(
+						(l: { id: string }) => !completedLessonIds.has(l.id)
+					);
 					if (hasIncomplete) {
 						currentUnitOrder = mod.order || 1;
 						break;
