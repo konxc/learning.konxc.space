@@ -81,12 +81,20 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 	const user = locals.user;
 
 	// Find the invitation
-	const invitation = await db.query.organizationInvitation.findFirst({
-		where: eq(schema.organizationInvitation.token, token),
-		with: {
-			organization: true
-		}
-	});
+	const invitationRows = await db
+		.select({
+			id: schema.organizationInvitation.id,
+			orgId: schema.organizationInvitation.orgId,
+			email: schema.organizationInvitation.email,
+			role: schema.organizationInvitation.role,
+			token: schema.organizationInvitation.token,
+			expiresAt: schema.organizationInvitation.expiresAt
+		})
+		.from(schema.organizationInvitation)
+		.where(eq(schema.organizationInvitation.token, token))
+		.limit(1);
+
+	const invitation = invitationRows[0];
 
 	if (!invitation) {
 		throw error(404, 'Invitation not found or has been revoked');

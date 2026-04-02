@@ -120,7 +120,16 @@
 								</span>
 							</div>
 							<p class={`${TEXT.small} ${COLOR.accent} mt-1 font-mono`}>
-								Invite link: /org/invite/{invite.token}
+								<button
+									type="button"
+									onclick={() =>
+										navigator.clipboard.writeText(
+											`${window.location.origin}/org/invite/${invite.token}`
+										)}
+									class="hover:underline"
+								>
+									📋 Copy invite link
+								</button>
 							</p>
 						</div>
 						<form method="post" action="?/cancelInvite" use:enhance>

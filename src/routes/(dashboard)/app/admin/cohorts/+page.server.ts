@@ -17,6 +17,13 @@ export const load: PageServerLoad = async (event) => {
 		.where(eq(schema.course.status, 'published'))
 		.orderBy(desc(schema.course.createdAt));
 
+	// Get facilitators for assignment dropdown
+	const facilitators = await db
+		.select({ id: schema.user.id, fullName: schema.user.fullName, username: schema.user.username })
+		.from(schema.user)
+		.where(eq(schema.user.role, 'facilitator'))
+		.orderBy(schema.user.fullName);
+
 	// Get all cohorts with course name and enrollment count
 	const cohorts = await db
 		.select({
@@ -101,6 +108,7 @@ export const load: PageServerLoad = async (event) => {
 
 	return {
 		courses,
+		facilitators,
 		cohorts: enrichedCohorts,
 		adminStats: { totalStudents, activeStudents, pendingPayments }
 	};
@@ -151,5 +159,23 @@ export const actions: Actions = {
 		await db.update(schema.cohort).set({ status }).where(eq(schema.cohort.id, cohortId));
 
 		return { success: true };
+	},
+
+	assignFacilitator: async (event) => {
+		const user = await requireAuth(event);
+		if (user.role !== 'admin') return fail(403, { error: 'Forbidden' });
+
+		const formData = await event.request.formData();
+		const cohortId = formData.get('cohortId') as string;
+		const facilitatorId = formData.get('facilitatorId') as string;
+
+		if (!cohortId) return fail(400, { error: 'Cohort ID wajib diisi.' });
+
+		await db
+			.update(schema.cohort)
+			.set({ facilitatorId: facilitatorId || null })
+			.where(eq(schema.cohort.id, cohortId));
+
+		return { success: true, message: 'Fasilitator berhasil di-assign.' };
 	}
 };

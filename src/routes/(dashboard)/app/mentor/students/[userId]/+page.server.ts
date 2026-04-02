@@ -2,7 +2,7 @@ import { requireMentor } from '$lib/server/middleware';
 import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, and, isNotNull, count, or } from 'drizzle-orm';
+import { eq, and, isNotNull, count, inArray } from 'drizzle-orm';
 import { error, fail } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { sendEmail, createNotification } from '$lib/server/email';
@@ -162,10 +162,7 @@ export const load: PageServerLoad = async (event) => {
 		const gradesResult = await db
 			.select()
 			.from(schema.submissionGrade)
-			.where(
-				// @ts-ignore - dynamic where clause
-				or(...submissionIds.map((id) => eq(schema.submissionGrade.submissionId, id)))
-			);
+			.where(inArray(schema.submissionGrade.submissionId, submissionIds));
 		for (const g of gradesResult) {
 			grades[g.submissionId] = g;
 		}

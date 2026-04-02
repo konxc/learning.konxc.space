@@ -47,7 +47,7 @@
 		<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 			{#each data.cohorts as cohort}
 				<a
-					href="/app/admin/cohorts/{cohort.id}"
+					href="/app/facilitator/cohorts/{cohort.id}"
 					class={`${RADIUS.card} ${COLOR.card} border ${COLOR.cardBorder} p-5 ${TRANSITION.all} hover:-translate-y-1 ${ELEVATION.cardHover}`}
 				>
 					<div class="mb-3 flex items-start justify-between">

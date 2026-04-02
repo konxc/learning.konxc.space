@@ -3,9 +3,15 @@ import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, count } from 'drizzle-orm';
+import { redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
+
+	// Only facilitator, mentor, and admin can access
+	if (!['facilitator', 'mentor', 'admin'].includes(user.role)) {
+		throw redirect(303, '/app/overview');
+	}
 
 	// Get user's organizations where they are a facilitator
 	const memberships = await db
