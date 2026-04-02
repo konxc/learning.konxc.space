@@ -66,8 +66,7 @@
 						<img src={workspaces.activeOrg.logoUrl} alt="" class="h-full w-full object-cover" />
 					{:else}
 						<div
-							class="flex h-full w-full items-center justify-center ${WORKSPACE.organization
-								.bg} text-sm font-black ${WORKSPACE.organization.text}"
+							class={`flex h-full w-full items-center justify-center ${WORKSPACE.organization.bg} text-sm font-black ${WORKSPACE.organization.text}`}
 						>
 							{workspaces.activeOrg?.name?.[0].toUpperCase() || 'O'}
 						</div>
@@ -81,6 +80,12 @@
 							>
 								Organization
 							</p>
+							{#if workspaces.activeOrg?.brandColor}
+								<span
+									class="inline-block h-2 w-2 rounded-full"
+									style="background-color: {workspaces.activeOrg.brandColor}"
+								></span>
+							{/if}
 							<span
 								class={`rounded-full px-1.5 py-0.5 text-[8px] font-black tracking-widest uppercase ${workspaces.activeOrg?.planType === 'pro' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : workspaces.activeOrg?.planType === 'enterprise' ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'}`}
 								>{workspaces.activeOrg?.planType || 'Free'}</span

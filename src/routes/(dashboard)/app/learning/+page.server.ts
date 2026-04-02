@@ -373,13 +373,33 @@ async function loadCheckpoints(
 				)
 				.limit(1);
 
+			// Submission history: all attempts for this checkpoint
+			const submissionHistory = await db
+				.select({
+					id: schema.submission.id,
+					score: schema.submission.score,
+					createdAt: schema.submission.createdAt,
+					feedback: schema.submissionGrade.feedback,
+					gradedAt: schema.submissionGrade.gradedAt,
+					gradeScore: schema.submissionGrade.score
+				})
+				.from(schema.submission)
+				.leftJoin(
+					schema.submissionGrade,
+					eq(schema.submission.id, schema.submissionGrade.submissionId)
+				)
+				.where(and(eq(schema.submission.userId, userId), eq(schema.submission.type, 'assignment')))
+				.orderBy(desc(schema.submission.createdAt))
+				.limit(5);
+
 			checkpointsWithSubmissions.push({
 				...checkpoint,
 				courseId: enrollment.courseId,
 				courseTitle: enrollment.courseTitle,
 				cohortName: enrollment.cohortName,
 				track: enrollment.track,
-				submission: submission[0] || null
+				submission: submission[0] || null,
+				submissionHistory
 			});
 		}
 	}

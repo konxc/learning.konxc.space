@@ -181,6 +181,8 @@
 			<button
 				type="button"
 				onclick={() => (focusMode = !focusMode)}
+				aria-label={focusMode ? 'Nonaktifkan mode fokus' : 'Aktifkan mode fokus'}
+				aria-pressed={focusMode}
 				class={`relative h-6 w-11 rounded-full transition-colors ${focusMode ? 'bg-blue-600' : 'bg-zinc-300 dark:bg-zinc-600'}`}
 			>
 				<span

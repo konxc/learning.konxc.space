@@ -12,6 +12,7 @@ export interface Organization {
 	id: string;
 	name: string;
 	logoUrl?: string | null;
+	brandColor?: string | null;
 	planType?: 'free' | 'pro' | 'enterprise';
 	role?: string;
 }

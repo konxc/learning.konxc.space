@@ -4,18 +4,11 @@ import * as schema from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
+import { generateUniqueSlug } from '$lib/server/org-utils';
 
 function generateId(): string {
 	const bytes = crypto.getRandomValues(new Uint8Array(15));
 	return encodeBase32LowerCase(bytes);
-}
-
-function createSlug(name: string): string {
-	return name
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/^-|-$/g, '')
-		.substring(0, 50);
 }
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -64,32 +57,34 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const name = formData.get('name') as string;
 		const brandColor = formData.get('brandColor') as string;
+		const logoBase64 = formData.get('logoBase64') as string;
 
 		// Validation
-		if (!name || name.length < 3) {
+		if (!name || name.trim().length < 3) {
 			return fail(400, { error: 'Nama organisasi minimal 3 karakter' });
 		}
 
-		const slug = createSlug(name);
-
-		// Check slug uniqueness
-		const existingSlug = await db.query.organization.findFirst({
-			where: eq(schema.organization.slug, slug)
-		});
-
-		if (existingSlug) {
-			return fail(400, { error: 'Nama organisasi sudah digunakan' });
+		// Parse invite emails
+		let inviteEmails: Array<{ email: string; role: string }> = [];
+		try {
+			const raw = formData.get('inviteEmails') as string;
+			inviteEmails = JSON.parse(raw || '[]');
+		} catch {
+			inviteEmails = [];
 		}
 
 		try {
+			// Generate unique slug
+			const slug = await generateUniqueSlug(name.trim());
 			const orgId = generateId();
 
 			// Create organization
 			await db.insert(schema.organization).values({
 				id: orgId,
 				slug,
-				name,
+				name: name.trim(),
 				brandColor: brandColor || '#4f46e5',
+				logoUrl: logoBase64 || null,
 				planType: 'free'
 			});
 
@@ -101,12 +96,31 @@ export const actions: Actions = {
 				role: 'owner'
 			});
 
-			return {
-				success: true,
-				message: 'Organisasi berhasil dibuat!',
-				orgId
-			};
+			// Process invitations
+			for (const invite of inviteEmails) {
+				if (!invite.email || !invite.email.includes('@')) continue;
+
+				const tokenBytes = crypto.getRandomValues(new Uint8Array(20));
+				const token = encodeBase32LowerCase(tokenBytes);
+				const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+				await db.insert(schema.organizationInvitation).values({
+					id: generateId(),
+					orgId,
+					email: invite.email,
+					role: invite.role || 'member',
+					token,
+					invitedBy: locals.user.id,
+					expiresAt
+				});
+			}
+
+			throw redirect(303, `/app/organizations/${orgId}`);
 		} catch (error) {
+			// Re-throw redirects
+			if (error instanceof Response || (error as { status?: number })?.status === 303) {
+				throw error;
+			}
 			console.error('Create organization error:', error);
 			return fail(500, { error: 'Gagal membuat organisasi' });
 		}

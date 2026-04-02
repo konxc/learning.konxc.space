@@ -47,13 +47,13 @@
 
 	function createOrganization() {
 		isOpen = false;
-		goto('/app/settings?tab=organization');
+		goto('/app/organizations/new');
 	}
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class={`fixed z-[52] ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} border ${ELEVATION.card} overflow-hidden bg-white/95 backdrop-blur-xl dark:bg-zinc-900/95`}
+	class={`fixed z-52 ${RADIUS.card} ${COLOR.card} ${COLOR.cardBorder} border ${ELEVATION.card} overflow-hidden bg-white/95 backdrop-blur-xl dark:bg-zinc-900/95`}
 	style={dropdownStyle()}
 	in:fly={{ y: 8, duration: 200, opacity: 0 }}
 	out:fly={{ y: 8, duration: 150, opacity: 0 }}
@@ -99,9 +99,16 @@
 			>
 				{#if org.logoUrl}
 					<img src={org.logoUrl} alt="" class="h-8 w-8 rounded-lg object-cover" />
+				{:else if workspaces.activeId === org.id}
+					<div
+						class="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white"
+						style="background-color: {org.brandColor ?? '#4f46e5'}"
+					>
+						{org.name[0].toUpperCase()}
+					</div>
 				{:else}
 					<div
-						class={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${workspaces.activeId === org.id ? WORKSPACE_ITEM.organization.icon : WORKSPACE_ITEM.iconIdle}`}
+						class={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${WORKSPACE_ITEM.iconIdle}`}
 					>
 						{org.name[0].toUpperCase()}
 					</div>

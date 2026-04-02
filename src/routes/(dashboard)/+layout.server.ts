@@ -142,9 +142,52 @@ export const load: LayoutServerLoad = async ({ locals, cookies, url }) => {
 		return item;
 	});
 
+	// 9. Pending grading count for mentor nav badge
+	let pendingGradingCount = 0;
+	try {
+		const mentorMembership = orgMemberships.find(
+			(m) => m.orgId === activeOrgId && m.role === 'mentor'
+		);
+		if (mentorMembership) {
+			const mentorCourses = await db
+				.select({ id: schema.course.id })
+				.from(schema.course)
+				.where(eq(schema.course.mentorId, user.id));
+
+			if (mentorCourses.length > 0) {
+				const { inArray: inArr, isNull: isNullFn, and: andFn } = await import('drizzle-orm');
+				const courseIds = mentorCourses.map((c) => c.id);
+				const pending = await db
+					.select({ id: schema.submission.id })
+					.from(schema.submission)
+					.leftJoin(
+						schema.submissionGrade,
+						eq(schema.submission.id, schema.submissionGrade.submissionId)
+					)
+					.where(
+						andFn(
+							eq(schema.submission.type, 'assignment'),
+							isNullFn(schema.submissionGrade.id),
+							inArr(schema.submission.courseId, courseIds)
+						)
+					);
+				pendingGradingCount = pending.length;
+			}
+		}
+	} catch {
+		// Non-blocking
+	}
+
+	const finalNavItems = enrichedNavItems.map((item) => {
+		if (item.label === 'Grading' && pendingGradingCount > 0) {
+			return { ...item, badge: pendingGradingCount, badgeColor: 'yellow' as const };
+		}
+		return item;
+	});
+
 	return {
 		user,
-		navItems: enrichedNavItems,
+		navItems: finalNavItems,
 		activeRole,
 		availableRoles,
 		effectiveRole,
@@ -152,6 +195,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies, url }) => {
 		orgMemberships,
 		notifications,
 		unreadCount,
+		pendingGradingCount,
 		workspaces: {
 			organizations: userOrgs,
 			activeId: activeWorkspaceId,

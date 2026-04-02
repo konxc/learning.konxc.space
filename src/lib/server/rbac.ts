@@ -219,6 +219,12 @@ function getOrgNavItems(orgRole: string, context: WorkspaceContext): NavItem[] {
 			},
 			{ label: 'Students', href: '/app/mentor/students', icon: 'users', category: 'management' },
 			{
+				label: 'Grading',
+				href: '/app/mentor/grading',
+				icon: 'check-square',
+				category: 'management'
+			},
+			{
 				label: 'Broadcast',
 				href: '/app/mentor/broadcast',
 				icon: 'megaphone',

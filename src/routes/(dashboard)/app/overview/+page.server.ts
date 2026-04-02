@@ -2,7 +2,7 @@ import type { PageServerLoad } from './$types';
 import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, and, inArray, gte, desc } from 'drizzle-orm';
+import { eq, and, inArray, gte, desc, isNotNull } from 'drizzle-orm';
 
 // Build 12-week activity graph from trackerActivity
 async function buildActivityGraph(userId: string): Promise<number[]> {
@@ -157,6 +157,23 @@ export const load: PageServerLoad = async (event) => {
 			.limit(1);
 		const streak = tracker[0]?.currentStreak ?? 0;
 
+		// Query last accessed lesson
+		const lastProgress = await db
+			.select({
+				lessonId: schema.lessonProgress.lessonId,
+				courseId: schema.lessonProgress.courseId,
+				lastPositionMs: schema.lessonProgress.lastPositionMs,
+				completedAt: schema.lessonProgress.completedAt,
+				courseTitle: schema.course.title,
+				lessonTitle: schema.lesson.title
+			})
+			.from(schema.lessonProgress)
+			.innerJoin(schema.course, eq(schema.lessonProgress.courseId, schema.course.id))
+			.innerJoin(schema.lesson, eq(schema.lessonProgress.lessonId, schema.lesson.id))
+			.where(eq(schema.lessonProgress.userId, user.id))
+			.orderBy(desc(schema.lessonProgress.completedAt))
+			.limit(1);
+
 		return {
 			stats: {
 				myCourses: activeEnrollments.length,
@@ -171,6 +188,7 @@ export const load: PageServerLoad = async (event) => {
 				pendingPayments: pendingEnrollments.length
 			},
 			courses: enrolledCourses,
+			lastLesson: lastProgress[0] || null,
 			activityGraph: await buildActivityGraph(user.id),
 			user: user,
 			workspace: { id: activeWorkspaceId, org: activeOrg }

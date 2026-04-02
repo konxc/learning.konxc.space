@@ -5,22 +5,21 @@ import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { redirect } from '@sveltejs/kit';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
+import { getMembership } from '$lib/server/org-utils';
+import { hasOrgPermission } from '$lib/server/rbac';
+import { ORG_ROLES } from '$lib/constants/roles';
+import type { OrgRole } from '$lib/constants/roles';
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
 	const orgId = event.params.id;
 
-	// Check if user is a member
-	const membership = await db
-		.select()
-		.from(schema.organizationMember)
-		.where(
-			and(eq(schema.organizationMember.orgId, orgId), eq(schema.organizationMember.userId, user.id))
-		)
-		.limit(1);
+	// Auth: must be member (throws redirect if not)
+	const membership = await getMembership(user.id, orgId);
 
-	if (membership.length === 0) {
-		throw redirect(303, '/app/organizations');
+	// Permission: must have member:read
+	if (!hasOrgPermission(membership.role, 'member:read')) {
+		throw redirect(303, `/app/organizations/${orgId}`);
 	}
 
 	// Get organization
@@ -38,23 +37,32 @@ export const load: PageServerLoad = async (event) => {
 	const members = await db
 		.select({
 			id: schema.organizationMember.id,
+			userId: schema.organizationMember.userId,
 			role: schema.organizationMember.role,
 			createdAt: schema.organizationMember.createdAt,
 			user: {
 				id: schema.user.id,
 				username: schema.user.username,
 				fullName: schema.user.fullName,
-				email: schema.user.email
+				email: schema.user.email,
+				avatarUrl: schema.user.avatarUrl
 			}
 		})
 		.from(schema.organizationMember)
 		.innerJoin(schema.user, eq(schema.organizationMember.userId, schema.user.id))
 		.where(eq(schema.organizationMember.orgId, orgId));
 
+	// Get pending invitations
+	const pendingInvitations = await db
+		.select()
+		.from(schema.organizationInvitation)
+		.where(eq(schema.organizationInvitation.orgId, orgId));
+
 	return {
 		organization: org[0],
-		membership: membership[0],
-		members
+		membership,
+		members,
+		pendingInvitations
 	};
 };
 
@@ -63,7 +71,6 @@ export const actions: Actions = {
 		const user = await requireAuth(event);
 		const orgId = event.params.id;
 
-		// Get user's membership
 		const membership = await db
 			.select()
 			.from(schema.organizationMember)
@@ -79,7 +86,6 @@ export const actions: Actions = {
 			return actionFailure(404, 'You are not a member of this organization.');
 		}
 
-		// Owner cannot leave - must transfer ownership first
 		if (membership[0].role === 'owner') {
 			return actionFailure(
 				400,
@@ -87,7 +93,6 @@ export const actions: Actions = {
 			);
 		}
 
-		// Delete membership
 		await db
 			.delete(schema.organizationMember)
 			.where(
@@ -97,7 +102,64 @@ export const actions: Actions = {
 				)
 			);
 
-		return actionSuccess({ message: 'Successfully left the organization.' });
+		throw redirect(303, '/app/organizations');
+	},
+
+	changeRole: async (event) => {
+		const user = await requireAuth(event);
+		const orgId = event.params.id;
+		const formData = await event.request.formData();
+		const targetUserId = formData.get('userId') as string;
+		const newRole = formData.get('role') as string;
+
+		if (!targetUserId || !newRole) {
+			return actionFailure(400, 'User ID and role are required.');
+		}
+
+		// Get requester's membership
+		const membership = await getMembership(user.id, orgId);
+
+		if (!hasOrgPermission(membership.role, 'member:update')) {
+			return actionFailure(403, 'Unauthorized.');
+		}
+
+		// Validate role
+		if (!ORG_ROLES.includes(newRole as OrgRole)) {
+			return actionFailure(400, 'Role tidak valid');
+		}
+
+		// Get target member
+		const targetMember = await db
+			.select()
+			.from(schema.organizationMember)
+			.where(
+				and(
+					eq(schema.organizationMember.orgId, orgId),
+					eq(schema.organizationMember.userId, targetUserId)
+				)
+			)
+			.limit(1);
+
+		if (targetMember.length === 0) {
+			return actionFailure(404, 'Member not found.');
+		}
+
+		// Cannot change owner's role
+		if (targetMember[0].role === 'owner') {
+			return actionFailure(400, "Cannot change the owner's role.");
+		}
+
+		await db
+			.update(schema.organizationMember)
+			.set({ role: newRole })
+			.where(
+				and(
+					eq(schema.organizationMember.orgId, orgId),
+					eq(schema.organizationMember.userId, targetUserId)
+				)
+			);
+
+		return actionSuccess({ message: 'Role berhasil diubah' });
 	},
 
 	removeMember: async (event) => {
@@ -110,19 +172,10 @@ export const actions: Actions = {
 			return actionFailure(400, 'Member ID is required.');
 		}
 
-		// Verify user is owner or admin
-		const membership = await db
-			.select()
-			.from(schema.organizationMember)
-			.where(
-				and(
-					eq(schema.organizationMember.orgId, orgId),
-					eq(schema.organizationMember.userId, user.id)
-				)
-			)
-			.limit(1);
+		// Get requester's membership
+		const membership = await getMembership(user.id, orgId);
 
-		if (membership.length === 0 || !['owner', 'admin'].includes(membership[0].role)) {
+		if (!hasOrgPermission(membership.role, 'member:delete')) {
 			return actionFailure(403, 'Unauthorized.');
 		}
 
@@ -144,14 +197,47 @@ export const actions: Actions = {
 			return actionFailure(400, 'Cannot remove the owner.');
 		}
 
-		// Admin can only remove members/facilitators, owner can remove anyone except themselves
-		if (membership[0].role === 'admin' && ['admin', 'creator'].includes(targetMember[0].role)) {
-			return actionFailure(403, 'Cannot remove admin or creator.');
+		// Cannot remove self
+		if (targetMember[0].userId === user.id) {
+			return actionFailure(400, 'Cannot remove yourself. Use leave instead.');
 		}
 
-		// Delete member
+		// Admin cannot remove other admins or owners
+		if (membership.role === 'admin' && targetMember[0].role === 'admin') {
+			return actionFailure(403, 'Admin cannot remove other admins.');
+		}
+
 		await db.delete(schema.organizationMember).where(eq(schema.organizationMember.id, memberId));
 
 		return actionSuccess({ message: 'Member removed successfully.' });
+	},
+
+	cancelInvite: async (event) => {
+		const user = await requireAuth(event);
+		const orgId = event.params.id;
+		const formData = await event.request.formData();
+		const invitationId = formData.get('invitationId') as string;
+
+		if (!invitationId) {
+			return actionFailure(400, 'Invitation ID is required.');
+		}
+
+		// Get requester's membership
+		const membership = await getMembership(user.id, orgId);
+
+		if (!hasOrgPermission(membership.role, 'member:create')) {
+			return actionFailure(403, 'Unauthorized.');
+		}
+
+		await db
+			.delete(schema.organizationInvitation)
+			.where(
+				and(
+					eq(schema.organizationInvitation.id, invitationId),
+					eq(schema.organizationInvitation.orgId, orgId)
+				)
+			);
+
+		return actionSuccess({ message: 'Undangan dibatalkan' });
 	}
 };

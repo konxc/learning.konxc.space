@@ -769,6 +769,15 @@
 													>
 														Cleared
 													</div>
+													<!-- Status badge -->
+													<div class="mb-4 flex items-center gap-3">
+														<span
+															class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black tracking-widest text-emerald-700 uppercase dark:bg-emerald-900/40 dark:text-emerald-400"
+														>
+															<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+															Submitted
+														</span>
+													</div>
 													<h4
 														class="mb-4 text-[9px] font-black tracking-widest text-zinc-400 uppercase italic"
 													>
@@ -782,7 +791,6 @@
 													<div
 														class="mt-8 flex items-center gap-4 border-t border-zinc-100 pt-4 opacity-60 dark:border-zinc-800"
 													>
-														<Icon name="clock" size={12} />
 														<span class="text-[9px] font-black tracking-widest uppercase">
 															Synthesized: {new Date(
 																checkpoint.submission.submittedAt!
@@ -815,6 +823,15 @@
 													class="space-y-6"
 												>
 													<input type="hidden" name="checkpointId" value={checkpoint.id} />
+													<!-- Status badge: draft -->
+													<div class="flex items-center gap-2">
+														<span
+															class="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1 text-[10px] font-black tracking-widest text-zinc-500 uppercase dark:bg-zinc-800 dark:text-zinc-400"
+														>
+															<span class="h-1.5 w-1.5 rounded-full bg-zinc-400"></span>
+															Draft
+														</span>
+													</div>
 													<div class="space-y-3">
 														<label
 															for="notes-{checkpoint.id}"

@@ -29,27 +29,32 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		.where(eq(schema.module.courseId, id))
 		.orderBy(schema.module.order);
 
-	const lessons = await db
+	// Load all lessons for this course (via module join)
+	const allLessons = await db
 		.select()
 		.from(schema.lesson)
-		.where(eq(schema.lesson.moduleId, modules[0]?.id || ''))
+		.innerJoin(schema.module, eq(schema.lesson.moduleId, schema.module.id))
+		.where(eq(schema.module.courseId, id))
 		.orderBy(schema.lesson.order);
 
-	const materials = await db
-		.select()
-		.from(schema.material)
-		.where(eq(schema.material.lessonId, lessons[0]?.id || ''))
-		.orderBy(schema.material.order);
+	const lessonRows = allLessons.map((r) => r.lesson);
+	const lessonIds = lessonRows.map((l) => l.id);
 
-	// For simplicity, we'll load all and structure on the frontend
-	const allLessons = await db.select().from(schema.lesson).orderBy(schema.lesson.order);
-
-	const allMaterials = await db.select().from(schema.material).orderBy(schema.material.order);
+	// Load all materials for these lessons
+	let allMaterials: (typeof schema.material.$inferSelect)[] = [];
+	if (lessonIds.length > 0) {
+		const { inArray } = await import('drizzle-orm');
+		allMaterials = await db
+			.select()
+			.from(schema.material)
+			.where(inArray(schema.material.lessonId, lessonIds))
+			.orderBy(schema.material.order);
+	}
 
 	return {
 		course: course[0],
 		modules,
-		lessons: allLessons,
+		lessons: lessonRows,
 		materials: allMaterials
 	};
 };
@@ -192,5 +197,112 @@ export const actions: Actions = {
 		});
 
 		return actionSuccess({ message: 'Materi berhasil ditambahkan.' });
+	},
+
+	reorderModules: async ({ request, params, locals }) => {
+		const mentor = await requireAuth({ user: locals.user });
+		const { id } = params;
+
+		// Verify ownership
+		const course = await db
+			.select()
+			.from(schema.course)
+			.where(and(eq(schema.course.id, id), eq(schema.course.mentorId, mentor.id)))
+			.limit(1);
+
+		if (course.length === 0) return actionFailure(403, 'Unauthorized');
+
+		const formData = await request.formData();
+		const orderedIds = (formData.get('orderedIds') as string).split(',').filter(Boolean);
+
+		for (let i = 0; i < orderedIds.length; i++) {
+			await db
+				.update(schema.module)
+				.set({ order: i })
+				.where(and(eq(schema.module.id, orderedIds[i]), eq(schema.module.courseId, id)));
+		}
+
+		return actionSuccess({ message: 'Urutan modul diperbarui.' });
+	},
+
+	reorderLessons: async ({ request, params, locals }) => {
+		const mentor = await requireAuth({ user: locals.user });
+		const { id } = params;
+
+		// Verify ownership
+		const course = await db
+			.select()
+			.from(schema.course)
+			.where(and(eq(schema.course.id, id), eq(schema.course.mentorId, mentor.id)))
+			.limit(1);
+
+		if (course.length === 0) return actionFailure(403, 'Unauthorized');
+
+		const formData = await request.formData();
+		const moduleId = formData.get('moduleId') as string;
+		const orderedIds = (formData.get('orderedIds') as string).split(',').filter(Boolean);
+
+		if (!moduleId) return actionFailure(400, 'moduleId required');
+
+		for (let i = 0; i < orderedIds.length; i++) {
+			await db
+				.update(schema.lesson)
+				.set({ order: i })
+				.where(and(eq(schema.lesson.id, orderedIds[i]), eq(schema.lesson.moduleId, moduleId)));
+		}
+
+		return actionSuccess({ message: 'Urutan lesson diperbarui.' });
+	},
+
+	setAvailableFrom: async ({ request, params, locals }) => {
+		const mentor = await requireAuth({ user: locals.user });
+		const { id } = params;
+
+		const course = await db
+			.select()
+			.from(schema.course)
+			.where(and(eq(schema.course.id, id), eq(schema.course.mentorId, mentor.id)))
+			.limit(1);
+
+		if (course.length === 0) return actionFailure(403, 'Unauthorized');
+
+		const formData = await request.formData();
+		const lessonId = formData.get('lessonId') as string;
+		const dateStr = formData.get('availableFrom') as string;
+
+		if (!lessonId) return actionFailure(400, 'lessonId required');
+
+		const availableFrom = dateStr ? new Date(dateStr) : null;
+
+		await db.update(schema.lesson).set({ availableFrom }).where(eq(schema.lesson.id, lessonId));
+
+		return actionSuccess({ message: 'Jadwal lesson diperbarui.' });
+	},
+
+	bulkSetSchedule: async ({ request, params, locals }) => {
+		const mentor = await requireAuth({ user: locals.user });
+		const { id } = params;
+
+		const course = await db
+			.select()
+			.from(schema.course)
+			.where(and(eq(schema.course.id, id), eq(schema.course.mentorId, mentor.id)))
+			.limit(1);
+
+		if (course.length === 0) return actionFailure(403, 'Unauthorized');
+
+		const formData = await request.formData();
+		const lessonIds = (formData.get('lessonIds') as string).split(',').filter(Boolean);
+		const dateStr = formData.get('availableFrom') as string;
+
+		if (!lessonIds.length) return actionFailure(400, 'lessonIds required');
+
+		const availableFrom = dateStr ? new Date(dateStr) : null;
+
+		for (const lessonId of lessonIds) {
+			await db.update(schema.lesson).set({ availableFrom }).where(eq(schema.lesson.id, lessonId));
+		}
+
+		return actionSuccess({ message: `${lessonIds.length} lesson dijadwalkan.` });
 	}
 } satisfies Actions;

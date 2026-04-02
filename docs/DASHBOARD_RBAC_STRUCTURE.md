@@ -2,116 +2,153 @@
 
 ## Overview
 
-Dashboard dengan role-based access control untuk Admin, Mentor, dan User biasa dengan struktur group yang jelas.
+Dashboard dengan role-based access control menggunakan dua lapisan role: **platform-level** (`user.role`) dan **org-level** (`organization_member.role`).
+
+### Role Architecture
+
+**Platform roles** (`user.role`) — hanya 3 nilai:
+
+| Role    | Akses                                        |
+| ------- | -------------------------------------------- |
+| `admin` | Full platform management                     |
+| `bd`    | CRM, waiting list, akuisisi org              |
+| `user`  | Default untuk semua orang (termasuk mentor!) |
+
+**Org roles** (`organization_member.role`) — menentukan akses dalam konteks org:
+
+| Role          | Akses                                  |
+| ------------- | -------------------------------------- |
+| `owner`       | Pemilik org, billing, hapus org        |
+| `admin`       | Kelola member, invite, setting org     |
+| `mentor`      | Buat & kelola kursus, nilai submission |
+| `facilitator` | Dampingi cohort, monitor progress      |
+| `member`      | Student dalam org, ikut kursus         |
+
+> `mentor` dan `facilitator` **tidak ada** di `user.role`. Mereka tetap `user` di platform, dengan role org di `organization_member.role`.
 
 ## Route Structure
 
 ### Base Layout
 
-- `/dashboard` - Dashboard overview
-- `/dashboard/+layout.svelte` - Group layout dengan sidebar navigation
-- `/dashboard/+layout.server.ts` - Auth check & role-based navigation
+- `/app` - Dashboard overview
+- `(dashboard)/+layout.svelte` - Group layout dengan sidebar navigation
+- `(dashboard)/+layout.server.ts` - Auth check & role-based navigation
 
-### User Routes (Role: user)
+### User Routes (Platform role: user)
 
-- `/dashboard/courses` - Browse available courses (marketplace)
-- `/dashboard/courses/[id]` - Course detail page dengan enroll button
-- `/dashboard/my-courses` - Enrolled courses (enrollments)
-- `/dashboard/apply-mentor` - Apply to become mentor
-- `/dashboard/my-mentor-application` - View application status
+- `/app/explore` - Browse available courses (marketplace)
+- `/app/learning/courses` - Enrolled courses
+- `/app/organizations` - Lihat & join org
+- `/app/affiliate` - Affiliate dashboard
 
-### Mentor Routes (Role: mentor)
+### Org Member Routes (Org role: mentor/facilitator/admin/owner)
 
-- `/dashboard/courses` - Browse available courses
-- `/dashboard/my-courses` - Enrolled courses sebagai user
-- `/dashboard/mentor/courses` - Manage assigned courses
-- `/dashboard/mentor/students` - View assigned students
+- `/app/mentor/courses` - Manage courses (org mentor)
+- `/app/mentor/students` - View students
+- `/app/facilitator/cohorts` - Manage cohorts (org facilitator)
+- `/app/organizations/[id]/members` - Manage org members (org admin/owner)
+- `/app/organizations/[id]/billing` - Org billing (org owner)
 
-### Admin Routes (Role: admin)
+### Platform Admin Routes (Platform role: admin)
 
-- `/dashboard/admin/courses` - Manage all courses (CRUD)
-- `/dashboard/admin/courses/create` - Create course form
-- `/dashboard/admin/courses/edit/[id]` - Edit course form
-- `/dashboard/admin/courses/delete/[id]` - Delete course API
-- `/dashboard/admin/coupons` - Manage coupons
-- `/dashboard/admin/coupons/create` - Create coupon form
-- `/dashboard/admin/users` - Manage users (workspace-aware)
-- `/dashboard/admin/mentor-applications` - Review mentor applications
-- `/dashboard/admin/mentor-applications/review/[id]` - Review/approve/reject
+- `/app/admin/courses` - Manage all courses
+- `/app/admin/users` - Manage users & platform roles
+- `/app/admin/mentor-applications` - Review mentor applications
+- `/app/admin/payments` - Payment management
+- `/app/admin/payouts` - Payout management
+- `/app/crm/waiting-list` - Waiting list (also accessible by `bd`)
 
 ## Features per Role
 
-### Admin
+### Platform Admin (`user.role = 'admin'`)
 
-- Full course management (create, edit, delete, publish)
-- Coupon management (create, view, edit, toggle)
-- User management (view, edit profile, role assignment)
-  - In `personal` workspace: views all users, updates `user.role` globally
-  - In org workspace: views only org members, updates `organizationMember.role` scoped to that org
-- Mentor application review (approve/reject)
-- Can assign mentors to courses
+- Full platform management
+- User management — update `user.role` (hanya `admin`, `bd`, `user`)
+- Mentor application review (approve/reject → creates org + org_member record)
+- Coupon, payment, payout management
 
-### Mentor
+### BD (`user.role = 'bd'`)
 
-- Browse and enroll courses (as regular user)
-- View assigned courses
-- View students in assigned courses
-- Can see all courses they teach
+- CRM dashboard
+- Waiting list management
 
-### User
+### Regular User (`user.role = 'user'`)
 
-- Browse available courses
-- Enroll in courses (with coupon support)
-- View enrolled courses
+- Browse & enroll courses
 - Apply to become mentor
-- Track application status
+- Join/switch organizations
+
+### Org Mentor (`organization_member.role = 'mentor'`)
+
+- Create & manage courses dalam org
+- Grade submissions
+- View students
+
+### Org Facilitator (`organization_member.role = 'facilitator'`)
+
+- Monitor cohorts
+- View student progress
+
+### Org Admin/Owner (`organization_member.role = 'admin' | 'owner'`)
+
+- Manage org members & invitations
+- Org settings & billing
+- Full course management dalam org
 
 ## Navigation Structure
 
-### Admin Navigation
+Navigation ditentukan oleh `getNavItemsForRole()` di `src/lib/server/rbac.ts`:
 
-1. Dashboard
-2. Manage Courses
-3. Coupons
-4. Users
-5. Mentor Applications
-
-### Mentor Navigation
-
-1. Dashboard
-2. Browse Courses
-3. My Enrollments
-4. My Mentor Courses
-5. Students
-
-### User Navigation
-
-1. Dashboard
-2. Browse Courses
-3. My Enrollments
-4. Apply as Mentor
-5. My Application
+- Tanpa org context → gunakan `user.role` (platform nav)
+- Dalam org context → gunakan `organization_member.role` (org nav)
 
 ## Course Enrollment Flow
 
-1. Browse courses at `/dashboard/courses`
-2. View course detail at `/dashboard/courses/[id]`
-3. Click "Enroll Now" button
+1. Browse courses at `/app/explore`
+2. View course detail
+3. Click "Enroll Now"
 4. If has coupon, apply coupon code
 5. Complete enrollment
-6. Redirect to `/dashboard/my-courses`
+6. Redirect to `/app/learning/courses`
 
 ## Database Integration
 
-- Uses Drizzle ORM with LibSQL (Turso)
-- All tables: user, session, course, enrollment, coupon, couponUsage, mentorApplication
-- Proper foreign key relationships
-- Timestamps and audit trails
+- Uses Drizzle ORM with Neon (PostgreSQL)
+- Key tables: `user`, `session`, `course`, `enrollment`, `organization`, `organizationMember`, `coupon`, `couponUsage`
+- `user.role` → platform roles only: `admin | bd | user`
+- `organization_member.role` → org roles: `owner | admin | mentor | facilitator | member`
+
+## Org Server Utilities (`src/lib/server/org-utils.ts`)
+
+Helper functions untuk operasi org yang digunakan di server-side routes.
+
+### `getMembership(userId, orgId, fallbackRedirect?)`
+
+Query `organizationMember` untuk kombinasi `userId` + `orgId`. Jika tidak ditemukan, otomatis `redirect(303, fallbackRedirect)` (default: `/app/organizations`).
+
+```ts
+import { getMembership } from '$lib/server/org-utils';
+
+// Dalam +page.server.ts
+const membership = await getMembership(user.id, params.id);
+// membership.role → 'owner' | 'admin' | 'mentor' | 'facilitator' | 'member'
+```
+
+### `generateUniqueSlug(name)`
+
+Slugify nama org menjadi URL-safe string, lalu cek keunikan di tabel `organization`. Jika slug sudah ada, tambahkan numeric suffix (`-1`, `-2`, dst.) hingga unik.
+
+```ts
+import { generateUniqueSlug } from '$lib/server/org-utils';
+
+const slug = await generateUniqueSlug('Koneksi Digital'); // → 'koneksi-digital' (atau 'koneksi-digital-1' jika sudah ada)
+```
 
 ## Security
 
 - Authentication required untuk semua dashboard routes
-- Role-based authorization
-- Admin only routes protected by requireAdmin middleware
-- Mentor routes protected by requireMentor middleware
+- Platform role checks via `isPlatformAdmin()`, `isBD()` di `rbac.ts`
+- Org role checks via `hasOrgPermission()` di `rbac.ts`
+- Org membership lookup via `getMembership()` di `org-utils.ts`
+- **Tidak ada** `requireMentor()` / `requireFacilitator()` di platform level — gunakan org membership check
 - Session management dengan Lucia v3

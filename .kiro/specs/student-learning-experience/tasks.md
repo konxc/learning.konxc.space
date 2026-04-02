@@ -2,17 +2,17 @@
 
 ## Task 1 — Video Player Enhancement
 
-- [ ] Buat `src/lib/components/app/learning/VideoPlayer.svelte`
-- [ ] Load `videoPosition` dari `lessonProgress` saat mount, set `video.currentTime`
-- [ ] Save posisi ke server action setiap 10 detik via debounce
-- [ ] Playback speed selector dengan `$state`
-- [ ] Auto-complete saat `currentTime / duration >= 0.9`
-- [ ] Keyboard event listener (Space, ArrowLeft, ArrowRight, F)
-- [ ] Jalankan `pnpm run check`
+- [x] Buat `src/lib/components/app/learning/VideoPlayer.svelte`
+- [x] Load `videoPosition` dari `lessonProgress` saat mount, set `video.currentTime`
+- [x] Save posisi ke server action setiap 10 detik via debounce
+- [x] Playback speed selector dengan `$state`
+- [x] Auto-complete saat `currentTime / duration >= 0.9`
+- [x] Keyboard event listener (Space, ArrowLeft, ArrowRight, F)
+- [x] Jalankan `pnpm run check`
 
 ## Task 2 — Inline Notes Panel
 
-- [ ] Buat `src/lib/components/app/learning/NotesPanel.svelte`
+- [-] Buat `src/lib/components/app/learning/NotesPanel.svelte`
 - [ ] Textarea dengan auto-resize dan debounce save 1 detik
 - [ ] Sync ke `POST /api/notes` dengan `lessonId` dan `content`
 - [ ] Timestamp button yang insert `[MM:SS]` ke notes
