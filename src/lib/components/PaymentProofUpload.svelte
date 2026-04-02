@@ -159,9 +159,17 @@
 			});
 
 			const result = await response.json();
-			const data = JSON.parse(result.data);
 
-			if (result.type === 'success' && data.snapToken) {
+			// Handle both form action return formats
+			let data: any;
+			if (result.data) {
+				// result.data is a JSON string from form action
+				data = typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
+			} else {
+				data = result;
+			}
+
+			if (data.snapToken) {
 				(window as any).snap.pay(data.snapToken, {
 					onSuccess: function () {
 						goto('/app/learning/courses?payment=success');
@@ -178,13 +186,11 @@
 					}
 				});
 			} else {
-				const failureMsg = Array.isArray(data)
-					? data[1]
-					: data?.message || 'Failed to create online transaction';
+				const failureMsg = data?.message || 'Failed to create online transaction';
 				throw new Error(failureMsg);
 			}
 		} catch (err) {
-			console.error(err);
+			console.error('Payment error:', err);
 			error = err instanceof Error ? err.message : 'Failed to process online payment';
 			isProcessingOnline = false;
 		}
