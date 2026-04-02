@@ -11,9 +11,12 @@
 		courseTitle: string;
 		existingProof?: { status: string } | null;
 		midtransClientKey?: string;
+		couponCode?: string;
+		finalPrice?: number;
 	}
 
-	let { courseId, courseTitle, existingProof, midtransClientKey }: Props = $props();
+	let { courseId, courseTitle, existingProof, midtransClientKey, couponCode, finalPrice }: Props =
+		$props();
 
 	let file: File | null = $state(null);
 	let error: string | null = $state(null);
@@ -144,6 +147,9 @@
 		try {
 			const formData = new FormData();
 			formData.append('courseId', courseId);
+			if (couponCode) {
+				formData.append('couponCode', couponCode);
+			}
 
 			const response = await fetch('?/createOnlineTransaction', {
 				method: 'POST',

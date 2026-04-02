@@ -5,9 +5,47 @@
 	import PageWrapper from '$lib/components/layouts/PageWrapper.svelte';
 	import PageHeader from '$lib/components/layouts/PageHeader.svelte';
 	import PageSection from '$lib/components/layouts/PageSection.svelte';
-	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION } from '$lib/config/design';
+	import { COLOR, RADIUS, SPACING, TRANSITION, TEXT, ELEVATION, STATUS } from '$lib/config/design';
 
 	let { data }: { data: PageData } = $props();
+
+	// Coupon state
+	let couponCode = $state('');
+	let couponLoading = $state(false);
+	let couponResult = $state<{
+		valid: boolean;
+		discount: number;
+		finalPrice: number;
+		error?: string;
+	} | null>(null);
+
+	async function applyCoupon(courseId: string, originalPrice: number) {
+		if (!couponCode.trim()) return;
+		couponLoading = true;
+		couponResult = null;
+		try {
+			const res = await fetch('/api/coupons/validate', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ code: couponCode.trim(), originalPrice, courseId })
+			});
+			const json = await res.json();
+			if (json.isValid) {
+				couponResult = { valid: true, discount: json.discountAmount, finalPrice: json.finalPrice };
+			} else {
+				couponResult = { valid: false, discount: 0, finalPrice: originalPrice, error: json.error };
+			}
+		} catch {
+			couponResult = {
+				valid: false,
+				discount: 0,
+				finalPrice: originalPrice,
+				error: 'Gagal memvalidasi kupon'
+			};
+		} finally {
+			couponLoading = false;
+		}
+	}
 
 	const selectedCourse = data.selectedCourseId
 		? data.enrollments.find((e) => e.course.id === data.selectedCourseId)
@@ -187,12 +225,65 @@
 	{/if}
 
 	{#if selectedCourse}
+		<!-- Coupon Input (Task 4) -->
+		<PageSection>
+			<div class={`${COLOR.card} ${COLOR.cardBorder} ${RADIUS.card} ${ELEVATION.base} p-5`}>
+				<h3 class={`${TEXT.h4} ${COLOR.textPrimary} mb-3`}>Kode Kupon</h3>
+				<div class="flex gap-2">
+					<input
+						type="text"
+						bind:value={couponCode}
+						placeholder="Masukkan kode kupon..."
+						class={`flex-1 ${RADIUS.input} border border-zinc-300 bg-white px-4 py-2.5 text-sm dark:border-zinc-600 dark:bg-zinc-800 ${COLOR.textPrimary}`}
+					/>
+					<button
+						type="button"
+						disabled={couponLoading || !couponCode.trim()}
+						onclick={() => applyCoupon(selectedCourse.course.id, selectedCourse.course.price)}
+						class={`${COLOR.accentBg} ${RADIUS.button} px-4 py-2.5 text-sm font-semibold text-white ${TRANSITION.colors} hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
+					>
+						{couponLoading ? 'Memvalidasi...' : 'Terapkan'}
+					</button>
+				</div>
+
+				{#if couponResult}
+					{#if couponResult.valid}
+						<div
+							class={`mt-3 ${RADIUS.small} border p-3 ${STATUS.success.bg} ${STATUS.success.border}`}
+						>
+							<p class={`text-sm font-semibold ${STATUS.success.text}`}>
+								Kupon berhasil diterapkan!
+							</p>
+							<div class={`mt-1 space-y-0.5 text-sm ${STATUS.success.text}`}>
+								<p>
+									Diskon: <span class="font-semibold">-{formatPrice(couponResult.discount)}</span>
+								</p>
+								<p>
+									Harga akhir: <span class="font-bold">{formatPrice(couponResult.finalPrice)}</span>
+								</p>
+							</div>
+						</div>
+					{:else}
+						<div
+							class={`mt-3 ${RADIUS.small} border p-3 ${STATUS.error.bg} ${STATUS.error.border}`}
+						>
+							<p class={`text-sm ${STATUS.error.text}`}>
+								{couponResult.error ?? 'Kupon tidak valid'}
+							</p>
+						</div>
+					{/if}
+				{/if}
+			</div>
+		</PageSection>
+
 		<PageSection>
 			<PaymentProofUpload
 				courseId={selectedCourse.course.id}
 				courseTitle={selectedCourse.course.title}
 				existingProof={selectedCourse.paymentProof}
 				midtransClientKey={data.midtransClientKey}
+				couponCode={couponResult?.valid ? couponCode : undefined}
+				finalPrice={couponResult?.valid ? couponResult.finalPrice : undefined}
 			/>
 		</PageSection>
 	{:else}

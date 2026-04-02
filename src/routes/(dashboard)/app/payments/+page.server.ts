@@ -8,6 +8,7 @@ import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { actionSuccess, actionFailure } from '$lib/server/actions';
 import { snap } from '$lib/server/midtrans';
 import { MIDTRANS_CLIENT_KEY } from '$env/static/private';
+import { validateCoupon, applyCoupon } from '$lib/server/coupon';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const user = await requireAuth(locals);
@@ -131,15 +132,20 @@ export const actions: Actions = {
 		const user = await requireAuth(locals);
 		const formData = await request.formData();
 		const courseId = formData.get('courseId') as string;
+		const couponCodeInput = (formData.get('couponCode') as string) || '';
 
 		if (!courseId) {
 			return actionFailure(400, 'Course ID is required');
 		}
 
 		// 1. Get Course details
-		const course = await db.query.course.findFirst({
-			where: eq(schema.course.id, courseId)
-		});
+		const courseResult = await db
+			.select()
+			.from(schema.course)
+			.where(eq(schema.course.id, courseId))
+			.limit(1);
+
+		const course = courseResult[0];
 
 		if (!course) {
 			console.error('Course not found:', courseId);
@@ -151,15 +157,30 @@ export const actions: Actions = {
 			return actionFailure(400, 'Kursus ini tidak dapat dibeli secara online');
 		}
 
-		// 2. Generate Order ID
+		// 2. Apply coupon if provided
+		let finalAmount = course.price;
+		let couponData: { id: string; discountAmount: number } | null = null;
+
+		if (couponCodeInput) {
+			const couponResult = await validateCoupon(couponCodeInput, course.price, courseId);
+			if (couponResult.isValid && couponResult.coupon) {
+				finalAmount = couponResult.finalPrice;
+				couponData = {
+					id: couponResult.coupon.id,
+					discountAmount: couponResult.discountAmount
+				};
+			}
+		}
+
+		// 3. Generate Order ID
 		const orderId = `NC-${encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(5))).toUpperCase()}`;
 		const baseUrl = url.origin;
 
-		// 3. Create Midtrans Transaction
+		// 4. Create Midtrans Transaction
 		const parameter = {
 			transaction_details: {
 				order_id: orderId,
-				gross_amount: course.price
+				gross_amount: finalAmount
 			},
 			customer_details: {
 				first_name: user.fullName || user.username,
@@ -169,7 +190,7 @@ export const actions: Actions = {
 			item_details: [
 				{
 					id: course.id,
-					price: course.price,
+					price: finalAmount,
 					quantity: 1,
 					name: course.title
 				}
@@ -184,16 +205,27 @@ export const actions: Actions = {
 		try {
 			const transactionRecord = await snap.createTransaction(parameter);
 
-			// 4. Save Transaction to DB
+			// 5. Save Transaction to DB
 			await db.insert(schema.transaction).values({
 				id: orderId,
 				userId: user.id,
 				courseId: course.id,
-				amount: course.price,
+				amount: finalAmount,
 				snapToken: transactionRecord.token,
 				snapUrl: transactionRecord.redirect_url,
 				status: 'pending'
 			});
+
+			// 6. Record coupon usage if applied
+			if (couponData) {
+				await applyCoupon(
+					couponData.id,
+					user.id,
+					courseId,
+					course.price,
+					couponData.discountAmount
+				);
+			}
 
 			return actionSuccess({
 				data: {

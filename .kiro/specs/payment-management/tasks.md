@@ -2,7 +2,7 @@
 
 ## Task 1 — Admin: Payment Proof Review UI
 
-- [ ] Update `admin/payments/+page.svelte` — tambah thumbnail preview inline
+- [~] Update `admin/payments/+page.svelte` — tambah thumbnail preview inline
 - [ ] Approve/reject buttons dengan server action
 - [ ] Server action `approveProof` dan `rejectProof` — update status + kirim notifikasi
 - [ ] Filter by status dan date range
