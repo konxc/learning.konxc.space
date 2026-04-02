@@ -28,17 +28,14 @@
 		const selectedFile = input.files[0];
 		error = null;
 
-		// Validate file type
 		if (!['image/jpeg', 'image/png', 'image/webp'].includes(selectedFile.type)) {
-			error = 'Only JPEG, PNG, or WebP images are allowed';
+			error = 'Format yang diperbolehkan: JPEG, PNG, atau WebP';
 			input.value = '';
 			return;
 		}
 
-		// Validate file size (raw, before compression)
 		if (selectedFile.size > 5 * 1024 * 1024) {
-			// 5MB
-			error = 'File size exceeds 5MB limit';
+			error = 'Ukuran file maksimal 5MB';
 			input.value = '';
 			return;
 		}
@@ -56,7 +53,6 @@
 					const canvas = document.createElement('canvas');
 					const ctx = canvas.getContext('2d');
 
-					// Calculate new dimensions (max width 1200px, maintain aspect ratio)
 					let width = img.width;
 					let height = img.height;
 					const maxWidth = 1200;
@@ -68,10 +64,8 @@
 
 					canvas.width = width;
 					canvas.height = height;
-
-					// Draw and compress
 					ctx?.drawImage(img, 0, 0, width, height);
-					const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8); // 80% quality
+					const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
 
 					resolve(compressedBase64);
 				};
@@ -115,7 +109,6 @@
 		}
 	}
 
-	// Cleanup
 	$effect(() => {
 		return () => {
 			if (previewUrl) {
@@ -124,7 +117,6 @@
 		};
 	});
 
-	// Handle Midtrans Snap Script
 	$effect(() => {
 		if (browser && midtransClientKey) {
 			const script = document.createElement('script');
@@ -142,7 +134,7 @@
 
 	async function handleOnlinePayment() {
 		if (!browser || !(window as any).snap) {
-			error = 'Online payment system is not ready. Please refresh the page.';
+			error = 'Sistem pembayaran belum siap. Silakan refresh halaman.';
 			return;
 		}
 
@@ -158,9 +150,7 @@
 				body: formData
 			});
 
-			// Debug: log response status and text
 			console.log('Payment response status:', response.status);
-			console.log('Payment response content-type:', response.headers.get('content-type'));
 
 			if (!response.ok) {
 				const errorText = await response.text();
@@ -170,37 +160,37 @@
 
 			const contentType = response.headers.get('content-type');
 			if (!contentType?.includes('application/json')) {
-				// Not JSON - might be redirect or HTML error page
 				const text = await response.text();
 				console.error('Non-JSON response:', text.substring(0, 500));
-				throw new Error('Invalid server response. Please try again.');
+				throw new Error('Respons server tidak valid.');
 			}
 
 			const result = await response.json();
 			console.log('Payment result:', result);
 
-			// Handle SvelteKit form action return format OR special string format
 			let data: any;
 
-			// Check if data is a string (could be PHP-like JSON array string)
 			if (typeof result.data === 'string') {
 				console.log('Result data is string, parsing:', result.data);
 
 				try {
-					// Try to parse the string as JSON
 					const parsed = JSON.parse(result.data);
 					console.log('Parsed result:', parsed);
 
-					// Handle array format: [metadata, success, dataObj, orderId, token, redirectUrl]
-					// Index 2 contains: {orderId, snapToken, redirectUrl}
-					if (Array.isArray(parsed) && parsed.length >= 3) {
-						// Try to find the object with snapToken
-						const dataObj = parsed.find((p) => p && typeof p === 'object' && p.snapToken);
+					if (Array.isArray(parsed) && parsed.length >= 6) {
+						data = {
+							orderId: parsed[3],
+							snapToken: parsed[4],
+							redirectUrl: parsed[5]
+						};
+						console.log('Extracted actual values from array:', data);
+					} else if (Array.isArray(parsed) && parsed.length >= 3) {
+						const dataObj = parsed.find(
+							(p) => p && typeof p === 'object' && typeof p.snapToken === 'string'
+						);
 						if (dataObj) {
 							data = dataObj;
-							console.log('Found data object with snapToken:', data);
 						} else if (typeof parsed[2] === 'object') {
-							// Fallback: index 2 might be the data object
 							data = parsed[2];
 						}
 					} else if (typeof parsed === 'object') {
@@ -214,9 +204,9 @@
 			} else if (result.success === true && result.data) {
 				data = result.data;
 			} else if (result.type === 'failure') {
-				throw new Error(result.data?.error || 'Failed to create online transaction');
+				throw new Error(result.data?.error || 'Gagal membuat transaksi');
 			} else if (result.success === false || result.error) {
-				throw new Error(result.error || result.message || 'Failed to create online transaction');
+				throw new Error(result.error || result.message || 'Gagal membuat transaksi');
 			} else {
 				data = result;
 			}
@@ -226,13 +216,13 @@
 			if (data?.snapToken) {
 				(window as any).snap.pay(data.snapToken, {
 					onSuccess: function () {
-						goto('/app/learning/courses?payment=success');
+						goto('/app/payments?status=success&orderId=' + (data.orderId || ''));
 					},
 					onPending: function () {
 						goto('/app/payments?status=pending');
 					},
 					onError: function () {
-						error = 'Payment failed. Please try again.';
+						error = 'Pembayaran gagal. Silakan coba lagi.';
 						isProcessingOnline = false;
 					},
 					onClose: function () {
@@ -241,124 +231,227 @@
 				});
 			} else {
 				console.error('No snapToken in response:', data);
-				throw new Error(data?.error || 'Failed to create online transaction - no token');
+				throw new Error(data?.error || 'Gagal membuat transaksi - tidak ada token');
 			}
 		} catch (err) {
 			console.error('Payment error:', err);
-			error = err instanceof Error ? err.message : 'Failed to process online payment';
+			error = err instanceof Error ? err.message : 'Gagal memproses pembayaran';
 			isProcessingOnline = false;
 		}
 	}
 </script>
 
-<div class={`${RADIUS.card} ${COLOR.card} p-8 ${ELEVATION.base}`}>
-	<h3 class={`${TEXT.h3} ${COLOR.textPrimary} mb-2`}>Upload Payment Proof</h3>
-	<p class={`${TEXT.body} ${COLOR.textSecondary} mb-5`}>Course: {courseTitle}</p>
+<div class={`${RADIUS.card} ${COLOR.card} p-6 md:p-8 ${ELEVATION.base}`}>
+	<div class="mb-6 border-b border-dashed border-zinc-200 pb-4 dark:border-zinc-700">
+		<h3 class={`${TEXT.h3} ${COLOR.textPrimary}`}>Metode Pembayaran</h3>
+		<p class={`${TEXT.body} ${COLOR.textSecondary} mt-1`}>
+			Kursus: <span class="font-semibold">{courseTitle}</span>
+		</p>
+	</div>
 
 	{#if error}
-		<div
-			class={`mb-4 ${RADIUS.small} ${SPACING.input} ${COLOR.error} ${TEXT.body} font-medium`}
-			role="alert"
-		>
+		<div class={`mb-6 ${RADIUS.small} ${SPACING.input} ${COLOR.error} ${TEXT.body}`} role="alert">
 			{error}
 		</div>
 	{/if}
 
 	{#if existingProof}
-		<div class={`mb-4 ${RADIUS.small} ${SPACING.input} ${COLOR.warning}`}>
+		<div class={`mb-6 ${RADIUS.small} ${SPACING.input} ${COLOR.warning}`}>
 			<div class="flex items-center gap-2">
 				{#if existingProof.status === 'pending'}
 					<span
 						class={`inline-block ${RADIUS.badge} px-3 py-1 ${TEXT.small} font-semibold ${COLOR.warningBg}`}
-						>Reviewing</span
+						>Menunggu Verifikasi</span
 					>
 				{:else if existingProof.status === 'rejected'}
 					<span
 						class={`inline-block ${RADIUS.badge} px-3 py-1 ${TEXT.small} font-semibold ${COLOR.errorBg}`}
-						>Rejected</span
+						>Ditolak</span
 					>
 				{/if}
 			</div>
 			<p class={`${TEXT.body} ${COLOR.textSecondary} mt-2 text-sm`}>
-				Upload again to replace existing proof
+				Unggah ulang untuk mengganti bukti yang ada
 			</p>
 		</div>
 	{/if}
 
-	<form method="POST" action="?/uploadProof" use:enhance={handleSubmit} class="space-y-5">
-		<input type="hidden" name="courseId" value={courseId} />
+	<div class="space-y-6">
+		<div>
+			<h4 class={`${TEXT.h4} ${COLOR.textPrimary} mb-4 flex items-center gap-2`}>
+				<span
+					class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600 dark:bg-blue-900 dark:text-blue-300"
+					>1</span
+				>
+				Transfer Manual
+			</h4>
+			<p class={`${TEXT.body} ${COLOR.textSecondary} mb-4 text-sm`}>
+				Upload bukti transfer untuk verifikasi manual oleh admin.
+			</p>
 
-		{#if file}
-			{#await compressImage(file) then compressed}
-				<input type="hidden" name="dataBase64" value={compressed.split(',')[1]} />
-				<input type="hidden" name="mime" value={file.type} />
-				<input
-					type="hidden"
-					name="size"
-					value={Math.round((compressed.split(',')[1].length * 3) / 4).toString()}
-				/>
-			{/await}
-		{/if}
+			<form method="POST" action="?/uploadProof" use:enhance={handleSubmit} class="space-y-4">
+				<input type="hidden" name="courseId" value={courseId} />
 
-		<div class="mb-5">
-			<input
-				type="file"
-				id="proofFile"
-				accept="image/jpeg,image/png,image/webp"
-				onchange={handleFileSelect}
-				disabled={isUploading}
-				class="hidden"
-			/>
-			<label
-				for="proofFile"
-				class={`inline-block cursor-pointer ${RADIUS.button} border-2 border-dashed border-gray-300 bg-gray-100 px-6 py-3 ${TEXT.button} ${COLOR.textPrimary} ${TRANSITION.all} hover:border-blue-600 hover:bg-gray-200 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-blue-500 dark:hover:bg-neutral-700`}
-			>
-				Select image file
-			</label>
+				{#if file}
+					{#await compressImage(file) then compressed}
+						<input type="hidden" name="dataBase64" value={compressed.split(',')[1]} />
+						<input type="hidden" name="mime" value={file.type} />
+						<input
+							type="hidden"
+							name="size"
+							value={Math.round((compressed.split(',')[1].length * 3) / 4).toString()}
+						/>
+					{/await}
+				{/if}
+
+				<div>
+					<input
+						type="file"
+						id="proofFile"
+						accept="image/jpeg,image/png,image/webp"
+						onchange={handleFileSelect}
+						disabled={isUploading || isProcessingOnline}
+						class="hidden"
+					/>
+					<label
+						for="proofFile"
+						class={`inline-flex cursor-pointer items-center gap-2 ${RADIUS.button} border-2 border-dashed border-zinc-300 bg-zinc-50 px-4 py-3 ${TEXT.button} ${COLOR.textSecondary} ${TRANSITION.all} hover:border-blue-500 hover:bg-blue-50 dark:border-zinc-600 dark:bg-zinc-800 dark:hover:border-blue-500 dark:hover:bg-blue-900/20`}
+					>
+						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+							/>
+						</svg>
+						{file ? 'Ganti File' : 'Pilih File'}
+					</label>
+					{#if file}
+						<span class="ml-3 text-sm text-zinc-500 dark:text-zinc-400">{file.name}</span>
+					{/if}
+				</div>
+
+				{#if previewUrl}
+					<div class="relative">
+						<img
+							src={previewUrl}
+							alt="Preview bukti pembayaran"
+							class="mx-auto max-h-48 rounded-lg border border-zinc-200 shadow-sm dark:border-zinc-700"
+						/>
+						<button
+							type="button"
+							onclick={removePreview}
+							class="absolute top-2 right-2 rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600"
+							aria-label="Remove preview"
+						>
+							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
+							</svg>
+						</button>
+					</div>
+				{/if}
+
+				<button
+					type="submit"
+					disabled={!file || isUploading || isProcessingOnline}
+					class={`w-full ${RADIUS.button} ${COLOR.accentBg} ${COLOR.accentHover} flex items-center justify-center gap-2 px-6 py-3 ${TEXT.button} font-semibold text-white ${TRANSITION.all} ${ELEVATION.base} disabled:cursor-not-allowed disabled:opacity-60`}
+				>
+					{#if isUploading}
+						<svg class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+							<circle
+								class="opacity-25"
+								cx="12"
+								cy="12"
+								r="10"
+								stroke="currentColor"
+								stroke-width="4"
+							></circle>
+							<path
+								class="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+							></path>
+						</svg>
+						Mengunggah...
+					{:else}
+						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+							/>
+						</svg>
+						Unggah Bukti Transfer
+					{/if}
+				</button>
+			</form>
 		</div>
 
-		{#if previewUrl}
-			<div class="mb-5 text-center">
-				<img
-					src={previewUrl}
-					alt="Payment proof preview"
-					class="mx-auto max-h-[400px] max-w-full rounded-lg shadow-md"
-				/>
-				<button
-					type="button"
-					onclick={removePreview}
-					class={`mt-3 block ${RADIUS.small} bg-red-600 px-4 py-2 ${TEXT.small} font-semibold text-white ${TRANSITION.all} hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600/70 focus-visible:ring-offset-1`}
+		<div class="flex items-center gap-4">
+			<div class="h-px flex-1 bg-zinc-200 dark:bg-zinc-700"></div>
+			<span class={`${TEXT.small} font-medium text-zinc-400`}>ATAU</span>
+			<div class="h-px flex-1 bg-zinc-200 dark:bg-zinc-700"></div>
+		</div>
+
+		<div>
+			<h4 class={`${TEXT.h4} ${COLOR.textPrimary} mb-4 flex items-center gap-2`}>
+				<span
+					class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-600 dark:bg-emerald-900 dark:text-emerald-300"
+					>2</span
 				>
-					Remove
-				</button>
-			</div>
-		{/if}
+				Pembayaran Instan
+			</h4>
+			<p class={`${TEXT.body} ${COLOR.textSecondary} mb-4 text-sm`}>
+				Pembayaran langsung dengan GoPay, QRIS, atau transfer bank. Proses otomatis & cepat.
+			</p>
 
-		<button
-			type="submit"
-			disabled={!file || isUploading || isProcessingOnline}
-			class={`w-full ${RADIUS.button} bg-linear-to-br from-blue-600 to-purple-600 px-6 py-3 ${TEXT.button} font-semibold text-white ${TRANSITION.all} ${ELEVATION.base} hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/70 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0`}
-		>
-			{isUploading ? 'Uploading...' : 'Upload Payment Proof'}
-		</button>
-	</form>
+			<button
+				type="button"
+				disabled={isUploading || isProcessingOnline || !midtransClientKey}
+				onclick={handleOnlinePayment}
+				class={`w-full ${RADIUS.button} relative overflow-hidden bg-linear-to-br from-emerald-500 to-teal-600 px-6 py-4 ${TEXT.button} font-bold text-white ${TRANSITION.all} ${ELEVATION.base} hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50`}
+			>
+				<span class="relative z-10 flex items-center justify-center gap-3">
+					{#if isProcessingOnline}
+						<svg class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+							<circle
+								class="opacity-25"
+								cx="12"
+								cy="12"
+								r="10"
+								stroke="currentColor"
+								stroke-width="4"
+							></circle>
+							<path
+								class="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+							></path>
+						</svg>
+						Menyiapkan pembayaran...
+					{:else}
+						<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none">
+							<path
+								d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"
+								fill="#00AA12"
+							/>
+							<path d="M12 7.5v9l7.5-4.5-7.5-4.5z" fill="white" />
+						</svg>
+						Bayar dengan GoPay / QRIS / Bank Transfer
+					{/if}
+				</span>
+			</button>
 
-	<div class="my-8 flex items-center gap-4">
-		<div class="h-px flex-1 bg-gray-200 dark:bg-neutral-800"></div>
-		<span class={`${TEXT.small} font-medium text-gray-400`}>OR PAY INSTANTLY</span>
-		<div class="h-px flex-1 bg-gray-200 dark:bg-neutral-800"></div>
+			<p class="mt-3 text-center text-xs text-zinc-400">
+				🔒 Pembayaran diproses oleh Midtrans. Aman & terpercaya.
+			</p>
+		</div>
 	</div>
-
-	<button
-		type="button"
-		disabled={isUploading || isProcessingOnline}
-		onclick={handleOnlinePayment}
-		class={`w-full ${RADIUS.button} border-2 border-blue-600 bg-white px-6 py-3 ${TEXT.button} font-bold text-blue-600 ${TRANSITION.all} hover:bg-blue-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50`}
-	>
-		{isProcessingOnline ? 'Preparing...' : '💳 Pay via GoPay / QRIS / Bank Transfer'}
-	</button>
-
-	<p class="mt-4 text-center text-[10px] text-gray-400">
-		Midtrans payments are processed automatically 24/7.
-	</p>
 </div>

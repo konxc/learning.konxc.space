@@ -48,7 +48,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-	uploadProof: async ({ request, locals }) => {
+	uploadProof: async ({ request, locals, url }) => {
 		const user = await requireAuth(locals);
 
 		const formData = await request.formData();
@@ -127,7 +127,7 @@ export const actions: Actions = {
 		throw redirect(303, '/app/payments?success=uploaded');
 	},
 
-	createOnlineTransaction: async ({ request, locals }) => {
+	createOnlineTransaction: async ({ request, locals, url }) => {
 		const user = await requireAuth(locals);
 		const formData = await request.formData();
 		const courseId = formData.get('courseId') as string;
@@ -153,6 +153,7 @@ export const actions: Actions = {
 
 		// 2. Generate Order ID
 		const orderId = `NC-${encodeBase32LowerCase(crypto.getRandomValues(new Uint8Array(5))).toUpperCase()}`;
+		const baseUrl = url.origin;
 
 		// 3. Create Midtrans Transaction
 		const parameter = {
@@ -172,7 +173,12 @@ export const actions: Actions = {
 					quantity: 1,
 					name: course.title
 				}
-			]
+			],
+			callbacks: {
+				finish: `${baseUrl}/app/payments?status=success&orderId=${orderId}`,
+				error: `${baseUrl}/app/payments?status=error`,
+				unfinish: `${baseUrl}/app/payments?status=pending`
+			}
 		};
 
 		try {

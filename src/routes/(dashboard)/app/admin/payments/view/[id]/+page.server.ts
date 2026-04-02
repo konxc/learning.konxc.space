@@ -75,16 +75,24 @@ export const actions: Actions = {
 		// Activate enrollment
 		await db
 			.update(schema.enrollment)
-			.set({
-				status: 'active',
-				activatedAt: new Date()
-			})
+			.set({ status: 'active', activatedAt: new Date() })
 			.where(
 				and(
 					eq(schema.enrollment.userId, proof[0].userId),
 					eq(schema.enrollment.courseId, proof[0].courseId)
 				)
 			);
+
+		// Notify student
+		await db.insert(schema.notification).values({
+			id: crypto.randomUUID(),
+			userId: proof[0].userId,
+			type: 'enrollment',
+			title: 'Pembayaran Dikonfirmasi ✅',
+			message: `Pembayaran kamu telah dikonfirmasi. Selamat belajar!`,
+			link: '/app/learning',
+			read: false
+		});
 
 		return actionSuccess({ message: 'Payment proof approved and enrollment activated' });
 	},
@@ -96,18 +104,30 @@ export const actions: Actions = {
 		const proofId = formData.get('proofId') as string;
 		const notes = formData.get('notes') as string;
 
-		if (!proofId) {
-			return actionFailure(400, 'Missing proof ID');
-		}
+		if (!proofId) return actionFailure(400, 'Missing proof ID');
 
-		// Update proof status
+		const proof = await db
+			.select()
+			.from(schema.paymentProof)
+			.where(eq(schema.paymentProof.id, proofId))
+			.limit(1);
+
 		await db
 			.update(schema.paymentProof)
-			.set({
-				status: 'rejected',
-				notes: notes || null
-			})
+			.set({ status: 'rejected', notes: notes || null })
 			.where(eq(schema.paymentProof.id, proofId));
+
+		if (proof[0]) {
+			await db.insert(schema.notification).values({
+				id: crypto.randomUUID(),
+				userId: proof[0].userId,
+				type: 'system',
+				title: 'Bukti Pembayaran Ditolak',
+				message: `Bukti pembayaran kamu ditolak.${notes ? ` Alasan: ${notes}` : ' Silakan upload ulang bukti yang valid.'}`,
+				link: '/app/payments',
+				read: false
+			});
+		}
 
 		return actionSuccess({ message: 'Payment proof rejected' });
 	}

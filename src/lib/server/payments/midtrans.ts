@@ -11,6 +11,12 @@ export type MidtransTransactionRequest = {
 	};
 	itemDetails?: Array<{ id?: string; price: number; quantity: number; name: string }>;
 	expiryMinutes?: number;
+	callbacks?: {
+		finish?: string;
+		unfinish?: string;
+		error?: string;
+		callback?: string;
+	};
 };
 
 export type MidtransTransactionResponse = {
@@ -46,7 +52,10 @@ export async function createSnapTransaction(
 		},
 		customer_details: payload.customer,
 		item_details: payload.itemDetails,
-		expiry: payload.expiryMinutes ? { unit: 'minutes', duration: payload.expiryMinutes } : undefined
+		expiry: payload.expiryMinutes
+			? { unit: 'minutes', duration: payload.expiryMinutes }
+			: undefined,
+		callbacks: payload.callbacks
 	};
 
 	const res = await fetch(url, {
