@@ -4,6 +4,7 @@ import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { actionSuccess, actionFailure } from '$lib/server/actions';
+import { createAffiliateAccountForUser } from '$lib/server/affiliate';
 
 export const load: PageServerLoad = async (event) => {
 	await requireAdmin(event);
@@ -70,19 +71,29 @@ export const actions: Actions = {
 		// Upgrade user role to mentor
 		await db.update(schema.user).set({ role: 'mentor' }).where(eq(schema.user.id, app[0].userId));
 
+		// Create affiliate account for the mentor
+		const userOrgs = await db
+			.select()
+			.from(schema.organizationMember)
+			.where(eq(schema.organizationMember.userId, app[0].userId))
+			.limit(1);
+
+		const orgId = userOrgs[0]?.orgId || 'personal';
+		await createAffiliateAccountForUser(app[0].userId, orgId, 'mentor');
+
 		// Send notification to applicant
 		await db.insert(schema.notification).values({
 			id: crypto.randomUUID(),
 			userId: app[0].userId,
 			type: 'system',
 			title: 'Selamat! Aplikasi Mentor Disetujui 🎉',
-			message: `Aplikasi mentor kamu telah disetujui. Akun kamu sekarang memiliki akses mentor. ${adminNotes ? `Catatan admin: ${adminNotes}` : ''}`,
-			link: '/app/mentor/courses',
+			message: `Aplikasi mentor kamu telah disetujui. Akun kamu sekarang memiliki akses mentor dan link affiliate. ${adminNotes ? `Catatan admin: ${adminNotes}` : ''}`,
+			link: '/app/affiliate',
 			read: false
 		});
 
 		return actionSuccess({
-			message: `Aplikasi ${app[0].fullName} disetujui dan role diupgrade ke mentor.`
+			message: `Aplikasi ${app[0].fullName} disetujui, role diupgrade ke mentor, dan affiliate account dibuat.`
 		});
 	},
 

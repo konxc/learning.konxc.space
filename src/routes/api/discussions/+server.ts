@@ -77,6 +77,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			parentId,
 			title: title || null,
 			content,
+			upvotes: 0,
 			createdAt: new Date(),
 			updatedAt: new Date()
 		});
@@ -131,5 +132,38 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	} catch (e) {
 		console.error(e);
 		return json({ error: 'Failed to post' }, { status: 500 });
+	}
+};
+
+export const PATCH: RequestHandler = async ({ request, locals }) => {
+	if (!locals.user) return json({ error: 'Unauthorized' }, { status: 401 });
+
+	const { discussionId, action } = await request.json();
+
+	if (!discussionId || !action) {
+		return json({ error: 'Missing required fields' }, { status: 400 });
+	}
+
+	try {
+		const discussion = await db.query.discussion.findFirst({
+			where: eq(schema.discussion.id, discussionId),
+			columns: { upvotes: true }
+		});
+
+		if (!discussion) {
+			return json({ error: 'Discussion not found' }, { status: 404 });
+		}
+
+		if (action === 'upvote') {
+			await db
+				.update(schema.discussion)
+				.set({ upvotes: (discussion.upvotes ?? 0) + 1 })
+				.where(eq(schema.discussion.id, discussionId));
+		}
+
+		return json({ success: true });
+	} catch (e) {
+		console.error(e);
+		return json({ error: 'Failed to vote' }, { status: 500 });
 	}
 };
