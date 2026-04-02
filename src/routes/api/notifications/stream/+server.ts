@@ -3,6 +3,9 @@ import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, count, gt } from 'drizzle-orm';
 
+const POLL_INTERVAL_MS = 15000; // 15 seconds - balance between responsiveness and DB load
+const HEARTBEAT_MS = 30000; // 30 seconds
+
 export const GET: RequestHandler = async ({ locals }) => {
 	if (!locals.user) {
 		return new Response('Unauthorized', { status: 401 });
@@ -14,6 +17,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 		start(controller) {
 			let lastChecked = new Date();
 			let closed = false;
+			let pollCount = 0;
 
 			function send(data: Record<string, unknown>) {
 				if (closed) return;
@@ -39,9 +43,14 @@ export const GET: RequestHandler = async ({ locals }) => {
 				}
 			}
 
-			// Poll for new notifications every 8 seconds
+			// Poll for new notifications
 			async function poll() {
 				if (closed) return;
+
+				// Simple rate limiting: skip every other poll to reduce DB load
+				pollCount++;
+				if (pollCount % 2 !== 0) return;
+
 				try {
 					const newNotifs = await db
 						.select()
@@ -82,7 +91,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 
 			sendInitial();
 
-			// Heartbeat every 25 seconds to keep connection alive
+			// Heartbeat to keep connection alive
 			const heartbeatInterval = setInterval(() => {
 				if (closed) {
 					clearInterval(heartbeatInterval);
@@ -96,11 +105,11 @@ export const GET: RequestHandler = async ({ locals }) => {
 					clearInterval(heartbeatInterval);
 					clearInterval(pollInterval);
 				}
-			}, 25000);
+			}, HEARTBEAT_MS);
 
 			const pollInterval = setInterval(() => {
 				poll();
-			}, 8000);
+			}, POLL_INTERVAL_MS);
 
 			// Cleanup on stream cancel
 			return () => {

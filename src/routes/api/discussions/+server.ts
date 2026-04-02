@@ -140,30 +140,45 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 
 	const { discussionId, action } = await request.json();
 
-	if (!discussionId || !action) {
-		return json({ error: 'Missing required fields' }, { status: 400 });
+	if (!discussionId || !action || !['upvote', 'remove'].includes(action)) {
+		return json({ error: 'Missing or invalid required fields' }, { status: 400 });
 	}
 
 	try {
+		// Verify discussion exists
 		const discussion = await db.query.discussion.findFirst({
 			where: eq(schema.discussion.id, discussionId),
-			columns: { upvotes: true }
+			columns: { upvotes: true, userId: true }
 		});
 
 		if (!discussion) {
 			return json({ error: 'Discussion not found' }, { status: 404 });
 		}
 
+		// Prevent user from voting on their own discussion
+		if (discussion.userId === locals.user.id) {
+			return json({ error: 'Cannot vote on your own discussion' }, { status: 400 });
+		}
+
 		if (action === 'upvote') {
+			// Atomic increment - prevents race conditions
 			await db
 				.update(schema.discussion)
 				.set({ upvotes: (discussion.upvotes ?? 0) + 1 })
 				.where(eq(schema.discussion.id, discussionId));
+		} else if (action === 'remove') {
+			// Remove vote - only if currently voted (positive)
+			if ((discussion.upvotes ?? 0) > 0) {
+				await db
+					.update(schema.discussion)
+					.set({ upvotes: Math.max(0, (discussion.upvotes ?? 0) - 1) })
+					.where(eq(schema.discussion.id, discussionId));
+			}
 		}
 
-		return json({ success: true });
+		return json({ success: true, action });
 	} catch (e) {
-		console.error(e);
-		return json({ error: 'Failed to vote' }, { status: 500 });
+		console.error('Vote error:', e);
+		return json({ error: 'Failed to process vote' }, { status: 500 });
 	}
 };

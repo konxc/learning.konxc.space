@@ -2,7 +2,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, asc } from 'drizzle-orm';
 import { redirect } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
@@ -44,23 +44,48 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	// Get quiz with questions and choices (exclude isCorrect for student)
-	const quiz = (await db.query.quiz.findFirst({
-		where: eq(schema.quiz.id, quizId),
-		with: {
-			questions: {
-				orderBy: schema.quizQuestion.order,
-				with: {
-					choices: {
-						columns: {
-							id: true,
-							text: true
-							// Explicitly exclude isCorrect
-						}
-					}
-				}
-			}
-		}
-	})) as QuizWithQuestions<QuizChoicePublic> | undefined;
+	const quizRow = await db.select().from(schema.quiz).where(eq(schema.quiz.id, quizId)).limit(1);
+
+	if (!quizRow[0]) {
+		throw redirect(303, `/app/explore/${courseId}/learn`);
+	}
+
+	const questions = await db
+		.select()
+		.from(schema.quizQuestion)
+		.where(eq(schema.quizQuestion.quizId, quizId))
+		.orderBy(asc(schema.quizQuestion.order));
+
+	const questionIds = questions.map((q) => q.id);
+	const allChoices =
+		questionIds.length > 0
+			? await db
+					.select({
+						id: schema.quizChoice.id,
+						text: schema.quizChoice.text,
+						questionId: schema.quizChoice.questionId
+					})
+					.from(schema.quizChoice)
+					.where(eq(schema.quizChoice.questionId, questionIds[0]))
+			: [];
+
+	// Build choices per question (fetch all at once would need inArray)
+	const choicesPerQuestion: Record<string, QuizChoicePublic[]> = {};
+	for (const qId of questionIds) {
+		const choices = await db
+			.select({ id: schema.quizChoice.id, text: schema.quizChoice.text })
+			.from(schema.quizChoice)
+			.where(eq(schema.quizChoice.questionId, qId));
+		choicesPerQuestion[qId] = choices;
+	}
+
+	const quiz: QuizWithQuestions<QuizChoicePublic> = {
+		...quizRow[0],
+		questions: questions.map((q) => ({
+			...q,
+			choices: choicesPerQuestion[q.id] ?? []
+		}))
+	};
 
 	if (!quiz) {
 		throw redirect(303, `/app/explore/${courseId}/learn`);
@@ -110,20 +135,37 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 
 		// Get quiz with correct answers
-		const quiz = (await db.query.quiz.findFirst({
-			where: eq(schema.quiz.id, quizId),
-			with: {
-				questions: {
-					with: {
-						choices: true
-					}
-				}
-			}
-		})) as QuizWithQuestions<QuizChoiceWithAnswer> | undefined;
+		const quizBaseRow = await db
+			.select()
+			.from(schema.quiz)
+			.where(eq(schema.quiz.id, quizId))
+			.limit(1);
 
-		if (!quiz) {
+		if (!quizBaseRow[0]) {
 			return actionFailure(404, 'Quiz not found');
 		}
+
+		const quizQuestions = await db
+			.select()
+			.from(schema.quizQuestion)
+			.where(eq(schema.quizQuestion.quizId, quizId))
+			.orderBy(asc(schema.quizQuestion.order));
+
+		const choicesWithAnswers: Record<string, QuizChoiceWithAnswer[]> = {};
+		for (const q of quizQuestions) {
+			choicesWithAnswers[q.id] = await db
+				.select()
+				.from(schema.quizChoice)
+				.where(eq(schema.quizChoice.questionId, q.id));
+		}
+
+		const quiz: QuizWithQuestions<QuizChoiceWithAnswer> = {
+			...quizBaseRow[0],
+			questions: quizQuestions.map((q) => ({
+				...q,
+				choices: choicesWithAnswers[q.id] ?? []
+			}))
+		};
 
 		const rawAnswers = formData.get('answers');
 		if (typeof rawAnswers !== 'string') {

@@ -52,6 +52,45 @@ export const actions: Actions = {
 			return actionFailure(400, 'Plugin ID required');
 		}
 
+		// Get the plugin definition
+		const plugin = builtInPlugins.find((p) => p.id === pluginId);
+		if (!plugin) {
+			return actionFailure(404, 'Plugin not found');
+		}
+
+		// Get currently enabled plugins
+		const enabledPlugins = await db
+			.select({ id: schema.pluginRegistry.id })
+			.from(schema.pluginRegistry)
+			.where(eq(schema.pluginRegistry.isActive, true));
+
+		const enabledIds = enabledPlugins.map((p) => p.id);
+
+		if (isActive) {
+			// Check dependencies when enabling
+			const dependencies = plugin.dependencies ?? [];
+			const missingDeps = dependencies.filter((dep) => !enabledIds.includes(dep));
+
+			if (missingDeps.length > 0) {
+				return actionFailure(
+					400,
+					`Cannot enable: missing dependencies - ${missingDeps.join(', ')}`
+				);
+			}
+		} else {
+			// Check if other plugins depend on this one when disabling
+			const dependentPlugins = builtInPlugins.filter((p) =>
+				(p.dependencies ?? []).includes(pluginId)
+			);
+			const enabledDependents = dependentPlugins
+				.filter((p) => enabledIds.includes(p.id))
+				.map((p) => p.name);
+
+			if (enabledDependents.length > 0) {
+				return actionFailure(400, `Cannot disable: required by ${enabledDependents.join(', ')}`);
+			}
+		}
+
 		const existing = await db
 			.select()
 			.from(schema.pluginRegistry)
@@ -66,9 +105,9 @@ export const actions: Actions = {
 		} else {
 			await db.insert(schema.pluginRegistry).values({
 				id: pluginId,
-				name: pluginId,
-				version: '1.0.0',
-				type: 'custom',
+				name: plugin.name,
+				version: plugin.version,
+				type: plugin.type,
 				isActive
 			});
 		}

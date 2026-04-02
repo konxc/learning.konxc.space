@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { RADIUS, COLOR, TEXT, ELEVATION } from '$lib/config/design';
+	import { formatRelativeTime } from '$lib/utils/date';
 
 	interface Notification {
 		id: string;
@@ -20,25 +21,6 @@
 
 	let { notifications = [], unreadCount = 0, show, onClose }: NotificationsDropdownProps = $props();
 
-	function formatDate(date: string | Date): string {
-		const now = new Date();
-		const notifDate = new Date(date);
-		const diffMs = now.getTime() - notifDate.getTime();
-		const diffMins = Math.floor(diffMs / 60000);
-		const diffHours = Math.floor(diffMins / 60);
-		const diffDays = Math.floor(diffHours / 24);
-
-		if (diffMins < 1) return 'Baru saja';
-		if (diffMins < 60) return `${diffMins} menit lalu`;
-		if (diffHours < 24) return `${diffHours} jam lalu`;
-		if (diffDays < 7) return `${diffDays} hari lalu`;
-
-		return notifDate.toLocaleDateString('id-ID', {
-			day: 'numeric',
-			month: 'short'
-		});
-	}
-
 	function getTypeIcon(type: string | null | undefined): string {
 		switch (type) {
 			case 'enrollment':
@@ -56,22 +38,41 @@
 		}
 	}
 
+	let markingId = $state<string | null>(null);
+	let errorMsg = $state<string | null>(null);
+
 	async function markAsRead(id: string) {
+		markingId = id;
+		errorMsg = null;
+
 		try {
-			await fetch('/api/notifications/read', {
+			const res = await fetch('/api/notifications/read', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ id })
 			});
+
+			const data = await res.json();
+
+			if (!res.ok) {
+				errorMsg = data.error || 'Failed to mark as read';
+				return;
+			}
+
+			// Reload page to refresh notifications
+			window.location.reload();
 		} catch (e) {
-			console.error('Failed to mark as read:', e);
+			errorMsg = 'Network error. Please try again.';
+		} finally {
+			markingId = null;
 		}
 	}
 
 	async function handleNotificationClick(notif: Notification) {
-		if (!notif.read) {
+		if (!notif.read && markingId !== notif.id) {
 			await markAsRead(notif.id);
 		}
+		if (errorMsg) return;
 		onClose();
 	}
 
@@ -107,6 +108,12 @@
 			{/if}
 		</div>
 
+		{#if errorMsg}
+			<div class="border-b border-red-200 bg-red-50 px-4 py-2 text-xs text-red-600">
+				{errorMsg}
+			</div>
+		{/if}
+
 		<div class="relative max-h-96 overflow-y-auto">
 			{#if notifications && notifications.length > 0}
 				{#each notifications as notif}
@@ -132,7 +139,7 @@
 									{notif.message}
 								</p>
 								<p class={`mt-1 text-xs ${COLOR.textMuted}`}>
-									{formatDate(notif.createdAt)}
+									{formatRelativeTime(notif.createdAt)}
 								</p>
 							</div>
 						</div>

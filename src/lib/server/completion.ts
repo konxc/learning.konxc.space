@@ -1,6 +1,6 @@
 import { db } from './db';
 import * as schema from './db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, isNotNull } from 'drizzle-orm';
 
 interface CompletionResult {
 	isComplete: boolean;
@@ -33,7 +33,11 @@ export async function checkCourseCompletion(
 		.select()
 		.from(schema.lessonProgress)
 		.where(
-			and(eq(schema.lessonProgress.userId, userId), eq(schema.lessonProgress.courseId, courseId))
+			and(
+				eq(schema.lessonProgress.userId, userId),
+				eq(schema.lessonProgress.courseId, courseId),
+				isNotNull(schema.lessonProgress.completedAt)
+			)
 		);
 
 	const completedLessonIds = new Set(completedLessons.map((p) => p.lessonId));

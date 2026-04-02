@@ -49,6 +49,7 @@ export const actions: Actions = {
 
 		if (!applicationId) return actionFailure(400, 'Application ID required');
 
+		// Verify application exists first
 		const app = await db
 			.select()
 			.from(schema.mentorApplication)
@@ -56,22 +57,18 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (!app[0]) return actionFailure(404, 'Application not found');
+		if (app[0].status !== 'pending') return actionFailure(400, 'Application already processed');
 
-		// Update application status
-		await db
-			.update(schema.mentorApplication)
-			.set({
-				status: 'approved',
-				adminNotes: adminNotes || null,
-				reviewedAt: new Date(),
-				reviewedBy: admin.id
-			})
-			.where(eq(schema.mentorApplication.id, applicationId));
+		// Verify user exists
+		const userExists = await db
+			.select({ id: schema.user.id })
+			.from(schema.user)
+			.where(eq(schema.user.id, app[0].userId))
+			.limit(1);
 
-		// Upgrade user role to mentor
-		await db.update(schema.user).set({ role: 'mentor' }).where(eq(schema.user.id, app[0].userId));
+		if (!userExists[0]) return actionFailure(404, 'User not found');
 
-		// Create affiliate account for the mentor
+		// Get user's org
 		const userOrgs = await db
 			.select()
 			.from(schema.organizationMember)
@@ -79,22 +76,69 @@ export const actions: Actions = {
 			.limit(1);
 
 		const orgId = userOrgs[0]?.orgId || 'personal';
-		await createAffiliateAccountForUser(app[0].userId, orgId, 'mentor');
+		const notificationId = crypto.randomUUID();
 
-		// Send notification to applicant
-		await db.insert(schema.notification).values({
-			id: crypto.randomUUID(),
-			userId: app[0].userId,
-			type: 'system',
-			title: 'Selamat! Aplikasi Mentor Disetujui 🎉',
-			message: `Aplikasi mentor kamu telah disetujui. Akun kamu sekarang memiliki akses mentor dan link affiliate. ${adminNotes ? `Catatan admin: ${adminNotes}` : ''}`,
-			link: '/app/affiliate',
-			read: false
-		});
+		try {
+			// Execute all operations in a transaction
+			await db.transaction(async (tx) => {
+				// 1. Update application status
+				await tx
+					.update(schema.mentorApplication)
+					.set({
+						status: 'approved',
+						adminNotes: adminNotes || null,
+						reviewedAt: new Date(),
+						reviewedBy: admin.id
+					})
+					.where(eq(schema.mentorApplication.id, applicationId));
 
-		return actionSuccess({
-			message: `Aplikasi ${app[0].fullName} disetujui, role diupgrade ke mentor, dan affiliate account dibuat.`
-		});
+				// 2. Upgrade user role to mentor
+				await tx
+					.update(schema.user)
+					.set({ role: 'mentor' })
+					.where(eq(schema.user.id, app[0].userId));
+
+				// 3. Create affiliate account
+				const accountId = `aff_${crypto.randomUUID().slice(0, 12)}`;
+				await tx.insert(schema.affiliateAccount).values({
+					id: accountId,
+					userId: app[0].userId,
+					orgId,
+					role: 'mentor',
+					commissionRate: 25,
+					isActive: true
+				});
+
+				// 4. Create auto affiliate link
+				const baseUrl = process.env.APP_URL || 'https://naikkelas.id';
+				await tx.insert(schema.autoAffiliateLink).values({
+					id: `link_${crypto.randomUUID().slice(0, 12)}`,
+					accountId,
+					orgId,
+					code: `mentor-${app[0].userId.slice(0, 8)}`,
+					url: `${baseUrl}/ref/mentor-${app[0].userId.slice(0, 8)}`,
+					isActive: true
+				});
+
+				// 5. Send notification
+				await tx.insert(schema.notification).values({
+					id: notificationId,
+					userId: app[0].userId,
+					type: 'system',
+					title: 'Selamat! Aplikasi Mentor Disetujui 🎉',
+					message: `Aplikasi mentor kamu telah disetujui. Akun kamu sekarang memiliki akses mentor dan link affiliate. ${adminNotes ? `Catatan admin: ${adminNotes}` : ''}`,
+					link: '/app/affiliate',
+					read: false
+				});
+			});
+
+			return actionSuccess({
+				message: `Aplikasi ${app[0].fullName} disetujui, role diupgrade ke mentor, dan affiliate account dibuat.`
+			});
+		} catch (error) {
+			console.error('Approve mentor application failed:', error);
+			return actionFailure(500, 'Failed to process application. Please try again.');
+		}
 	},
 
 	reject: async (event) => {
@@ -112,6 +156,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (!app[0]) return actionFailure(404, 'Application not found');
+		if (app[0].status !== 'pending') return actionFailure(400, 'Application already processed');
 
 		await db
 			.update(schema.mentorApplication)
