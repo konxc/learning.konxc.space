@@ -319,21 +319,21 @@
 				<div class="flex items-center gap-3 rounded-lg bg-zinc-50 p-3">
 					<span class="text-2xl">✅</span>
 					<div>
-						<p class="font-medium">Selesai Modul</p>
-						<p class="text-sm font-bold text-emerald-600">+50 poin</p>
+						<p class="font-medium">Lulus Quiz</p>
+						<p class="text-sm font-bold text-emerald-600">+15 poin</p>
 					</div>
 				</div>
 				<div class="flex items-center gap-3 rounded-lg bg-zinc-50 p-3">
 					<span class="text-2xl">📋</span>
 					<div>
 						<p class="font-medium">Submit Checkpoint</p>
-						<p class="text-sm font-bold text-emerald-600">+100 poin</p>
+						<p class="text-sm font-bold text-emerald-600">+25 poin</p>
 					</div>
 				</div>
 				<div class="flex items-center gap-3 rounded-lg bg-zinc-50 p-3">
 					<span class="text-2xl">🔥</span>
 					<div>
-						<p class="font-medium">Streak Harian</p>
+						<p class="font-medium">Login Harian</p>
 						<p class="text-sm font-bold text-emerald-600">+5 poin/hari</p>
 					</div>
 				</div>
@@ -348,7 +348,21 @@
 					<span class="text-2xl">🤝</span>
 					<div>
 						<p class="font-medium">Referral</p>
-						<p class="text-sm font-bold text-emerald-600">+50 poin</p>
+						<p class="text-sm font-bold text-emerald-600">+30 poin</p>
+					</div>
+				</div>
+				<div class="flex items-center gap-3 rounded-lg bg-amber-50 p-3">
+					<span class="text-2xl">🎯</span>
+					<div>
+						<p class="font-medium">Streak 7 Hari</p>
+						<p class="text-sm font-bold text-amber-600">+50 poin</p>
+					</div>
+				</div>
+				<div class="flex items-center gap-3 rounded-lg bg-amber-50 p-3">
+					<span class="text-2xl">🏅</span>
+					<div>
+						<p class="font-medium">Streak 30 Hari</p>
+						<p class="text-sm font-bold text-amber-600">+100 poin</p>
 					</div>
 				</div>
 			</div>
