@@ -245,7 +245,7 @@
 			<OverviewGraph
 				title="Learning Velocity"
 				description="Submission volume and engagement spikes across your curriculum."
-				dataPoints={[30, 45, 60, 55, 70, 90, 85, 100, 110, 95, 120, 130]}
+				dataPoints={data.activityGraph ?? []}
 			/>
 		</div>
 

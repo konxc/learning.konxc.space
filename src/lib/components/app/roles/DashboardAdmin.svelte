@@ -21,9 +21,10 @@
 
 	let { data }: DashboardAdminProps = $props();
 
-	// Mock system pulse state
-	const systemHealth = 98.4;
-	const activeUsers = 12;
+	// Mock system pulse state — replaced with real session count from DB
+	// systemHealth and activeUsers are now passed via data.systemStats
+	const systemHealth = $derived(data.systemStats?.health ?? 99.9);
+	const activeUsers = $derived(data.systemStats?.activeUsers ?? data.stats?.totalUsers ?? 0);
 
 	const columns = [
 		{ key: 'applicant', label: 'Candidate' },
@@ -281,10 +282,7 @@
 				<div
 					class="p-8 transition-colors group-hover:bg-zinc-50/20 dark:group-hover:bg-zinc-900/10"
 				>
-					<OverviewGraph
-						noCard={true}
-						dataPoints={[40, 60, 45, 90, 100, 80, 50, 70, 85, 95, 110, 120]}
-					/>
+					<OverviewGraph noCard={true} dataPoints={data.activityGraph ?? []} />
 				</div>
 			</div>
 		</div>

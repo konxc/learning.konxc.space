@@ -2,7 +2,34 @@ import type { PageServerLoad } from './$types';
 import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and, inArray, gte, desc } from 'drizzle-orm';
+
+// Build 12-week activity graph from trackerActivity
+async function buildActivityGraph(userId: string): Promise<number[]> {
+	const twelveWeeksAgo = new Date();
+	twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - 84);
+
+	const activities = await db
+		.select({ points: schema.trackerActivity.points, createdAt: schema.trackerActivity.createdAt })
+		.from(schema.trackerActivity)
+		.where(
+			and(
+				eq(schema.trackerActivity.userId, userId),
+				gte(schema.trackerActivity.createdAt, twelveWeeksAgo)
+			)
+		)
+		.orderBy(schema.trackerActivity.createdAt);
+
+	// Bucket into 12 weekly slots
+	const buckets = new Array(12).fill(0);
+	const now = Date.now();
+	for (const a of activities) {
+		const msAgo = now - new Date(a.createdAt).getTime();
+		const weekIndex = 11 - Math.min(11, Math.floor(msAgo / (7 * 24 * 60 * 60 * 1000)));
+		buckets[weekIndex] += a.points;
+	}
+	return buckets;
+}
 
 export const load: PageServerLoad = async (event) => {
 	const user = await requireAuth(event);
@@ -128,6 +155,7 @@ export const load: PageServerLoad = async (event) => {
 				pendingPayments: pendingEnrollments.length
 			},
 			courses: enrolledCourses,
+			activityGraph: await buildActivityGraph(user.id),
 			user: user,
 			workspace: { id: activeWorkspaceId, org: activeOrg }
 		};
@@ -193,6 +221,7 @@ export const load: PageServerLoad = async (event) => {
 				trackCounts
 			},
 			pendingApplicationsList: pendingApplications.slice(0, 10),
+			activityGraph: await buildActivityGraph(user.id),
 			user: user,
 			workspace: { id: activeWorkspaceId, org: activeOrg }
 		};
@@ -320,6 +349,7 @@ export const load: PageServerLoad = async (event) => {
 				approvalRate,
 				avgScore
 			},
+			activityGraph: await buildActivityGraph(user.id),
 			user: user,
 			workspace: { id: activeWorkspaceId, org: activeOrg }
 		};
