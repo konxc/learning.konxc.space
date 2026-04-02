@@ -36,8 +36,8 @@ Dashboard lengkap untuk user dengan affiliate account — tracking sales, komisi
 
 ### R5 — Auto-Affiliate untuk Mentor/Facilitator
 
-- **R5.1**: Mentor dan facilitator otomatis punya affiliate account saat role diberikan
-- **R5.2**: Auto-generate affiliate links untuk semua course aktif
+- **R5.1**: Mentor dan facilitator otomatis punya affiliate account saat `organization_member.role` di-set ke `mentor` atau `facilitator` (BUKAN dari `user.role` — role ini ada di org context)
+- **R5.2**: Auto-generate affiliate links untuk semua course aktif milik org tersebut
 - **R5.3**: Notifikasi saat affiliate account dibuat
 
 ## Technical Constraints

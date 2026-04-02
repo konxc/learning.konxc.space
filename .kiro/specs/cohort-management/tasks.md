@@ -3,7 +3,7 @@
 ## Task 1 — Admin: Assign Facilitator
 
 - [ ] Tambah kolom `facilitatorId` display di tabel cohort
-- [ ] Dropdown select facilitator (query users dengan role facilitator)
+- [ ] Dropdown select facilitator — query dari `organization_member` dengan `role = 'facilitator'` (BUKAN dari `user.role`, karena facilitator adalah org-level role)
 - [ ] Server action `assignFacilitator` di `admin/cohorts/+page.server.ts`
 - [ ] Jalankan `pnpm run check`
 
