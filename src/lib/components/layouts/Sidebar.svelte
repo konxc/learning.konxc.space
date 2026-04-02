@@ -28,8 +28,8 @@
 			dashboard: '',
 			workspace: 'Workspace',
 			learning: 'Learning',
-			management: 'Management',
-			platform: 'Platform Admin',
+			management: 'Organization',
+			platform: 'Platform',
 			admin: 'Administration',
 			crm: 'CRM',
 			other: 'Other'
@@ -164,7 +164,7 @@
 </script>
 
 <aside
-	class="sidebar-container fixed top-0 left-0 hidden h-screen overflow-x-hidden overflow-y-auto border-r border-gray-200/60 bg-white/95 backdrop-blur-sm md:block dark:border-neutral-800/60 dark:bg-neutral-900/95 ${ELEVATION.base} z-40 transition-[width] duration-300 ease-out {isCollapsed
+	class="sidebar-container fixed top-0 left-0 hidden h-screen overflow-x-hidden overflow-y-auto border-r md:block ${COLOR.cardBorder} ${COLOR.card} backdrop-blur-sm ${ELEVATION.base} z-40 transition-[width] duration-300 ease-out {isCollapsed
 		? 'w-16'
 		: 'w-64'}"
 	aria-label="Sidebar navigation"
@@ -239,7 +239,7 @@
 										href={item.href}
 										class={`sidebar-item group relative flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-3'} ${RADIUS.small} py-2.5 ${TEXT.button} ${TRANSITION.all} ${
 											active
-												? `${COLOR.textPrimary} bg-white font-bold shadow-xs ring-1 ring-gray-200/50 dark:bg-blue-950/20 dark:ring-blue-500/20`
+												? `${COLOR.textPrimary} ${COLOR.surface} font-bold shadow-xs ring-1 ${COLOR.cardBorder} dark:bg-blue-950/20 dark:ring-blue-500/20`
 												: `${COLOR.textSecondary} hover:bg-white/50 hover:text-gray-900 hover:shadow-xs dark:hover:bg-neutral-800/40 dark:hover:text-gray-100`
 										} focus:ring-2 focus:ring-blue-500/50 focus:outline-none`}
 										aria-current={active ? 'page' : undefined}
@@ -284,9 +284,7 @@
 
 		<!-- Workspace Switcher at the Bottom -->
 		{#if workspaces}
-			<div
-				class={`border-t border-gray-100 px-3 pt-2 pb-4 dark:border-neutral-800 ${isCollapsed ? 'px-2' : ''}`}
-			>
+			<div class={`border-t px-3 pt-2 pb-4 ${COLOR.cardBorder} ${isCollapsed ? 'px-2' : ''}`}>
 				<WorkspaceSwitcher
 					{workspaces}
 					fullWidth={true}

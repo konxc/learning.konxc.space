@@ -106,8 +106,14 @@ export function getNavItemsForRole(role: string, context?: WorkspaceContext): Na
 			{ label: 'Reviews', href: '/app/admin/reviews', icon: 'star', category: 'platform' },
 			{
 				label: 'Broadcast',
-				href: '/app/mentor/broadcast',
+				href: '/app/admin/broadcast',
 				icon: 'megaphone',
+				category: 'platform'
+			},
+			{
+				label: 'Verification',
+				href: '/app/admin/verification',
+				icon: 'shield',
 				category: 'platform'
 			},
 			{ label: 'Plugins', href: '/app/admin/plugins', icon: 'puzzle', category: 'platform' },
@@ -126,6 +132,8 @@ export function getNavItemsForRole(role: string, context?: WorkspaceContext): Na
 	return [
 		...baseNav,
 		...workspaceNav,
+		{ label: 'Tracker', href: '/app/tracker', icon: 'zap', category: 'workspace' },
+		{ label: 'Payments', href: '/app/payments', icon: 'credit-card', category: 'workspace' },
 		{ label: 'Affiliate', href: '/app/affiliate', icon: 'wallet', category: 'workspace' }
 	];
 }
@@ -171,9 +179,9 @@ function getOrgNavItems(orgRole: string, context: WorkspaceContext): NavItem[] {
 				category: 'management'
 			},
 			{
-				label: 'Billing',
-				href: `/app/organizations/${orgId}/billing`,
-				icon: 'credit-card',
+				label: 'Settings',
+				href: `/app/organizations/${orgId}/settings`,
+				icon: 'settings',
 				category: 'management'
 			},
 			{
@@ -188,9 +196,12 @@ function getOrgNavItems(orgRole: string, context: WorkspaceContext): NavItem[] {
 				icon: 'hammer',
 				category: 'platform'
 			},
-			{ label: 'Reviews', href: '/app/admin/reviews', icon: 'star', category: 'platform' },
-			{ label: 'Cohorts', href: '/app/admin/cohorts', icon: 'calendar', category: 'platform' },
-			{ label: 'Reports', href: '/app/admin/reports', icon: 'chart', category: 'platform' },
+			{
+				label: 'Cohorts',
+				href: '/app/facilitator/cohorts',
+				icon: 'calendar',
+				category: 'platform'
+			},
 			{
 				label: 'Broadcast',
 				href: '/app/mentor/broadcast',
@@ -249,7 +260,6 @@ function getOrgNavItems(orgRole: string, context: WorkspaceContext): NavItem[] {
 				icon: 'calendar',
 				category: 'management'
 			},
-			{ label: 'Students', href: '/app/mentor/students', icon: 'users', category: 'management' },
 			{
 				label: 'Broadcast',
 				href: '/app/mentor/broadcast',
@@ -280,12 +290,12 @@ export function groupNavItems(items: NavItem[]): NavGroup[] {
 
 	const categoryLabels: Record<string, string> = {
 		dashboard: '',
-		workspace: 'Workspace Tasks',
+		workspace: 'Workspace',
 		learning: 'Learning',
-		management: 'Organization Settings',
+		management: 'Organization',
 		admin: 'Administration',
-		platform: 'Platform Management',
-		crm: 'Customer Relations',
+		platform: 'Platform',
+		crm: 'CRM',
 		other: 'Other'
 	};
 

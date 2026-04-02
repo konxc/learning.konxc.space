@@ -75,35 +75,9 @@
 	let showNotifications = $state(false);
 	let liveUnreadCount = $state(unreadCount);
 
+	// Sync dari prop — AppShell sudah handle SSE dan update unreadCount
 	$effect(() => {
 		liveUnreadCount = unreadCount;
-	});
-
-	$effect(() => {
-		const es = new EventSource('/api/notifications/stream');
-
-		es.onmessage = (event) => {
-			try {
-				const data = JSON.parse(event.data as string) as {
-					type?: string;
-					unreadCount?: number;
-					newNotifications?: Array<{ id: string; type: string; title: string }>;
-				};
-				if (data.unreadCount !== undefined) {
-					liveUnreadCount = data.unreadCount;
-				}
-			} catch {
-				// ignore parse errors
-			}
-		};
-
-		es.onerror = () => {
-			es.close();
-		};
-
-		return () => {
-			es.close();
-		};
 	});
 
 	// Tab selection handler for PageData-driven tabs
@@ -252,7 +226,7 @@
 					</div>
 				{/if}
 
-				{#if activeRole && currentRoleColor}
+				{#if activeRole && activeRole !== 'user' && currentRoleColor}
 					<div
 						class={`flex items-center gap-1.5 ${currentRoleColor.bgMuted} ${currentRoleColor.border} border ${RADIUS.badge} px-2 py-0.5 ${TRANSITION.all}`}
 					>
