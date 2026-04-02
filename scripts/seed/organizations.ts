@@ -1,244 +1,400 @@
+/**
+ * ORGANIZATIONS SEED — Prinsip: 1 User = 1 Role yang Konsisten
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * ROLE PLATFORM → ROLE ORG yang SESUAI:
+ *   admin       → owner  (hanya di org utama: Koneksi Digital)
+ *   mentor      → creator (hanya di 1 org sesuai spesialisasi)
+ *   facilitator → facilitator (hanya di 1 org)
+ *   bd          → tidak masuk org (hanya akses CRM)
+ *   user/student→ tidak masuk org (hanya belajar)
+ *
+ * PEMETAAN USER → ORG:
+ *
+ * org-koneksi  (Koneksi Digital Academy) — org utama platform
+ *   owner      : admin-001   (Aditya Pratama — admin platform)
+ *   creator    : mentor-001  (Budi Santoso — bisnis & affiliate)
+ *   creator    : mentor-002  (Dewi Anggraini — content creator)
+ *   facilitator: facil-001   (Irwan Setiawan)
+ *   facilitator: facil-002   (Siti Nurhaliza)
+ *
+ * org-pondokit (Pondok IT Academy) — org teknis
+ *   owner      : mentor-004  (Rina Kusuma — Python/DS)
+ *   creator    : mentor-005  (Ahmad Fauzi — Full Stack/Video)
+ *   facilitator: facil-003   (Joko Purnomo)
+ *
+ * org-marketinglab (Marketing Lab Indonesia) — org marketing
+ *   owner      : mentor-006  (Maya Sari — branding/keuangan)
+ *   creator    : mentor-003  (Hendra Wijaya — UI/UX/digital marketing)
+ *
+ * org-creatorhub (Creator Hub Indonesia) — tidak ada member khusus
+ *   (org ini dikelola oleh Koneksi Digital, courses-nya di-assign ke sini)
+ *   owner      : admin-001   (Aditya Pratama — dikelola platform)
+ *
+ * CATATAN:
+ *   - mentor_dewi (Dewi) adalah creator di Koneksi Digital, BUKAN owner Creator Hub
+ *   - Tidak ada user yang punya role berbeda di org berbeda
+ *   - admin platform hanya jadi owner di org utama (Koneksi Digital)
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
 import * as schema from '../../src/lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
+import { logSection, logSuccess, generateId } from './utils.js';
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
 
-function generateId() {
-	return 'ws-' + Math.random().toString(36).substring(2, 11);
-}
-
-export async function seedOrganizations(db: LibSQLDatabase<typeof schema>, adminIds: string[]) {
-	console.log('🏢 Seeding organizations...');
+export async function seedOrganizations(db: LibSQLDatabase<typeof schema>, _unused: string[]) {
+	logSection('Seeding organizations (4 orgs, 1 user = 1 role)');
 
 	const organizations = [
 		{
-			id: 'org-pondokit',
-			slug: 'pondokit-academy',
-			name: 'Pondok IT Academy',
-			logoUrl: null,
-			brandColor: '#22c55e',
+			id: 'org-koneksi',
+			slug: 'koneksi-digital',
+			name: 'Koneksi Digital Academy',
+			logoUrl: 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=200&h=200&fit=crop',
+			brandColor: '#4f46e5',
 			planType: 'enterprise',
 			createdAt: new Date('2024-01-01'),
 			updatedAt: new Date('2024-01-01')
 		},
 		{
-			id: 'org-koneksi',
-			slug: 'koneksi-digital',
-			name: 'Koneksi Digital Academy',
-			logoUrl: null,
-			brandColor: '#4f46e5',
+			id: 'org-pondokit',
+			slug: 'pondokit-academy',
+			name: 'Pondok IT Academy',
+			logoUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=200&h=200&fit=crop',
+			brandColor: '#22c55e',
 			planType: 'pro',
-			createdAt: new Date('2024-01-15'),
-			updatedAt: new Date('2024-01-15')
+			createdAt: new Date('2024-01-10'),
+			updatedAt: new Date('2024-01-10')
 		},
 		{
 			id: 'org-marketinglab',
 			slug: 'marketing-lab-id',
 			name: 'Marketing Lab Indonesia',
-			logoUrl: null,
+			logoUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200&h=200&fit=crop',
 			brandColor: '#f59e0b',
-			planType: 'free',
-			createdAt: new Date('2024-02-01'),
-			updatedAt: new Date('2024-02-01')
+			planType: 'pro',
+			createdAt: new Date('2024-01-20'),
+			updatedAt: new Date('2024-01-20')
 		},
 		{
 			id: 'org-creatorhub',
 			slug: 'creator-hub-id',
 			name: 'Creator Hub Indonesia',
-			logoUrl: null,
+			logoUrl: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=200&h=200&fit=crop',
 			brandColor: '#ec4899',
-			planType: 'pro',
-			createdAt: new Date('2024-02-15'),
-			updatedAt: new Date('2024-02-15')
+			planType: 'free',
+			createdAt: new Date('2024-02-01'),
+			updatedAt: new Date('2024-02-01')
 		}
 	];
 
 	for (const org of organizations) {
 		await db.insert(schema.organization).values(org).onConflictDoNothing();
 	}
+	logSuccess(`Seeded ${organizations.length} organizations`);
 
-	console.log(`✅ Seeded ${organizations.length} organizations`);
-
-	// Seed organization members
-	console.log('👥 Seeding organization members...');
+	logSection('Seeding organization members (1 user = 1 role, no overlap)');
 
 	const members = [
-		// Pondok IT Academy - Admin is owner
+		// ── KONEKSI DIGITAL ACADEMY ─────────────────────────────────────────────
+		// Admin platform = owner org utama
+		// Mentor bisnis/content = creator
+		// Facilitator = facilitator
 		{
-			id: 'mem-pondokit-001',
-			orgId: 'org-pondokit',
-			userId: adminIds[0],
-			role: 'owner',
-			createdAt: new Date('2024-01-01'),
-			updatedAt: new Date('2024-01-01')
-		},
-		{
-			id: 'mem-pondokit-002',
-			orgId: 'org-pondokit',
-			userId: adminIds[1],
-			role: 'admin',
-			createdAt: new Date('2024-01-02'),
-			updatedAt: new Date('2024-01-02')
-		},
-		{
-			id: 'mem-pondokit-003',
-			orgId: 'org-pondokit',
-			userId: adminIds[2],
-			role: 'facilitator',
-			createdAt: new Date('2024-01-03'),
-			updatedAt: new Date('2024-01-03')
-		},
-		// Koneksi Digital - Admin is owner
-		{
-			id: 'mem-koneksi-001',
+			id: 'mem-kd-001',
 			orgId: 'org-koneksi',
-			userId: adminIds[0],
+			userId: 'admin-001',
 			role: 'owner',
-			createdAt: new Date('2024-01-15'),
-			updatedAt: new Date('2024-01-15')
+			createdAt: new Date('2024-01-01')
 		},
 		{
-			id: 'mem-koneksi-002',
+			id: 'mem-kd-002',
 			orgId: 'org-koneksi',
-			userId: adminIds[2],
+			userId: 'mentor-001',
 			role: 'creator',
-			createdAt: new Date('2024-01-16'),
-			updatedAt: new Date('2024-01-16')
+			createdAt: new Date('2024-01-03')
 		},
-		// Marketing Lab - Admin is owner
 		{
-			id: 'mem-marketinglab-001',
+			id: 'mem-kd-003',
+			orgId: 'org-koneksi',
+			userId: 'mentor-002',
+			role: 'creator',
+			createdAt: new Date('2024-01-03')
+		},
+		{
+			id: 'mem-kd-004',
+			orgId: 'org-koneksi',
+			userId: 'facil-001',
+			role: 'facilitator',
+			createdAt: new Date('2024-01-05')
+		},
+		{
+			id: 'mem-kd-005',
+			orgId: 'org-koneksi',
+			userId: 'facil-002',
+			role: 'facilitator',
+			createdAt: new Date('2024-01-05')
+		},
+
+		// ── PONDOK IT ACADEMY ────────────────────────────────────────────────────
+		// mentor-004 (Rina) = owner org ini, sesuai role mentor-nya
+		// mentor-005 (Ahmad) = creator di org ini saja
+		// facil-003 (Joko) = facilitator di org ini saja
+		{
+			id: 'mem-pi-001',
+			orgId: 'org-pondokit',
+			userId: 'mentor-004',
+			role: 'owner',
+			createdAt: new Date('2024-01-10')
+		},
+		{
+			id: 'mem-pi-002',
+			orgId: 'org-pondokit',
+			userId: 'mentor-005',
+			role: 'creator',
+			createdAt: new Date('2024-01-10')
+		},
+		{
+			id: 'mem-pi-003',
+			orgId: 'org-pondokit',
+			userId: 'facil-003',
+			role: 'facilitator',
+			createdAt: new Date('2024-01-12')
+		},
+
+		// ── MARKETING LAB INDONESIA ──────────────────────────────────────────────
+		// mentor-006 (Maya) = owner org ini
+		// mentor-003 (Hendra) = creator di org ini saja
+		{
+			id: 'mem-ml-001',
 			orgId: 'org-marketinglab',
-			userId: adminIds[0],
+			userId: 'mentor-006',
 			role: 'owner',
-			createdAt: new Date('2024-02-01'),
-			updatedAt: new Date('2024-02-01')
+			createdAt: new Date('2024-01-20')
 		},
-		// Creator Hub - Admin is owner
 		{
-			id: 'mem-creatorhub-001',
+			id: 'mem-ml-002',
+			orgId: 'org-marketinglab',
+			userId: 'mentor-003',
+			role: 'creator',
+			createdAt: new Date('2024-01-20')
+		},
+
+		// ── CREATOR HUB INDONESIA ────────────────────────────────────────────────
+		// Dikelola platform (admin), tidak ada mentor/facilitator khusus
+		// Courses di-assign ke sini tapi dikelola dari Koneksi Digital
+		{
+			id: 'mem-ch-001',
 			orgId: 'org-creatorhub',
-			userId: adminIds[0],
+			userId: 'admin-001',
 			role: 'owner',
-			createdAt: new Date('2024-02-15'),
-			updatedAt: new Date('2024-02-15')
+			createdAt: new Date('2024-02-01')
 		}
 	];
 
-	for (const member of members) {
-		await db.insert(schema.organizationMember).values(member).onConflictDoNothing();
+	for (const m of members) {
+		await db
+			.insert(schema.organizationMember)
+			.values({
+				...m,
+				updatedAt: m.createdAt
+			})
+			.onConflictDoNothing();
 	}
-
-	console.log(`✅ Seeded ${members.length} organization members`);
+	logSuccess(`Seeded ${members.length} organization members`);
 
 	return organizations;
 }
 
-export async function assignCoursesToOrganizations(db: LibSQLDatabase<typeof schema>, courseIds: string[]) {
-	console.log('📚 Assigning courses to organizations...');
+export async function assignCoursesToOrganizations(
+	db: LibSQLDatabase<typeof schema>,
+	_courseIds: string[]
+) {
+	logSection('Assigning courses to organizations');
 
-	// Assign courses to organizations based on category and relevance
-	const assignments = [
-		{ courseId: courseIds[0], orgId: 'org-koneksi' }, // Akselerasi Bisnis Digital -> Koneksi
-		{ courseId: courseIds[1], orgId: 'org-creatorhub' }, // Content Creator -> Creator Hub
-		{ courseId: courseIds[2], orgId: 'org-koneksi' }, // E-Commerce -> Koneksi
-		{ courseId: courseIds[3], orgId: 'org-koneksi' }, // Affiliate -> Koneksi
-		{ courseId: courseIds[4], orgId: 'org-pondokit' }, // Python -> Pondok IT
-		{ courseId: courseIds[5], orgId: 'org-pondokit' }, // Full Stack -> Pondok IT
-		{ courseId: courseIds[6], orgId: 'org-pondokit' }, // Mobile App -> Pondok IT
-		{ courseId: courseIds[7], orgId: 'org-marketinglab' }, // Digital Marketing -> Marketing Lab
-		{ courseId: courseIds[8], orgId: 'org-marketinglab' }, // Brand Building -> Marketing Lab
+	// Sesuai mentor yang mengajar dan org tempat mereka bernaung
+	const assignments: { courseId: string; orgId: string }[] = [
+		// Koneksi Digital — mentor-001 (Budi) & mentor-002 (Dewi)
+		{ courseId: 'course-001', orgId: 'org-koneksi' }, // Akselerasi Bisnis Digital (mentor-001)
+		{ courseId: 'course-002', orgId: 'org-koneksi' }, // Content Creator Mastery (mentor-002)
+		{ courseId: 'course-003', orgId: 'org-koneksi' }, // E-Commerce (mentor-003 → pindah ke marketinglab)
+		{ courseId: 'course-004', orgId: 'org-koneksi' }, // Affiliate Marketing (mentor-001)
+
+		// Pondok IT — mentor-004 (Rina) & mentor-005 (Ahmad)
+		{ courseId: 'course-005', orgId: 'org-pondokit' }, // Python Data Science (mentor-004)
+		{ courseId: 'course-006', orgId: 'org-pondokit' }, // Full Stack Web Dev (mentor-005)
+		{ courseId: 'course-007', orgId: 'org-pondokit' }, // Mobile App Flutter (mentor-004)
+
+		// Marketing Lab — mentor-006 (Maya) & mentor-003 (Hendra)
+		{ courseId: 'course-008', orgId: 'org-marketinglab' }, // Digital Marketing (mentor-002 → marketinglab)
+		{ courseId: 'course-009', orgId: 'org-marketinglab' }, // Brand Building (mentor-006)
+		{ courseId: 'course-010', orgId: 'org-marketinglab' }, // Keuangan UMKM (mentor-006)
+
+		// Creator Hub — dikelola admin, courses design & video
+		{ courseId: 'course-011', orgId: 'org-creatorhub' }, // UI/UX Design (mentor-003)
+		{ courseId: 'course-012', orgId: 'org-creatorhub' } // Video Production (mentor-005)
 	];
 
-	for (const assignment of assignments) {
-		await db.update(schema.course)
-			.set({ orgId: assignment.orgId })
-			.where(eq(schema.course.id, assignment.courseId));
+	for (const a of assignments) {
+		await db.update(schema.course).set({ orgId: a.orgId }).where(eq(schema.course.id, a.courseId));
 	}
-
-	console.log(`✅ Assigned ${assignments.length} courses to organizations`);
+	logSuccess(`Assigned ${assignments.length} courses to organizations`);
 }
 
-export async function seedWorkspaces(db: LibSQLDatabase<typeof schema>, userIds: string[]) {
-	console.log('🏢 Seeding workspaces...');
+export async function seedWorkspaces(db: LibSQLDatabase<typeof schema>, _unused: string[]) {
+	logSection('Seeding workspaces');
 
 	const workspaces = [
-		// Workspaces for Pondok IT Academy
+		// Koneksi Digital — 2 tim sesuai spesialisasi
 		{
-			id: 'ws-pondokit-001',
-			orgId: 'org-pondokit',
-			name: 'Tim Pengajar Teknis',
-			description: 'Tim mentor dan instruktur kursus teknis',
-			createdAt: new Date('2024-01-02'),
-			updatedAt: new Date('2024-01-02')
-		},
-		{
-			id: 'ws-pondokit-002',
-			orgId: 'org-pondokit',
-			name: 'Tim Konten',
-			description: 'Tim pengembangan materi dan konten pembelajaran',
-			createdAt: new Date('2024-01-02'),
-			updatedAt: new Date('2024-01-02')
-		},
-		// Workspaces for Koneksi Digital
-		{
-			id: 'ws-koneksi-001',
+			id: 'ws-kd-bisnis',
 			orgId: 'org-koneksi',
-			name: 'Tim Bisnis Digital',
-			description: 'Tim pengembangan program akselerasi bisnis',
-			createdAt: new Date('2024-01-16'),
-			updatedAt: new Date('2024-01-16')
+			name: 'Tim Bisnis & Affiliate',
+			description: 'Mentor dan fasilitator program bisnis digital dan affiliate',
+			createdAt: new Date('2024-01-05')
 		},
 		{
-			id: 'ws-koneksi-002',
+			id: 'ws-kd-content',
 			orgId: 'org-koneksi',
-			name: 'Tim Marketing',
-			description: 'Tim marketing dan pertumbuhan komunitas',
-			createdAt: new Date('2024-01-16'),
-			updatedAt: new Date('2024-01-16')
+			name: 'Tim Content Creator',
+			description: 'Mentor dan fasilitator program content creator',
+			createdAt: new Date('2024-01-05')
 		},
-		// Workspaces for Creator Hub
+		// Pondok IT — 1 tim teknis
 		{
-			id: 'ws-creatorhub-001',
+			id: 'ws-pi-teknis',
+			orgId: 'org-pondokit',
+			name: 'Tim Teknis',
+			description: 'Instruktur dan fasilitator kursus pemrograman',
+			createdAt: new Date('2024-01-12')
+		},
+		// Marketing Lab — 1 tim
+		{
+			id: 'ws-ml-marketing',
+			orgId: 'org-marketinglab',
+			name: 'Tim Marketing & Desain',
+			description: 'Instruktur digital marketing, brand, dan UI/UX',
+			createdAt: new Date('2024-01-22')
+		},
+		// Creator Hub — 1 tim
+		{
+			id: 'ws-ch-creator',
 			orgId: 'org-creatorhub',
-			name: 'Tim Creator',
-			description: 'Tim creator dan content developer',
-			createdAt: new Date('2024-02-16'),
-			updatedAt: new Date('2024-02-16')
+			name: 'Tim Creator & Video',
+			description: 'Instruktur desain dan produksi video',
+			createdAt: new Date('2024-02-05')
 		}
 	];
 
 	for (const ws of workspaces) {
-		await db.insert(schema.workspace).values(ws).onConflictDoNothing();
+		await db
+			.insert(schema.workspace)
+			.values({ ...ws, updatedAt: ws.createdAt })
+			.onConflictDoNothing();
 	}
+	logSuccess(`Seeded ${workspaces.length} workspaces`);
 
-	console.log(`✅ Seeded ${workspaces.length} workspaces`);
-
-	// Seed workspace members
-	console.log('👥 Seeding workspace members...');
-
-	const workspaceMembers = [
-		// Pondok IT - Tim Pengajar
-		{ id: generateId(), workspaceId: 'ws-pondokit-001', userId: userIds[0], role: 'admin' },
-		{ id: generateId(), workspaceId: 'ws-pondokit-001', userId: userIds[2], role: 'member' },
-		// Pondok IT - Tim Konten
-		{ id: generateId(), workspaceId: 'ws-pondokit-002', userId: userIds[0], role: 'admin' },
-		{ id: generateId(), workspaceId: 'ws-pondokit-002', userId: userIds[1], role: 'member' },
-		// Koneksi - Tim Bisnis
-		{ id: generateId(), workspaceId: 'ws-koneksi-001', userId: userIds[0], role: 'admin' },
-		{ id: generateId(), workspaceId: 'ws-koneksi-001', userId: userIds[2], role: 'member' },
-		// Koneksi - Tim Marketing
-		{ id: generateId(), workspaceId: 'ws-koneksi-002', userId: userIds[0], role: 'admin' },
-		{ id: generateId(), workspaceId: 'ws-koneksi-002', userId: userIds[1], role: 'member' },
-		// Creator Hub
-		{ id: generateId(), workspaceId: 'ws-creatorhub-001', userId: userIds[0], role: 'admin' },
-		{ id: generateId(), workspaceId: 'ws-creatorhub-001', userId: userIds[2], role: 'member' }
+	// Workspace members — sesuai org membership masing-masing user
+	const wsMembers = [
+		// Koneksi Digital — Tim Bisnis (Budi + Irwan)
+		{
+			id: generateId(),
+			workspaceId: 'ws-kd-bisnis',
+			userId: 'admin-001',
+			role: 'admin',
+			createdAt: new Date('2024-01-05')
+		},
+		{
+			id: generateId(),
+			workspaceId: 'ws-kd-bisnis',
+			userId: 'mentor-001',
+			role: 'member',
+			createdAt: new Date('2024-01-05')
+		},
+		{
+			id: generateId(),
+			workspaceId: 'ws-kd-bisnis',
+			userId: 'facil-001',
+			role: 'member',
+			createdAt: new Date('2024-01-05')
+		},
+		// Koneksi Digital — Tim Content (Dewi + Siti)
+		{
+			id: generateId(),
+			workspaceId: 'ws-kd-content',
+			userId: 'admin-001',
+			role: 'admin',
+			createdAt: new Date('2024-01-05')
+		},
+		{
+			id: generateId(),
+			workspaceId: 'ws-kd-content',
+			userId: 'mentor-002',
+			role: 'member',
+			createdAt: new Date('2024-01-05')
+		},
+		{
+			id: generateId(),
+			workspaceId: 'ws-kd-content',
+			userId: 'facil-002',
+			role: 'member',
+			createdAt: new Date('2024-01-05')
+		},
+		// Pondok IT (Rina + Ahmad + Joko)
+		{
+			id: generateId(),
+			workspaceId: 'ws-pi-teknis',
+			userId: 'mentor-004',
+			role: 'admin',
+			createdAt: new Date('2024-01-12')
+		},
+		{
+			id: generateId(),
+			workspaceId: 'ws-pi-teknis',
+			userId: 'mentor-005',
+			role: 'member',
+			createdAt: new Date('2024-01-12')
+		},
+		{
+			id: generateId(),
+			workspaceId: 'ws-pi-teknis',
+			userId: 'facil-003',
+			role: 'member',
+			createdAt: new Date('2024-01-12')
+		},
+		// Marketing Lab (Maya + Hendra)
+		{
+			id: generateId(),
+			workspaceId: 'ws-ml-marketing',
+			userId: 'mentor-006',
+			role: 'admin',
+			createdAt: new Date('2024-01-22')
+		},
+		{
+			id: generateId(),
+			workspaceId: 'ws-ml-marketing',
+			userId: 'mentor-003',
+			role: 'member',
+			createdAt: new Date('2024-01-22')
+		},
+		// Creator Hub (admin platform)
+		{
+			id: generateId(),
+			workspaceId: 'ws-ch-creator',
+			userId: 'admin-001',
+			role: 'admin',
+			createdAt: new Date('2024-02-05')
+		}
 	];
 
-	for (const member of workspaceMembers) {
-		await db.insert(schema.workspaceMember).values(member).onConflictDoNothing();
+	for (const m of wsMembers) {
+		await db
+			.insert(schema.workspaceMember)
+			.values({ ...m, updatedAt: m.createdAt })
+			.onConflictDoNothing();
 	}
-
-	console.log(`✅ Seeded ${workspaceMembers.length} workspace members`);
+	logSuccess(`Seeded ${wsMembers.length} workspace members`);
 
 	return workspaces;
 }

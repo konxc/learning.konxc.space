@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 // Modular seeders
 import { seedUsers, seedStudents } from './seed/users.js';
 import { seedCourses, seedCoupons, seedEnrollments } from './seed/courses.js';
-import { seedCourseContent } from './seed/content.ts';
+import { seedCourseContent } from './seed/content.js';
 import { seedPartners, seedCohorts } from './seed/partners.js';
 import { seedMentorApplications, seedWaitingList } from './seed/applications.js';
 import { seedBadges, seedUserXP, seedUserBadges } from './seed/gamification.js';
@@ -23,7 +23,11 @@ import {
 	seedCourseReviews
 } from './seed/notifications.js';
 import { seedAffiliateLinks, seedAffiliateSales } from './seed/affiliates.js';
-import { seedOrganizations, assignCoursesToOrganizations, seedWorkspaces } from './seed/organizations.js';
+import {
+	seedOrganizations,
+	assignCoursesToOrganizations,
+	seedWorkspaces
+} from './seed/organizations.js';
 import { seedPlugins } from './seed/plugins.js';
 import { seedKoneksiDigital } from './seed/koneksi-digital.js';
 
@@ -113,29 +117,43 @@ async function resetTables() {
 	await safeDelete(schema.quizChoice, 'quizChoice');
 	await safeDelete(schema.quizQuestion, 'quizQuestion');
 	await safeDelete(schema.quiz, 'quiz');
-	
+
 	// Level 2: Tables that depend on course
 	await safeDelete(schema.enrollment, 'enrollment');
 	await safeDelete(schema.material, 'material');
 	await safeDelete(schema.lesson, 'lesson');
 	await safeDelete(schema.module, 'module');
 	await safeDelete(schema.cohort, 'cohort');
-	
+
 	// Level 3: Course and coupon (after enrollments)
 	await safeDelete(schema.course, 'course');
 	await safeDelete(schema.coupon, 'coupon');
 	await safeDelete(schema.pluginRegistry, 'pluginRegistry');
-	
+
 	// Level 4: Organization related
 	await safeDelete(schema.organizationMember, 'organizationMember');
 	await safeDelete(schema.organizationInvitation, 'organizationInvitation');
 	await safeDelete(schema.workspaceMember, 'workspaceMember');
 	await safeDelete(schema.workspace, 'workspace');
 	await safeDelete(schema.organization, 'organization');
-	
+
 	// Level 5: Partners
 	await safeDelete(schema.partner, 'partner');
-	
+
+	// Level 5.5: User-dependent tables not yet cleared
+	await safeDelete(schema.jobApplication, 'jobApplication');
+	await safeDelete(schema.jobPosting, 'jobPosting');
+	await safeDelete(schema.autoAffiliateLink, 'autoAffiliateLink');
+	await safeDelete(schema.affiliateAccount, 'affiliateAccount');
+	await safeDelete(schema.trackerActivity, 'trackerActivity');
+	await safeDelete(schema.userTracker, 'userTracker');
+	await safeDelete(schema.userPreferences, 'userPreferences');
+	await safeDelete(schema.userVerification, 'userVerification');
+	await safeDelete(schema.organizationVerification, 'organizationVerification');
+	await safeDelete(schema.organizationApiKey, 'organizationApiKey');
+	await safeDelete(schema.emailLog, 'emailLog');
+	await safeDelete(schema.whatsappLog, 'whatsappLog');
+
 	// Level 6: Session and user (must be last)
 	await safeDelete(schema.session, 'session');
 	await safeDelete(schema.user, 'user');
@@ -152,34 +170,36 @@ async function main() {
 		const coreUsers = await seedUsers(db);
 		const adminId = coreUsers[0].id; // admin
 		const bdId = coreUsers[1].id; // bd_salsabila
-		const mentorIds = coreUsers.slice(2, 8).map(u => u.id); // 6 mentors
-		const facilitatorIds = coreUsers.slice(8, 11).map(u => u.id); // 3 facilitators
+		const mentorIds = coreUsers.slice(2, 8).map((u) => u.id); // 6 mentors
+		const facilitatorIds = coreUsers.slice(8, 11).map((u) => u.id); // 3 facilitators
 
 		// ===== STEP 2: Students =====
 		console.log('\n📋 STEP 2: Creating students...');
 		const students = await seedStudents(db);
-		const studentIds = students.map(s => s.id);
+		const studentIds = students.map((s) => s.id);
 
 		// ===== STEP 3: Organizations =====
 		console.log('\n📋 STEP 3: Creating organizations...');
-		const orgIds = [adminId, bdId, mentorIds[0]];
-		await seedOrganizations(db, orgIds);
+		await seedOrganizations(db, []);
 
 		// ===== STEP 4: Courses =====
 		console.log('\n📋 STEP 4: Creating courses...');
 		const courses = await seedCourses(db, adminId);
-		const courseIds = courses.map(c => c.id);
+		const courseIds = courses.map((c) => c.id);
+
+		// Assign courses ke org yang tepat sesuai mentor/owner
+		await assignCoursesToOrganizations(db, courseIds);
 
 		// ===== STEP 5: Partners & Cohorts =====
 		console.log('\n📋 STEP 5: Creating partners and cohorts...');
 		await seedPartners(db);
 		const cohorts = await seedCohorts(db, mentorIds, facilitatorIds, courseIds);
-		const cohortIds = cohorts.map(c => c.id);
+		const cohortIds = cohorts.map((c) => c.id);
 
 		// ===== STEP 6: Coupons =====
 		console.log('\n📋 STEP 6: Creating coupons...');
 		const coupons = await seedCoupons(db, adminId);
-		const couponIds = coupons.map(c => c.id);
+		const couponIds = coupons.map((c) => c.id);
 
 		// ===== STEP 7: Enrollments with Tracks =====
 		console.log('\n📋 STEP 7: Creating enrollments with tracks...');
@@ -196,8 +216,7 @@ async function main() {
 
 		// ===== STEP 10: Workspaces =====
 		console.log('\n📋 STEP 10: Creating workspaces...');
-		const workspaceAdminIds = [adminId, bdId, mentorIds[0]];
-		await seedWorkspaces(db, workspaceAdminIds);
+		await seedWorkspaces(db, []);
 
 		// ===== STEP 11: Plugins =====
 		console.log('\n📋 STEP 11: Creating plugins...');
@@ -219,12 +238,12 @@ async function main() {
 
 		// ===== STEP 14: Checkpoint Submissions =====
 		console.log('\n📋 STEP 14: Creating checkpoint submissions...');
-		const checkpointIds = (await db.select().from(schema.checkpoint)).map(c => c.id);
+		const checkpointIds = (await db.select().from(schema.checkpoint)).map((c) => c.id);
 		await seedCheckpointSubmissions(db, studentIds, checkpointIds);
 
 		// ===== STEP 15: Discussions & Notes =====
 		console.log('\n📋 STEP 15: Creating discussions and notes...');
-		const lessonIds = ['lesson-001', 'lesson-002', 'lesson-003', 'lesson-004', 'lesson-005'];
+		const lessonIds = ['c1l1', 'c1l2', 'c1l3', 'c2l1', 'c2l2', 'c3l1', 'c5l1', 'c6l1'];
 		await seedDiscussions(db, studentIds, courseIds, lessonIds);
 		await seedLessonNotes(db, studentIds, lessonIds, courseIds);
 
@@ -264,7 +283,7 @@ async function main() {
 		console.log('   Facilitator: facil_irwan / naikkelas2024');
 		console.log('   Student: ahmad_rizki / naikkelas2024');
 		console.log('='.repeat(60));
-		
+
 		process.exit(0);
 	} catch (error) {
 		console.error('\n❌ Seeding failed:', error);
