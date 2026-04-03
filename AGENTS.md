@@ -1,6 +1,8 @@
 # AGENTS.md — Multi-Agent Coding Guidelines for Naik Kelas 2.0
 
 > Context file for AI coding agents (Antigravity, Cursor, Copilot, Cline, etc.) working on this repository.
+> 
+> **IMPORTANT**: For detailed conventions, see [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md)
 
 ## Quick Reference
 
@@ -47,6 +49,7 @@ src/
 │   │   ├── db/schema.ts     # 📦 Drizzle tables (PostgreSQL/Neon)
 │   │   ├── rbac.ts          # 🔐 Role-based nav & permissions
 │   │   ├── auth.ts          # 🔒 Lucia auth setup
+│   │   ├── org-context.ts   # 🔐 Org membership checks
 │   │   └── payments/        # 💰 Midtrans integration
 │   ├── components/
 │   │   ├── layouts/         # Shell: AppShell, Sidebar, DashboardHeader
@@ -55,11 +58,47 @@ src/
 │   ├── stores/              # Svelte stores (theme, toast, metadata)
 │   └── plugins/             # Feature toggle system
 ├── routes/
-│   ├── (dashboard)/app/     # 🏠 Protected. 16 route groups.
-│   ├── (public)/            # 🌐 Landing, marketplace, docs
-│   ├── (auth)/              # 🔑 Login, register, waiting list
-│   └── api/                 # 📡 REST: payments, webhooks, notes
+│   ├── (auth)/             # 🔑 Auth pages (signin, signup, waiting-list)
+│   ├── (dashboard)/app/    # 🏠 Protected dashboard with AppShell
+│   │   ├── overview/        # Dashboard entry
+│   │   ├── admin/           # Platform admin routes
+│   │   ├── crm/             # Platform BD routes
+│   │   ├── explore/         # Marketplace
+│   │   ├── learning/        # User learning
+│   │   ├── organizations/   # Org management
+│   │   │   └── [id]/        # Org context
+│   │   │       ├── mentor/         # Org-scoped mentor (✅ CORRECT)
+│   │   │       ├── facilitator/     # Org-scoped facilitator (✅ CORRECT)
+│   │   │       └── ...            # Other org features
+│   │   ├── settings/        # User settings
+│   │   └── payments/        # User payments
+│   ├── (public)/            # 🌐 Public pages (marketplace, docs, jobs)
+│   ├── (prototype)/         # 🔧 Dev testing (kept as requested)
+│   ├── onboarding/          # 🚀 Onboarding flow
+│   ├── org/                 # 🌐 Public org pages (invite, slug)
+│   ├── login/               # ✅ Alias for /auth/signin (conventional)
+│   └── register/            # ✅ Alias for /auth/signup (conventional)
 ```
+
+## Two-Layer Role System
+
+### Platform Roles (user.role - only 3 values!)
+```
+PLATFORM_ROLES = ['admin', 'bd', 'user']
+```
+- `admin`: Platform operations → `/app/admin/*`
+- `bd`: Business Development → `/app/crm/*`  
+- `user`: Everyone else (including mentors!)
+
+### Org Roles (organization_member.role)
+```
+ORG_ROLES = ['owner', 'admin', 'mentor', 'facilitator', 'member']
+```
+
+### KEY RULE
+> A mentor does NOT have `user.role = 'mentor'`. They have:
+> - `user.role = 'user'` (platform level)
+> - `organization_member.role = 'mentor'` (org level)
 
 ## Design System Cheat Sheet
 
