@@ -1,3 +1,6 @@
+// Learning page for enrolled students
+// Route: /app/explore/[courseId]/learn
+// Note: [courseId] is the enrolled course ID, different from [id] in explore/[id] (course detail)
 import type { PageServerLoad, Actions } from './$types';
 import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';

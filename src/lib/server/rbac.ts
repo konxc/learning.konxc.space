@@ -81,6 +81,7 @@ export function getNavItemsForRole(role: string, context?: WorkspaceContext): Na
 		{ label: 'Achievements', href: '/app/achievements', icon: 'award', category: 'workspace' },
 		{ label: 'Leaderboard', href: '/app/leaderboard', icon: 'trophy', category: 'workspace' },
 		{ label: 'Organizations', href: '/app/organizations', icon: 'building', category: 'workspace' },
+		{ label: 'Verification', href: '/app/verification', icon: 'shield', category: 'workspace' },
 		{ label: 'Notifications', href: '/app/notifications', icon: 'bell', category: 'workspace' }
 	];
 

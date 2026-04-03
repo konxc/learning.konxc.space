@@ -53,3 +53,4 @@ prototype/
 tmp/
 drafting kursus/
 naikkelas-agent/
+.pnpm-store/

@@ -1,3 +1,6 @@
+// Course detail/enroll page
+// Route: /app/explore/[id]
+// Note: [id] is the course ID for browsing/enrolling, different from [courseId] in explore/[courseId]/learn
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
