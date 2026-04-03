@@ -26,25 +26,18 @@
 		visibility: 'draft'
 	});
 
-	// Validation
-	const validateStep1 = () => {
-		return courseData.title.length >= 3 && courseData.description.length >= 10;
-	};
+	// Validation functions
+	const validateStep1 = () => courseData.title.length >= 3 && courseData.description.length >= 10;
+	const validateStep2 = () => true; // For now, step 2 is optional
+	const validateStep3 = () => courseData.price >= 0;
 
-	const validateStep2 = () => {
-		// For now, step 2 is optional (modules can be added later)
-		return true;
-	};
-
-	const validateStep3 = () => {
-		return courseData.price >= 0;
-	};
-
-	const canProceed = $derived(() => {
-		if (currentStep === 1) return validateStep1();
-		if (currentStep === 2) return validateStep2();
-		if (currentStep === 3) return validateStep3();
-		return false;
+	// Navigation state
+	let canProceed = $state(false);
+	$effect(() => {
+		if (currentStep === 1) canProceed = validateStep1();
+		else if (currentStep === 2) canProceed = validateStep2();
+		else if (currentStep === 3) canProceed = validateStep3();
+		else canProceed = false;
 	});
 
 	// Navigation

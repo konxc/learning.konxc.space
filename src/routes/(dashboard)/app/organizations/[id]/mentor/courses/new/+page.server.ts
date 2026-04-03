@@ -61,7 +61,7 @@ export const actions: Actions = {
 				createdBy: user.id
 			});
 
-			return actionSuccess({ courseId });
+			return actionSuccess({ data: { courseId } });
 		}
 
 		// Fallback for form submission
