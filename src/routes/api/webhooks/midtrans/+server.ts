@@ -21,9 +21,13 @@ export const POST: RequestHandler = async ({ request }) => {
 		);
 
 		// 2. Find transaction in our DB
-		const tx = await db.query.transaction.findFirst({
-			where: eq(schema.transaction.id, orderId)
-		});
+		const txResult = await db
+			.select()
+			.from(schema.transaction)
+			.where(eq(schema.transaction.id, orderId))
+			.limit(1);
+
+		const tx = txResult[0];
 
 		if (!tx) {
 			return json({ message: 'Transaction not found' }, { status: 404 });
@@ -71,6 +75,23 @@ export const POST: RequestHandler = async ({ request }) => {
 					.where(
 						and(eq(schema.enrollment.userId, tx.userId), eq(schema.enrollment.courseId, courseId))
 					);
+
+				// Notify student
+				const courseResult = await db
+					.select({ title: schema.course.title })
+					.from(schema.course)
+					.where(eq(schema.course.id, courseId))
+					.limit(1);
+
+				await db.insert(schema.notification).values({
+					id: crypto.randomUUID(),
+					userId: tx.userId,
+					type: 'enrollment',
+					title: 'Pembayaran Berhasil ✅',
+					message: `Pembayaran untuk kursus "${courseResult[0]?.title ?? courseId}" telah dikonfirmasi. Selamat belajar!`,
+					link: '/app/learning',
+					read: false
+				});
 
 				console.log(`Enrollment activated for user ${tx.userId} in course ${courseId}`);
 			} else if (tx.orgId) {

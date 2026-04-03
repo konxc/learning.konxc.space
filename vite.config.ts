@@ -24,9 +24,6 @@ export default defineConfig({
 			external: ['html2canvas', 'jspdf']
 		}
 	},
-	ssr: {
-		external: ['@libsql/client']
-	},
 	server: {
 		host: '0.0.0.0',
 		port: 5173,
