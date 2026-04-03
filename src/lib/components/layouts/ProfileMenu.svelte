@@ -77,12 +77,17 @@
 				onToggle={(e) => onAccordionToggle?.('theme', e)}
 			/>
 
-			<RoleSwitcherAccordion
-				{user}
-				{activeRole}
-				accordionRef={roleAccordionRef}
-				onToggle={(e) => onAccordionToggle?.('role', e)}
-			/>
+			<!-- RoleSwitcher: only show for non-admin roles -->
+			<!-- Admin doesn't need to switch - they have full access via /app/admin/* -->
+			<!-- BD needs to switch to user for marketplace browsing -->
+			{#if user?.role !== 'admin'}
+				<RoleSwitcherAccordion
+					{user}
+					{activeRole}
+					accordionRef={roleAccordionRef}
+					onToggle={(e) => onAccordionToggle?.('role', e)}
+				/>
+			{/if}
 
 			<!-- Menu Items -->
 			<a

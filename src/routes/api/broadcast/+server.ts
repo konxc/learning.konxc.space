@@ -76,7 +76,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const user = await requireAuth(locals);
 
 	const data = await request.json();
-	const { title, content, targetRole, targetCohortId, targetCourseId, sentVia } = data;
+	const { title, content, targetRole, targetCohortId, targetCourseId, sentVia, orgId } = data;
 
 	if (!title || !content) {
 		return json({ error: 'Title and content are required' }, { status: 400 });
@@ -101,7 +101,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	let recipients: { id: string; email: string | null; phone: string | null }[] = [];
 
 	if (targetCohortId) {
-		// Get students in this cohort
+		// Get students in this cohort (Cohort -> Course -> Org join ensures isolation)
 		recipients = await db
 			.select({
 				id: schema.user.id,
@@ -110,7 +110,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			})
 			.from(schema.enrollment)
 			.innerJoin(schema.user, eq(schema.enrollment.userId, schema.user.id))
-			.where(eq(schema.enrollment.cohortId, targetCohortId));
+			.innerJoin(schema.course, eq(schema.enrollment.courseId, schema.course.id))
+			.where(and(
+				eq(schema.enrollment.cohortId, targetCohortId),
+				orgId ? eq(schema.course.orgId, orgId) : undefined
+			));
 	} else if (targetCourseId) {
 		// Get students in this course
 		recipients = await db
@@ -121,19 +125,50 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			})
 			.from(schema.enrollment)
 			.innerJoin(schema.user, eq(schema.enrollment.userId, schema.user.id))
-			.where(eq(schema.enrollment.courseId, targetCourseId));
+			.innerJoin(schema.course, eq(schema.enrollment.courseId, schema.course.id))
+			.where(and(
+				eq(schema.enrollment.courseId, targetCourseId),
+				orgId ? eq(schema.course.orgId, orgId) : undefined
+			));
 	} else if (targetRole) {
-		// Get users by role
+		// Get users by role within the organization if orgId is provided
+		if (orgId) {
+			recipients = await db
+				.select({
+					id: schema.user.id,
+					email: schema.user.email,
+					phone: schema.user.phone
+				})
+				.from(schema.organizationMember)
+				.innerJoin(schema.user, eq(schema.organizationMember.userId, schema.user.id))
+				.where(and(
+					eq(schema.organizationMember.orgId, orgId),
+					eq(schema.user.role, targetRole)
+				));
+		} else if (user.role === 'admin') {
+			// Platform admin global broadcast
+			recipients = await db
+				.select({
+					id: schema.user.id,
+					email: schema.user.email,
+					phone: schema.user.phone
+				})
+				.from(schema.user)
+				.where(eq(schema.user.role, targetRole));
+		}
+	} else if (orgId) {
+		// All users in organization
 		recipients = await db
 			.select({
 				id: schema.user.id,
 				email: schema.user.email,
 				phone: schema.user.phone
 			})
-			.from(schema.user)
-			.where(eq(schema.user.role, targetRole));
-	} else {
-		// Get all learners
+			.from(schema.organizationMember)
+			.innerJoin(schema.user, eq(schema.organizationMember.userId, schema.user.id))
+			.where(eq(schema.organizationMember.orgId, orgId));
+	} else if (user.role === 'admin') {
+		// Platform admin global broadcast (all learners)
 		recipients = await db
 			.select({
 				id: schema.user.id,

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import KpiCard from '$lib/components/KpiCard.svelte';
 	import OverviewGraph from '$lib/components/app/OverviewGraph.svelte';
-	import RoleSwitcher from '$lib/components/app/RoleSwitcher.svelte';
 	import Table from '$lib/components/ui/Table.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import PageSection from '$lib/components/layouts/PageSection.svelte';

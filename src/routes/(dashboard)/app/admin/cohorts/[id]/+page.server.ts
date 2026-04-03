@@ -22,7 +22,8 @@ export const load: PageServerLoad = async (event) => {
 			createdAt: schema.cohort.createdAt,
 			course: {
 				id: schema.course.id,
-				title: schema.course.title
+				title: schema.course.title,
+				orgId: schema.course.orgId
 			},
 			facilitator: {
 				id: schema.user.id,
@@ -95,6 +96,7 @@ export const load: PageServerLoad = async (event) => {
 		cohort,
 		enrollments,
 		facilitators,
+		orgId: cohort.course.orgId,
 		stats: {
 			totalStudents,
 			activeStudents,

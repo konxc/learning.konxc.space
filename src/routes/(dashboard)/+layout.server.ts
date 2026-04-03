@@ -7,7 +7,7 @@ import * as schema from '$lib/server/db/schema';
 
 const ACTIVE_ROLE_COOKIE = 'active-role';
 
-export const load: LayoutServerLoad = async ({ locals, cookies, url }) => {
+export const load: LayoutServerLoad = async ({ locals, cookies, url, params }) => {
 	const user = locals.user;
 	if (!user) {
 		throw redirect(303, '/auth/signin?redirect=' + url.pathname);
@@ -40,12 +40,15 @@ export const load: LayoutServerLoad = async ({ locals, cookies, url }) => {
 	}));
 
 	// 2. Determine activeOrgId:
-	//    Priority: URL param orgId → cookie active-workspace → user.lastWorkspaceId → first org
+	//    Priority: URL path [id] → URL param orgId → cookie active-workspace → user.lastWorkspaceId → first org
 	const urlOrgId = url.searchParams.get('orgId');
+	const pathOrgId = params.id;
 	const cookieWorkspace = cookies.get('active-workspace');
 
 	let activeWorkspaceId: string;
-	if (urlOrgId && orgMemberships.some((m) => m.orgId === urlOrgId)) {
+	if (pathOrgId && orgMemberships.some((m) => m.orgId === pathOrgId)) {
+		activeWorkspaceId = pathOrgId;
+	} else if (urlOrgId && orgMemberships.some((m) => m.orgId === urlOrgId)) {
 		activeWorkspaceId = urlOrgId;
 	} else if (cookieWorkspace && cookieWorkspace !== 'personal') {
 		const valid = orgMemberships.some((m) => m.orgId === cookieWorkspace);

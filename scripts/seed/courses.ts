@@ -405,6 +405,10 @@ export async function seedEnrollments(
 ) {
 	logSection('Seeding enrollments with tracks (80 enrollments)');
 
+	// Get course orgIds for enrollment multi-tenant isolation
+	const courses = await db.select({ id: schema.course.id, orgId: schema.course.orgId }).from(schema.course);
+	const courseOrgMap = new Map(courses.map(c => [c.id, c.orgId]));
+
 	const tracks = ['creator', 'seller', 'affiliate'] as const;
 	const statuses = ['active', 'active', 'active', 'active', 'completed', 'pending'] as const;
 
@@ -413,10 +417,12 @@ export async function seedEnrollments(
 	// Course 0 (Akselerasi Bisnis Digital) - Popular, many enrollments with tracks
 	for (let i = 0; i < 20; i++) {
 		const studentIdx = i % studentIds.length;
+		const courseId = courseIds[0];
 		enrollments.push({
 			id: generateId(),
 			userId: studentIds[studentIdx],
-			courseId: courseIds[0],
+			courseId: courseId,
+			orgId: courseOrgMap.get(courseId) ?? null,
 			cohortId: cohortIds[0],
 			couponId: i % 5 === 0 ? couponIds[0] : null,
 			track: tracks[i % 3],
@@ -430,10 +436,12 @@ export async function seedEnrollments(
 	// Course 1 (Content Creator) - Many enrollments with creator track
 	for (let i = 0; i < 15; i++) {
 		const studentIdx = (i + 10) % studentIds.length;
+		const courseId = courseIds[1];
 		enrollments.push({
 			id: generateId(),
 			userId: studentIds[studentIdx],
-			courseId: courseIds[1],
+			courseId: courseId,
+			orgId: courseOrgMap.get(courseId) ?? null,
 			cohortId: cohortIds[1],
 			couponId: i % 4 === 0 ? couponIds[1] : null,
 			track: i < 10 ? 'creator' : tracks[i % 3],
@@ -447,10 +455,12 @@ export async function seedEnrollments(
 	// Course 2 (E-Commerce) - Seller track focus
 	for (let i = 0; i < 12; i++) {
 		const studentIdx = (i + 20) % studentIds.length;
+		const courseId = courseIds[2];
 		enrollments.push({
 			id: generateId(),
 			userId: studentIds[studentIdx],
-			courseId: courseIds[2],
+			courseId: courseId,
+			orgId: courseOrgMap.get(courseId) ?? null,
 			cohortId: cohortIds[2],
 			couponId: null,
 			track: i < 8 ? 'seller' : tracks[i % 3],
@@ -464,10 +474,12 @@ export async function seedEnrollments(
 	// Course 3 (Affiliate Marketing) - Affiliate track focus
 	for (let i = 0; i < 10; i++) {
 		const studentIdx = (i + 30) % studentIds.length;
+		const courseId = courseIds[3];
 		enrollments.push({
 			id: generateId(),
 			userId: studentIds[studentIdx],
-			courseId: courseIds[3],
+			courseId: courseId,
+			orgId: courseOrgMap.get(courseId) ?? null,
 			cohortId: cohortIds[3],
 			couponId: i % 3 === 0 ? couponIds[4] : null,
 			track: i < 7 ? 'affiliate' : tracks[i % 3],
@@ -481,10 +493,12 @@ export async function seedEnrollments(
 	// Course 4 (Python) - Technical, no track
 	for (let i = 0; i < 8; i++) {
 		const studentIdx = (i + 40) % studentIds.length;
+		const courseId = courseIds[4];
 		enrollments.push({
 			id: generateId(),
 			userId: studentIds[studentIdx],
-			courseId: courseIds[4],
+			courseId: courseId,
+			orgId: courseOrgMap.get(courseId) ?? null,
 			cohortId: null,
 			couponId: null,
 			track: null,
@@ -498,10 +512,12 @@ export async function seedEnrollments(
 	// Course 5 (Full Stack) - Technical, no track
 	for (let i = 0; i < 8; i++) {
 		const studentIdx = (i + 45) % studentIds.length;
+		const courseId = courseIds[5];
 		enrollments.push({
 			id: generateId(),
 			userId: studentIds[studentIdx],
-			courseId: courseIds[5],
+			courseId: courseId,
+			orgId: courseOrgMap.get(courseId) ?? null,
 			cohortId: null,
 			couponId: null,
 			track: null,
@@ -515,10 +531,12 @@ export async function seedEnrollments(
 	// Course 8 (Digital Marketing) - Mixed
 	for (let i = 0; i < 7; i++) {
 		const studentIdx = (i + 50) % studentIds.length;
+		const courseId = courseIds[8];
 		enrollments.push({
 			id: generateId(),
 			userId: studentIds[studentIdx],
-			courseId: courseIds[8],
+			courseId: courseId,
+			orgId: courseOrgMap.get(courseId) ?? null,
 			cohortId: null,
 			couponId: i % 5 === 0 ? couponIds[3] : null,
 			track: tracks[i % 3],

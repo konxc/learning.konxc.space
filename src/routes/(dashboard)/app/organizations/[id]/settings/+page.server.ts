@@ -1,46 +1,32 @@
 import type { PageServerLoad, Actions } from './$types';
-import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, ne } from 'drizzle-orm';
-import { redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
-import { getMembership } from '$lib/server/org-utils';
-import { hasOrgPermission } from '$lib/server/rbac';
+import { requireOrgAdmin } from '$lib/server/middleware';
 
 export const load: PageServerLoad = async (event) => {
-	const user = await requireAuth(event);
+	const { organization } = await event.parent();
 	const orgId = event.params.id;
 
-	const membership = await getMembership(user.id, orgId);
-
-	if (!hasOrgPermission(membership.role, 'org:update')) {
-		throw redirect(303, `/app/organizations/${orgId}`);
-	}
-
-	const org = await db
-		.select()
-		.from(schema.organization)
-		.where(eq(schema.organization.id, orgId))
-		.limit(1);
+	const membership = await requireOrgAdmin(event, orgId);
 
 	return {
-		organization: org[0],
+		organization,
 		membership
 	};
 };
 
 export const actions: Actions = {
 	updateSettings: async (event) => {
-		const user = await requireAuth(event);
-		const orgId = event.params.id;
+		const { params, request } = event;
+		const orgId = params.id;
 
-		const membership = await getMembership(user.id, orgId);
-		if (!hasOrgPermission(membership.role, 'org:update')) {
-			return actionFailure(403, 'Unauthorized');
-		}
+		// Verify membership via centralized helper
+		const membership = await requireOrgAdmin(event, orgId);
 
-		const formData = await event.request.formData();
+		const formData = await request.formData();
 		const name = (formData.get('name') as string) ?? '';
 		const slug = (formData.get('slug') as string) ?? '';
 		const brandColor = (formData.get('brandColor') as string) ?? '';
@@ -79,15 +65,13 @@ export const actions: Actions = {
 	},
 
 	updateLogo: async (event) => {
-		const user = await requireAuth(event);
-		const orgId = event.params.id;
+		const { params, request } = event;
+		const orgId = params.id;
 
-		const membership = await getMembership(user.id, orgId);
-		if (!hasOrgPermission(membership.role, 'org:update')) {
-			return actionFailure(403, 'Unauthorized');
-		}
+		// Verify membership via centralized helper
+		const membership = await requireOrgAdmin(event, orgId);
 
-		const formData = await event.request.formData();
+		const formData = await request.formData();
 		const logoBase64 = (formData.get('logoBase64') as string) ?? '';
 
 		if (logoBase64 && logoBase64.length > 682667) {

@@ -2,44 +2,26 @@ import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, error } from '@sveltejs/kit';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
+import { requireOrgOwner } from '$lib/server/middleware';
 
 function generateId(): string {
 	const bytes = crypto.getRandomValues(new Uint8Array(15));
 	return encodeBase32LowerCase(bytes);
 }
 
-export const load: PageServerLoad = async ({ params, locals }) => {
-	if (!locals.user) {
-		throw redirect(303, '/auth/signin');
+export const load: PageServerLoad = async (event) => {
+	const orgId = event.params.id;
+
+	let membership;
+	try {
+		membership = await requireOrgOwner(event, orgId);
+	} catch (err) {
+		throw redirect(303, `/app/organizations/${orgId}`);
 	}
 
-	const orgId = params.id;
-
-	// Check if user is owner of this org — explicit join, no db.query
-	const memberRows = await db
-		.select()
-		.from(schema.organizationMember)
-		.where(
-			and(
-				eq(schema.organizationMember.orgId, orgId),
-				eq(schema.organizationMember.userId, locals.user.id),
-				eq(schema.organizationMember.role, 'owner')
-			)
-		)
-		.limit(1);
-
-	if (!memberRows[0]) {
-		throw redirect(303, '/app');
-	}
-
-	// Get organization
-	const orgRows = await db
-		.select()
-		.from(schema.organization)
-		.where(eq(schema.organization.id, orgId))
-		.limit(1);
+	const { organization } = await event.parent();
 
 	// Get existing verification
 	const verificationRows = await db
@@ -51,34 +33,21 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const verification = verificationRows[0] ?? null;
 
 	return {
-		organization: orgRows[0] ?? null,
+		organization,
 		verification,
 		isVerified: verification?.status === 'verified'
 	};
 };
 
 export const actions: Actions = {
-	submitVerification: async ({ request, locals, params }) => {
-		if (!locals.user) {
-			return fail(401, { error: 'Unauthorized' });
-		}
-
+	submitVerification: async (event) => {
+		const { request, params } = event;
 		const orgId = params.id;
 
-		// Check if user is owner/admin
-		const memberRows2 = await db
-			.select()
-			.from(schema.organizationMember)
-			.where(
-				and(
-					eq(schema.organizationMember.orgId, orgId),
-					eq(schema.organizationMember.userId, locals.user!.id),
-					eq(schema.organizationMember.role, 'owner')
-				)
-			)
-			.limit(1);
-
-		if (!memberRows2[0]) {
+		// Verify membership via centralized owner helper
+		try {
+			await requireOrgOwner(event, orgId);
+		} catch (err) {
 			return fail(403, { error: 'Hanya owner yang dapat melakukan verifikasi' });
 		}
 

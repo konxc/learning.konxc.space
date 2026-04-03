@@ -83,6 +83,7 @@ export const coupon = pgTable('coupon', {
 	createdBy: text('created_by')
 		.notNull()
 		.references(() => user.id),
+	orgId: text('org_id').references(() => organization.id),
 	createdAt: timestamp('created_at')
 		.notNull()
 		.$defaultFn(() => new Date()),

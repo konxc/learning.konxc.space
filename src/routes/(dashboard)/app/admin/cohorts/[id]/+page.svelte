@@ -278,7 +278,7 @@
 								<td class="px-6 py-4">
 									<div class="flex items-center gap-2">
 										<a
-											href="/app/mentor/students/{enrollment.user.id}"
+											href="/app/organizations/{data.orgId}/mentor/students/{enrollment.user.id}"
 											class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-600 transition-all hover:bg-blue-100"
 										>
 											View

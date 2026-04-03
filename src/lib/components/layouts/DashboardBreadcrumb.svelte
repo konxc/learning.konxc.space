@@ -12,7 +12,9 @@
 		checkpoints: 'Checkpoints',
 		certificates: 'Certificates',
 		admin: 'Admin',
-		mentor: 'Mentor'
+		mentor: 'Mentor',
+		organizations: 'Organizations',
+		facilitator: 'Facilitator'
 	};
 
 	function segments(pathname: string) {

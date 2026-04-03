@@ -14,7 +14,8 @@ export interface CouponValidationResult {
 export async function validateCoupon(
 	code: string,
 	originalPrice: number,
-	courseId?: string
+	courseId?: string,
+	orgId?: string | null
 ): Promise<CouponValidationResult> {
 	// Find the coupon
 	const coupon = await db.select().from(schema.coupon).where(eq(schema.coupon.code, code)).limit(1);
@@ -30,6 +31,17 @@ export async function validateCoupon(
 	}
 
 	const foundCoupon = coupon[0];
+
+	// Check organization scope (if provided)
+	if (orgId && foundCoupon.orgId && foundCoupon.orgId !== orgId) {
+		return {
+			isValid: false,
+			coupon: foundCoupon,
+			error: 'Coupon is not valid for this organization',
+			finalPrice: originalPrice,
+			discountAmount: 0
+		};
+	}
 
 	// Check if coupon is active
 	if (!foundCoupon.isActive) {

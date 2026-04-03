@@ -1,20 +1,13 @@
 import type { PageServerLoad } from './$types';
-import { requireAuth } from '$lib/server/middleware';
-import { getMembership } from '$lib/server/org-utils';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, count } from 'drizzle-orm';
-import { redirect } from '@sveltejs/kit';
-import { hasOrgPermission } from '$lib/server/rbac';
+import { error } from '@sveltejs/kit';
+import { requireOrgAdmin } from '$lib/server/middleware';
 
 export const load: PageServerLoad = async (event) => {
-	const user = await requireAuth(event);
 	const orgId = event.params.id;
-
-	const membership = await getMembership(user.id, orgId);
-	if (!hasOrgPermission(membership.role, 'analytics:view')) {
-		throw redirect(303, `/app/organizations/${orgId}`);
-	}
+	const membership = await requireOrgAdmin(event, orgId);
 
 	// Get org courses (needed for courseStats revenue calc)
 	const courses = await db
@@ -28,20 +21,22 @@ export const load: PageServerLoad = async (event) => {
 			const enrollments = await db
 				.select({ status: schema.enrollment.status })
 				.from(schema.enrollment)
-				.where(eq(schema.enrollment.courseId, course.id));
+				.where(
+					and(eq(schema.enrollment.courseId, course.id), eq(schema.enrollment.orgId, orgId))
+				);
 
 			const total = enrollments.length;
 			const active = enrollments.filter((e) => e.status === 'active').length;
 			const completed = enrollments.filter((e) => e.status === 'completed').length;
-			const revenue = active * course.price;
+			const revenue = active * (course.price || 0);
 
 			return { ...course, total, active, completed, revenue };
 		})
 	);
 
-	// Three parallel queries
+	// Three parallel data queries
 	const [enrollmentsByCourse, memberCountResult, completionData] = await Promise.all([
-		// Query A — Enrollment count per course
+		// Enrollment count per course
 		db
 			.select({
 				courseId: schema.course.id,
@@ -49,17 +44,20 @@ export const load: PageServerLoad = async (event) => {
 				count: count(schema.enrollment.id)
 			})
 			.from(schema.course)
-			.leftJoin(schema.enrollment, eq(schema.enrollment.courseId, schema.course.id))
+			.leftJoin(
+				schema.enrollment,
+				and(eq(schema.enrollment.courseId, schema.course.id), eq(schema.enrollment.orgId, orgId))
+			)
 			.where(eq(schema.course.orgId, orgId))
 			.groupBy(schema.course.id, schema.course.title),
 
-		// Query B — Member count
+		// Member count in this org
 		db
 			.select({ count: count() })
 			.from(schema.organizationMember)
 			.where(eq(schema.organizationMember.orgId, orgId)),
 
-		// Query C — Course completion rate per course
+		// Completion count per course
 		db
 			.select({
 				courseId: schema.course.id,
@@ -71,6 +69,7 @@ export const load: PageServerLoad = async (event) => {
 				schema.enrollment,
 				and(
 					eq(schema.enrollment.courseId, schema.course.id),
+					eq(schema.enrollment.orgId, orgId),
 					eq(schema.enrollment.status, 'completed')
 				)
 			)

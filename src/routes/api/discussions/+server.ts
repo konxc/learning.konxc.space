@@ -4,12 +4,21 @@ import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, desc, isNull, inArray } from 'drizzle-orm';
 import { sendNotification } from '$lib/server/notifications';
+import { checkCourseAccess, getCourseIdFromLesson } from '$lib/server/access';
 
 export const GET: RequestHandler = async ({ url, locals }) => {
 	if (!locals.user) return json({ error: 'Unauthorized' }, { status: 401 });
 
 	const lessonId = url.searchParams.get('lessonId');
 	if (!lessonId) return json({ error: 'Lesson ID required' }, { status: 400 });
+
+	const courseId = await getCourseIdFromLesson(lessonId);
+	if (!courseId) return json({ error: 'Course not found for this lesson' }, { status: 404 });
+
+	const access = await checkCourseAccess(locals.user.id, courseId);
+	if (!access.hasAccess) {
+		return json({ error: access.error || 'Forbidden' }, { status: 403 });
+	}
 
 	try {
 		// Fetch top-level discussions for this lesson
@@ -97,6 +106,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Missing required fields' }, { status: 400 });
 	}
 
+	const targetedCourseId = courseId || (lessonId ? await getCourseIdFromLesson(lessonId) : null);
+	if (!targetedCourseId) {
+		return json({ error: 'Course target not found' }, { status: 404 });
+	}
+
+	const access = await checkCourseAccess(locals.user.id, targetedCourseId);
+	if (!access.hasAccess) {
+		return json({ error: access.error || 'Forbidden' }, { status: 403 });
+	}
+
 	try {
 		const id = crypto.randomUUID();
 		await db.insert(schema.discussion).values({
@@ -180,13 +199,24 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 
 	try {
 		const discRows = await db
-			.select({ upvotes: schema.discussion.upvotes, userId: schema.discussion.userId })
+			.select({
+				upvotes: schema.discussion.upvotes,
+				userId: schema.discussion.userId,
+				courseId: schema.discussion.courseId
+			})
 			.from(schema.discussion)
 			.where(eq(schema.discussion.id, discussionId))
 			.limit(1);
 
 		const discussion = discRows[0];
 		if (!discussion) return json({ error: 'Discussion not found' }, { status: 404 });
+
+		if (discussion.courseId) {
+			const access = await checkCourseAccess(locals.user.id, discussion.courseId);
+			if (!access.hasAccess) {
+				return json({ error: access.error || 'Forbidden' }, { status: 403 });
+			}
+		}
 
 		if (discussion.userId === locals.user.id) {
 			return json({ error: 'Cannot vote on your own discussion' }, { status: 400 });

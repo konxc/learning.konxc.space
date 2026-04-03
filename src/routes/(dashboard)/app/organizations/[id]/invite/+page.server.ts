@@ -1,12 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
-import { requireAuth } from '$lib/server/middleware';
-import { getMembership } from '$lib/server/org-utils';
-import { hasOrgPermission } from '$lib/server/rbac';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
+import { requireOrgAdmin } from '$lib/server/middleware';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { ORG_ROLES } from '$lib/constants/roles';
 
@@ -16,23 +14,10 @@ function generateId(): string {
 }
 
 export const load: PageServerLoad = async (event) => {
-	const user = await requireAuth(event);
 	const orgId = event.params.id;
 
-	const membership = await getMembership(user.id, orgId);
-	if (!hasOrgPermission(membership.role, 'member:create')) {
-		throw redirect(303, `/app/organizations/${orgId}`);
-	}
-
-	const org = await db
-		.select()
-		.from(schema.organization)
-		.where(eq(schema.organization.id, orgId))
-		.limit(1);
-
-	if (!org[0]) {
-		throw redirect(303, '/app/organizations');
-	}
+	const membership = await requireOrgAdmin(event, orgId);
+	const { organization } = await event.parent();
 
 	const invitations = await db
 		.select()
@@ -40,7 +25,7 @@ export const load: PageServerLoad = async (event) => {
 		.where(eq(schema.organizationInvitation.orgId, orgId));
 
 	return {
-		organization: org[0],
+		organization,
 		membership,
 		invitations
 	};
@@ -48,20 +33,19 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	sendInvite: async (event) => {
-		const user = await requireAuth(event);
-		const orgId = event.params.id;
+		const { locals, params, request } = event;
+		const user = locals.user!;
+		const orgId = params.id;
 
-		const formData = await event.request.formData();
+		// Verify membership via centralized helper
+		const membership = await requireOrgAdmin(event, orgId);
+
+		const formData = await request.formData();
 		const email = formData.get('email') as string;
 		const role = formData.get('role') as string;
 
 		if (!email || !role) {
 			return actionFailure(400, 'Email and role are required.');
-		}
-
-		const membership = await getMembership(user.id, orgId);
-		if (!hasOrgPermission(membership.role, 'member:create')) {
-			return actionFailure(403, 'Unauthorized.');
 		}
 
 		// Valid roles: all ORG_ROLES except 'owner'
@@ -71,13 +55,13 @@ export const actions: Actions = {
 		}
 
 		// Get org for notification message
-		const org = await db
+		const [org] = await db
 			.select()
 			.from(schema.organization)
 			.where(eq(schema.organization.id, orgId))
 			.limit(1);
 
-		if (!org[0]) {
+		if (!org) {
 			return actionFailure(404, 'Organization not found.');
 		}
 
@@ -129,8 +113,8 @@ export const actions: Actions = {
 				id: generateId(),
 				userId: existingUser[0].id,
 				type: 'org_invitation',
-				title: `Undangan bergabung ke ${org[0].name}`,
-				message: `Anda diundang untuk bergabung sebagai ${role} di ${org[0].name}`,
+				title: `Undangan bergabung ke ${org.name}`,
+				message: `Anda diundang untuk bergabung sebagai ${role} di ${org.name}`,
 				link: `/org/invite?token=${token}`,
 				read: false
 			});
@@ -140,29 +124,17 @@ export const actions: Actions = {
 	},
 
 	cancelInvite: async (event) => {
-		const user = await requireAuth(event);
-		const orgId = event.params.id;
-		const formData = await event.request.formData();
+		const { params, request } = event;
+		const orgId = params.id;
+
+		// Verify membership via centralized helper
+		const membership = await requireOrgAdmin(event, orgId);
+
+		const formData = await request.formData();
 		const invitationId = formData.get('invitationId') as string;
 
 		if (!invitationId) {
 			return actionFailure(400, 'Invitation ID is required.');
-		}
-
-		// Verify user is owner or admin
-		const membership = await db
-			.select()
-			.from(schema.organizationMember)
-			.where(
-				and(
-					eq(schema.organizationMember.orgId, orgId),
-					eq(schema.organizationMember.userId, user.id)
-				)
-			)
-			.limit(1);
-
-		if (membership.length === 0 || !['owner', 'admin'].includes(membership[0].role)) {
-			return actionFailure(403, 'Unauthorized.');
 		}
 
 		await db

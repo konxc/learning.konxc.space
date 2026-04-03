@@ -170,11 +170,14 @@ async function loadCourses(
 
 async function loadProgress(
 	event: Parameters<PageServerLoad>[0],
-	{ userId }: { userId: string; activeWorkspaceId: string }
+	{ userId, activeWorkspaceId }: { userId: string; activeWorkspaceId: string }
 ) {
 	const q = event.url.searchParams.get('q');
 
 	let whereClause = eq(schema.enrollment.userId, userId);
+	if (activeWorkspaceId !== 'personal') {
+		whereClause = and(whereClause, eq(schema.course.orgId, activeWorkspaceId)) as any;
+	}
 	if (q) {
 		whereClause = and(whereClause, like(schema.course.title, `%${q}%`)) as any;
 	}
@@ -243,6 +246,12 @@ async function loadProgress(
 		})
 	);
 
+	// Scope submissions to active organization
+	let submissionWhere = eq(schema.submission.userId, userId);
+	if (activeWorkspaceId !== 'personal') {
+		submissionWhere = and(submissionWhere, eq(schema.course.orgId, activeWorkspaceId)) as any;
+	}
+
 	const submissions = await db
 		.select({
 			id: schema.submission.id,
@@ -258,7 +267,7 @@ async function loadProgress(
 		.innerJoin(schema.course, eq(schema.submission.courseId, schema.course.id))
 		.leftJoin(schema.lesson, eq(schema.submission.lessonId, schema.lesson.id))
 		.leftJoin(schema.submissionGrade, eq(schema.submission.id, schema.submissionGrade.submissionId))
-		.where(eq(schema.submission.userId, userId))
+		.where(submissionWhere)
 		.orderBy(desc(schema.submission.createdAt))
 		.limit(10);
 
@@ -278,6 +287,12 @@ async function loadProgress(
 			: 0;
 	const passedQuizzes = gradedSubmissions.filter((s) => (s.score || 0) >= 70).length;
 
+	// Scope certificates to active organization
+	let certWhere = eq(schema.certificate.userId, userId);
+	if (activeWorkspaceId !== 'personal') {
+		certWhere = and(certWhere, eq(schema.course.orgId, activeWorkspaceId)) as any;
+	}
+
 	const certificates = await db
 		.select({
 			id: schema.certificate.id,
@@ -287,7 +302,7 @@ async function loadProgress(
 		})
 		.from(schema.certificate)
 		.innerJoin(schema.course, eq(schema.certificate.courseId, schema.course.id))
-		.where(eq(schema.certificate.userId, userId))
+		.where(certWhere)
 		.orderBy(desc(schema.certificate.issuedAt));
 
 	const userXP = await db
@@ -316,7 +331,7 @@ async function loadProgress(
 
 async function loadCheckpoints(
 	event: Parameters<PageServerLoad>[0],
-	{ userId }: { userId: string; activeWorkspaceId: string }
+	{ userId, activeWorkspaceId }: { userId: string; activeWorkspaceId: string }
 ) {
 	const q = event.url.searchParams.get('q');
 
@@ -324,6 +339,9 @@ async function loadCheckpoints(
 		eq(schema.enrollment.userId, userId),
 		eq(schema.enrollment.status, 'active')
 	);
+	if (activeWorkspaceId !== 'personal') {
+		enrollmentWhere = and(enrollmentWhere, eq(schema.course.orgId, activeWorkspaceId)) as any;
+	}
 	if (q) {
 		enrollmentWhere = and(
 			enrollmentWhere,
@@ -341,7 +359,7 @@ async function loadCheckpoints(
 			cohortName: schema.cohort.name
 		})
 		.from(schema.enrollment)
-		.leftJoin(schema.course, eq(schema.enrollment.courseId, schema.course.id))
+		.innerJoin(schema.course, eq(schema.enrollment.courseId, schema.course.id))
 		.leftJoin(schema.cohort, eq(schema.enrollment.cohortId, schema.cohort.id))
 		.where(enrollmentWhere);
 
@@ -422,11 +440,14 @@ async function loadCheckpoints(
 
 async function loadCertificates(
 	event: Parameters<PageServerLoad>[0],
-	{ userId }: { userId: string; activeWorkspaceId: string }
+	{ userId, activeWorkspaceId }: { userId: string; activeWorkspaceId: string }
 ) {
 	const q = event.url.searchParams.get('q');
 
 	let whereClause = eq(schema.certificate.userId, userId);
+	if (activeWorkspaceId !== 'personal') {
+		whereClause = and(whereClause, eq(schema.course.orgId, activeWorkspaceId)) as any;
+	}
 	if (q) {
 		whereClause = and(whereClause, like(schema.course.title, `%${q}%`)) as any;
 	}

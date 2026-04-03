@@ -12,6 +12,10 @@ export const POST: RequestHandler = async (event) => {
 	const courseId = data.courseId as string | undefined;
 	const couponCode = (data.couponCode as string | undefined) || undefined;
 
+	// 1. Get affiliate from cookie
+	const affiliateId = event.cookies.get('nk_affiliate_id');
+	let verifiedAffiliateId: string | null = null;
+
 	if (!courseId) {
 		return new Response(JSON.stringify({ error: 'courseId is required' }), { status: 400 });
 	}
@@ -42,7 +46,7 @@ export const POST: RequestHandler = async (event) => {
 	let discountAmount = 0;
 
 	if (couponCode) {
-		const validation = await validateCoupon(couponCode, course.price, courseId);
+		const validation = await validateCoupon(couponCode, course.price, courseId, course.orgId);
 		if (!validation.isValid) {
 			return new Response(JSON.stringify({ error: validation.error || 'Invalid coupon' }), {
 				status: 400
@@ -51,6 +55,25 @@ export const POST: RequestHandler = async (event) => {
 		finalPrice = validation.finalPrice;
 		discountAmount = validation.discountAmount;
 		couponId = validation.coupon!.id;
+	}
+
+	// 2. Verify affiliate attribution if present
+	if (affiliateId) {
+		const [affiliate] = await db
+			.select({ id: schema.affiliateAccount.id, orgId: schema.affiliateAccount.orgId })
+			.from(schema.affiliateAccount)
+			.where(
+				and(
+					eq(schema.affiliateAccount.id, affiliateId),
+					eq(schema.affiliateAccount.isActive, true)
+				)
+			)
+			.limit(1);
+
+		// Only attribute if affiliate belongs to the same organization as the course
+		if (affiliate && affiliate.orgId === course.orgId) {
+			verifiedAffiliateId = affiliate.id;
+		}
 	}
 
 	// If final price is zero, instantly enroll without Midtrans
@@ -88,9 +111,15 @@ export const POST: RequestHandler = async (event) => {
 		id: transactionId,
 		userId: user.id,
 		courseId: course.id,
+		orgId: course.orgId,
 		amount: finalPrice,
 		status: 'pending',
-		payload: JSON.stringify({ enrollmentId, couponId, discountAmount })
+		payload: JSON.stringify({
+			enrollmentId,
+			couponId,
+			discountAmount,
+			affiliateId: verifiedAffiliateId
+		})
 	});
 
 	// Create transaction in Midtrans

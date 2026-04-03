@@ -193,19 +193,19 @@ function getOrgNavItems(orgRole: string, context: WorkspaceContext): NavItem[] {
 			},
 			{
 				label: 'Course Builder',
-				href: '/app/mentor/courses',
+				href: `/app/organizations/${orgId}/mentor/courses`,
 				icon: 'hammer',
 				category: 'platform'
 			},
 			{
 				label: 'Cohorts',
-				href: '/app/facilitator/cohorts',
+				href: `/app/organizations/${orgId}/facilitator/cohorts`,
 				icon: 'calendar',
 				category: 'platform'
 			},
 			{
 				label: 'Broadcast',
-				href: '/app/mentor/broadcast',
+				href: `/app/organizations/${orgId}/mentor/broadcast`,
 				icon: 'megaphone',
 				category: 'platform'
 			},
@@ -225,20 +225,25 @@ function getOrgNavItems(orgRole: string, context: WorkspaceContext): NavItem[] {
 			...learningNav,
 			{
 				label: 'My Courses',
-				href: '/app/mentor/courses',
+				href: `/app/organizations/${orgId}/mentor/courses`,
 				icon: 'graduation',
 				category: 'management'
 			},
-			{ label: 'Students', href: '/app/mentor/students', icon: 'users', category: 'management' },
+			{
+				label: 'Students',
+				href: `/app/organizations/${orgId}/mentor/students`,
+				icon: 'users',
+				category: 'management'
+			},
 			{
 				label: 'Grading',
-				href: '/app/mentor/grading',
+				href: `/app/organizations/${orgId}/mentor/grading`,
 				icon: 'check-square',
 				category: 'management'
 			},
 			{
 				label: 'Broadcast',
-				href: '/app/mentor/broadcast',
+				href: `/app/organizations/${orgId}/mentor/broadcast`,
 				icon: 'megaphone',
 				category: 'management'
 			},
@@ -257,13 +262,13 @@ function getOrgNavItems(orgRole: string, context: WorkspaceContext): NavItem[] {
 			...learningNav,
 			{
 				label: 'My Batches',
-				href: '/app/facilitator/cohorts',
+				href: `/app/organizations/${orgId}/facilitator/cohorts`,
 				icon: 'calendar',
 				category: 'management'
 			},
 			{
 				label: 'Broadcast',
-				href: '/app/mentor/broadcast',
+				href: `/app/organizations/${orgId}/mentor/broadcast`,
 				icon: 'megaphone',
 				category: 'management'
 			}

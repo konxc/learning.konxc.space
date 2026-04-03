@@ -1,4 +1,4 @@
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { User } from './db/schema';
 import { db } from './db';
@@ -61,6 +61,18 @@ export interface OrgMembership {
 }
 
 /**
+ * Enforces that the user is an owner of the organization.
+ * Used for extremely sensitive actions (deletion, billing downgrade, verification resubmission).
+ */
+export async function requireOrgOwner(event: RequestEvent, orgId: string) {
+	const membership = await requireOrgAdmin(event, orgId);
+	if (membership.role !== 'owner') {
+		throw error(403, 'Forbidden: Owner privileges required');
+	}
+	return membership;
+}
+
+/**
  * Verify user is a member of an organization
  */
 export async function requireOrgMember(event: RequestEvent, orgId: string): Promise<OrgMembership> {
@@ -114,4 +126,18 @@ export function isOrgOwner(membership: OrgMembership | null): boolean {
 
 export function isOrgAdmin(membership: OrgMembership | null): boolean {
 	return hasOrgRole(membership, ['owner', 'admin']);
+}
+
+/**
+ * Platform Admin & Organization Admin checks for server-side handlers
+ */
+export async function requireOrgAdmin(event: RequestEvent, orgId: string): Promise<OrgMembership> {
+	return requireOrgRole(event, orgId, ['owner', 'admin']);
+}
+
+export async function requireOrgFacilitator(
+	event: RequestEvent,
+	orgId: string
+): Promise<OrgMembership> {
+	return requireOrgRole(event, orgId, ['owner', 'admin', 'facilitator', 'mentor']);
 }

@@ -3,44 +3,28 @@ import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and, count } from 'drizzle-orm';
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async (event) => {
-	const user = await requireAuth(event);
-	const orgId = event.params.id;
+	const { locals, params } = event;
+	const user = locals.user;
+	if (!user) throw error(401, 'Unauthorized');
 
-	// Check membership
-	const membership = await db
-		.select()
-		.from(schema.organizationMember)
-		.where(
-			and(eq(schema.organizationMember.orgId, orgId), eq(schema.organizationMember.userId, user.id))
-		)
-		.limit(1);
+	const { membership, organization } = await event.parent();
 
-	if (membership.length === 0) {
-		throw redirect(303, '/app/organizations');
-	}
-
-	// Get organization details
-	const org = await db
-		.select()
-		.from(schema.organization)
-		.where(eq(schema.organization.id, orgId))
-		.limit(1);
-
-	if (!org[0]) {
+	const orgId = params.id;
+	if (!membership || !organization) {
 		throw redirect(303, '/app/organizations');
 	}
 
 	// Get member count
-	const memberCount = await db
+	const [memberCount] = await db
 		.select({ count: count() })
 		.from(schema.organizationMember)
 		.where(eq(schema.organizationMember.orgId, orgId));
 
 	// Get courses count
-	const courseCount = await db
+	const [courseCount] = await db
 		.select({ count: count() })
 		.from(schema.course)
 		.where(eq(schema.course.orgId, orgId));
@@ -63,11 +47,11 @@ export const load: PageServerLoad = async (event) => {
 		.limit(5);
 
 	return {
-		organization: org[0],
-		membership: membership[0],
+		organization,
+		membership,
 		stats: {
-			memberCount: Number(memberCount[0]?.count || 0),
-			courseCount: Number(courseCount[0]?.count || 0)
+			memberCount: Number(memberCount?.count || 0),
+			courseCount: Number(courseCount?.count || 0)
 		},
 		recentMembers
 	};

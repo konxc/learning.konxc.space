@@ -26,8 +26,10 @@
 		return [];
 	});
 
-	// Only show if there is actually a choice to make
-	const showSwitcher = $derived(availableRoles.length >= 2);
+	// Only show if there is actually a choice to make AND not for admin
+	// Admin doesn't need to switch - they have full access via /app/admin/*
+	// BD needs to switch to user for marketplace browsing
+	const showSwitcher = $derived(availableRoles.length >= 2 && userRole !== 'admin');
 
 	function handleRoleChange(role: string) {
 		setRole(role as UserRole);

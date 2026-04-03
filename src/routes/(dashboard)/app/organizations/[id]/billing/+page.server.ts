@@ -1,10 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
-import { requireAuth } from '$lib/server/middleware';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import { actionFailure, actionSuccess } from '$lib/server/actions';
+import { requireOrgAdmin } from '$lib/server/middleware';
 import {
 	createSnapTransaction,
 	type MidtransTransactionRequest
@@ -19,46 +19,30 @@ const PLAN_PRICES: Record<string, number> = {
 };
 
 export const load: PageServerLoad = async (event) => {
-	const user = await requireAuth(event);
+	const { organization } = await event.parent();
 	const orgId = event.params.id;
 
-	// Verify user is owner or admin
-	const membership = await db
-		.select()
-		.from(schema.organizationMember)
-		.where(
-			and(eq(schema.organizationMember.orgId, orgId), eq(schema.organizationMember.userId, user.id))
-		)
-		.limit(1);
+	const membership = await requireOrgAdmin(event, orgId);
 
-	if (membership.length === 0 || !['owner', 'admin'].includes(membership[0].role)) {
-		throw redirect(303, `/app/organizations/${orgId}`);
-	}
-
-	// Get organization
-	const org = await db
-		.select()
-		.from(schema.organization)
-		.where(eq(schema.organization.id, orgId))
-		.limit(1);
-
-	if (!org[0]) {
-		throw redirect(303, '/app/organizations');
-	}
+	if (!organization) throw error(404, 'Organization not found');
 
 	return {
-		organization: org[0],
-		currentPlan: org[0].planType,
+		organization,
+		currentPlan: organization.planType,
 		planPrices: PLAN_PRICES
 	};
 };
 
 export const actions: Actions = {
 	upgrade: async (event) => {
-		const user = await requireAuth(event);
-		const orgId = event.params.id;
+		const { locals, params, request } = event;
+		const user = locals.user!;
+		const orgId = params.id;
 
-		const formData = await event.request.formData();
+		// Verify membership via centralized helper
+		const membership = await requireOrgAdmin(event, orgId);
+
+		const formData = await request.formData();
 		const planType = formData.get('planType') as string;
 
 		if (!planType || !['pro', 'enterprise'].includes(planType)) {
@@ -93,7 +77,7 @@ export const actions: Actions = {
 
 		const snapResponse = await createSnapTransaction(midtransRequest);
 
-		// Save transaction
+		// Save transaction - explicitly link to orgId
 		await db.insert(schema.transaction).values({
 			id: transactionId,
 			userId: user.id,
@@ -118,22 +102,13 @@ export const actions: Actions = {
 	},
 
 	downgrade: async (event) => {
-		const user = await requireAuth(event);
-		const orgId = event.params.id;
+		const { params } = event;
+		const orgId = params.id;
 
-		// Verify owner
-		const membership = await db
-			.select()
-			.from(schema.organizationMember)
-			.where(
-				and(
-					eq(schema.organizationMember.orgId, orgId),
-					eq(schema.organizationMember.userId, user.id)
-				)
-			)
-			.limit(1);
+		// Verify ownership via centralized helper
+		const membership = await requireOrgAdmin(event, orgId);
 
-		if (membership.length === 0 || membership[0].role !== 'owner') {
+		if (membership.role !== 'owner') {
 			return actionFailure(403, 'Only owner can downgrade.');
 		}
 

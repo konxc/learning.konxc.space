@@ -1,3 +1,4 @@
+import { error } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
@@ -5,7 +6,7 @@ import { eq, and } from 'drizzle-orm';
 
 export const load: LayoutServerLoad = async ({ params, locals }) => {
 	if (!locals.user) {
-		return { membership: null, organization: null };
+		throw error(401, 'Unauthorized');
 	}
 
 	const orgId = params.id;
@@ -17,10 +18,8 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 		.where(eq(schema.organization.id, orgId))
 		.limit(1);
 
-	if (!organization) {
-		return { membership: null, organization: null };
-	}
-
+	if (!organization) throw error(404, 'Organization not found');
+	
 	// Get membership
 	const [membership] = await db
 		.select()
@@ -33,8 +32,10 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 		)
 		.limit(1);
 
+	if (!membership) throw error(403, 'Forbidden: You are not a member of this organization');
+
 	return {
-		membership: membership ?? null,
+		membership,
 		organization
 	};
 };
